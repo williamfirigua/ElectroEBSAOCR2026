@@ -1,0 +1,665 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.gselectroCaqueta.accesoyseguridad"
+4    android:versionCode="7"
+5    android:versionName="7.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="30"
+8-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml
+9        android:targetSdkVersion="32" />
+9-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml
+10
+11    <!-- <uses-sdk -->
+12    <!-- android:minSdkVersion="22" -->
+13    <!-- android:targetSdkVersion="29" /> -->
+14
+15    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+15-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:12:5-79
+15-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:12:22-76
+16    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
+16-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:13:5-79
+16-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:13:22-77
+17    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
+17-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:14:5-122
+17-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:14:22-83
+18    <uses-permission android:name="android.permission.MANAGE_MEDIA" />
+18-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:15:5-16:47
+18-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:15:22-68
+19    <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
+19-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:17:5-18:47
+19-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:17:22-72
+20    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+20-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:19:5-81
+20-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:19:22-79
+21    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+21-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:20:5-81
+21-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:20:22-78
+22    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+22-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:21:5-80
+22-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:21:22-77
+23    <uses-permission android:name="android.permission.CAMERA" />
+23-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:22:5-65
+23-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:22:22-62
+24    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+24-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:23:5-75
+24-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:23:22-72
+25    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+25-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:24:5-81
+25-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:24:22-78
+26    <uses-permission android:name="android.permission.BLUETOOTH" />
+26-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:25:5-68
+26-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:25:22-65
+27    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+27-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:26:5-74
+27-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:26:22-71
+28    <uses-permission
+28-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:27:5-119
+29        android:name="android.permission.BLUETOOTH_SCAN"
+29-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:27:22-70
+30        android:usesPermissionFlags="neverForLocation" />
+30-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:27:71-117
+31    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+31-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:28:5-76
+31-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:28:22-73
+32    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+32-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:29:5-78
+32-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:29:22-75
+33    <uses-permission android:name="android.permission.INTERNET" />
+33-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:30:5-67
+33-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:30:22-64
+34    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+34-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:31:5-75
+34-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:31:22-73
+35    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+35-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:32:5-76
+35-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:32:22-73
+36    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+36-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:33:5-79
+36-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:33:22-76
+37    <uses-permission android:name="android.permission.VIBRATE" />
+37-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:34:5-66
+37-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:34:22-63
+38    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+38-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:35:5-82
+38-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:35:22-80
+39    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+39-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:37:5-77
+39-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:37:22-74
+40    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+40-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:38:5-86
+40-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:38:22-83
+41    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+41-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:39:5-77
+41-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:39:22-74
+42
+43    <uses-feature android:name="android.hardware.camera.autofocus" />
+43-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:41:5-70
+43-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:41:19-67
+44    <uses-feature
+44-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:42:5-44:36
+45        android:name="android.hardware.camera.front"
+45-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:43:9-53
+46        android:required="false" />
+46-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:44:9-33
+47    <uses-feature android:name="android.hardware.camera" />
+47-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:45:5-60
+47-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:45:19-57
+48
+49    <!--
+50requerido desde android 11 api 30+ packege visibility filtering
+51sin este bloque, packemanager.getApplicationInfo() leanza
+52nameNotFoundException para cualquier app externa, aunque este instalada.
+53Esto hacia que NavigationHelper cayera siempre al fallcack in app.
+54    -->
+55    <queries>
+55-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:53:5-67:15
+56
+57        <!-- Google Maps — navegación turn-by-turn -->
+58        <package android:name="com.google.android.apps.maps" />
+58-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:55:9-64
+58-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:55:18-61
+59        <!-- Waze -->
+60        <package android:name="com.waze" />
+60-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:57:9-44
+60-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:57:18-41
+61        <!-- Fallback: cualquier app que maneje URIs de navegación -->
+62        <intent>
+62-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:59:9-62:18
+63            <action android:name="android.intent.action.VIEW" />
+63-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:60:13-65
+63-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:60:21-62
+64
+65            <data android:scheme="google.navigation" />
+65-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:61:13-56
+65-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:61:19-53
+66        </intent>
+67        <intent>
+67-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:63:9-66:18
+68            <action android:name="android.intent.action.VIEW" />
+68-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:60:13-65
+68-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:60:21-62
+69
+70            <data android:scheme="waze" />
+70-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:61:13-56
+70-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:61:19-53
+71        </intent>
+72    </queries>
+73
+74    <uses-feature
+74-->[com.google.android.gms:play-services-maps:16.0.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\44f5f0219f0e11a9f7b8892d357cb896\jetified-play-services-maps-16.0.0\AndroidManifest.xml:26:5-28:35
+75        android:glEsVersion="0x00020000"
+75-->[com.google.android.gms:play-services-maps:16.0.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\44f5f0219f0e11a9f7b8892d357cb896\jetified-play-services-maps-16.0.0\AndroidManifest.xml:27:9-41
+76        android:required="true" />
+76-->[com.google.android.gms:play-services-maps:16.0.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\44f5f0219f0e11a9f7b8892d357cb896\jetified-play-services-maps-16.0.0\AndroidManifest.xml:28:9-32
+77    <uses-feature
+77-->[com.journeyapps:zxing-android-embedded:3.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\5c62783980885216ef2bd2a92dcc86d7\jetified-zxing-android-embedded-3.3.0\AndroidManifest.xml:35:5-37:36
+78        android:name="android.hardware.camera.flash"
+78-->[com.journeyapps:zxing-android-embedded:3.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\5c62783980885216ef2bd2a92dcc86d7\jetified-zxing-android-embedded-3.3.0\AndroidManifest.xml:36:9-53
+79        android:required="false" />
+79-->[com.journeyapps:zxing-android-embedded:3.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\5c62783980885216ef2bd2a92dcc86d7\jetified-zxing-android-embedded-3.3.0\AndroidManifest.xml:37:9-33
+80    <uses-feature
+80-->[com.journeyapps:zxing-android-embedded:3.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\5c62783980885216ef2bd2a92dcc86d7\jetified-zxing-android-embedded-3.3.0\AndroidManifest.xml:38:5-40:36
+81        android:name="android.hardware.screen.landscape"
+81-->[com.journeyapps:zxing-android-embedded:3.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\5c62783980885216ef2bd2a92dcc86d7\jetified-zxing-android-embedded-3.3.0\AndroidManifest.xml:39:9-57
+82        android:required="false" />
+82-->[com.journeyapps:zxing-android-embedded:3.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\5c62783980885216ef2bd2a92dcc86d7\jetified-zxing-android-embedded-3.3.0\AndroidManifest.xml:40:9-33
+83    <uses-feature
+83-->[com.journeyapps:zxing-android-embedded:3.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\5c62783980885216ef2bd2a92dcc86d7\jetified-zxing-android-embedded-3.3.0\AndroidManifest.xml:41:5-43:36
+84        android:name="android.hardware.wifi"
+84-->[com.journeyapps:zxing-android-embedded:3.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\5c62783980885216ef2bd2a92dcc86d7\jetified-zxing-android-embedded-3.3.0\AndroidManifest.xml:42:9-45
+85        android:required="false" />
+85-->[com.journeyapps:zxing-android-embedded:3.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\5c62783980885216ef2bd2a92dcc86d7\jetified-zxing-android-embedded-3.3.0\AndroidManifest.xml:43:9-33
+86
+87    <application
+87-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:68:5-253:19
+88        android:allowBackup="true"
+88-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:69:9-35
+89        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+89-->[androidx.core:core:1.7.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\4abd0a003c3d2a44084b20542274478f\core-1.7.0\AndroidManifest.xml:24:18-86
+90        android:debuggable="true"
+91        android:exported="true"
+91-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:73:9-32
+92        android:extractNativeLibs="false"
+93        android:icon="@drawable/ic_launcher1"
+93-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:70:9-46
+94        android:label="@string/app_name"
+94-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:71:9-41
+95        android:largeHeap="true"
+95-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:72:9-33
+96        android:requestLegacyExternalStorage="true"
+96-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:75:9-52
+97        android:testOnly="true"
+98        android:theme="@style/AppTheme"
+98-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:76:9-40
+99        android:usesCleartextTraffic="true" >
+99-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:74:9-44
+100        <uses-library
+100-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:77:9-87
+101            android:name="org.apache.http.legacy"
+101-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:77:23-60
+102            android:required="false" />
+102-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:77:61-85
+103
+104        <activity android:name="com.gselectroCaqueta.moduloreimpresion.ModuloReimpresion" />
+104-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:78:9-102
+104-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:78:19-90
+105        <!-- <activity -->
+106        <!-- android:name="com.gselectroCaqueta.moduloreimpresion.MainActivity"  ????????????????????????????????? -->
+107        <!-- android:label="@string/title_activity_main" -->
+108        <!-- android:theme="@style/AppTheme.NoActionBar" /> -->
+109        <activity
+109-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:83:9-97:20
+110            android:name="com.gselectroCaqueta.accesoyseguridad.GuiAcceso"
+110-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:84:13-38
+111            android:exported="true"
+111-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:87:13-36
+112            android:label="@string/app_name"
+112-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:85:13-45
+113            android:largeHeap="true"
+113-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:86:13-37
+114            android:requestLegacyExternalStorage="true"
+114-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:90:13-56
+115            android:supportsRtl="true"
+115-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:88:13-39
+116            android:usesCleartextTraffic="true" >
+116-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:89:13-48
+117            <intent-filter android:exported="true" >
+117-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:91:13-96:29
+117-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:92:17-40
+118                <action android:name="android.intent.action.MAIN" />
+118-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:93:17-69
+118-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:93:25-66
+119
+120                <category android:name="android.intent.category.LAUNCHER" />
+120-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:95:17-77
+120-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:95:27-74
+121            </intent-filter>
+122        </activity>
+123        <activity
+123-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:98:9-107:20
+124            android:name="com.gselectroCaqueta.modulobluetooth.DeviceListActivity"
+124-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:99:13-83
+125            android:configChanges="orientation|keyboardHidden"
+125-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:100:13-63
+126            android:label="@string/select_device"
+126-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:101:13-50
+127            android:parentActivityName="com.gselectroCaqueta.accesoyseguridad.GuiAcceso"
+127-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:102:13-52
+128            android:theme="@android:style/Theme.Dialog" >
+128-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:103:13-56
+129            <meta-data
+129-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:104:13-106:83
+130                android:name="android.support.PARENT_ACTIVITY"
+130-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:105:17-63
+131                android:value="com.gselectroCaqueta.accesoyseguridad.GuiAcceso" />
+131-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:106:17-80
+132        </activity>
+133        <activity
+133-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:108:9-115:20
+134            android:name="com.gselectroCaqueta.accesoyseguridad.MenuPrincipal"
+134-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:109:13-42
+135            android:label="@string/title_activity_menu_principal"
+135-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:110:13-66
+136            android:parentActivityName="com.gselectroCaqueta.accesoyseguridad.GuiAcceso" >
+136-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:111:13-52
+137            <meta-data
+137-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:104:13-106:83
+138                android:name="android.support.PARENT_ACTIVITY"
+138-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:105:17-63
+139                android:value="com.gselectroCaqueta.accesoyseguridad.GuiAcceso" />
+139-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:106:17-80
+140        </activity>
+141        <activity
+141-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:116:9-123:20
+142            android:name="com.gselectroCaqueta.accesoyseguridad.ResumenEstadistico"
+142-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:117:13-47
+143            android:label="@string/title_activity_resumen_estadistico"
+143-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:118:13-71
+144            android:parentActivityName="com.gselectroCaqueta.accesoyseguridad.MenuPrincipal" >
+144-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:119:13-56
+145            <meta-data
+145-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:104:13-106:83
+146                android:name="android.support.PARENT_ACTIVITY"
+146-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:105:17-63
+147                android:value="com.gselectroCaqueta.accesoyseguridad.MenuPrincipal" />
+147-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:106:17-80
+148        </activity>
+149        <activity
+149-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:124:9-132:20
+150            android:name="com.gselectroCaqueta.accesoyseguridad.MenuDeLiquidacion"
+150-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:125:13-46
+151            android:label="@string/title_activity_menu_de_liquidacion"
+151-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:126:13-71
+152            android:parentActivityName="com.gselectroCaqueta.accesoyseguridad.ResumenEstadistico"
+152-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:127:13-61
+153            android:windowSoftInputMode="stateHidden" >
+153-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:128:13-54
+154            <meta-data
+154-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:104:13-106:83
+155                android:name="android.support.PARENT_ACTIVITY"
+155-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:105:17-63
+156                android:value="com.gselectroCaqueta.accesoyseguridad.ResumenEstadistico" />
+156-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:106:17-80
+157        </activity>
+158        <activity
+158-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:133:9-136:55
+159            android:name="com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias"
+159-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:134:13-82
+160            android:label="@string/title_activity_modulo_de_anomalias"
+160-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:135:13-71
+161            android:windowSoftInputMode="adjustPan" />
+161-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:136:13-52
+162        <activity
+162-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:137:9-140:64
+163            android:name="com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect"
+163-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:138:13-86
+164            android:label="@string/title_activity_modulo_capt_novlect"
+164-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:139:13-71
+165            android:windowSoftInputMode="stateAlwaysVisible" />
+165-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:140:13-61
+166        <activity
+166-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:141:9-144:55
+167            android:name="com.gselectroCaqueta.modulocomentarios.PanelComentarios"
+167-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:142:13-83
+168            android:label="@string/title_activity_panel_comentarios"
+168-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:143:13-69
+169            android:windowSoftInputMode="adjustPan" />
+169-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:144:13-52
+170        <activity
+170-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:145:9-147:76
+171            android:name="com.gselectroCaqueta.moduloseleccionlote.ModuloSeleccionLote"
+171-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:146:13-88
+172            android:label="@string/title_activity_modulo_seleccion_lote" />
+172-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:147:13-73
+173        <activity
+173-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:148:9-150:76
+174            android:name="com.gselectroCaqueta.modulocambiodigitos.ModuloCambioDigitos"
+174-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:149:13-88
+175            android:label="@string/title_activity_modulo_cambio_digitos" />
+175-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:150:13-73
+176        <activity
+176-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:151:9-153:77
+177            android:name="com.gselectroCaqueta.modulobusquedacuenta.ModuloBusquedaCuenta"
+177-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:152:13-90
+178            android:label="@string/title_activity_modulo_busqueda_cuenta" />
+178-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:153:13-74
+179        <activity
+179-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:154:9-161:20
+180            android:name="com.gselectroCaqueta.comunicaciones.Comunicaciones"
+180-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:155:13-78
+181            android:label="@string/title_activity_comunicaciones"
+181-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:156:13-66
+182            android:parentActivityName="com.gselectroCaqueta.accesoyseguridad.GuiAcceso" >
+182-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:157:13-52
+183            <meta-data
+183-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:104:13-106:83
+184                android:name="android.support.PARENT_ACTIVITY"
+184-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:105:17-63
+185                android:value="com.gselectroCaqueta.accesoyseguridad.GuiAcceso" />
+185-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:106:17-80
+186        </activity>
+187        <activity
+187-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:162:9-170:20
+188            android:name="com.gselectroCaqueta.comunicaciones.Configurar_webIp"
+188-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:163:13-80
+189            android:label="@string/title_activity_configurar_web_ip"
+189-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:164:13-69
+190            android:parentActivityName="com.gselectroCaqueta.comunicaciones.Comunicaciones"
+190-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:165:13-92
+191            android:theme="@style/AppTheme" >
+191-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:166:13-44
+192            <meta-data
+192-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:104:13-106:83
+193                android:name="android.support.PARENT_ACTIVITY"
+193-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:105:17-63
+194                android:value="com.gselectroCaqueta.comunicaciones.Comunicaciones" />
+194-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:106:17-80
+195        </activity>
+196        <activity android:name="com.gselectroCaqueta.accesoyseguridad.FechayHora" />
+196-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:171:9-48
+196-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:171:19-45
+197        <activity
+197-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:172:9-175:66
+198            android:name="com.gselectroCaqueta.accesoyseguridad.CamaraLecturaActivity"
+198-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:173:13-50
+199            android:screenOrientation="portrait"
+199-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:174:13-49
+200            android:theme="@style/Theme.AppCompat.NoActionBar" />
+200-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:175:13-63
+201        <activity
+201-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:176:9-178:56
+202            android:name="com.gselectroCaqueta.modulobusquedacuenta.ModuloConsultaNoEnviados"
+202-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:177:13-94
+203            android:label="ModuloConsultaNoEnviados" />
+203-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:178:13-53
+204        <activity
+204-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:179:9-181:59
+205            android:name="com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarVerificacion"
+205-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:180:13-96
+206            android:label="ModuloAdicionarVerificacion" />
+206-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:181:13-56
+207        <activity
+207-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:182:9-184:53
+208            android:name="com.gselectroCaqueta.modulocaptnovedlect.ModuloVerificaConsumo"
+208-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:183:13-90
+209            android:label="ModuloVerificaConsumo" />
+209-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:184:13-50
+210        <activity
+210-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:185:9-188:55
+211            android:name="com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarCertificado"
+211-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:186:13-95
+212            android:label="ModuloAdicionarCertificado"
+212-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:187:13-55
+213            android:windowSoftInputMode="adjustPan" />
+213-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:188:13-52
+214        <activity
+214-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:189:9-191:43
+215            android:name="com.gselectroCaqueta.modulocaptnovedlect.ModuloFirma"
+215-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:190:13-80
+216            android:label="ModuloFirma" />
+216-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:191:13-40
+217        <activity
+217-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:192:9-194:60
+218            android:name="com.gselectroCaqueta.modulocaptnovedlect.ModuloConfigFormatoImpresion"
+218-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:193:13-97
+219            android:label="ModuloConfigFormatoImpresion" />
+219-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:194:13-57
+220        <activity android:name="com.gselectroCaqueta.modulochat.Insertar" />
+220-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:195:9-196:71
+220-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:196:13-68
+221        <activity android:name="com.gselectroCaqueta.modulochat.Recibidos" />
+221-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:197:9-198:72
+221-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:198:13-69
+222        <activity android:name="com.gselectroCaqueta.moduloGPS.ActGPS" />
+222-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:199:9-200:68
+222-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:200:13-65
+223        <activity android:name="com.gselectroCaqueta.moduloLicencia.ActLicencia" />
+223-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:201:9-202:78
+223-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:202:13-75
+224        <activity android:name="com.gselectroCaqueta.moduloscannerhardware.ModuloEscanerHardware" /> <!-- <receiver android:name="com.gsenerca.accesoyseguridad.UnitechReceiver"> -->
+224-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:203:9-204:95
+224-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:204:13-92
+225        <!-- <intent-filter> -->
+226        <!-- <action android:name="unitech.scanservice.software_scankey" /> -->
+227        <!-- </intent-filter> -->
+228        <!-- </receiver> -->
+229        <receiver
+229-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:209:9-214:20
+230            android:name="com.gselectroCaqueta.moduloscannerhardware.UnitechReceiverScan"
+230-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:209:19-96
+231            android:exported="true" >
+231-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:210:13-36
+232            <intent-filter>
+232-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:211:13-213:29
+233                <action android:name="unitech.scanservice.software_scankey" />
+233-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:212:17-79
+233-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:212:25-76
+234            </intent-filter>
+235        </receiver>
+236
+237        <activity
+237-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:216:9-219:47
+238            android:name="com.gselectroCaqueta.moduloscannerhardware.ModuloScannerKT40Q"
+238-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:217:13-89
+239            android:label="@string/title_activity_modulo_scanner_kt40_q"
+239-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:218:13-73
+240            android:theme="@style/AppTheme" />
+240-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:219:13-44
+241        <!--
+242             The API key for Google Maps-based APIs is defined as a string resource.
+243             (See the file "res/values/google_maps_api.xml").
+244             Note that the API key is linked to the encryption key used to sign the APK.
+245             You need a different API key for each encryption key, including the release key that is used to
+246             sign the APK for publishing.
+247             You can define the keys for the debug and release targets in src/debug/ and src/release/. 
+248        -->
+249        <meta-data
+249-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:228:9-230:55
+250            android:name="com.google.android.geo.API_KEY"
+250-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:229:13-58
+251            android:value="@string/google_maps_key" />
+251-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:230:13-52
+252
+253        <activity
+253-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:232:9-234:59
+254            android:name="com.gselectroCaqueta.moduloMapas.MapsActivity"
+254-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:233:13-73
+255            android:label="@string/title_activity_maps" />
+255-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:234:13-56
+256        <activity android:name="com.gselectroCaqueta.moduloanomalias.AlertaCuentaD" />
+256-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:236:9-87
+256-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:236:19-84
+257        <activity
+257-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:237:9-239:74
+258            android:name="com.gselectroCaqueta.accesoyseguridad.AndroidCamera"
+258-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:238:13-42
+259            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+259-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:239:13-71
+260
+261        <provider
+261-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:240:9-248:20
+262            android:name="androidx.core.content.FileProvider"
+262-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:241:13-62
+263            android:authorities="com.gselectroCaqueta.accesoyseguridad.fileprovider"
+263-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:242:13-85
+264            android:exported="false"
+264-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:243:13-37
+265            android:grantUriPermissions="true" >
+265-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:244:13-47
+266            <meta-data
+266-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:245:13-247:64
+267                android:name="android.support.FILE_PROVIDER_PATHS"
+267-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:246:17-67
+268                android:resource="@xml/file_paths" />
+268-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:247:17-51
+269        </provider>
+270
+271        <service
+271-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:249:9-252:56
+272            android:name="com.gselectroCaqueta.accesoyseguridad.TrackingLocationService"
+272-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:250:13-52
+273            android:exported="false"
+273-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:251:13-37
+274            android:foregroundServiceType="location" />
+274-->D:\AndroidStudioProjects\ElectroEBSAOCR2026\SimfaEnerca\src\main\AndroidManifest.xml:252:13-53
+275        <service
+275-->[androidx.camera:camera-camera2:1.2.3] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\a39339caad1734f220a0cbde646f167c\jetified-camera-camera2-1.2.3\AndroidManifest.xml:24:9-33:19
+276            android:name="androidx.camera.core.impl.MetadataHolderService"
+276-->[androidx.camera:camera-camera2:1.2.3] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\a39339caad1734f220a0cbde646f167c\jetified-camera-camera2-1.2.3\AndroidManifest.xml:25:13-75
+277            android:enabled="false"
+277-->[androidx.camera:camera-camera2:1.2.3] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\a39339caad1734f220a0cbde646f167c\jetified-camera-camera2-1.2.3\AndroidManifest.xml:26:13-36
+278            android:exported="false" >
+278-->[androidx.camera:camera-camera2:1.2.3] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\a39339caad1734f220a0cbde646f167c\jetified-camera-camera2-1.2.3\AndroidManifest.xml:27:13-37
+279            <meta-data
+279-->[androidx.camera:camera-camera2:1.2.3] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\a39339caad1734f220a0cbde646f167c\jetified-camera-camera2-1.2.3\AndroidManifest.xml:30:13-32:89
+280                android:name="androidx.camera.core.impl.MetadataHolderService.DEFAULT_CONFIG_PROVIDER"
+280-->[androidx.camera:camera-camera2:1.2.3] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\a39339caad1734f220a0cbde646f167c\jetified-camera-camera2-1.2.3\AndroidManifest.xml:31:17-103
+281                android:value="androidx.camera.camera2.Camera2Config$DefaultProvider" />
+281-->[androidx.camera:camera-camera2:1.2.3] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\a39339caad1734f220a0cbde646f167c\jetified-camera-camera2-1.2.3\AndroidManifest.xml:32:17-86
+282        </service>
+283
+284        <activity
+284-->[com.journeyapps:zxing-android-embedded:3.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\5c62783980885216ef2bd2a92dcc86d7\jetified-zxing-android-embedded-3.3.0\AndroidManifest.xml:46:9-52:63
+285            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+285-->[com.journeyapps:zxing-android-embedded:3.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\5c62783980885216ef2bd2a92dcc86d7\jetified-zxing-android-embedded-3.3.0\AndroidManifest.xml:47:13-74
+286            android:clearTaskOnLaunch="true"
+286-->[com.journeyapps:zxing-android-embedded:3.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\5c62783980885216ef2bd2a92dcc86d7\jetified-zxing-android-embedded-3.3.0\AndroidManifest.xml:48:13-45
+287            android:screenOrientation="sensorLandscape"
+287-->[com.journeyapps:zxing-android-embedded:3.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\5c62783980885216ef2bd2a92dcc86d7\jetified-zxing-android-embedded-3.3.0\AndroidManifest.xml:49:13-56
+288            android:stateNotNeeded="true"
+288-->[com.journeyapps:zxing-android-embedded:3.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\5c62783980885216ef2bd2a92dcc86d7\jetified-zxing-android-embedded-3.3.0\AndroidManifest.xml:50:13-42
+289            android:theme="@style/zxing_CaptureTheme"
+289-->[com.journeyapps:zxing-android-embedded:3.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\5c62783980885216ef2bd2a92dcc86d7\jetified-zxing-android-embedded-3.3.0\AndroidManifest.xml:51:13-54
+290            android:windowSoftInputMode="stateAlwaysHidden" />
+290-->[com.journeyapps:zxing-android-embedded:3.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\5c62783980885216ef2bd2a92dcc86d7\jetified-zxing-android-embedded-3.3.0\AndroidManifest.xml:52:13-60
+291
+292        <service
+292-->[com.google.android.gms:play-services-mlkit-text-recognition-common:19.0.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\0d5352e09da83b57cd63557c7093e17b\jetified-play-services-mlkit-text-recognition-common-19.0.0\AndroidManifest.xml:9:9-15:19
+293            android:name="com.google.mlkit.common.internal.MlKitComponentDiscoveryService"
+293-->[com.google.android.gms:play-services-mlkit-text-recognition-common:19.0.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\0d5352e09da83b57cd63557c7093e17b\jetified-play-services-mlkit-text-recognition-common-19.0.0\AndroidManifest.xml:10:13-91
+294            android:directBootAware="true"
+294-->[com.google.mlkit:common:18.8.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\e762d94fde72c3bcb861d3403872ac9c\jetified-common-18.8.0\AndroidManifest.xml:17:13-43
+295            android:exported="false" >
+295-->[com.google.android.gms:play-services-mlkit-text-recognition-common:19.0.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\0d5352e09da83b57cd63557c7093e17b\jetified-play-services-mlkit-text-recognition-common-19.0.0\AndroidManifest.xml:11:13-37
+296            <meta-data
+296-->[com.google.android.gms:play-services-mlkit-text-recognition-common:19.0.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\0d5352e09da83b57cd63557c7093e17b\jetified-play-services-mlkit-text-recognition-common-19.0.0\AndroidManifest.xml:12:13-14:85
+297                android:name="com.google.firebase.components:com.google.mlkit.vision.text.internal.TextRegistrar"
+297-->[com.google.android.gms:play-services-mlkit-text-recognition-common:19.0.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\0d5352e09da83b57cd63557c7093e17b\jetified-play-services-mlkit-text-recognition-common-19.0.0\AndroidManifest.xml:13:17-114
+298                android:value="com.google.firebase.components.ComponentRegistrar" />
+298-->[com.google.android.gms:play-services-mlkit-text-recognition-common:19.0.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\0d5352e09da83b57cd63557c7093e17b\jetified-play-services-mlkit-text-recognition-common-19.0.0\AndroidManifest.xml:14:17-82
+299            <meta-data
+299-->[com.google.mlkit:vision-common:17.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\e95f71b7c4e39cff99e1d954f0521bea\jetified-vision-common-17.3.0\AndroidManifest.xml:12:13-14:85
+300                android:name="com.google.firebase.components:com.google.mlkit.vision.common.internal.VisionCommonRegistrar"
+300-->[com.google.mlkit:vision-common:17.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\e95f71b7c4e39cff99e1d954f0521bea\jetified-vision-common-17.3.0\AndroidManifest.xml:13:17-124
+301                android:value="com.google.firebase.components.ComponentRegistrar" />
+301-->[com.google.mlkit:vision-common:17.3.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\e95f71b7c4e39cff99e1d954f0521bea\jetified-vision-common-17.3.0\AndroidManifest.xml:14:17-82
+302            <meta-data
+302-->[com.google.mlkit:common:18.8.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\e762d94fde72c3bcb861d3403872ac9c\jetified-common-18.8.0\AndroidManifest.xml:20:13-22:85
+303                android:name="com.google.firebase.components:com.google.mlkit.common.internal.CommonComponentRegistrar"
+303-->[com.google.mlkit:common:18.8.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\e762d94fde72c3bcb861d3403872ac9c\jetified-common-18.8.0\AndroidManifest.xml:21:17-120
+304                android:value="com.google.firebase.components.ComponentRegistrar" />
+304-->[com.google.mlkit:common:18.8.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\e762d94fde72c3bcb861d3403872ac9c\jetified-common-18.8.0\AndroidManifest.xml:22:17-82
+305        </service>
+306
+307        <provider
+307-->[com.google.mlkit:common:18.8.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\e762d94fde72c3bcb861d3403872ac9c\jetified-common-18.8.0\AndroidManifest.xml:9:9-13:38
+308            android:name="com.google.mlkit.common.internal.MlKitInitProvider"
+308-->[com.google.mlkit:common:18.8.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\e762d94fde72c3bcb861d3403872ac9c\jetified-common-18.8.0\AndroidManifest.xml:10:13-78
+309            android:authorities="com.gselectroCaqueta.accesoyseguridad.mlkitinitprovider"
+309-->[com.google.mlkit:common:18.8.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\e762d94fde72c3bcb861d3403872ac9c\jetified-common-18.8.0\AndroidManifest.xml:11:13-69
+310            android:exported="false"
+310-->[com.google.mlkit:common:18.8.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\e762d94fde72c3bcb861d3403872ac9c\jetified-common-18.8.0\AndroidManifest.xml:12:13-37
+311            android:initOrder="99" />
+311-->[com.google.mlkit:common:18.8.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\e762d94fde72c3bcb861d3403872ac9c\jetified-common-18.8.0\AndroidManifest.xml:13:13-35
+312
+313        <activity
+313-->[com.google.android.gms:play-services-base:18.1.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\150b0ca1b1d22956098faf3c81bbdf59\jetified-play-services-base-18.1.0\AndroidManifest.xml:20:9-22:45
+314            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+314-->[com.google.android.gms:play-services-base:18.1.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\150b0ca1b1d22956098faf3c81bbdf59\jetified-play-services-base-18.1.0\AndroidManifest.xml:20:19-85
+315            android:exported="false"
+315-->[com.google.android.gms:play-services-base:18.1.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\150b0ca1b1d22956098faf3c81bbdf59\jetified-play-services-base-18.1.0\AndroidManifest.xml:22:19-43
+316            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+316-->[com.google.android.gms:play-services-base:18.1.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\150b0ca1b1d22956098faf3c81bbdf59\jetified-play-services-base-18.1.0\AndroidManifest.xml:21:19-78
+317
+318        <meta-data
+318-->[com.google.android.gms:play-services-basement:18.1.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\8ff76746d87d24645349182fd0f58aa9\jetified-play-services-basement-18.1.0\AndroidManifest.xml:21:9-23:69
+319            android:name="com.google.android.gms.version"
+319-->[com.google.android.gms:play-services-basement:18.1.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\8ff76746d87d24645349182fd0f58aa9\jetified-play-services-basement-18.1.0\AndroidManifest.xml:22:13-58
+320            android:value="@integer/google_play_services_version" />
+320-->[com.google.android.gms:play-services-basement:18.1.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\8ff76746d87d24645349182fd0f58aa9\jetified-play-services-basement-18.1.0\AndroidManifest.xml:23:13-66
+321
+322        <provider
+322-->[androidx.emoji2:emoji2:1.0.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\17082c23013d870caae774489a217624\jetified-emoji2-1.0.0\AndroidManifest.xml:26:9-34:20
+323            android:name="androidx.startup.InitializationProvider"
+323-->[androidx.emoji2:emoji2:1.0.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\17082c23013d870caae774489a217624\jetified-emoji2-1.0.0\AndroidManifest.xml:27:13-67
+324            android:authorities="com.gselectroCaqueta.accesoyseguridad.androidx-startup"
+324-->[androidx.emoji2:emoji2:1.0.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\17082c23013d870caae774489a217624\jetified-emoji2-1.0.0\AndroidManifest.xml:28:13-68
+325            android:exported="false" >
+325-->[androidx.emoji2:emoji2:1.0.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\17082c23013d870caae774489a217624\jetified-emoji2-1.0.0\AndroidManifest.xml:29:13-37
+326            <meta-data
+326-->[androidx.emoji2:emoji2:1.0.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\17082c23013d870caae774489a217624\jetified-emoji2-1.0.0\AndroidManifest.xml:31:13-33:52
+327                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+327-->[androidx.emoji2:emoji2:1.0.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\17082c23013d870caae774489a217624\jetified-emoji2-1.0.0\AndroidManifest.xml:32:17-75
+328                android:value="androidx.startup" />
+328-->[androidx.emoji2:emoji2:1.0.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\17082c23013d870caae774489a217624\jetified-emoji2-1.0.0\AndroidManifest.xml:33:17-49
+329            <meta-data
+329-->[androidx.lifecycle:lifecycle-process:2.4.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\6a477497e49f1e7a2c5974d4847da6cf\jetified-lifecycle-process-2.4.0\AndroidManifest.xml:31:13-33:52
+330                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+330-->[androidx.lifecycle:lifecycle-process:2.4.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\6a477497e49f1e7a2c5974d4847da6cf\jetified-lifecycle-process-2.4.0\AndroidManifest.xml:32:17-78
+331                android:value="androidx.startup" />
+331-->[androidx.lifecycle:lifecycle-process:2.4.0] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\6a477497e49f1e7a2c5974d4847da6cf\jetified-lifecycle-process-2.4.0\AndroidManifest.xml:33:17-49
+332        </provider>
+333
+334        <service
+334-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\63d33f5beda88bb9ea8f01b5a37f09f0\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:29:9-35:19
+335            android:name="com.google.android.datatransport.runtime.backends.TransportBackendDiscovery"
+335-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\63d33f5beda88bb9ea8f01b5a37f09f0\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:30:13-103
+336            android:exported="false" >
+336-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\63d33f5beda88bb9ea8f01b5a37f09f0\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:31:13-37
+337            <meta-data
+337-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\63d33f5beda88bb9ea8f01b5a37f09f0\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:32:13-34:39
+338                android:name="backend:com.google.android.datatransport.cct.CctBackendFactory"
+338-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\63d33f5beda88bb9ea8f01b5a37f09f0\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:33:17-94
+339                android:value="cct" />
+339-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\63d33f5beda88bb9ea8f01b5a37f09f0\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:34:17-36
+340        </service>
+341        <service
+341-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\2273f425745b0c400e9b06862f2e575a\jetified-transport-runtime-2.2.6\AndroidManifest.xml:26:9-30:19
+342            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService"
+342-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\2273f425745b0c400e9b06862f2e575a\jetified-transport-runtime-2.2.6\AndroidManifest.xml:27:13-117
+343            android:exported="false"
+343-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\2273f425745b0c400e9b06862f2e575a\jetified-transport-runtime-2.2.6\AndroidManifest.xml:28:13-37
+344            android:permission="android.permission.BIND_JOB_SERVICE" >
+344-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\2273f425745b0c400e9b06862f2e575a\jetified-transport-runtime-2.2.6\AndroidManifest.xml:29:13-69
+345        </service>
+346
+347        <receiver
+347-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\2273f425745b0c400e9b06862f2e575a\jetified-transport-runtime-2.2.6\AndroidManifest.xml:32:9-34:40
+348            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver"
+348-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\2273f425745b0c400e9b06862f2e575a\jetified-transport-runtime-2.2.6\AndroidManifest.xml:33:13-132
+349            android:exported="false" />
+349-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\vicko\AndroidStudioGradle\caches\transforms-2\files-2.1\2273f425745b0c400e9b06862f2e575a\jetified-transport-runtime-2.2.6\AndroidManifest.xml:34:13-37
+350    </application>
+351
+352</manifest>

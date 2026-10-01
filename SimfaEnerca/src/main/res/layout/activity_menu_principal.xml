@@ -1,0 +1,383 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:textAlignment="center"
+    tools:context="com.gselectroCaqueta.accesoyseguridad.MenuPrincipal">
+
+    <TableLayout
+        android:id="@+id/tableLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/btnLogos"
+                android:layout_width="80dp"
+                android:layout_height="39dp"
+                android:background="@color/zxing_transparent"
+                android:contentDescription="@string/info"
+                android:scaleType="centerInside"
+                android:src="@drawable/gss_logo40x40" />
+
+            <TextView
+                android:id="@+id/txtTitleMenuPrincipal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|bottom"
+                android:layout_weight="1"
+                android:background="@color/ocrePop"
+                android:gravity="center|bottom"
+                android:text="OKINNOM - MENU PRINCIPAL"
+                android:textColor="@color/white"
+
+                android:textSize="15dp"
+                android:textStyle="bold">
+
+            </TextView>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/bg_card"
+            android:elevation="6dp"
+            android:orientation="horizontal"
+            android:padding="20dp"></LinearLayout>
+
+        <!--Primer visualizador organizador de los graficos o botones-->
+
+        <LinearLayout
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <!--primer linea de botones-->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/btnIniciarLecturas"
+                    android:layout_width="120dp"
+                    android:layout_height="75dp"
+                    android:background="@drawable/bg_icon_button_selector"
+                    android:contentDescription="@string/iniciar_lecturas"
+                    android:elevation="4dp"
+                    android:padding="10dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/rutero12" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Rutero"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/btnUtilidades"
+                    android:layout_width="120dp"
+                    android:layout_height="75dp"
+                    android:background="@drawable/bg_icon_button_selector"
+                    android:contentDescription="@string/utilidades"
+                    android:elevation="4dp"
+                    android:padding="10dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/utilitario31" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Utilitarios"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!--Bloque dos de botonera -->
+
+        <LinearLayout
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/btnRetornar"
+                    android:layout_width="120dp"
+                    android:layout_height="75dp"
+                    android:background="@drawable/bg_icon_button_selector"
+                    android:contentDescription="@string/retornar"
+                    android:padding="10dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/retornar31" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Retornar"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/btnElimnarInfo"
+                    android:layout_width="120dp"
+                    android:layout_height="75dp"
+                    android:background="@drawable/bg_icon_button_selector"
+                    android:contentDescription="@string/eliminar_info"
+                    android:padding="10dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/eliminar23" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Eliminar"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!--Bloque tres de botonera -->
+
+        <LinearLayout
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <!--                android:enabled="false"-->
+                <ImageButton
+                    android:id="@+id/btnComunica"
+                    android:layout_width="120dp"
+                    android:layout_height="75dp"
+                    android:background="@drawable/bg_icon_button_selector"
+                    android:contentDescription="@string/menucomunicacion"
+                    android:padding="10dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/comunica1" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Menu Comunicaciones"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+                <!--                android:clickable="false"-->
+
+                <ImageButton
+                    android:id="@+id/btnAyuda"
+                    android:layout_width="120dp"
+                    android:layout_height="75dp"
+                    android:background="@drawable/bg_icon_button_selector"
+                    android:contentDescription="@string/menuayuda"
+                    android:padding="10dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ayuda" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ayuda"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+
+        </LinearLayout>
+        <!--finaliza los botones en su regla de bordes principales-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/bg_card"
+            android:elevation="6dp"
+            android:orientation="horizontal"
+            android:padding="20dp"></LinearLayout>
+
+
+
+        <LinearLayout
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/btnInfo"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+
+                android:background="@color/zxing_transparent"
+                android:contentDescription="@string/info"
+                android:scaleType="centerInside"
+                android:src="@drawable/formato_de_archivo" />
+
+        </LinearLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardElevation="5dp"
+            app:cardCornerRadius="15dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp">
+            <LinearLayout
+                android:id="@+id/linearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:elevation="10dp"
+                android:padding="12dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.578"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.228">
+
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/txtTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@color/ocrePop"
+                        android:text="DATOS DEL AFORADOR"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:textAlignment="center"
+                        android:gravity="center"/>
+
+                    <TableRow>
+
+                        <ImageView
+                            android:id="@+id/fotoAforador"
+                            android:layout_width="110dp"
+                            android:layout_height="150dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_weight="0"
+                            android:src="@drawable/avatar_man_icono" />
+
+                        <TableLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_weight="1">
+
+                            <TextView
+                                android:id="@+id/txtNom"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Nombre Completo:" />
+
+                            <TableRow>
+
+                                <TextView
+                                    android:id="@+id/txt_nombre"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:background="@color/grayBlue2Soft"
+                                    android:text="SIN NOMBRE"
+                                    android:textStyle="bold"/>
+                            </TableRow>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Ruta Programada:" />
+
+                            <TableRow>
+
+                                <TextView
+                                    android:id="@+id/txtRuta"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:background="@color/grayBlue2Soft"
+                                    android:text="C0000000"
+                                    android:textStyle="bold"/>
+                            </TableRow>
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Programa:" />
+
+                            <TableRow>
+
+                                <TextView
+                                    android:id="@+id/txtPrg"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:background="@color/grayBlue2Soft"
+                                    android:text="Prg00000"
+                                    android:textStyle="bold"/>
+                            </TableRow>
+                        </TableLayout>
+                    </TableRow>
+
+
+                </TableLayout>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </TableLayout>
+
+
+</RelativeLayout>

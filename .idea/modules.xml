@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ElectroEBSAOCR2026.iml" filepath="$PROJECT_DIR$/.idea/modules/ElectroEBSAOCR2026.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SimfaEnerca/ElectroEBSAOCR2026.SimfaEnerca.iml" filepath="$PROJECT_DIR$/.idea/modules/SimfaEnerca/ElectroEBSAOCR2026.SimfaEnerca.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SimfaEnerca/ElectroEBSAOCR2026.SimfaEnerca.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/SimfaEnerca/ElectroEBSAOCR2026.SimfaEnerca.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SimfaEnerca/ElectroEBSAOCR2026.SimfaEnerca.main.iml" filepath="$PROJECT_DIR$/.idea/modules/SimfaEnerca/ElectroEBSAOCR2026.SimfaEnerca.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SimfaEnerca/ElectroEBSAOCR2026.SimfaEnerca.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/SimfaEnerca/ElectroEBSAOCR2026.SimfaEnerca.unitTest.iml" />
+    </modules>
+  </component>
+</project>

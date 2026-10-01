@@ -1,0 +1,982 @@
+[
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-mdpi_webserviceon.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-mdpi\\webserviceon.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxxhdpi_enviardatos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxxhdpi\\enviardatos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxhdpi_btnindocs300.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxhdpi\\btnindocs300.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_impresora_ok521.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\impresora_ok521.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_torreselectricasalatardecer.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\torreselectricasalatardecer.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_seekbar_slider.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\seekbar_slider.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout-port_activity_verificar_consumo.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout-port\\activity_verificar_consumo.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_imagen_testigo.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi\\imagen_testigo.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_config_formato_impresion.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_config_formato_impresion.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-hdpi_webserviceoff.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-hdpi\\webserviceoff.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi_primero.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-mdpi\\primero.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_bg_boton_primario.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\bg_boton_primario.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi-v9_chat_msg_no.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-hdpi-v9\\chat_msg_no.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\menu_resumen_estadistico.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\menu\\resumen_estadistico.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_panel_comentarios.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_panel_comentarios.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi_flecha.jpg.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-mdpi\\flecha.jpg"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_impresora_ok420.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\impresora_ok420.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_fechay_hora.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_fechay_hora.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi_ajustes.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xhdpi\\ajustes.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_tabla_celda.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\tabla_celda.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxhdpi_ajustes.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxhdpi\\ajustes.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi_borrarbckpfotos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xhdpi\\borrarbckpfotos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_imagen_lecturasiguales.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi\\imagen_lecturasiguales.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-mdpi_borrarbckpfotos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-mdpi\\borrarbckpfotos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-hdpi_volver.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-hdpi\\volver.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi_ultimo.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-mdpi\\ultimo.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_gui_acceso.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_gui_acceso.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_modulo_reimpresion.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_modulo_reimpresion.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-mdpi_traerruta.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-mdpi\\traerruta.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxxhdpi_btnindocs300.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxxhdpi\\btnindocs300.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi_inicialecturas_w.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xhdpi\\inicialecturas_w.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi_flechasult.jpg.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-hdpi\\flechasult.jpg"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_bg_chip.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\bg_chip.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxhdpi_webserviceoff.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxhdpi\\webserviceoff.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_redinativa.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi\\redinativa.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_iconguardar.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\iconguardar.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_imagen_consumoalto.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi\\imagen_consumoalto.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_servidorenlinea.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\servidorenlinea.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-hdpi_borrador.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-hdpi\\borrador.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-ldpi_titulo.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-ldpi\\titulo.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_olvide_la_contrasena_de_movil.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\olvide_la_contrasena_de_movil.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_retornar31.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\retornar31.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi_atras1.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-mdpi\\atras1.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi_enviardatos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xhdpi\\enviardatos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi-v11_seekbar_layer.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-mdpi-v11\\seekbar_layer.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_informacion1.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\informacion1.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_backup_fotos_layout.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\backup_fotos_layout.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_bg_icon_button_selector.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\bg_icon_button_selector.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi_btnindocs300.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xhdpi\\btnindocs300.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi_enviarfotos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xhdpi\\enviarfotos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_bg_botonestados.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi\\bg_botonestados.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xhdpi_btn_signal_gray_150.jpg.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xhdpi\\btn_signal_gray_150.jpg"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxxhdpi_borrarimagen.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxxhdpi\\borrarimagen.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_bg_bordecomun.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\bg_bordecomun.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xhdpi-v9_buscar.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xhdpi-v9\\buscar.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_certificado.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\certificado.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_loading_activity.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\loading_activity.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_utilitario31.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\utilitario31.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_ayuda.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\ayuda.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_icon_volver.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\icon_volver.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_bg_card.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\bg_card.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_tabla_celda_cabecera.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\tabla_celda_cabecera.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-ldpi_btnindocs42.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-ldpi\\btnindocs42.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-hdpi_eliminarinfo.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-hdpi\\eliminarinfo.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxxhdpi_ajustes.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxxhdpi\\ajustes.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_imagen_postal.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi\\imagen_postal.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xhdpi_camara.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xhdpi\\camara.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-ldpi_icon_mic.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-ldpi\\icon_mic.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_icon_bateria.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\icon_bateria.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-ldpi_celda_cuerpo.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-ldpi\\celda_cuerpo.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_imagen_prin_apagada.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi\\imagen_prin_apagada.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xhdpi_ddm300.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xhdpi\\ddm300.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_rutero12.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\rutero12.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-tvdpi_scanner.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-tvdpi\\scanner.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxhdpi_borrarimagen.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxhdpi\\borrarimagen.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi_ultimo1.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-mdpi\\ultimo1.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-ldpi_enviardatos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-ldpi\\enviardatos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_device_list.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\device_list.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xhdpi_app_dropbox.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xhdpi\\app_dropbox.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_configurar_web_layout.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\configurar_web_layout.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi-v9_chat_msg_si.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-hdpi-v9\\chat_msg_si.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_spinner_menu.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\spinner_menu.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxhdpi_borrarbckpfotos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxhdpi\\borrarbckpfotos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi-v9_icon_acercade.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-mdpi-v9\\icon_acercade.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_act_gps.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_act_gps.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi-v9_fondo_seleccionado.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi-v9\\fondo_seleccionado.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_seleccion_ruta_layout.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\seleccion_ruta_layout.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-mdpi_volver.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-mdpi\\volver.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-ldpi_celda_cabecera.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-ldpi\\celda_cabecera.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_gps.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\gps.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-ldpi_borrarbckpfotos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-ldpi\\borrarbckpfotos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_bg_cycle.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\bg_cycle.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_borde_redondo.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\borde_redondo.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_configurar_web_ip.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_configurar_web_ip.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_resumen_estadistico.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_resumen_estadistico.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-ldpi_traerruta.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-ldpi\\traerruta.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxxhdpi_eliminarinfo.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxxhdpi\\eliminarinfo.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxhdpi_borrador.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxhdpi\\borrador.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-mdpi_enviarfotos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-mdpi\\enviarfotos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_device_name.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\device_name.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi_volver.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xhdpi\\volver.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_alerta_cuenta_d.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_alerta_cuenta_d.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_simfa_logofacturacion.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\simfa_logofacturacion.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxxhdpi_enviarfotos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxxhdpi\\enviarfotos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_bg_input.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\bg_input.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_icon_rutero.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\icon_rutero.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_recibidos.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_recibidos.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_ic_launcher1.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\ic_launcher1.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_gss_logo40x40.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\gss_logo40x40.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_impresora_ok.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\impresora_ok.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-hdpi_enviardatos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-hdpi\\enviardatos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxxhdpi_volver.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxxhdpi\\volver.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_imagen_contratada.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi\\imagen_contratada.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxhdpi_enviardatos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxhdpi\\enviardatos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_txt_remote_device.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_txt_remote_device.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_message_dialog.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\message_dialog.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_protecciondedatos1.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\protecciondedatos1.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_imagen_integrador.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi\\imagen_integrador.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi-v9_edittextstyle.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi-v9\\edittextstyle.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxhdpi_validarenvio.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxhdpi\\validarenvio.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi_flechasatras.jpg.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-hdpi\\flechasatras.jpg"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_salidadeemergencia.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\salidadeemergencia.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi-v11_icon_camara_flashno.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-mdpi-v11\\icon_camara_flashno.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-hdpi_ajustes.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-hdpi\\ajustes.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxxhdpi_ddm300.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxxhdpi\\ddm300.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_adicionar_certificado.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_adicionar_certificado.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi_flprimero.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-mdpi\\flprimero.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi_traerruta.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xhdpi\\traerruta.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\menu_menu_principal.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\menu\\menu_principal.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_icon_comunicaciones.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\icon_comunicaciones.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_icon_eliminar.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\icon_eliminar.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_menu_de_liquidacion.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_menu_de_liquidacion.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_modulo_firma.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_modulo_firma.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxxhdpi_webserviceoff.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxxhdpi\\webserviceoff.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_operadomovil.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\operadomovil.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-hdpi_borrarbckpfotos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-hdpi\\borrarbckpfotos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi_icon_impresora.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-mdpi\\icon_impresora.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-hdpi_webserviceon.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-hdpi\\webserviceon.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi_atras.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-mdpi\\atras.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_comunica1.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\comunica1.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_imagen_cortado.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi\\imagen_cortado.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_imagen_verificarpredio.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi\\imagen_verificarpredio.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-mdpi_borrador.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-mdpi\\borrador.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi_webserviceon.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xhdpi\\webserviceon.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_imagen_consumobajo.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi\\imagen_consumobajo.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi_avatar_man_icono.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-hdpi\\avatar_man_icono.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_modulo_seleccion_lote.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_modulo_seleccion_lote.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxhdpi_eliminarinfo.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxhdpi\\eliminarinfo.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-ldpi_validarenvio.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-ldpi\\validarenvio.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxxhdpi_traerruta.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxxhdpi\\traerruta.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_eliminar23.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\eliminar23.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_bg_boton_redondeado.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\bg_boton_redondeado.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-hdpi_borrarimagen.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-hdpi\\borrarimagen.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxhdpi_lapiz.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxhdpi\\lapiz.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_impresora_ko.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\impresora_ko.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-hdpi_lapiz.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-hdpi\\lapiz.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi-v9_fondo_no_seleccionado.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi-v9\\fondo_no_seleccionado.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi_flechasprim.jpg.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-hdpi\\flechasprim.jpg"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_bg_boton_secundario.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\bg_boton_secundario.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxxhdpi_validarenvio.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxxhdpi\\validarenvio.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi-v9_bg_bordes.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-mdpi-v9\\bg_bordes.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_insertar.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_insertar.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxxhdpi_webserviceon.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxxhdpi\\webserviceon.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\menu_modulo_de_anomalias.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\menu\\modulo_de_anomalias.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxhdpi_volver.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxhdpi\\volver.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_toast.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\toast.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_icon_bluetooth.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi\\icon_bluetooth.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_fondos_global.jpg.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi\\fondos_global.jpg"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxhdpi_inicialecturas_w.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxhdpi\\inicialecturas_w.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxxhdpi_inicialecturas_w.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxxhdpi\\inicialecturas_w.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_comunicaciones.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_comunicaciones.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-hdpi_btnindocs300.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-hdpi\\btnindocs300.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi-v11_icon_camera_flip.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-mdpi-v11\\icon_camera_flip.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_bg_cycle2.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\bg_cycle2.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_maps.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_maps.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_protecciondedatos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\protecciondedatos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_impresora.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi\\impresora.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_alfiler.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\alfiler.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi_delete.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-hdpi\\delete.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_redactiva.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi\\redactiva.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-hdpi_validarenvio.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-hdpi\\validarenvio.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout-port_fila.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout-port\\fila.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-hdpi_traerruta.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-hdpi\\traerruta.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi-v9_selector_filas.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi-v9\\selector_filas.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi_validarenvio.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xhdpi\\validarenvio.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_modulo_cambio_digitos.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_modulo_cambio_digitos.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-mdpi_eliminarinfo.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-mdpi\\eliminarinfo.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi_ddm300.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxhdpi\\ddm300.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-mdpi_lapiz.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-mdpi\\lapiz.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi_app_dropbox.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-mdpi\\app_dropbox.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xxxhdpi_anomalia.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xxxhdpi\\anomalia.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi_lapiz.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xhdpi\\lapiz.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxxhdpi_borrarbckpfotos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxxhdpi\\borrarbckpfotos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_bluetooth.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\bluetooth.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi_obrero.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-hdpi\\obrero.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxhdpi_webserviceon.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxhdpi\\webserviceon.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\xml_keyboard.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\xml\\keyboard.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_act_licencia.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_act_licencia.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxxhdpi_borrador.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxxhdpi\\borrador.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-mdpi_btnindocs300.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-mdpi\\btnindocs300.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\menu_main.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\menu\\main.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_icon_camara.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\icon_camara.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_computadora.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\computadora.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi_adelante.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-mdpi\\adelante.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_modulo_scanner_kt40_q.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_modulo_scanner_kt40_q.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi_borrarimagen.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xhdpi\\borrarimagen.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout-port_activity_scanner_hardaware.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout-port\\activity_scanner_hardaware.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi_icon_info.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-mdpi\\icon_info.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_bg_circle_button.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\bg_circle_button.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_custom_dialog.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\custom_dialog.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-mdpi_inicialecturas_w.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-mdpi\\inicialecturas_w.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_modulo_busqueda_cuenta.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_modulo_busqueda_cuenta.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-hdpi_flechaadelantre.jpg.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-hdpi\\flechaadelantre.jpg"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_adicionar_verificacion.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_adicionar_verificacion.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_bateriacargada1.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\bateriacargada1.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_camera.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_camera.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-tvdpi_ddm300.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-tvdpi\\ddm300.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxhdpi_enviarfotos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxhdpi\\enviarfotos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-hdpi_enviarfotos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-hdpi\\enviarfotos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-mdpi_webserviceoff.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-mdpi\\webserviceoff.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi_eliminarinfo.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xhdpi\\eliminarinfo.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_btnvolver.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\btnvolver.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_bg_card2.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\bg_card2.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-mdpi_enviardatos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-mdpi\\enviardatos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxhdpi_traerruta.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxhdpi\\traerruta.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_modulo_consultnoenviads.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_modulo_consultnoenviads.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_capturar_novedad_lect.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_capturar_novedad_lect.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-mdpi_validarenvio.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-mdpi\\validarenvio.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi_borrador.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xhdpi\\borrador.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-ldpi_enviarfotos.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-ldpi\\enviarfotos.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-mdpi_borrarimagen.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-mdpi\\borrarimagen.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_menu_principal.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_menu_principal.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_icon_utilitarios.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\icon_utilitarios.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\menu_gui_acceso.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\menu\\gui_acceso.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi_webserviceoff.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xhdpi\\webserviceoff.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-mdpi_adelante1.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-mdpi\\adelante1.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-hdpi_inicialecturas_w.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-hdpi\\inicialecturas_w.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-xxxhdpi_lapiz.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-xxxhdpi\\lapiz.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\xml_file_paths.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\xml\\file_paths.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_wifi_1.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\wifi_1.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable-xhdpi_backspace.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable-xhdpi\\backspace.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\mipmap-mdpi_ajustes.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\mipmap-mdpi\\ajustes.png"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_bg_input2.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\bg_input2.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\layout_activity_modulo_de_anomalias.xml.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\layout\\activity_modulo_de_anomalias.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\build\\intermediates\\res\\merged\\debug\\drawable_formato_de_archivo.png.flat",
+        "source": "D:\\AndroidStudioProjects\\ElectroEBSAOCR2026\\SimfaEnerca\\src\\main\\res\\drawable\\formato_de_archivo.png"
+    }
+]

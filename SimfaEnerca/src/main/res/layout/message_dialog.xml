@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:background="@drawable/titulo"
+        android:gravity="right"
+        android:stretchColumns="1"
+        android:weightSum="4">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_weight="1"
+            android:background="@color/orangehuila"
+            android:gravity="center|bottom"
+            android:text="SELECCION RUTA"
+            android:textColor="@color/white"
+            android:textSize="15dp"
+            android:textStyle="bold">
+
+        </TextView>
+    </TableRow>
+
+    <RadioGroup
+        android:id="@+id/radio_Group"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="@color/grayBlue"
+        android:checkedButton="@+id/sound"
+        android:paddingBottom="20dp"
+        android:paddingTop="20dp">
+
+        <RadioButton
+            android:id="@+id/rbtn1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="C234235C0" />
+
+        <RadioButton
+            android:id="@+id/rbtn2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="C234236C0" />
+
+        <RadioButton
+            android:id="@+id/rbtn3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="C234237C0" />
+
+    </RadioGroup>
+</LinearLayout>

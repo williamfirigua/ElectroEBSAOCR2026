@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OKINNOM-FES.GSS</string>
+    <string name="action_settings">Ajustes</string>
+    <string name="nombreAforador">Nombre Aforador</string>
+    <string name="usuario">Usuario</string>
+    <string name="ingresar">Ingresar</string>
+    <string name="salir">Salir</string>
+    <string name="comunica">Comunica</string>
+    <string name="contrasena">Contraseña</string>
+    <string name="serial">"Serial "</string>
+    <string name="title_activity_menu_principal">Menu Principal</string>
+    <string name="menuPrincipal">Menu Principal</string>
+    <string name="title_activity_resumen_estadistico">Resumen Estadistico</string>
+    <string name="menuDeLiquidacion">Menu Liquidacion</string>
+    <string name="title_activity_menu_de_liquidacion">Menu de Liquid.</string>
+    <string name="cerrar">Cerrar</string>
+    <string name="ruta">Ruta</string>
+    <string name="nroMedidor">Nro Medidor</string>
+    <string name="direccion">Direccion</string>
+    <string name="nombre">Nombre</string>
+    <string name="lectura">Lectura</string>
+    <string name="anomalia">Causa NL</string>
+    <string name="comentario">Comentario</string>
+    <string name="informe">Informe</string>
+    <string name="id">Id</string>
+    <string name="campo">Campo</string>
+    <string name="valor">Valor</string>
+    <string name="escanear">Scanner</string>
+    <string name="action_capturar_anomalia">Capturar Anomalia</string>
+    <string name="action_reimprimir_factura">Reimprimir Factura</string>
+    <string name="action_anterior_predio">Anterior Predio Leido</string>
+    <string name="action_capturar_imagen">Captura Imagen Fotografica</string>
+    <string name="action_capturar_comentario">Capturar Comentario</string>
+    <string name="action_capturar_novedad">Capturar Novedad Lect.</string>
+    <string name="action_modificar_digitos">Modificar Nro de Digitos</string>
+    <string name="action_buscar_cliente">Buscar Cliente</string>
+    <string name="action_habilitar_impresora">Des/Habilitar Impresora</string>
+    <string name="action_ejecutar_impresion_lote">Ejecutar Impresion en Lote</string>
+    <string name="action_opciones_supervisor">Opciones de Supervisor</string>
+    <string name="action_cambiar_puerto">Des/Asociar Impresora</string>
+    <string name="action_configurar_preimpreso">Configurar PreImpreso Fact.</string>
+    <string name="action_estadistica_proceso">Estadistica del Proceso</string>
+    <string name="action_ayuda_ubicacion">Ayuda Ubicacion GPS</string>
+    <string name="action_utilerias">Utilidades</string>
+    <string name="action_enviar_facturacion">Enviar Facturacion GPRS</string>
+    <string name="action_enviar_mensajes">Mensajeria</string>
+    <string name="action_procesar_reenvioGprs">Procesar Reenvio GPRS</string>
+    <string name="action_evaluar_noEnviadas">Evaluar No enviadas GRPS</string>
+    <string name="action_censo_Por_Supervision">Censo Por Supervision</string>
+    <string name="action_documento_Certificado">Documento Certificado</string>
+    <string name="action_resumen_No_Impresos">Resumen No Impresos</string>
+    <string name="action_certificar_Postal">Certificar Postal</string>
+    <string name="action_enviar_fotos">Enviar Fotos </string>
+    <string name="action_mapa">Mapa </string>
+    <string name="volver">Volver</string>
+    <string name="toma_foto">Tomar Foto</string>
+    <!-- Modulo bluetooth -->
+
+    <string name="title_paired_devices">Dispositivos Vinculados</string>
+    <string name="title_other_devices">Otros Dispositivos</string>
+    <string name="button_scan">buscando...</string>
+    <string name="none_paired">ninguno vinculado</string>
+    <string name="scanning">escaneando...</string>
+    <string name="select_device">seleccione dispositivo</string>
+    <string name="none_found">ninguno encontrado</string>
+    <string name="bt_not_enabled_leaving">Bluetooth deshabilitado. Abandonando.</string>
+    <string name="devicelist_action_button_text_scan">Escanear</string>
+    <string name="devicelist_action_button_text_cancel">DETENER</string>
+    <string name="red_inactiva">Red</string>
+    <string name="no_existe_predio">No Existe Predio</string>
+    <string name="red_activa">Red Activa</string>
+    <string name="consumo_muy_alto">Consumo muy alto</string>
+    <string name="consumo_bajo">Consumo bajo</string>
+    <string name="lecturas_iguales">Lecturas Iguales</string>
+    <string name="cortado">Cortado</string>
+    <string name="integrador">Integrador</string>
+    <string name="primer_registro">Primer Registro</string>
+    <string name="ultimo_registro">Ultimo Registro</string>
+    <string name="adelanta_un_registro">Adelanta un Registro</string>
+    <string name="postal">Postal</string>
+    <string name="impresora_activa">Impresora activa</string>
+    <string name="impresora_inactiva">Impresora inactiva</string>
+    <string name="verificar_predio">Verificar predio</string>
+    <string name="testigo">Testigo</string>
+    <string name="atras_un_registro">Atras un Registro</string>
+    <string name="title_activity_modulo_de_anomalias">ModuloDeAnomalias</string>
+    <string name="title_activity_modulo_capt_novlect">ModuloCapturaNovedadLect</string>
+    <string name="title_activity_panel_comentarios">PanelComentarios</string>
+    <string name="title_activity_modulo_seleccion_lote">ModuloSeleccionLote</string>
+    <string name="digitar_orden_cuenta">Digitar orden Cuenta</string>
+    <string name="rango_inicial">Rango Inicial</string>
+    <string name="rango_final">Rango Final</string>
+    <string name="title_activity_modulo_cambio_digitos">ModuloCambioDigitos</string>
+    <string name="nro_digitos">Nro Digitos Actuales</string>
+    <string name="title_activity_modulo_busqueda_cuenta">ModuloBusquedaCuenta</string>
+    <string name="nro_cuenta">Nro Cuenta</string>
+    <string name="digite_valor_a_buscar">DIGITE VALOR A BUSCAR</string>
+    <string name="nro_medidor">Nro Medidor</string>
+    <string name="seleccion_respuesta">Seleccion Respuesta</string>
+    <string name="observacion_anterior">Observacion Anterior:</string>
+    <string name="liq_promedio_cta">LIQ. PROMEDIO CTA.     </string>
+    <string name="liq_consumo_actual">LIQ. CONSUMO ACTUAL</string>
+    <string name="retener_factura">RETENER FACTURA   </string>
+    <string name="liq_promedio_estrato">LIQ. PROMEDIO ESTRATO</string>
+    <string name="digite_lectura">DIGITE LECTURA</string>
+    <string name="acerca_de">Acerca de...</string>
+    <string name="imprimir">Imprimir</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="bateria">Bateria</string>
+    <string name="info">Informacion</string>
+    <!--nuevas variables-->
+    <string name="iniciar_lecturas">Iniciar Lecturas</string>
+    <string name="utilidades">Utilidades</string>
+    <string name="retornar">Retornar</string>
+    <string name="eliminar_info">Eliminar Info</string>
+    <string name="menucomunicacion">Menu Comunicacion</string>
+    <string name="menuayuda">Menu Ayuda</string>
+    <!--//fin nuevas variables-->
+    <string name="foto_usuario">Foto usuario</string>
+    <string name="title_activity_comunicaciones">Comunicaciones</string>
+    <string name="wifi">WiFi</string>
+    <string name="gprs_activo">GPRS ACTIVO</string>
+    <string name="ciclo">Ciclo</string>
+    <string name="municipio">Municipio</string>
+    <string name="seccion">Seccion</string>
+    <string name="division">Division</string>
+    <string name="backup_fotos">Backup Fotos</string>
+    <string name="borrar_backup_fotos">Borrar Backup Fotos</string>
+    <string name="validar_version_pda">Validar Version PDA</string>
+    <string name="activa_ip1">Activa IP 1</string>
+    <string name="activa_ip2">Activa IP 2</string>
+    <string name="nombre_serviio_web">Nombre Servicio Web</string>
+    <string name="nro_puerto"># Puerto</string>
+    <string name="nro_tramas">Nro. Tramas</string>
+    <string name="grabar_ip">Grabar IP</string>
+    <string name="prueba_ws">Prueba WS</string>
+    <string name="ip_ws">IP WS</string>
+
+    <string name="print420">Impresora 420</string>
+    <string name="print520">Impresora 520</string>
+
+
+    <color name="white">#FFFFFF</color>
+    <color name="bluePop">#04A5EF</color>
+    <color name="redPop">#FC6A6E</color>
+    <color name="redPopHard">#ae4a4d</color>
+    <color name="bluePopSoft">#45617A</color>
+    <color name="greenPop">#4EAA54</color>
+    <color name="ocrePop">#E0A025</color>
+    <color name="grayPop">#74777A</color>
+    <color name="greenPopHard">#028482</color>
+    <color name="bluePopHard">#004C70</color>
+    <color name="purplePop">#B84B9E</color>
+    <color name="purplePopHard">#93228D</color>
+    <color name="grayBlue">#B2BEE5</color>
+    <color name="grayBlueSoft">#e9ecf5</color>
+    <color name="grayBlue2Soft">#ced3e1</color>
+    <color name="orangePopsoft">#FCD1B3</color>
+    <color name="greenPopsoft">#C9F79B</color>
+    <color name="orangehuila">#e46713</color>
+    <color name="grayblack">#232323</color>
+    <color name="Header">#044BA1</color>
+    <color name="background_dialog">#8BE4B0</color>
+    <color name="border_dialog">#BFECDF02</color>
+    <color name="colorstest">#89CAE8</color>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="title_activity_configurar_web_ip">Configurar_webIp</string>
+
+    <!--kim -->
+    <string-array name="cabecera_tabla">
+        <item>De  </item>
+        <item>Asunto</item>
+        <item>Texto</item>
+        <item>Fecha</item>
+        <item>Para  </item>
+    </string-array>
+    <string name="title_activity_modulo_scanner_kt40_q">ModuloScannerKT40Q</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_alerta_cuenta_d">AlertaCuentaD</string>
+    <string name="title_activity_main">MainActivity</string>
+</resources>

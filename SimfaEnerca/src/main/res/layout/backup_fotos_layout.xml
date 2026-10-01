@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!--<TableRow-->
+    <!--android:id="@+id/tableRow9"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="70dp"-->
+    <!--android:layout_weight="0"-->
+    <!--android:orientation="horizontal"-->
+    <!--android:background="@drawable/menuhorayfecha">-->
+
+    <!--</TableRow>-->
+    <Button
+        android:id="@+id/btnBorrarBackup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/btnBkFotos"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/btnBkFotos"
+        android:layout_marginTop="28dp"
+        android:text="@string/borrar_backup_fotos" />
+
+    <Button
+        android:id="@+id/btnValidaVersion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btnBkFotos"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="20dp"
+        android:text="@string/validar_version_pda" />
+
+    <Button
+        android:id="@+id/btnBkFotos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/btnValidaVersion"
+        android:layout_alignRight="@+id/btnValidaVersion"
+        android:layout_below="@+id/btnBorrarBackup"
+        android:layout_marginTop="25dp"
+        android:text="@string/backup_fotos" />
+
+</RelativeLayout>

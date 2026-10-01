@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_act_gps"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gps"
+    tools:context="com.gselectroCaqueta.moduloGPS.ActGPS">
+
+    <TableRow
+        android:id="@+id/tableRowLicencia"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/titulo"
+        android:gravity="right"
+        android:orientation="horizontal"
+        android:weightSum="4">
+
+        <TextView
+            android:id="@+id/txtTitleLicencia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_weight="1"
+            android:background="@color/orangehuila"
+            android:gravity="center|bottom"
+            android:text="GEOLOCALIZACION"
+            android:textColor="@color/white"
+            android:textSize="15dp"
+            android:textStyle="bold">
+
+        </TextView>
+    </TableRow>
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/textView6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="10dp"
+                android:text="Localizacion"
+                android:textColor="#000000"
+                android:textSize="32sp" />
+
+            <TextView
+                android:id="@+id/txcvcoordenadas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txvusu"
+                android:layout_marginTop="20dp"
+                android:textColor="#000000"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/txvcli"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textView6"
+                android:layout_marginTop="30dp"
+                android:textColor="#000000"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/txvcoor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txvcli"
+                android:layout_marginTop="20dp"
+                android:textColor="#000000"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/txvres"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txcvcoordenadas"
+                android:layout_marginTop="40dp"
+                android:background="@color/grayBlue2Soft"
+                android:textColor="#000000"
+                android:textSize="20sp" />
+
+            <Button
+                android:id="@+id/salir"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txvres"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="20dp"
+                android:background="@color/grayPop"
+                android:text="Volver" />
+
+            <TextView
+                android:id="@+id/txvusu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txvcoor"
+                android:layout_marginTop="30dp"
+                android:textColor="#000000"
+                android:textSize="20sp" />
+        </RelativeLayout>
+    </ScrollView>
+</RelativeLayout>

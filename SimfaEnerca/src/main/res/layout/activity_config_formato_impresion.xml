@@ -1,0 +1,198 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.gselectroCaqueta.modulocaptnovedlect.ModuloConfigFormatoImpresion">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:orientation="vertical">
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:background="@drawable/titulo"
+            android:gravity="right"
+            android:stretchColumns="1"
+            android:weightSum="4">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center"
+                android:layout_weight="1"
+                android:background="@color/orangehuila"
+                android:gravity="center|bottom"
+                android:text="CONF. FORMATO IMPRESION"
+                android:textColor="@color/white"
+                android:textSize="15dp"
+                android:textStyle="bold">
+
+            </TextView>
+        </TableRow>
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:shrinkColumns="0"
+            android:stretchColumns="0">
+
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="20dp"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text="Colocar Temperatura"
+                    android:textSize="16dp" />
+
+                <EditText
+                    android:id="@+id/txtcitemperatura"
+                    android:layout_width="0dp"
+                    android:layout_height="55px"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="2dp"
+                    android:layout_marginRight="7dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_bordes"
+                    android:inputType="numberSigned"
+                    android:maxLength="4"
+                    android:paddingLeft="3dp"
+                    android:privateImeOptions="nm"
+                    android:text="0" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="20dp"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text="Valor por correr"
+                    android:textSize="16dp" />
+
+                <EditText
+                    android:id="@+id/txtcicorrer"
+                    android:layout_width="0dp"
+                    android:layout_height="55px"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_bordes"
+                    android:inputType="numberSigned"
+                    android:maxLength="3"
+                    android:paddingLeft="3dp"
+                    android:privateImeOptions="nm"
+                    android:text="0" />
+            </TableRow>
+
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center">
+
+                <CheckBox
+                    android:id="@+id/chkbxcigap"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Imprimir Grafico" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center">
+
+                <CheckBox
+                    android:id="@+id/chkbxdosbarras"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dos Barras" />
+            </TableRow>
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center">
+
+                <CheckBox
+                    android:id="@+id/chkbxrw420"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Con Impresora RW420" />
+            </TableRow>
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center">
+
+                <CheckBox
+                    android:id="@+id/chkbxzq521"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    android:text="Con Impresora ZQ521" />
+            </TableRow>
+<!--//nuevo-->
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center">
+
+                <CheckBox
+                    android:id="@+id/chkbxdosImpre"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Es RW420"
+                    android:visibility="gone"/>
+            </TableRow>
+
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:gravity="center">
+
+                <Button
+                    android:id="@+id/btnciguardar"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+
+                    android:layout_marginRight="10dp"
+                    android:background="@drawable/bg_botonestados"
+                    android:text="GUARDAR Y RETORNAR"
+                    android:textColor="@color/white" />
+            </TableRow>
+
+
+
+        </TableLayout>
+    </LinearLayout>
+</ScrollView>

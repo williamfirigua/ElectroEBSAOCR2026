@@ -1,0 +1,301 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F6FA">
+
+    <!-- SCROLL PRINCIPAL -->
+    <ScrollView
+        android:id="@+id/scroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <!-- HEADER -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card2"
+                android:padding="12dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="📊 ESTADO DE OPERACIÓN"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333"/>
+
+                <TextView
+                    android:id="@+id/txtNombreRuta"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Ruta: ---"
+                    android:textSize="18sp"
+                    android:layout_marginTop="4dp"/>
+
+                <TextView
+                    android:id="@+id/txtFecha"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Fecha: ---"
+                    android:textSize="14sp"/>
+            </LinearLayout>
+
+            <!-- ESTADO -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_card2"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="140dp"
+                    android:layout_height="wrap_content"
+                    android:text="🎯 ESTADO DE ENVÍO"
+                    android:textColor="#555"
+                    android:textSize="12sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/txtEstado"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="SIN CONEXIÓN"
+                    android:textColor="#D32F2F"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <!-- INDICADORES -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="6dp">
+
+                <!-- CARD -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="70dp"
+                    android:layout_weight="1"
+                    android:layout_margin="4dp"
+                    android:background="@drawable/bg_card"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="📊 TOTAL"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:id="@+id/txtTotal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:gravity="center"/>
+                </LinearLayout>
+
+                <!-- CARD -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="70dp"
+                    android:layout_weight="1"
+                    android:layout_margin="4dp"
+                    android:background="@drawable/bg_card"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/idLeidos"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="✅ LEÍDOS" />
+
+                    <TextView
+                        android:id="@+id/txtLeidos"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:gravity="center"/>
+                </LinearLayout>
+
+                <!-- CARD -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="70dp"
+                    android:layout_weight="1"
+                    android:layout_margin="4dp"
+                    android:background="@drawable/bg_card"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="⏳ X Leer" />
+
+                    <TextView
+                        android:id="@+id/txtPendientes"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:gravity="center"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- FILTROS -->
+            <RadioGroup
+                android:id="@+id/GrupoOpciones"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="6dp">
+
+                <RadioButton
+                    android:id="@+id/OptTodas"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:text="Todas"/>
+
+                <RadioButton
+                    android:id="@+id/OptProcesadas"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:text="Procesadas"
+                    android:layout_marginLeft="20dp"/>
+
+                <RadioButton
+                    android:id="@+id/OptNoprocesada"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:text="No procesadas"
+                    android:layout_marginLeft="20dp"/>
+            </RadioGroup>
+
+            <!-- TABLA -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:contentDescription="TablaRegistros"
+                android:layout_marginTop="6dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_card">
+
+                    <TableLayout
+                        android:id="@+id/cabecera"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="#E3F2FD"
+                        android:padding="6dp"/>
+
+                    <TableLayout
+                        android:id="@+id/tablaResumen"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="4dp"/>
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- RESUMEN GENERAL -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📈 RESUMEN GENERAL"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginTop="10dp"/>
+
+            <ListView
+                android:id="@+id/list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:dividerHeight="1dp"
+                android:nestedScrollingEnabled="false"
+                android:background="@drawable/bg_card"
+                android:padding="6dp"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- BOTONES -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="6dp">
+
+        <ImageButton
+            android:id="@+id/btnAtras1"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="6dp"
+            android:contentDescription="Atras"
+            android:background="@drawable/bg_cycle2"
+            android:src="@android:drawable/ic_media_previous" />
+
+        <ImageButton
+            android:id="@+id/btnPrimero1"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="6dp"
+            android:contentDescription="Primero"
+            android:background="@drawable/bg_cycle2"
+            android:src="@android:drawable/ic_media_rew" />
+
+        <ImageButton
+            android:id="@+id/btnUltimo1"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="6dp"
+            android:contentDescription="Ultimo"
+            android:background="@drawable/bg_cycle2"
+            android:src="@android:drawable/ic_media_ff" />
+
+        <ImageButton
+            android:id="@+id/btnAdelante1"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="6dp"
+            android:contentDescription="Adelante"
+            android:background="@drawable/bg_cycle2"
+            android:src="@android:drawable/ic_media_next" />
+
+        <ImageButton
+            android:id="@+id/btnCerrar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="6dp"
+            android:contentDescription="Salir"
+            android:background="@drawable/bg_cycle2"
+            android:src="@android:drawable/ic_menu_rotate" />
+
+    </LinearLayout>
+
+</LinearLayout>

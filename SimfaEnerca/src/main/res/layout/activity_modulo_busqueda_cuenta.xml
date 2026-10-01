@@ -1,0 +1,148 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.gselectroCaqueta.modulobusquedacuenta.ModuloBusquedaCuenta">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical">
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:background="@drawable/titulo"
+            android:gravity="right"
+            android:stretchColumns="1"
+            android:weightSum="4">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center"
+                android:layout_weight="1"
+                android:background="@color/orangehuila"
+                android:gravity="center|bottom"
+                android:text="BUSQUEDA"
+                android:textColor="@color/white"
+                android:textSize="15dp"
+                android:textStyle="bold">
+
+            </TextView>
+        </TableRow>
+
+        <RadioGroup
+            android:id="@+id/rgBotones"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:orientation="vertical"
+            android:showDividers="middle|none">
+
+            <RadioButton
+                android:id="@+id/rbContador"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/nro_medidor" />
+
+            <RadioButton
+                android:id="@+id/rbCuenta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/nro_cuenta" />
+
+            <RadioButton
+                android:id="@+id/rbRuta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ruta" />
+
+            <RadioButton
+                android:id="@+id/rbDireccion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/direccion" />
+
+            <RadioButton
+                android:id="@+id/rbNombre"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/nombre" />
+
+        </RadioGroup>
+
+        <EditText
+            android:id="@+id/txtBuscar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/rgBotones"
+            android:ems="10"
+            android:hint="@string/digite_valor_a_buscar"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceLarge">
+
+            <requestFocus />
+        </EditText>
+
+        <Button
+            android:id="@+id/btnvol"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/btnvolver"
+            android:background="@drawable/borde_redondo"
+            android:text="Volver" />
+
+        <HorizontalScrollView
+            android:id="@+id/horizontalView"
+            android:layout_width="wrap_content"
+            android:layout_height="150dp"
+            android:layout_alignLeft="@+id/rgBotones"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="15px"
+            android:scrollbars="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:orientation="vertical">
+
+                <TableLayout
+                    android:id="@+id/cabeceraDatos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"></TableLayout>
+
+                <ScrollView
+                    android:id="@+id/scroll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="280dp"
+                    android:scrollbars="horizontal|vertical">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TableLayout
+                            android:id="@+id/tablaResumenDatos"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="true"></TableLayout>
+                    </LinearLayout>
+                </ScrollView>
+            </LinearLayout>
+        </HorizontalScrollView>
+
+
+
+    </LinearLayout>
+</RelativeLayout>

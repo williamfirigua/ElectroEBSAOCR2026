@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.gselectroCaqueta.moduloreimpresion.ModuloReimpresion">
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:background="@drawable/titulo"
+        android:gravity="right"
+        android:stretchColumns="1"
+        android:weightSum="4">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_weight="1"
+            android:background="@color/orangehuila"
+            android:gravity="center|bottom"
+            android:text="REIMPRESION FACTURA"
+            android:textColor="@color/white"
+            android:textSize="15dp"
+            android:textStyle="bold">
+
+        </TextView>
+    </TableRow>
+
+    <TableLayout
+        android:id="@+id/tabla_cuerpo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TableRow
+            android:id="@+id/tableRow1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp">
+
+            <TextView
+                android:id="@+id/lblCuenta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="5dp"
+                android:layout_weight="1"
+                android:text="Cuenta" />
+
+            <EditText
+                android:id="@+id/txtCuenta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:layout_weight="1"
+                android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 "
+                android:gravity="left"
+                android:inputType="number"
+                android:maxLength="9"
+                android:text="000000000" />
+
+            <Button
+                android:id="@+id/btnTraerArchivo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_weight="1"
+                android:background="@color/redPop"
+                android:gravity="center"
+                android:text="Traer Archivo" />
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow21"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp">
+
+            <TextView
+                android:id="@+id/lblAno"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_columnSpan="1"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="5dp"
+                android:layout_weight="1"
+                android:text="Año" />
+
+            <EditText
+                android:id="@+id/txtAno"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_columnSpan="1"
+                android:layout_gravity="left"
+                android:layout_weight="1"
+                android:gravity="left"
+                android:inputType="number"
+                android:maxLength="4"
+                android:text="0000" />
+
+            <Button
+                android:id="@+id/btnImprimir"
+                android:layout_width="20dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_weight="1"
+                android:adjustViewBounds="true"
+                android:background="@color/bluePop"
+                android:gravity="center"
+                android:scaleType="fitXY"
+                android:text="      Imprimir       " />
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow31"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp">
+
+            <TextView
+                android:id="@+id/lblMes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_columnSpan="1"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="5dp"
+                android:layout_weight="1"
+                android:text="Mes" />
+
+            <EditText
+                android:id="@+id/txtMes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_columnSpan="1"
+                android:layout_gravity="left"
+                android:layout_weight="1"
+                android:gravity="left"
+                android:inputType="number"
+                android:maxLength="2"
+                android:text="000" />
+
+            <Button
+                android:id="@+id/btnVolver"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_weight="1"
+                android:background="@color/ocrePop"
+                android:gravity="center"
+                android:text= "     Retornar     " />
+
+        </TableRow>
+
+
+    </TableLayout>
+
+
+
+</LinearLayout>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:id="@+id/camera_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/imgViewFoto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:id="@+id/camera_preview"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal"></LinearLayout>
+
+        </FrameLayout>
+
+        <ImageButton
+            android:id="@+id/btnFlashOk"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="10px"
+            android:alpha="0.75"
+            android:background="@null"
+            android:scaleType="centerInside"
+            android:src="@drawable/icon_camara_flashno" />
+
+
+        <ImageButton
+            android:id="@+id/button_capture"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="10px"
+            android:alpha="0.75"
+            android:background="@null"
+            android:scaleType="centerInside"
+            android:src="@drawable/icon_camara" />
+
+
+        <ImageButton
+            android:id="@+id/btnChangeCancel"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="10px"
+            android:alpha="0.75"
+            android:background="@null"
+            android:scaleType="centerInside"
+            android:src="@drawable/icon_camera_flip" />
+
+        <LinearLayout
+            android:id="@+id/camera_sc"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@id/btnChangeCancel"
+            android:layout_above="@id/btnChangeCancel"
+            android:layout_weight="1"
+            android:layout_marginBottom="10dp"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:layout_width="1dp"
+                android:layout_height="1dp">
+            </ImageButton>
+
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="250dp"
+                android:layout_height="250dp"
+                android:padding="20dp"
+                android:layout_marginLeft="35dp"
+                android:maxHeight="3dp"
+                android:minHeight="3dp"
+                android:alpha="0.30"
+                android:progressDrawable="@drawable/seekbar_layer"
+                android:thumb="@drawable/seekbar_slider"
+                android:rotation="270">
+            </SeekBar>
+            <!--  camera_sc OJO! lo que contiene debe quedar a asi o desaparece la barra -->
+
+        </LinearLayout>
+
+    </RelativeLayout>
+</LinearLayout>

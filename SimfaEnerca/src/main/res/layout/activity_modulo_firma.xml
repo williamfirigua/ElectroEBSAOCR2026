@@ -1,0 +1,129 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.gselectroCaqueta.modulocaptnovedlect.ModuloFirma">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:orientation="vertical">
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:background="@drawable/titulo"
+            android:gravity="right"
+            android:stretchColumns="1"
+            android:weightSum="4">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center"
+                android:layout_weight="1"
+                android:background="@color/orangehuila"
+                android:gravity="center|bottom"
+                android:text="MODULO DE FIRMA"
+                android:textColor="@color/white"
+                android:textSize="15dp"
+                android:textStyle="bold">
+
+            </TextView>
+        </TableRow>
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:shrinkColumns="0"
+            android:stretchColumns="0">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:text="Firmar aqui:"
+                android:textSize="16dp" />
+
+            <RelativeLayout
+                android:id="@+id/reloutmf"
+                android:layout_width="match_parent"
+                android:layout_height="170dp"
+                android:background="@drawable/bg_bordes">
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/lblmfCuenta"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="20dp"
+                android:layout_weight="1"
+                android:text="Cuenta: "
+                android:textSize="16dp" />
+
+            <Button
+                android:id="@+id/btnmfErase"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginLeft="7dp"
+                android:layout_marginRight="7dp"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/bg_botonestados"
+                android:text="Borrador"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/btnmfDraw"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginLeft="7dp"
+                android:layout_marginRight="7dp"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/bg_botonestados"
+                android:text="lapiz"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/btnmfDelete"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginLeft="7dp"
+                android:layout_marginRight="7dp"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/bg_botonestados"
+                android:text="Borrar todo"
+                android:textColor="@color/white" />
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:gravity="center">
+
+                <Button
+                    android:id="@+id/btnmfSave"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="7dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="1"
+
+                    android:background="@drawable/bg_botonestados"
+                    android:text="GUARDAR"
+                    android:textColor="@color/white" />
+
+
+            </TableRow>
+        </TableLayout>
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,161 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:background="@drawable/titulo"
+        android:gravity="right"
+        android:stretchColumns="1"
+        android:weightSum="4">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_weight="1"
+            android:background="@color/orangehuila"
+            android:gravity="center|bottom"
+            android:text="CONSULTA NO ENVIADOS"
+            android:textColor="@color/white"
+            android:textSize="15dp"
+            android:textStyle="bold">
+
+        </TextView>
+    </TableRow>
+
+    <HorizontalScrollView
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scrollbars="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:orientation="vertical">
+
+            <TableLayout
+                android:id="@+id/tblcabecera"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"></TableLayout>
+
+            <ScrollView
+                android:id="@+id/scrollNe2"
+                android:layout_width="wrap_content"
+                android:layout_height="300dp"
+                android:clickable="false"
+                android:scrollbars="horizontal|vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TableLayout
+                        android:id="@+id/tblcuentacontador"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"></TableLayout>
+                </LinearLayout>
+            </ScrollView>
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <GridLayout
+        android:layout_width="wrap_content"
+        android:layout_height="100px">
+
+        <ImageButton
+            android:id="@+id/btnAtrasNe2"
+            android:layout_height="wrap_content"
+            android:layout_margin="13px"
+            android:layout_marginBottom="2px"
+            android:layout_marginTop="2px"
+            android:contentDescription="@string/atras_un_registro"
+            android:src="@drawable/atras" />
+
+        <ImageButton
+            android:id="@+id/btnPrimeroNe2"
+            android:layout_height="wrap_content"
+            android:layout_margin="13px"
+            android:layout_marginBottom="2px"
+            android:layout_marginTop="2px"
+            android:contentDescription="@string/primer_registro"
+            android:src="@drawable/primero" />
+
+        <ImageButton
+            android:id="@+id/btnUltimoNe2"
+            android:layout_height="wrap_content"
+            android:layout_margin="13px"
+            android:layout_marginBottom="2px"
+            android:layout_marginTop="2px"
+            android:contentDescription="@string/ultimo_registro"
+            android:src="@drawable/ultimo" />
+
+        <ImageButton
+            android:id="@+id/btnAdelanteNe2"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_margin="13px"
+            android:layout_marginBottom="2px"
+            android:layout_marginTop="2px"
+            android:contentDescription="@string/adelanta_un_registro"
+            android:src="@drawable/adelante" />
+
+    </GridLayout>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
+            android:text="Reg. No enviados"
+            android:textSize="16dp" />
+
+        <EditText
+            android:id="@+id/txtregnoenviados"
+            android:layout_width="0dp"
+            android:layout_height="60px"
+            android:layout_gravity="center"
+            android:layout_marginBottom="2dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="2dp"
+            android:layout_weight="2"
+            android:background="@drawable/bg_bordes"
+            android:clickable="false"
+            android:cursorVisible="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:paddingLeft="4dp" />
+
+        <TextView
+            android:id="@+id/lblpos"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
+            android:text="0/0"
+            android:textSize="16dp" />
+
+    </TableRow>
+
+    <Button
+        android:id="@+id/btnCerrarNe2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="1dp"
+        android:text="@string/cerrar" />
+
+</LinearLayout>

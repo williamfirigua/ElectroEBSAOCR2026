@@ -1,0 +1,628 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/LinearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:orientation="vertical"
+        tools:ignore="MissingConstraints">
+
+        <TableLayout
+            android:id="@+id/tabla_fondo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/ocrePop">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="50dp">
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:orientation="horizontal">
+
+                    <!--                <ImageView-->
+                    <!--                    android:id="@+id/imagenPrinter"-->
+                    <!--                    android:layout_width="48dp"-->
+                    <!--                    android:layout_height="48dp"-->
+
+                    <!--                    android:layout_weight="1"-->
+                    <!--                    android:contentDescription="@string/impresora_inactiva"-->
+                    <!--                    android:visibility="gone" />-->
+
+                    <ImageView
+                        android:id="@+id/imagenRed"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+
+                        android:layout_weight="1"
+                        android:contentDescription="@string/red_inactiva" />
+
+                    <ImageView
+                        android:id="@+id/imagenChat"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+
+                        android:layout_weight="1"
+                        android:clickable="true"
+                        android:contentDescription="@string/red_inactiva"
+                        android:focusable="true"
+                        android:padding="0dp"
+                        android:scaleType="fitXY" />
+
+                    <ImageView
+                        android:id="@+id/imagenLiquid_3"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+
+                        android:layout_weight="1"
+                        android:contentDescription="@string/red_inactiva" />
+
+                    <ImageView
+                        android:id="@+id/imagenLiquid_2"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+
+                        android:layout_weight="1"
+                        android:contentDescription="@string/red_inactiva" />
+
+                    <ImageView
+                        android:id="@+id/imagenLiquid_1"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+
+                        android:layout_weight="1"
+                        android:contentDescription="@string/red_inactiva" />
+
+                    <Spinner
+                        android:id="@+id/spinnerMenu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center_vertical"
+                        android:background="@color/orangePopsoft"
+                        android:popupBackground="@color/bluePopHard"
+                        android:spinnerMode="dropdown"
+                        android:theme="@style/style_items" />
+
+                </LinearLayout>
+
+            </TableRow>
+        </TableLayout>
+
+        <RelativeLayout
+            android:id="@+id/panelLecturas1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <HorizontalScrollView
+                android:id="@+id/horizontalView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginStart="2dp"
+                android:layout_marginLeft="2dp"
+                android:layout_marginEnd="-2dp"
+                android:layout_marginRight="-2dp"
+                android:scrollbars="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/linlout1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="260dp"
+                    android:layout_gravity="bottom"
+                    android:orientation="vertical">
+
+                    <TableLayout
+                        android:id="@+id/cabecera"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                    </TableLayout>
+
+                    <ScrollView
+                        android:id="@+id/scroll"
+                        android:layout_width="wrap_content"
+                        android:layout_height="80dp"
+                        android:minHeight="80dp"
+                        android:scrollbars="horizontal|vertical">
+
+                        <LinearLayout
+                            android:id="@+id/linlout2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="200dp"
+                            android:orientation="vertical">
+
+                            <TableLayout
+                                android:id="@+id/tablaResumen"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content">
+
+                            </TableLayout>
+
+                        </LinearLayout>
+
+                    </ScrollView>
+
+                </LinearLayout>
+            </HorizontalScrollView>
+            <TableRow
+                android:id="@+id/tableButtons"
+                android:layout_below="@+id/horizontalView"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:layout_gravity="bottom">
+
+                <ImageButton
+                    android:id="@+id/btnAtras"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/atras_un_registro"
+                    android:padding="0dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/flprimero" />
+
+                <ImageButton
+                    android:id="@+id/btnPrimero"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/primer_registro"
+                    android:padding="0dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/atras1" />
+
+                <ImageButton
+                    android:id="@+id/btnUltimo"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/ultimo_registro"
+                    android:padding="0dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/ultimo1" />
+
+                <ImageButton
+                    android:id="@+id/btnAdelante"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/adelanta_un_registro"
+                    android:padding="0dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/adelante1" />
+
+                <!--                    <ImageButton-->
+                <!--                        android:id="@+id/btnActivaScanner"-->
+                <!--                        android:layout_width="65dp"-->
+                <!--                        android:layout_height="45dp"-->
+                <!--                        android:layout_marginLeft="10dp"-->
+                <!--                        android:layout_weight="0"-->
+                <!--                        android:contentDescription="@string/adelanta_un_registro"-->
+                <!--                        android:padding="0dp"-->
+                <!--                        android:scaleType="fitXY"-->
+                <!--                        android:src="@drawable/scanner" />-->
+
+                <!--                    <ImageButton-->
+                <!--                        android:id="@+id/btnFotografia"-->
+                <!--                        android:layout_width="55dp"-->
+                <!--                        android:layout_height="45dp"-->
+                <!--                        android:layout_marginLeft="10dp"-->
+                <!--                        android:layout_weight="1"-->
+                <!--                        android:contentDescription="@string/adelanta_un_registro"-->
+                <!--                        android:padding="0dp"-->
+                <!--                        android:src="@drawable/camara" />-->
+                <ImageButton
+                    android:id="@+id/btnAnomalia"
+                    android:layout_width="55dp"
+                    android:layout_height="45dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_weight="1"
+                    android:padding="0dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/anomalia" />
+
+                <ImageButton
+                    android:id="@+id/btnBuscar"
+                    android:layout_width="55dp"
+                    android:layout_height="45dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:padding="0dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/buscar" />
+
+                <ImageButton
+                    android:id="@+id/btnTomarFoto"
+                    android:layout_width="55dp"
+                    android:layout_height="45dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:padding="0dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/camara" />
+            </TableRow>
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tableButtons"
+                android:orientation="horizontal">
+
+                <TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="right">
+
+                    <EditText
+                        android:id="@+id/txtElectura"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:layout_weight="2"
+                        android:gravity="left"
+                        android:hint="LECTURA"
+                        android:maxLength="13"
+                        android:focusable="false"
+                        android:windowSoftInputMode="stateAlwaysHidden"
+                        android:focusableInTouchMode="false"
+                        android:textSize="26sp"
+                        android:textStyle="bold">
+                        <!--                <EditText-->
+                        <!--                    android:id="@+id/txtElectura"-->
+                        <!--                    android:layout_width="wrap_content"-->
+                        <!--                    android:layout_height="wrap_content"-->
+                        <!--                    android:layout_gravity="left"-->
+                        <!--                    android:layout_weight="2"-->
+                        <!--                    android:gravity="left"-->
+                        <!--                    android:hint="LECTURA"-->
+                        <!--                    android:maxLength="13"-->
+                        <!--                    android:focusable="false"-->
+                        <!--                    android:windowSoftInputMode="stateAlwaysHidden"-->
+                        <!--                    android:focusableInTouchMode="false"-->
+                        <!--                    android:onClick="openKeyboard"-->
+                        <!--                    android:textSize="26sp"-->
+                        <!--                    android:textStyle="bold">-->
+
+
+                    </EditText>
+
+                    <TextView
+                        android:id="@+id/lblInfoMedida"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginLeft="2dp"
+                        android:gravity="right"
+                        android:text="0"
+                        android:textSize="20dp"
+                        android:textStyle="bold|italic" />
+
+                    <!--                <ImageButton-->
+                    <!--                    android:id="@+id/imagenPrinter"-->
+                    <!--                    android:layout_width="55dp"-->
+                    <!--                    android:layout_height="45dp"-->
+                    <!--                    android:layout_marginLeft="8dp"-->
+                    <!--                    android:layout_weight="1"-->
+                    <!--                    android:padding="0dp"-->
+                    <!--                    android:src="@drawable/imagen_prin_apagada" />-->
+
+                    <ImageButton
+                        android:id="@+id/imagenPrinter"
+                        android:layout_width="55dp"
+                        android:layout_height="45dp"
+                        android:layout_gravity="right|bottom"
+                        android:layout_marginLeft="2dp"
+                        android:layout_marginRight="5dp"
+                        android:gravity="right"
+                        android:padding="0dp"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/impresora_ko" />
+                    <!--                </RelativeLayout >-->
+                </TableRow>
+
+                <TableRow
+
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <EditText
+                        android:id="@+id/txtMedidorCuenta"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginBottom="2dp"
+                        android:layout_weight="6"
+                        android:background="@color/grayBlueSoft"
+                        android:ems="10"
+                        android:textStyle="bold"
+                        android:inputType="number|textNoSuggestions"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/lblpuntero"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="4"
+                        android:background="@color/grayBlueSoft"
+                        android:text="0"
+                        android:textSize="16dp"
+                        android:textStyle="bold" />
+
+                </TableRow>
+
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/txtLatitud"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5"
+                        android:background="@color/grayBlue"
+                        android:hint=""
+                        android:maxLength="14"
+                        android:text="0.00"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/txtLongitud"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5"
+                        android:background="@color/grayBlue"
+                        android:hint=""
+                        android:maxLength="14"
+                        android:text="0.00"
+                        android:textSize="14sp" />
+                    <TextView
+                        android:id="@+id/txtDistancia"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5"
+                        android:background="@color/grayBlue"
+                        android:hint=""
+                        android:maxLength="12"
+                        android:text="0"
+                        android:textSize="14sp" />
+
+
+                </TableRow>
+
+                <!--                        <EditText-->
+                <!--                            android:id="@+id/txtInformeEscrito"-->
+                <!--                            android:layout_width="match_parent"-->
+                <!--                            android:layout_height="wrap_content"-->
+                <!--                            android:layout_marginBottom="2dp"-->
+                <!--                            android:layout_marginTop="2dp"-->
+                <!--                            android:background="@color/grayBlueSoft"-->
+                <!--                            android:hint=""-->
+                <!--                            android:inputType="number|textNoSuggestions"-->
+                <!--                            android:textSize="14sp" />-->
+
+                <!--            <TextView-->
+                <!--                android:id="@+id/txtRemoteDevice2"-->
+                <!--                android:layout_width="wrap_content"-->
+                <!--                android:layout_height="wrap_content"-->
+                <!--                android:background="@color/grayBlueSoft"-->
+                <!--                android:textAppearance="?android:attr/textAppearanceSmall" />-->
+
+                <android.inputmethodservice.KeyboardView
+                    android:id="@+id/keyboardview"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/txtLatitud"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:keyTextSize="28dp"
+                    android:visibility="gone"
+
+                    />
+                <!--            android:keyBackground="@color/bluePopHard"-->
+
+            </TableLayout>
+        </RelativeLayout>
+    </LinearLayout>
+    <!-- Teclado numerico adaptativo -->
+    <GridLayout
+        android:id="@+id/gridTeclado"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:columnCount="3"
+        android:rowCount="4"
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
+        app:layout_constraintTop_toBottomOf="@+id/LinearLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/Boton1"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="3dp"
+            app:cardElevation="10dp"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="@color/grayblack">
+            <TextView android:layout_width="match_parent" android:layout_height="match_parent"
+                android:textColor="@color/white" android:text="1" android:textSize="20sp" android:gravity="center"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/Boton2"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="3dp"
+            app:cardElevation="10dp"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="@color/grayblack">
+            <TextView android:layout_width="match_parent" android:layout_height="match_parent"
+                android:textColor="@color/white" android:text="2" android:textSize="20sp" android:gravity="center"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/Boton3"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="3dp"
+            app:cardElevation="10dp"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="@color/grayblack">
+            <TextView android:layout_width="match_parent" android:layout_height="match_parent"
+                android:textColor="@color/white" android:text="3" android:textSize="20sp" android:gravity="center"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/Boton4"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="3dp"
+            app:cardElevation="10dp"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="@color/grayblack">
+            <TextView android:layout_width="match_parent" android:layout_height="match_parent"
+                android:textColor="@color/white" android:text="4" android:textSize="20sp" android:gravity="center"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/Boton5"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="3dp"
+            app:cardElevation="10dp"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="@color/grayblack">
+            <TextView android:layout_width="match_parent" android:layout_height="match_parent"
+                android:textColor="@color/white" android:text="5" android:textSize="20sp" android:gravity="center"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/Boton6"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="3dp"
+            app:cardElevation="10dp"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="@color/grayblack">
+            <TextView android:layout_width="match_parent" android:layout_height="match_parent"
+                android:textColor="@color/white" android:text="6" android:textSize="20sp" android:gravity="center"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/Boton7"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="3dp"
+            app:cardElevation="10dp"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="@color/grayblack">
+            <TextView android:layout_width="match_parent" android:layout_height="match_parent"
+                android:textColor="@color/white" android:text="7" android:textSize="20sp" android:gravity="center"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/Boton8"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="3dp"
+            app:cardElevation="10dp"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="@color/grayblack">
+            <TextView android:layout_width="match_parent" android:layout_height="match_parent"
+                android:textColor="@color/white" android:text="8" android:textSize="20sp" android:gravity="center"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/Boton9"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="3dp"
+            app:cardElevation="10dp"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="@color/grayblack">
+            <TextView android:layout_width="match_parent" android:layout_height="match_parent"
+                android:textColor="@color/white" android:text="9" android:textSize="20sp" android:gravity="center"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/BotonDel"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="3dp"
+            app:cardElevation="10dp"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="@color/grayblack">
+            <ImageView
+                android:id="@+id/delete"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/delete"
+                android:layout_gravity="center"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/Boton0"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="3dp"
+            app:cardElevation="10dp"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="@color/grayblack">
+            <TextView android:layout_width="match_parent" android:layout_height="match_parent"
+                android:textColor="@color/white" android:text="0" android:textSize="20sp" android:gravity="center"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/BotonOk"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="3dp"
+            app:cardElevation="10dp"
+            app:cardCornerRadius="10dp"
+            app:cardBackgroundColor="@color/grayblack">
+            <TextView
+                android:id="@+id/Btn_ok"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@color/white"
+                android:text="OK"
+                android:textSize="25sp"
+                android:gravity="center"/>
+        </com.google.android.material.card.MaterialCardView>
+
+    </GridLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

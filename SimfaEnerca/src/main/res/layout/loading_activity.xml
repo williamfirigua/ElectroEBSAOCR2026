@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="340dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        app:cardCornerRadius="11dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:layout_width="61dp"
+                        android:layout_height="51dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginLeft="12dp"
+                        android:src="@drawable/obrero"/>
+                    <TextView
+                        android:id="@+id/txt_loadAct"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="22dp"
+                        android:layout_marginTop="18dp"
+                        android:text="EVALUANDO NO ENVIADOS             "
+                        android:textStyle="bold"
+                        android:textSize="15dp"/>
+
+                </LinearLayout>
+            </TableRow>
+            <TableRow
+                android:layout_marginTop="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_gravity="center">
+                    <ProgressBar
+                        android:id="@+id/progressBar_cyclic"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minHeight="50dp"
+                        android:minWidth="50dp"
+                        android:layout_centerVertical="true"
+                        android:layout_centerHorizontal="true" />
+                </LinearLayout>
+            </TableRow>
+            <TableRow
+                android:layout_marginTop="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="30dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_gravity="center">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Espere porfavor "
+                        android:textStyle="bold"
+                        android:textSize="15dp"/>
+                </LinearLayout>
+            </TableRow>
+
+        </TableLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    
+
+</androidx.constraintlayout.widget.ConstraintLayout>

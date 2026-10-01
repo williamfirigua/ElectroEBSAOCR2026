@@ -1,0 +1,96 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F6FA"
+    android:padding="16dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="@drawable/bg_card"
+        android:padding="16dp">
+
+        <ImageButton
+            android:id="@+id/btnLogos"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@color/zxing_transparent"
+            android:contentDescription="@string/info"
+            android:scaleType="centerInside"
+            android:src="@drawable/gss_logo40x40" />
+
+        <ImageButton
+            android:id="@+id/btnLogos2"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:contentDescription="@string/info"
+            android:background="@color/zxing_transparent"
+            android:scaleType="centerInside"
+            android:src="@drawable/operadomovil" />
+    </LinearLayout>
+    <!-- HEADER -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="⚙ CONFIGURACIÓN DE DÍGITOS"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#333"
+        android:gravity="center"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- CARD -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_card"
+        android:padding="16dp">
+
+        <!-- DESCRIPCIÓN -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ingrese la cantidad de dígitos del medidor. Este valor ajusta cómo se interpreta la lectura capturada."
+            android:textSize="14sp"
+            android:textColor="#555"/>
+
+        <!-- INPUT -->
+        <EditText
+            android:id="@+id/txtdigitos"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_input2"
+            android:hint="Ej: 5"
+            android:gravity="center"
+            android:inputType="number"
+            android:maxLength="2"
+            android:textSize="18sp"/>
+
+        <!-- TEXTO DINÁMICO -->
+        <TextView
+            android:id="@+id/txtEjemplo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ejemplo: Lectura 12345"
+            android:textColor="#1976D2"
+            android:textSize="14sp"
+            android:layout_marginTop="10dp"/>
+
+        <!-- NOTA -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginTop="8dp"
+            android:text="ℹ Si no ingresa ningún valor, el sistema continuará sin cambios."
+            android:textColor="#777"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+
+
+</LinearLayout>

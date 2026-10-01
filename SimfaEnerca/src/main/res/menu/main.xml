@@ -1,0 +1,133 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/capturar_anomalia"
+        android:orderInCategory="1"
+        android:title="@string/action_capturar_anomalia" />
+
+  <!--  <item
+        android:id="@+id/capturar_comentario"
+        android:orderInCategory="3"
+        android:title="@string/action_capturar_comentario" /> -->
+
+    <item
+        android:id="@+id/reimprimir_factura"
+        android:orderInCategory="2"
+        android:title="@string/action_reimprimir_factura" />
+
+    <item
+        android:id="@+id/anterior_predio_leido"
+        android:orderInCategory="3"
+        android:title="@string/action_anterior_predio" />
+
+    <item
+        android:id="@+id/capturar_novedad_lect"
+        android:orderInCategory="3"
+        android:title="@string/action_capturar_novedad" />
+
+    <item
+        android:id="@+id/modificar_nro_digitos"
+        android:orderInCategory="3"
+        android:title="@string/action_modificar_digitos" />
+
+    <item
+        android:id="@+id/buscar_cliente"
+        android:orderInCategory="3"
+        android:title="@string/action_buscar_cliente" />
+
+    <item
+        android:id="@+id/habilitar_impresora"
+        android:orderInCategory="3"
+        android:title="@string/action_habilitar_impresora" />
+
+    <item
+        android:id="@+id/cambiar_impresora"
+        android:orderInCategory="3"
+        android:title="@string/action_cambiar_puerto" />
+
+    <!--<item-->
+        <!--android:id="@+id/ejecurar_impresion_lote"-->
+        <!--android:orderInCategory="3"-->
+        <!--android:title="@string/action_ejecutar_impresion_lote" />-->
+
+    <item
+        android:id="@+id/configurar_preImpreso_fact"
+        android:orderInCategory="3"
+        android:title="@string/action_configurar_preimpreso" />
+
+    <item
+        android:id="@+id/estadistica_proceso"
+        android:orderInCategory="3"
+        android:title="@string/action_estadistica_proceso" />
+
+    <item
+     android:id="@+id/tomar_foto"
+     android:orderInCategory="3"
+     android:title="@string/toma_foto"
+        />
+
+     <item
+        android:id="@+id/utilidades"
+        android:orderInCategory="3"
+        android:title="@string/action_utilerias" />
+
+    <item
+        android:id="@+id/enviar_facturacion_gprs"
+        android:orderInCategory="3"
+        android:title="@string/action_enviar_facturacion" />
+
+    <!--<item-->
+        <!--android:id="@+id/mensajes"-->
+        <!--android:orderInCategory="3"-->
+        <!--android:title="@string/action_enviar_mensajes" />-->
+
+    <item
+        android:id="@+id/procesar_reenvio_gprs"
+        android:orderInCategory="3"
+        android:title="@string/action_procesar_reenvioGprs" />
+
+    <item
+        android:id="@+id/evaluar_noEnviadas_gprs"
+        android:orderInCategory="3"
+        android:title="@string/action_evaluar_noEnviadas" />
+
+
+    <!--<item-->
+        <!--android:id="@+id/documento_Certificado"-->
+        <!--android:orderInCategory="3"-->
+        <!--android:title="@string/action_documento_Certificado" />-->
+
+    <item
+        android:orderInCategory="3"
+        android:title="@string/action_resumen_No_Impresos" />
+
+    <item
+        android:id="@+id/liquidacion_automatica"
+        android:orderInCategory="3"
+        android:title="Liquidacion Automatica" />
+
+    <!--<item-->
+        <!--android:id="@+id/certificar_Postal"-->
+        <!--android:orderInCategory="3"-->
+        <!--android:title="@string/action_certificar_Postal" />-->
+
+    <item
+        android:id="@+id/enviar_fotos"
+        android:orderInCategory="3"
+        android:title="@string/action_enviar_fotos"/>
+
+    <item
+        android:id="@+id/Activar_WIFI"
+        android:orderInCategory="3"
+        android:title="Activar WiFi" />
+
+     <item
+        android:id="@+id/mapa"
+        android:orderInCategory="3"
+        android:title="@string/action_mapa"/>
+
+    <item
+        android:id="@+id/volver"
+        android:orderInCategory="3"
+        android:title="@string/volver" />
+</menu>

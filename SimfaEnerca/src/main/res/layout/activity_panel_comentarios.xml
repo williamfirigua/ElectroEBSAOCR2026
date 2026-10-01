@@ -1,0 +1,99 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.gselectroCaqueta.modulocomentarios.PanelComentarios">
+
+    <TableRow
+        android:id="@+id/tableRowCom"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/titulo"
+        android:gravity="right"
+        android:orientation="horizontal"
+        android:weightSum="4">
+
+        <TextView
+            android:id="@+id/txtTitleCom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_weight="1"
+            android:background="@color/orangehuila"
+            android:gravity="center|bottom"
+            android:text="BUSCAR"
+            android:textColor="@color/white"
+            android:textSize="15dp"
+            android:textStyle="bold">
+
+        </TextView>
+
+    </TableRow>
+
+    <ListView
+        android:id="@+id/listadoComentarios"
+        android:layout_width="match_parent"
+        android:layout_height="360dp"
+        android:layout_marginTop="6dp"
+        android:drawSelectorOnTop="false"
+        android:minLines="2"
+        android:textSize="5dp">
+
+    </ListView>
+
+    <TableRow
+        android:id="@+id/tableRowc2"
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:orientation="horizontal"
+        android:weightSum="4">
+
+        <TextView
+            android:id="@+id/txtComentario"
+            android:layout_width="300dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="2dp"
+            android:background="@color/grayBlue"
+            android:minHeight="30dp"
+            android:textSize="25dp" />
+
+        <TextView
+            android:id="@+id/txtbtn"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginTop="2dp"
+            android:background="@color/grayBlue"
+            android:gravity="center"
+            android:minHeight="40dp"
+            android:text=">>"
+            android:textSize="22dp" />
+
+    </TableRow>
+
+    <!--<TextView-->
+    <!--android:id="@+id/txtComentario2"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="60dp"-->
+    <!--android:layout_marginTop="2dp"-->
+    <!--android:background="@color/grayBlue"-->
+    <!--android:minHeight="60dp"-->
+    <!--android:textAppearance="?android:attr/textAppearanceLarge" />-->
+
+    <EditText
+        android:id="@+id/lblComentario"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_bordes"
+        android:ems="10"
+        android:hint="BUSCAR"
+        android:inputType="number"
+        android:maxLength="3" />
+
+</LinearLayout>

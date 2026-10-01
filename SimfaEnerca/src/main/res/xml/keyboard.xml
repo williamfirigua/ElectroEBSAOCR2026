@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Keyboard xmlns:Android="http://schemas.android.com/apk/res/android"
+    Android:keyWidth="33%p"
+    Android:keyHeight="10%p"  Android:horizontalGap="0px" Android:verticalGap="0px">
+
+    <!--    <Row>-->
+    <!--        <Key Android:codes="1"    Android:keyLabel="1" Android:horizontalGap="1%p" />-->
+    <!--        <Key Android:codes="2"    Android:keyLabel="2" Android:horizontalGap="1%p"/>-->
+    <!--        <Key Android:codes="3"    Android:keyLabel="3" Android:horizontalGap="1%p" />-->
+    <!--        <Key Android:codes="4"    Android:keyLabel="4" Android:horizontalGap="1%p" />-->
+    <!--        <Key Android:codes="5"    Android:keyLabel="5" Android:horizontalGap="1%p" />-->
+    <!--    </Row>-->
+    <!--    <Row>-->
+    <!--        <Key Android:codes="6"    Android:keyLabel="6" Android:horizontalGap="1%p"/>-->
+    <!--        <Key Android:codes="7"    Android:keyLabel="7" Android:horizontalGap="1%p"/>-->
+    <!--        <Key Android:codes="8"    Android:keyLabel="8" Android:horizontalGap="1%p" />-->
+    <!--        <Key Android:codes="9"    Android:keyLabel="9" Android:horizontalGap="1%p" />-->
+    <!--        <Key Android:codes="0"    Android:keyLabel="0" Android:horizontalGap="1%p" />-->
+    <!--    </Row>-->
+    <Row>
+        <Key Android:codes="1"    Android:keyLabel="1"  Android:keyEdgeFlags="left"/>
+        <Key Android:codes="2"    Android:keyLabel="2" />
+        <Key Android:codes="3"    Android:keyLabel="3"  Android:keyEdgeFlags="right"/>
+    </Row>
+    <Row>
+        <Key Android:codes="4"    Android:keyLabel="4"  Android:keyEdgeFlags="left"/>
+        <Key Android:codes="5"    Android:keyLabel="5"  />
+        <Key Android:codes="6"    Android:keyLabel="6"  Android:keyEdgeFlags="right"/>
+    </Row>
+    <Row>
+
+        <Key Android:codes="7"    Android:keyLabel="7"  Android:keyEdgeFlags="left"/>
+        <Key Android:codes="8"    Android:keyLabel="8"  />
+        <Key Android:codes="9"    Android:keyLabel="9"   Android:keyEdgeFlags="right"/>
+
+    </Row>
+
+    <Row>
+        <Key Android:codes="-1"    Android:keyIcon="@drawable/backspace"    Android:keyOutputText="" Android:keyEdgeFlags="left"/>
+        <Key Android:codes="0"    Android:keyLabel="0"  />
+        <Key Android:codes="100"    Android:keyLabel="ENTER"     Android:keyEdgeFlags="right"/>
+    </Row>
+</Keyboard>

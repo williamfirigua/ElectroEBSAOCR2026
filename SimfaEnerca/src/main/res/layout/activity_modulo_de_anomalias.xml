@@ -1,0 +1,100 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias">
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:background="@drawable/titulo"
+        android:gravity="right"
+        android:stretchColumns="1"
+        android:weightSum="4">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_weight="1"
+            android:background="@color/orangehuila"
+            android:gravity="center|bottom"
+            android:text="CAUSA DE NO LECTURA"
+            android:textColor="@color/white"
+            android:textSize="15dp"
+            android:textStyle="bold">
+
+        </TextView>
+    </TableRow>
+
+    <TableLayout
+        android:id="@+id/tableLayout1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="50dp">
+
+        <TableRow
+            android:id="@+id/tableRowlist"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp">
+
+            <ListView
+                android:id="@+id/listadoAnomaliasNoLectura"
+                android:layout_width="wrap_content"
+                android:layout_height="350dp"
+                android:drawSelectorOnTop="false"
+                android:minLines="2"
+                android:textSize="5dp">
+
+            </ListView>
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/txtNumAnomalia"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/txtAnomalia"
+                android:layout_alignLeft="@+id/txtAnomalia"
+                android:layout_marginBottom="14dp"
+                android:ems="10"
+                android:hint="Buscar Causa"
+                android:inputType="number"
+                android:visibility="gone"
+                android:maxLength="3" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/txtAnomalia"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="10dp"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+        </TableRow>
+
+        <Button
+            android:id="@+id/btnvol"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/btnvolver"
+            android:background="@drawable/borde_redondo"
+            android:text="@string/volver" />
+
+    </TableLayout>
+</RelativeLayout>

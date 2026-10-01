@@ -1,0 +1,402 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.gselectroCaqueta.comunicaciones.Configurar_webIp">
+
+    <TableRow
+        android:id="@+id/tittle"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:background="@drawable/titulo"
+        android:gravity="right"
+        android:stretchColumns="1"
+        android:weightSum="4">
+
+        <TextView
+            android:layout_width="332dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_weight="1"
+            android:background="@color/ocrePop"
+            android:gravity="center|bottom"
+            android:text="CONFIGURACION WEB"
+            android:textColor="@color/white"
+            android:textSize="15dp"
+            android:textStyle="bold">
+
+        </TextView>
+    </TableRow>
+
+    <TableLayout
+        android:layout_below="@+id/tittle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        tools:ignore="UselessParent">
+
+        <TableRow
+            android:id="@+id/tableRow19"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_marginTop="10dp"
+            android:layout_weight="0"
+            android:orientation="horizontal">
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <CheckBox
+                android:id="@+id/chkIp1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Activa IP1" />
+
+            <CheckBox
+                android:id="@+id/chkIp2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Activa IP2" />
+
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/lblIpws"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="IP WS"
+                android:textStyle="bold"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <!--<EditText
+                android:id="@+id/txtIpWs1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="number"
+                android:lines="1"
+                android:maxLength="3"
+                android:maxLines="1"
+                android:textColor="#AA2323">
+
+                <requestFocus />
+
+            </EditText>
+
+            <EditText
+                android:id="@+id/txtIpWs2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="number"
+                android:maxLength="3"
+                android:maxLines="1"
+                android:textColor="#AA2323" />
+
+            <EditText
+                android:id="@+id/txtIpWs3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="number"
+                android:maxLength="3"
+                android:maxLines="1"
+                android:textColor="#AA2323" />
+
+            <EditText
+                android:id="@+id/txtIpWs4"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="number"
+                android:maxLength="3"
+                android:maxLines="1"
+                android:textColor="#AA2323" />-->
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/txtdirWs"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:background="@drawable/bg_input"
+                android:layout_weight="1"
+                android:inputType="text"
+                android:lines="1"
+                android:maxLines="1"
+                android:textColor="#AA2323">
+
+                <requestFocus />
+
+            </EditText>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/lblNombreServicioWeb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Nombre Servicio Web:"
+                android:textStyle="bold"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/txtDescServWeb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="textMultiLine|textFilter"
+                android:textColor="#AA2323" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/lblrutaadministrador"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Ruta Administrador:"
+                android:textStyle="bold"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow10"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/txtrutaadmin"
+                android:layout_width="match_parent"
+                android:layout_height="38dp"
+                android:background="@drawable/bg_input"
+                android:layout_weight="1"
+                android:ems="10"
+                android:enabled="false"
+                android:inputType="textMultiLine|textFilter"
+                android:textColor="#AA2323" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow11"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/lblpuertoAPI"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Puerto comunicaciones API:"
+                android:textStyle="bold"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow12"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/edtxPuertoAPI"
+                android:layout_width="match_parent"
+                android:layout_height="38dp"
+                android:background="@drawable/bg_input"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="textMultiLine|textFilter"
+                android:textColor="#AA2323" />
+        </TableRow>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+
+            android:gravity="center">
+
+
+        </LinearLayout>
+        <!--<TableRow
+            android:id="@+id/tableRow5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/lblPuerto"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/nro_puerto"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <EditText
+                android:id="@+id/txtPuerto"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="number"
+                android:lines="1"
+                android:maxLength="4"
+                android:maxLines="1"
+                android:textColor="#AA2323" />
+        </TableRow>-->
+
+        <!--<TableRow
+            android:id="@+id/tableRow7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/lblNroTramas"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/nro_tramas"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <EditText
+                android:id="@+id/txtTramas"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="number"
+                android:lines="1"
+                android:maxLength="10"
+                android:maxLines="1"
+                android:textColor="#AA2323" />
+        </TableRow>-->
+
+        <TableRow
+            android:id="@+id/tableRow6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/btnGrabarIp"
+                style="@style/AppTheme"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_boton_redondeado"
+                android:layout_weight="1"
+                android:text="Establecer Datos"
+                android:textStyle="bold"/>
+
+            <Button
+                android:id="@+id/btnPruebaWs"
+                style="@style/AppTheme"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_boton_redondeado"
+                android:layout_weight="1"
+                android:text="PRUEBA WS"
+                android:textStyle="bold"/>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/lblTransmite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow9"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/iconwebserviceon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|right"
+                android:layout_marginTop="10dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="RED ACTIVA"
+                android:maxWidth="36dp"
+                android:maxHeight="36dp"
+                android:scaleType="fitCenter"
+                android:src="@mipmap/webserviceon"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:id="@+id/iconwebserviceoff"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|right"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="5dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="RED ACTIVA"
+                android:maxWidth="36dp"
+                android:maxHeight="36dp"
+                android:scaleType="fitCenter"
+                android:src="@mipmap/webserviceoff"
+                android:visibility="visible" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow1x"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="22dp">
+
+        </TableRow>
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/btnRegresar1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:width="200dp"
+
+                android:background="@drawable/bg_boton_redondeado"
+
+                android:gravity="center"
+                android:lines="1"
+                android:text="Regresar al modulo"
+                android:textStyle="bold"/>
+        </LinearLayout>
+    </TableLayout>
+</RelativeLayout>

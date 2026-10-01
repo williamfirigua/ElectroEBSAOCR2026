@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.gselectroCaqueta.accesoyseguridad"
+    android:versionCode="7"
+    android:versionName="7.0">
+
+    <!--    <uses-sdk-->
+    <!--        android:minSdkVersion="22"-->
+    <!--        android:targetSdkVersion="29" />-->
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION"/>
+    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.MANAGE_MEDIA"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.MANAGE_DOCUMENTS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-feature
+        android:name="android.hardware.camera.front"
+        android:required="false" />
+    <uses-feature android:name="android.hardware.camera" />
+
+    <!--
+requerido desde android 11 api 30+ packege visibility filtering
+sin este bloque, packemanager.getApplicationInfo() leanza
+nameNotFoundException para cualquier app externa, aunque este instalada.
+Esto hacia que NavigationHelper cayera siempre al fallcack in app.
+-->
+    <queries>
+        <!-- Google Maps — navegación turn-by-turn -->
+        <package android:name="com.google.android.apps.maps" />
+        <!-- Waze -->
+        <package android:name="com.waze" />
+        <!-- Fallback: cualquier app que maneje URIs de navegación -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="google.navigation" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="waze" />
+        </intent>
+    </queries>
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher1"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:exported="true"
+        android:usesCleartextTraffic="true"
+        android:requestLegacyExternalStorage="true"
+        android:theme="@style/AppTheme">
+        <uses-library android:name="org.apache.http.legacy" android:required="false"/>
+        <activity android:name="com.gselectroCaqueta.moduloreimpresion.ModuloReimpresion"></activity>
+        <!--        <activity-->
+        <!--            android:name="com.gselectroCaqueta.moduloreimpresion.MainActivity"  ?????????????????????????????????-->
+        <!--            android:label="@string/title_activity_main"-->
+        <!--            android:theme="@style/AppTheme.NoActionBar" />  -->
+        <activity
+            android:name=".GuiAcceso"
+            android:label="@string/app_name"
+            android:largeHeap="true"
+            android:exported="true"
+            android:supportsRtl="true"
+            android:usesCleartextTraffic="true"
+            android:requestLegacyExternalStorage="true">
+            <intent-filter
+                android:exported="true">
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.gselectroCaqueta.modulobluetooth.DeviceListActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:label="@string/select_device"
+            android:parentActivityName=".GuiAcceso"
+            android:theme="@android:style/Theme.Dialog">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.gselectroCaqueta.accesoyseguridad.GuiAcceso" />
+        </activity>
+        <activity
+            android:name=".MenuPrincipal"
+            android:label="@string/title_activity_menu_principal"
+            android:parentActivityName=".GuiAcceso">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.gselectroCaqueta.accesoyseguridad.GuiAcceso" />
+        </activity>
+        <activity
+            android:name=".ResumenEstadistico"
+            android:label="@string/title_activity_resumen_estadistico"
+            android:parentActivityName=".MenuPrincipal">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.gselectroCaqueta.accesoyseguridad.MenuPrincipal" />
+        </activity>
+        <activity
+            android:name=".MenuDeLiquidacion"
+            android:label="@string/title_activity_menu_de_liquidacion"
+            android:parentActivityName=".ResumenEstadistico"
+            android:windowSoftInputMode="stateHidden">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.gselectroCaqueta.accesoyseguridad.ResumenEstadistico" />
+        </activity>
+        <activity
+            android:name="com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias"
+            android:label="@string/title_activity_modulo_de_anomalias"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name="com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect"
+            android:label="@string/title_activity_modulo_capt_novlect"
+            android:windowSoftInputMode="stateAlwaysVisible" />
+        <activity
+            android:name="com.gselectroCaqueta.modulocomentarios.PanelComentarios"
+            android:label="@string/title_activity_panel_comentarios"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name="com.gselectroCaqueta.moduloseleccionlote.ModuloSeleccionLote"
+            android:label="@string/title_activity_modulo_seleccion_lote" />
+        <activity
+            android:name="com.gselectroCaqueta.modulocambiodigitos.ModuloCambioDigitos"
+            android:label="@string/title_activity_modulo_cambio_digitos" />
+        <activity
+            android:name="com.gselectroCaqueta.modulobusquedacuenta.ModuloBusquedaCuenta"
+            android:label="@string/title_activity_modulo_busqueda_cuenta" />
+        <activity
+            android:name="com.gselectroCaqueta.comunicaciones.Comunicaciones"
+            android:label="@string/title_activity_comunicaciones"
+            android:parentActivityName=".GuiAcceso">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.gselectroCaqueta.accesoyseguridad.GuiAcceso" />
+        </activity>
+        <activity
+            android:name="com.gselectroCaqueta.comunicaciones.Configurar_webIp"
+            android:label="@string/title_activity_configurar_web_ip"
+            android:parentActivityName="com.gselectroCaqueta.comunicaciones.Comunicaciones"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.gselectroCaqueta.comunicaciones.Comunicaciones" />
+        </activity>
+        <activity android:name=".FechayHora" />
+        <activity
+            android:name=".CamaraLecturaActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+        <activity
+            android:name="com.gselectroCaqueta.modulobusquedacuenta.ModuloConsultaNoEnviados"
+            android:label="ModuloConsultaNoEnviados" />
+        <activity
+            android:name="com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarVerificacion"
+            android:label="ModuloAdicionarVerificacion" />
+        <activity
+            android:name="com.gselectroCaqueta.modulocaptnovedlect.ModuloVerificaConsumo"
+            android:label="ModuloVerificaConsumo" />
+        <activity
+            android:name="com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarCertificado"
+            android:label="ModuloAdicionarCertificado"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name="com.gselectroCaqueta.modulocaptnovedlect.ModuloFirma"
+            android:label="ModuloFirma" />
+        <activity
+            android:name="com.gselectroCaqueta.modulocaptnovedlect.ModuloConfigFormatoImpresion"
+            android:label="ModuloConfigFormatoImpresion" />
+        <activity
+            android:name="com.gselectroCaqueta.modulochat.Insertar" />
+        <activity
+            android:name="com.gselectroCaqueta.modulochat.Recibidos" />
+        <activity
+            android:name="com.gselectroCaqueta.moduloGPS.ActGPS" />
+        <activity
+            android:name="com.gselectroCaqueta.moduloLicencia.ActLicencia" />
+        <activity
+            android:name="com.gselectroCaqueta.moduloscannerhardware.ModuloEscanerHardware" /> <!-- <receiver android:name="com.gsenerca.accesoyseguridad.UnitechReceiver"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="unitech.scanservice.software_scankey" /> -->
+        <!-- </intent-filter> -->
+        <!-- </receiver> -->
+        <receiver android:name="com.gselectroCaqueta.moduloscannerhardware.UnitechReceiverScan"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="unitech.scanservice.software_scankey" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name="com.gselectroCaqueta.moduloscannerhardware.ModuloScannerKT40Q"
+            android:label="@string/title_activity_modulo_scanner_kt40_q"
+            android:theme="@style/AppTheme" />
+        <!--
+             The API key for Google Maps-based APIs is defined as a string resource.
+             (See the file "res/values/google_maps_api.xml").
+             Note that the API key is linked to the encryption key used to sign the APK.
+             You need a different API key for each encryption key, including the release key that is used to
+             sign the APK for publishing.
+             You can define the keys for the debug and release targets in src/debug/ and src/release/. 
+        -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
+        <activity
+            android:name="com.gselectroCaqueta.moduloMapas.MapsActivity"
+            android:label="@string/title_activity_maps" />
+
+        <activity android:name="com.gselectroCaqueta.moduloanomalias.AlertaCuentaD" />
+        <activity
+            android:name=".AndroidCamera"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.gselectroCaqueta.accesoyseguridad.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
+        <service
+            android:name=".TrackingLocationService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+    </application>
+
+</manifest>

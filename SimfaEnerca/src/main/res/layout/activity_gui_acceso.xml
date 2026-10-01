@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/torreselectricasalatardecer"
+    android:orientation="vertical"
+    android:textAlignment="center">
+
+    <TextView
+        android:id="@+id/txtFecha"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:text=""
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp">
+
+            <TextView
+                android:id="@+id/txtSerial"
+                android:layout_width="79dp"
+                android:layout_height="match_parent"
+                android:text="@string/serial"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtCodInterno"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="14"
+                android:maxLength="15"
+                android:text="123456789012345"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+        </TableRow>
+
+
+        <ImageView
+            android:id="@+id/fotoUsuario"
+            android:layout_width="160dp"
+            android:layout_height="7dp"
+            android:contentDescription="@string/foto_usuario"
+            android:src="@drawable/avatar_man_icono"
+            android:visibility="invisible" />
+
+        <TextView
+            android:id="@+id/txtNombreAforador"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/white"
+            android:text="@string/nombreAforador"
+            android:textColor="@color/white"
+            android:textColorLink="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtNombreUsuario"
+
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@android:color/holo_orange_light"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="89dp"
+            android:layout_weight="1"
+            android:gravity="center" />
+        <!-- CONTENEDOR CENTRAL inicio-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_weight="1"
+            android:gravity="center">
+            <!-- CARD -->
+            <LinearLayout
+                android:layout_width="256dp"
+                android:layout_height="239dp"
+                android:layout_margin="20dp"
+                android:background="@drawable/bg_card"
+                android:elevation="6dp"
+                android:orientation="vertical"
+                android:padding="10dp"
+                android:scrollbarDefaultDelayBeforeFade="400"
+                android:scrollbarFadeDuration="250">
+
+                <!--<TableRow> -->
+
+                <TextView
+                    android:id="@+id/txtAcceso"
+                    android:layout_width="324dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Acceso al sistema FES"
+                    android:textAlignment="center"
+                    android:textColor="@android:color/holo_green_dark"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+
+                <!--</TableRow> -->
+
+                <!--<TableRow> -->
+
+
+                <EditText
+                    android:id="@+id/txtUsername"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_input"
+                    android:hint="Usuario"
+                    android:inputType="number"
+                    android:maxLength="11"
+                    android:textStyle="bold">
+
+                    <requestFocus />
+                </EditText>
+
+                <EditText
+                    android:id="@+id/txtPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_input"
+                    android:ems="10"
+                    android:hint="Contraseña"
+                    android:inputType="numberPassword"
+                    android:maxLength="11"
+                    android:textStyle="bold" />
+                <!--</TableRow> -->
+
+                <!--<TableRow
+            android:id="@+id/tableRow2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="0dp">-->
+
+
+                <Button
+                    android:id="@+id/btnIngresar"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/bg_boton_redondeado"
+                    android:backgroundTint="#FF6A00"
+                    android:text="@string/ingresar"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold" />
+
+
+                <!--</TableRow>-->
+            </LinearLayout>
+        </LinearLayout>
+        <!-- fin de CONTENEDOR CENTRAL inicio-->
+        <TableRow>
+
+            <TextView
+                android:id="@+id/txtRemoteDevice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="120px" />
+        </TableRow>
+
+
+        <!--  <TableRow>-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="130dp"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/btnImprime"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="6dp"
+                android:background="@drawable/bg_cycle"
+                android:contentDescription="@string/imprimir"
+                android:elevation="4dp"
+                android:padding="12dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/impresora" />
+
+            <ImageButton
+                android:id="@+id/btnBluetooth"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="6dp"
+                android:background="@drawable/bg_cycle"
+                android:contentDescription="@string/bluetooth"
+                android:elevation="4dp"
+                android:padding="12dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/icon_bluetooth" />
+
+            <ImageButton
+                android:id="@+id/btnBateria"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="6dp"
+                android:background="@drawable/bg_cycle"
+                android:contentDescription="@string/bateria"
+                android:elevation="4dp"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/bateriacargada1" />
+        <LinearLayout
+            android:layout_width="63dp"
+            android:layout_height="95dp"
+
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageButton
+                android:id="@+id/btnComunicar2"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="6dp"
+                android:background="@drawable/bg_cycle"
+                android:contentDescription="Comunicacion"
+                android:elevation="4dp"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/servidorenlinea" />
+            <TextView
+                android:id="@+id/txtSincroniza"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sincronizar"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:gravity="center"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="63dp"
+            android:layout_height="95dp"
+
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageButton
+                android:id="@+id/btnInfo"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="6dp"
+                android:background="@drawable/bg_cycle"
+                android:contentDescription="@string/info"
+                android:elevation="4dp"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/protecciondedatos" />
+
+            <TextView
+                android:id="@+id/txtInfocarga"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Carga?"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        </LinearLayout>
+        <!-- </TableRow>-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="89dp"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/btnAcercaDe"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="6dp"
+                android:background="@drawable/bg_cycle"
+                android:contentDescription="@string/acerca_de"
+                android:elevation="4dp"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/informacion1" />
+
+            <ImageButton
+                android:id="@+id/btnSalir"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="6dp"
+                android:background="@drawable/bg_cycle"
+                android:contentDescription="SalieAlSitema"
+                android:elevation="4dp"
+                android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/salidadeemergencia" />
+        </LinearLayout>
+
+        <!-- FOOTER -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingBottom="10dp">
+
+            <TextView
+                android:id="@+id/txtVerion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Versión 1.1.0"
+                android:textColor="#888888"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtConexion"
+                android:layout_width="170dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="  |  Estado: Conectado"
+                android:textColor="#4CAF50"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtCondicion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text=" | Archivo: AAAAMMRRR LXXXXXXX.000"
+                android:textColor="@color/ocrePop"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+    </TableLayout>
+
+</LinearLayout>

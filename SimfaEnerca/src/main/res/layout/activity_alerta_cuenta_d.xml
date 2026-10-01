@@ -1,0 +1,79 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias">
+
+    <TableRow
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:background="@drawable/titulo"
+        android:gravity="right"
+        android:stretchColumns="1"
+        android:weightSum="4">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_weight="1"
+            android:background="@color/orangehuila"
+            android:gravity="center|bottom"
+            android:text="ALERTA CTA. DIRECTA"
+            android:textColor="@color/white"
+            android:textSize="15dp"
+            android:textStyle="bold">
+
+        </TextView>
+    </TableRow>
+
+<LinearLayout
+    android:id="@+id/latout1"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/title"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/mensaje"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginTop="50dp"
+        android:text="CARGA DIRECTA [SI] LIQUIDAR MEDIDA  [NO] PROCESAR NOVEDAD"
+        android:textSize="15dp"
+        android:textStyle="bold"/>
+
+</LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/latout1"
+        android:orientation="horizontal"
+
+        android:layout_marginTop="20dp">
+
+       <Button
+           android:id="@+id/btnNo"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:layout_gravity="center"
+           android:gravity="center"
+           android:text="NO"
+           />
+        <Button
+            android:id="@+id/btnSi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SI"
+            />
+    </LinearLayout>
+
+</RelativeLayout>
