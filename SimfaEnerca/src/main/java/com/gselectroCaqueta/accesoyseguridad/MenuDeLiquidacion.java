@@ -13631,14 +13631,35 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 }
 
 
+                // procurar que el consumo a evaluar sea correcto
+                if (variables.lactual < l_anterior) {
+                    // Regla SIEC (ciclo 11: 151 de 153 cuentas): lectura menor a la anterior => 1 mes de promedio.
+                    // SIEC no liquida giro de registro.
+                    if (indicadorManual == 0 && variables.nveces < 2) {        // el lector confirma una vez
+                        variables.lect2 = variables.lactual;
+                        mensajeT("LECTURA MENOR A LA ANTERIOR. CONFIRME", msgCorto);
+                        imagenLiquid_3.setImageResource(R.drawable.flechasatras);
+                        return 0;
+                    }
+                    variables.cactual = promedioMensualSinFactor();             // se multiplica por el factor en la sumatoria
+                    variables.consumoactual = variables.cactual;
+                    variables.impresoraAnalitica = "LECT. MENOR P1";
+                    variables.estado = "8";
+                    variables.lect2 = -1;
+                    variables.lect3 = -1;
+                    escribirTablasSalida();
+                    return 1;
+                }
+
+
+
                 if (variables.lactual == l_anterior) {
                     if (variables.nveces < 9) {
                         variables.nveces++;
                     }
 
                     predio_temporal = 1;
-                    if ((variables.lect2 == variables.lactual
-                            && variables.nveces >= 2))// ||
+                    if ((variables.lect2 == variables.lactual  && variables.nveces >= 2))// ||
 
                     {
                         reporteEstadoCritica = "LECTURA IGUALES ";
@@ -13722,12 +13743,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                     reporteEstadoCritica = "CONSUMO ALTO";
                     mensajeT("DESV. GRAVE X DEBAJO!", msgCorto);
-                    if (variables.cactual>2000) {
-                        variables.cactual = (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediocliente().trim()) *
-                                             Double.parseDouble(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()) /
-                                             Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));
-                        variables.consumoactual = variables.cactual;
-                    }
+                  //  if (variables.cactual>2000) {
+                  //      variables.cactual = promedioMensualSinFactor();
+
+                  //      variables.consumoactual = variables.cactual;
+                  //  }
                     if (estadoCritica == 2) {
                         variables.estado = "7";
                         mensajeT("DESV. MUY GRAVE X ENCIMA!", msgCorto);
@@ -13742,6 +13762,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 } else if (estadoCritica == 3) {                     // Consumo Bajo lectura menor a la anterior
                     imagenLiquid_3.setImageResource(R.drawable.imagen_consumobajo);
                 }
+
                 if (variables.lect2 == variables.lactual  && (variables.nveces >= 2)) {
                     if (estadoCritica == 2) {
                         reporteEstadoCritica = "CONSUMO ALTO";
@@ -13813,7 +13834,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         }
         return 0;
     }
-
+    private double promedioMensualSinFactor() {
+        double prom = parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediocliente().trim());
+        double factor = parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim());
+        return factor > 0 ? prom / factor : prom;
+    }
     //se modifica esta analitica para maximo dos intentos de lecturas la otra se deja igual
     private int evaluarLecturaAnalitica(int primero, int N_veces, double l_actual, String Estado, String lectura_act, double c_actual) {
         String UltimacuentaTres = "";
@@ -13965,6 +13990,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     notificación para dejarle al usuario indicando que la cuenta va a ser visitada
                     5. Finalmente se imprime la factura con toma exitosa y se carga al SIEC.*/
 
+                double lsTpoUs = parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LS_BDA_TPO_US().trim());
+                double lsAnual = parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LS_BNDA_ANUAL().trim());
+
                 Log.e("error2", "diferencia2 " + diferencia);
                 if ((diferencia >= parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LI_BNDA_RES().trim())
                         && diferencia <= parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LS_BNDA_RES().trim())) && diferencia != 0) {
@@ -14002,8 +14030,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                             //SERIA INCLUIR AQUI LA TERCERA DELIMITACION Y ES SI SUPERA EL 200 POR CIENTO DEL PROMEDIO ANUAL REPORTADO EN PROMEDIO NORMALIZADO
                             //se le quita el subir el 200% del promedio ya que se les presentaban muchas criticas * 2
                             //if (parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_PRMDIO().trim()) == 0) {
-                            if (diferencia > parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LS_BDA_TPO_US()) &&
-                                    parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LS_BDA_TPO_US()) > 0) {
+                            if (diferencia > lsTpoUs && lsTpoUs > 0 && diferencia > lsAnual) {
                                 infoRegistroSalida.settablaRegistroSalida_comentario2("003");
                                 variables.impresoraAnalitica = "CONS. ALTO DV3";
                                 //toca consultar porque aqui en el consumo alto se cobra el promedio de uun mes para los trimestrales
@@ -14022,7 +14049,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                             //hay que hacer algo si el consumo real es demacisdo alto porque tabbine veo que no cobra como maximo 2000 kb, toca buscar que es lo que se hace && Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_PRMDIO().trim()) == 0
                             if ((diferencia > (2000 * parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim())))  )
                             {
-                                //deberia de cambiar este concumo aqui
+                                //deberia de cambiar este concumo aqui QUITAR POR AHORA Y VALIDAR
                                 variables.cactual =  (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediocliente().trim())
                                         * Double.parseDouble(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()) / Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));
                             }
@@ -14070,7 +14097,28 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                 ultimaCriticaLectura = "  ";
                 //este proceso aqui se iria del la seccion
+                //creeria que si querevos ver el efecto de invertido asi el consumo sea correcto se retorna para el cobro por promedio
+                // procurar que el consumo a evaluar sea correcto
 
+                if (variables.lactual < l_anterior) {
+                    imagenLiquid_3.setImageResource(R.drawable.flechasprim);
+                    // Regla SIEC (ciclo 11: 151 de 153 cuentas): lectura menor a la anterior => 1 mes de promedio.
+                    // SIEC no liquida giro de registro.
+                    if (indicadorManual == 0 && variables.nveces < 2) {        // el lector confirma una vez
+                        variables.lect2 = variables.lactual;
+                        mensajeT("LECTURA MENOR A LA ANTERIOR. CONFIRME", msgCorto);
+
+                        return 0;
+                    }
+                    variables.cactual = promedioMensualSinFactor();             // se multiplica por el factor en la sumatoria
+                    variables.consumoactual = variables.cactual;
+                    variables.impresoraAnalitica = "LECT. MENOR P1";
+                    variables.estado = "8";
+                    variables.lect2 = -1;
+                    variables.lect3 = -1;
+                    escribirTablasSalida();
+                    return 1;
+                }
                 //fin de lo que primero se quitaria
 
                 if (variables.lactual == l_anterior) {
@@ -14117,6 +14165,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 extraerPuntoDecimal();
                 variables.consumoactual = variables.cactual;
                 int estadosanteriores = 0;
+
+
+
 
                 if (estadoCritica == 1) {
                     estadosanteriores = 1;

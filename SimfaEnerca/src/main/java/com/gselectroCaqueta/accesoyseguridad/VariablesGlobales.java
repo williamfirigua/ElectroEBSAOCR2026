@@ -292,7 +292,7 @@ public class VariablesGlobales {
     public String V76_2 = "T 0 0 30  ";
 
 
-    public String V77 = "PCX 0 0 !<fscaq.pcx";
+    public String V77 = "PCX 0 0 !<EBSA.PCX";//
 
     public String V78 = ";// FORM";
 

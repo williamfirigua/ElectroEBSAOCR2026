@@ -81,130 +81,50 @@
       <change beforePath="$PROJECT_DIR$/.gradle/6.5/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.5/fileHashes/fileHashes.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/6.5/javaCompile/classAnalysis.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.5/javaCompile/classAnalysis.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/6.5/javaCompile/javaCompile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.5/javaCompile/javaCompile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/6.5/javaCompile/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/6.5/javaCompile/taskHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/dex/debug/mergeProjectDexDebug/classes.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/dex/debug/mergeProjectDexDebug/classes.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/incremental/mergeDebugResources/compile-file-map.properties" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/incremental/mergeDebugResources/compile-file-map.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/incremental/packageDebug/tmp/debug/dex-renamer-state.txt" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/incremental/packageDebug/tmp/debug/dex-renamer-state.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$10.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$10.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$11.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$11.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$12.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$12.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$13.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$13.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$14.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$14.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$15.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$15.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$16.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$16.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$17.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$17.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$18.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$18.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$19.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$19.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$20.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$20.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$21.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$21.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$22.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$22.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$23.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$23.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$24.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$24.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$25.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$25.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$26.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$26.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$27.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$27.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$28.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$28.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$29.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$29.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$3.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$30.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$30.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$31.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$31.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$4.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$4.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$5.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$5.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$6.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$6.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$7.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$7.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$8.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$8.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$9.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$9.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$AsyncCallChat.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$AsyncCallChat.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$AsyncCallWS.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$AsyncCallWS.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$Reloj3.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$Reloj3.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$TaskHelper.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$TaskHelper.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$UsarGPS.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$UsarGPS.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/modulobusquedacuenta/ModuloBusquedaCuenta$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/javac/debug/classes/com/gselectroCaqueta/modulobusquedacuenta/ModuloBusquedaCuenta$3.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$1.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$1.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$10.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$10.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$11.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$11.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$12.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$12.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$13.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$13.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$14.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$14.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$15.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$15.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$16.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$16.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$17.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$17.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$18.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$18.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$19.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$19.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$2.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$2.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$20.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$20.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$21.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$21.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$22.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$22.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$23.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$23.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$24.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$24.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$25.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$25.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$26.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$26.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$27.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$27.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$28.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$28.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$29.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$29.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$3.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$3.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$30.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$30.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$31.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$31.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$4.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$4.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$5.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$5.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$6.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$6.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$7.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$7.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$8.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$8.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$9.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$9.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$AsyncCallChat.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$AsyncCallChat.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$AsyncCallWS.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$AsyncCallWS.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$Reloj3.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$Reloj3.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$TaskHelper.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$TaskHelper.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$UsarGPS.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$UsarGPS.dex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/modulobusquedacuenta/ModuloBusquedaCuenta$3.dex" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/project_dex_archive/debug/out/com/gselectroCaqueta/modulobusquedacuenta/ModuloBusquedaCuenta$3.dex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$10.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$10.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$11.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$11.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$12.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$12.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$13.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$13.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$14.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$14.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$15.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$15.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$16.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$16.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$17.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$17.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$18.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$18.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$19.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$19.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$20.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$20.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$21.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$21.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$22.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$22.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$23.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$23.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$24.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$24.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$25.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$25.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$26.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$26.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$27.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$27.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$28.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$28.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$29.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$29.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$3.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$30.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$30.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$31.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$31.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$4.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$4.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$5.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$5.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$6.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$6.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$7.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$7.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$8.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$8.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$9.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$9.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$AsyncCallChat.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$AsyncCallChat.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$AsyncCallWS.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$AsyncCallWS.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$Reloj3.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$Reloj3.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$TaskHelper.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$TaskHelper.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$UsarGPS.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion$UsarGPS.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/modulobusquedacuenta/ModuloBusquedaCuenta$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/intermediates/transforms/RealmTransformer/debug/0/com/gselectroCaqueta/modulobusquedacuenta/ModuloBusquedaCuenta$3.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/outputs/apk/debug/SimfaEnerca-debug.apk" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/outputs/apk/debug/SimfaEnerca-debug.apk" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/build/tmp/compileDebugJavaWithJavac/source-classes-mapping.txt" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/build/tmp/compileDebugJavaWithJavac/source-classes-mapping.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/modulobusquedacuenta/ModuloBusquedaCuenta.java" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/modulobusquedacuenta/ModuloBusquedaCuenta.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/VariablesGlobales.java" beforeDir="false" afterPath="$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/VariablesGlobales.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -867,7 +787,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>16109</line>
+          <line>16160</line>
           <option name="timeStamp" value="714" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -1072,32 +992,32 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>17152</line>
+          <line>17203</line>
           <option name="timeStamp" value="795" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>17149</line>
+          <line>17200</line>
           <option name="timeStamp" value="796" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>17157</line>
+          <line>17208</line>
           <option name="timeStamp" value="797" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>17166</line>
+          <line>17217</line>
           <option name="timeStamp" value="798" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>17168</line>
+          <line>17219</line>
           <option name="timeStamp" value="799" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>17170</line>
+          <line>17221</line>
           <option name="timeStamp" value="800" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -1207,7 +1127,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>13660</line>
+          <line>13681</line>
           <option name="timeStamp" value="855" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -1297,7 +1217,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>13635</line>
+          <line>13657</line>
           <option name="timeStamp" value="900" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -1367,7 +1287,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>16698</line>
+          <line>16749</line>
           <option name="timeStamp" value="1011" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -1462,22 +1382,22 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>14948</line>
+          <line>14999</line>
           <option name="timeStamp" value="1095" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>14949</line>
+          <line>15000</line>
           <option name="timeStamp" value="1096" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>14951</line>
+          <line>15002</line>
           <option name="timeStamp" value="1097" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>14964</line>
+          <line>15015</line>
           <option name="timeStamp" value="1098" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -1767,7 +1687,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>16106</line>
+          <line>16157</line>
           <option name="timeStamp" value="1203" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -1962,7 +1882,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>13809</line>
+          <line>13830</line>
           <option name="timeStamp" value="1288" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -2062,7 +1982,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>13639</line>
+          <line>13661</line>
           <option name="timeStamp" value="1322" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -2117,12 +2037,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>16102</line>
+          <line>16153</line>
           <option name="timeStamp" value="1336" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>16056</line>
+          <line>16107</line>
           <option name="timeStamp" value="1337" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -2332,42 +2252,42 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>14020</line>
+          <line>14047</line>
           <option name="timeStamp" value="1384" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>14022</line>
+          <line>14049</line>
           <option name="timeStamp" value="1385" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>14025</line>
+          <line>14052</line>
           <option name="timeStamp" value="1386" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>14036</line>
+          <line>14063</line>
           <option name="timeStamp" value="1387" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>14117</line>
+          <line>14165</line>
           <option name="timeStamp" value="1388" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>14118</line>
+          <line>14166</line>
           <option name="timeStamp" value="1389" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>14197</line>
+          <line>14248</line>
           <option name="timeStamp" value="1390" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>14203</line>
+          <line>14254</line>
           <option name="timeStamp" value="1391" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -2477,27 +2397,27 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>13728</line>
+          <line>13748</line>
           <option name="timeStamp" value="1434" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>13724</line>
+          <line>13745</line>
           <option name="timeStamp" value="1435" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>14011</line>
+          <line>14038</line>
           <option name="timeStamp" value="1437" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>14060</line>
+          <line>14087</line>
           <option name="timeStamp" value="1438" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
-          <line>14070</line>
+          <line>14097</line>
           <option name="timeStamp" value="1439" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -2769,6 +2689,16 @@
           <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
           <line>6517</line>
           <option name="timeStamp" value="1498" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
+          <line>13720</line>
+          <option name="timeStamp" value="1499" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/SimfaEnerca/src/main/java/com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java</url>
+          <line>14008</line>
+          <option name="timeStamp" value="1500" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
