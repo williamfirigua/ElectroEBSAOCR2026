@@ -171,7 +171,7 @@ public class ModuloBusquedaCuenta extends AppCompatActivity {
                 }
                 if (checkedId == rbCuenta.getId()) {
                     txtBuscar.setRawInputType(InputType.TYPE_CLASS_NUMBER);
-                    txtMaxLength = 9;
+                    txtMaxLength = 10;
                     txtMinLength = 6;
                     opcion = 2;
                     // "Cuenta";

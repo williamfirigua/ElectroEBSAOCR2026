@@ -163,7 +163,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     public final int ALERTACUENTADIRECTA_REQUEST_CODE = 6685;
     public final int CAMBIODIGITOS_REQUEST_CODE = 6686;
     public final int CAMARA_LECTURA_REQUEST_CODE = 6687; // OCR lectura de medidor
+//se crean nuevas variablles para valorizar los consumos por los meces que aplicara el convenio esto por los trimestrales
 
+ double PesosEnergiaConvenio=0;
+ double PesosEnergiaContrConvenio=0;
+ double PesosEnergiaReactConvenio=0;
+ double PesosEnergiaReactContrConvenio=0;
     // ── OCR ──────────────────────────────────────────────────────────────────
     // true  → la siguiente foto es del medidor: se lanzará CamaraLecturaActivity
     // false → foto normal (causal, informe, supervisor) sin OCR
@@ -5505,9 +5510,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         infoClienteSalida.settablaClienteSalida_CONTRIBUCIONENERGIA((int) AcumulaSubscontri + "");
                     else
                         infoClienteSalida.settablaClienteSalida_CONTRIBUCIONENERGIA((int) AcumulaSubscontri + "");
-
-
-                }
+            }
             }
         }
 
@@ -5523,132 +5526,6 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
 
-    int ejecutarLiquidacionTrimestral(double total_consumo, String periodo, String[] puntero_consumo, String[] puntero_pesos, double valor_total, int primera_tarifa, String puntero_sub_con) {
-        try {
-            double[] consumos_por_rangos = new double[13];
-            double[] valores_por_rangos = new double[13];
-            double[] valores_por_referencia = new double[3];
-            double consumo;
-            Valor1ParaConvenio = 0;
-            Valor2ParaConvenio = 0;
-            double consumo1;
-            int consumo_final;
-            int rango = 0;
-            int numero_rango;
-
-            int consumo_promedio;
-            double subsidio_contribucion = 0;
-            double Pesos_energia;
-            puntero_consumo[0] = "";
-            puntero_pesos[0] = "";
-            Pesos_energia_trimestra = 0;
-            variables.pesosenergia = valor_total;
-
-            numero_rango = 0;
-            for (int i = 2; i >= 0; i--) {
-                tablaTarifa.lectura_TablaTarifas(primera_tarifa - i);
-                /* CAMBIAR PARA EBSA
-                valores_por_referencia[rango] = utils.parseStringToDouble(tablaTarifa.gettablaTarifas_VALORUNIDADREFERENCIA());
-                ++rango;
-
-                valores_por_rangos[numero_rango + 0] = utils.parseStringToDouble(tablaTarifa.gettablaTarifas_VALORUNIDAD1().trim());
-                valores_por_rangos[numero_rango + 1] = utils.parseStringToDouble(tablaTarifa.gettablaTarifas_VALORUNIDAD2().trim());
-                valores_por_rangos[numero_rango + 2] = utils.parseStringToDouble(tablaTarifa.gettablaTarifas_VALORUNIDAD3().trim());
-                valores_por_rangos[numero_rango + 3] = utils.parseStringToDouble(tablaTarifa.gettablaTarifas_VALORUNIDAD4().trim());
-                consumos_por_rangos[numero_rango + 0] = utils.parseStringToDouble(tablaTarifa.gettablaTarifas_CONSUMOMAXIMO1());
-                consumos_por_rangos[numero_rango + 1] = utils.parseStringToDouble(tablaTarifa.gettablaTarifas_CONSUMOMAXIMO2());
-                consumos_por_rangos[numero_rango + 2] = utils.parseStringToDouble(tablaTarifa.gettablaTarifas_CONSUMOMAXIMO3());
-                consumos_por_rangos[numero_rango + 3] = 0;
-*/
-                if (consumos_por_rangos[numero_rango + 0] == (double) 0)
-                    consumos_por_rangos[numero_rango + 0] = (double) 9999999999L;
-                if (consumos_por_rangos[numero_rango + 1] == (double) 0)
-                    consumos_por_rangos[numero_rango + 1] = (double) 9999999999L;
-                if (consumos_por_rangos[numero_rango + 2] == (double) 0)
-                    consumos_por_rangos[numero_rango + 2] = 9999999999L;
-                if (consumos_por_rangos[numero_rango + 3] == (double) 0)
-                    consumos_por_rangos[numero_rango + 3] = (double) 9999999999L;
-
-                numero_rango += 4;
-            }
-
-          /*  if (infoClienteEntrada.gettablaEntradaClientes_Clasedeservicio().trim().equals("IQ")) {
-                // Log.e("ensaje de depuracion", "Paso por iq2.2 " + infoClienteEntrada.getTablaEntradaClientes_nrofamilias().trim());
-                consumo = total_consumo / Integer.parseInt(valfamilia);
-                consumo1 = total_consumo / Integer.parseInt(valfamilia);
-                consumo_promedio = (int) (total_consumo / Integer.parseInt(infoClienteEntrada.gettablaEntradaClientes_Bimestral()) / Integer.parseInt(valfamilia));
-                // Log.e("ensaje de depuracion", "Paso por iq3.3 " + infoClienteEntrada.getTablaEntradaClientes_nrofamilias().trim());
-            } else {*/
-                consumo = total_consumo;
-                consumo1 = total_consumo;
-                consumo_promedio = (int) (total_consumo / Integer.parseInt(infoClienteEntrada.gettablaEntradaClientes_Bimestral()));
-          //  }
-
-            /*consumo = total_consumo;
-            consumo1 = total_consumo;
-            consumo_promedio = (int) (total_consumo / 3);*/
-            numero_rango = 0;
-            for (int y = 1; y <= 3; y++) {
-                rango = 0;
-                if (y == 1) {
-                    consumo = consumo1 - (consumo_promedio * 2);
-                } else
-                    consumo = consumo_promedio;
-
-                consumo_final = (int) consumo;
-                Pesos_energia = 0;
-
-                while (consumo > 0) {
-                    if (consumo >= consumos_por_rangos[rango + numero_rango])
-                        consumo -= consumos_por_rangos[rango + numero_rango];
-                    else {
-                        consumos_por_rangos[rango + numero_rango] = consumo;
-                        consumo = 0;
-                    }
-
-                    if (infoClienteEntrada.gettablaEntradaClientes_Clasedeservicio().trim().equals("IQ")) {
-                        // Log.e("ensaje de depuracion", "Paso por iq0 " + infoClienteEntrada.getTablaEntradaClientes_nrofamilias().trim());
-                        Pesos_energia = Pesos_energia + (valores_por_rangos[rango + numero_rango] * consumos_por_rangos[rango + numero_rango] * Integer.parseInt(valfamilia));
-                        // Log.e("ensaje de depuracion", "Paso por iq01 " + infoClienteEntrada.getTablaEntradaClientes_nrofamilias().trim());
-                    } else
-                        Pesos_energia = Pesos_energia + (valores_por_rangos[rango + numero_rango] * consumos_por_rangos[rango + numero_rango]);
-
-                    puntero_consumo[rango] = String.format("%1$9s", Double.toString(consumos_por_rangos[rango]));
-                    puntero_pesos[rango] = String.format("%1$11s", Double.toString(valores_por_rangos[rango]));
-                    ++rango;
-                }
-
-                if (infoClienteEntrada.gettablaEntradaClientes_Clasedeservicio().trim().equals("IQ")) {
-                    // Log.e("ensaje de depuracion", "Paso por iq1 " + infoClienteEntrada.getTablaEntradaClientes_nrofamilias().trim());
-                    subsidio_contribucion += Pesos_energia - (valores_por_referencia[y - 1] * consumo_final * Integer.parseInt(valfamilia));
-                    // Log.e("ensaje de depuracion", "Paso por iq2 " + infoClienteEntrada.getTablaEntradaClientes_nrofamilias().trim());
-                } else
-                    subsidio_contribucion += Pesos_energia - (valores_por_referencia[y - 1] * consumo_final);
-                //posible EjecutarAjusteUnidades igual arriba subsidiocontribucion += Pesosenergia - Variables.EjecutarAjusteUnidades((valoresporreferencia[y - 1] * consumofinal));
-
-                variables.pesosenergia += Pesos_energia;
-                numero_rango += 4;
-            }
-
-            //***solo validar de aqui para abajo
-
-            if (subsidio_contribucion < 0) {
-                Pesos_energia_trimestra = (-1) * (subsidio_contribucion);
-                Pesos_energia_trimestra += variables.pesosenergia;
-
-            } else {
-                Pesos_energia_trimestra = variables.pesosenergia;
-            }
-            double temp = variables.ejecutarAjusteUnidades(subsidio_contribucion);
-            infoClienteSalida.settablaClienteSalida_CONTRIBUCIONENERGIA(Integer.toString((int) temp));
-            return (1);
-        } catch (Exception ex) {
-
-            utils.Log(logfile, "[MenuDeLiquidacion]ejecutarLiquidacionTrimestral(); " + ex.getMessage());
-            mensajeT("El Sistema de Liquidacion Trimestral con Problemas", msgMedio);
-            return (0);
-        }
-    }
 
     /**
      * NUCLEO de la busqueda/calculo de tarifa, SIN aplicar el ajuste al peso
@@ -5833,13 +5710,34 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                                                     String anios, String meses, String codtarifa) {//String[] anios, String[] meses, String codtarifa
 
         int abriotarifas = 0;
+        PesosEnergiaConvenio=0;
+        PesosEnergiaContrConvenio=0;
 
+        int NumeroConvenios=0;
         try {
             if (!tablaTarifa.abrir_TablaTarifas(tablaTarifa.getArchivo_TablaTarifas())) {
                 mensajeT("No se puede abrir tabla de tarifas", msgMedio);
                 return -1;
             }
+
+            if (!infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1CNCPTO().trim().equals(""))
+            {
+                NumeroConvenios++;
+            }
+            if (!infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO2CNCPTO().trim().equals(""))
+            {
+                NumeroConvenios++;
+            }
+            if (!infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO3CNCPTO().trim().equals(""))
+            {
+                NumeroConvenios++;
+            }
+
             abriotarifas = 1;
+            if (NumeroConvenios==3 && consumoTotal<3)
+            {
+                NumeroConvenios = consumoTotal;
+            }
 
             int[] consumoPorMes = repartirConsumoTrimestral(consumoTotal);
             double[] raw = new double[2];
@@ -5851,14 +5749,29 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             for (int i = 0; i < 3; i++) {
                 int r = calcularValorTarifaRaw(consumoPorMes[i], consumoSubsistencia, valorReferenciaPorKwh,
                         anios, meses, codtarifa, raw,"A");
-                if (r < peorResultado) peorResultado = r;
+                if (r < peorResultado)
+                {
+                    peorResultado = r;
+                }
                 totalRawValor += variables.ejecutarAjusteUnidades(raw[0]);
                 totalRawSubsidio += raw[1];//variables.ejecutarAjusteUnidades() para igualar no ajustan el subs
+
+                if (NumeroConvenios>0)
+                {
+                    if (i < NumeroConvenios)
+                    {
+                        PesosEnergiaConvenio = totalRawValor;
+                        PesosEnergiaContrConvenio = totalRawSubsidio;
+                    }
+                }
+
             }
+
+            PesosEnergiaContrConvenio= variables.ejecutarAjusteUnidades(PesosEnergiaContrConvenio);
 
             variables.pesosenergia = variables.ejecutarAjusteUnidades(totalRawValor);
             infoClienteSalida.settablaClienteSalida_CONTRIBUCIONENERGIA(
-                    Integer.toString((int) variables.ejecutarAjusteUnidades(totalRawSubsidio)));
+                    Integer.toString((int) variables.ejecutarAjusteUnidades(totalRawSubsidio + subsidiocontribucionreactiva)));
 
             tablaTarifa.Cerrar_TablaTarifas();
             return peorResultado;
@@ -5881,12 +5794,35 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                                                     String anios, String meses, String codtarifa) {//String[] anios, String[] meses, String codtarifa
 
         int abriotarifas = 0;
+        PesosEnergiaReactConvenio=0;
+        PesosEnergiaReactContrConvenio=0;
+
+        int NumeroConvenios=0;
         try {
             if (!tablaTarifa.abrir_TablaTarifas(tablaTarifa.getArchivo_TablaTarifas())) {
                 mensajeT("No se puede abrir tabla de tarifas", msgMedio);
                 return -1;
             }
+
+            if (!infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1CNCPTO().trim().equals(""))
+            {
+                NumeroConvenios++;
+            }
+            if (!infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO2CNCPTO().trim().equals(""))
+            {
+                NumeroConvenios++;
+            }
+            if (!infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO3CNCPTO().trim().equals(""))
+            {
+                NumeroConvenios++;
+            }
+
             abriotarifas = 1;
+            if (NumeroConvenios>1 && consumoTotal<3)
+            {
+                NumeroConvenios = 1;
+            }
+
             int[] consumoPorMes = repartirConsumoTrimestral(consumoTotal);
             double[] raw = new double[2];
             double totalRawValor = 0;
@@ -5898,10 +5834,20 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 if (r < peorResultado) peorResultado = r;
                 totalRawValor += variables.ejecutarAjusteUnidades(raw[0]);
                 totalRawSubsidio += raw[1];//variables.ejecutarAjusteUnidades() para igualar no ajustan el subs
+
+                if (NumeroConvenios>0)
+                {
+                    if (i < NumeroConvenios)
+                    {
+                        PesosEnergiaReactConvenio = totalRawValor;
+                        PesosEnergiaReactContrConvenio = totalRawSubsidio;
+                    }
+                }
+
             }
+            PesosEnergiaReactContrConvenio  = variables.ejecutarAjusteUnidades(PesosEnergiaReactContrConvenio);
             variables.pesosenergiareactiva = variables.ejecutarAjusteUnidades(totalRawValor);
-            infoClienteSalida.settablaClienteSalida_CONTRIBUCIONENERGIA(
-                    Integer.toString((int) variables.ejecutarAjusteUnidades(totalRawSubsidio)));
+            subsidiocontribucionreactiva = variables.ejecutarAjusteUnidades(totalRawSubsidio);
             tablaTarifa.Cerrar_TablaTarifas();
             return peorResultado;
         } catch (Exception e) {
@@ -6218,8 +6164,6 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
 
-
-
     private int ejecutarReliquidacionConceptos(double pesosenergia) {
 
         double valorconcepto, pesosajuste;
@@ -6367,8 +6311,71 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     if (valor21 <= valorconcepto) {
                         infoRegistroSalida.lectura_TablaRegistroSalida(VariablesGlobales.registroactual);
                         infoRegistroSalida.settablaRegistroSalida_informe("DESCUENTO MES FOES ");
-                        variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";Concepto 626 ;" + getPhoneDate() + "-" + getPhoneHour();
+                        variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";Concepto 626-627 ;" + getPhoneDate() + "-" + getPhoneHour();
                         escribeResumenTiempo(variableResumenLiquidacion + " " + " Concepto 626 : Posicion Actual|" + VariablesGlobales.registroactual);
+                        infoRegistroSalida.escribir_TablaRegistroSalida(VariablesGlobales.registroactual);
+                        infoCobrosLiquidados.settablaCobrosRealizados_saldopendiente(infoCobrosLiquidados.gettablaCobrosRealizados_VALOR());
+                        infoCobrosLiquidados.escribir_TablaCobrosRealizados(conceptoactual);
+                        //MessageBox.Show("Paso por aqui 1 "+valor21.ToString()+" <= "+valor_concepto.ToString());
+                        valorconcepto = valor21;
+                        valor21 = 0;
+                        valorconcepto = variables.ejecutarAjusteUnidades(valorconcepto);
+                    } else {
+                        valor21 = valor21 - valorconcepto;
+                    }
+                    break;
+                case 903://queda este fundamento de la 903 es como un pago anticipado hay que preguntar cual es su verdadero orden si llega a ser mayor que el valor de los kw consumidos
+                    //llenar las variables para que el sistema rehaga los valores de este concepto con
+                    valorconcepto = Double.parseDouble(infoCobrosLiquidados.gettablaCobrosRealizados_VALOR().trim());
+                    valorconcepto = variables.ejecutarAjusteUnidades(valorconcepto);
+                    //el proceso debe de ser descontando este valor al sistem para que se ejecute lo que se requiere
+                    if (valor21 <= valorconcepto) {
+                        infoRegistroSalida.lectura_TablaRegistroSalida(VariablesGlobales.registroactual);
+                        infoRegistroSalida.settablaRegistroSalida_informe("PAGO ANTICIPADOMES ");
+                        variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";Concepto 903;" + getPhoneDate() + "-" + getPhoneHour();
+                        escribeResumenTiempo(variableResumenLiquidacion + " " + " Concepto 903 : Posicion Actual|" + VariablesGlobales.registroactual);
+                        infoRegistroSalida.escribir_TablaRegistroSalida(VariablesGlobales.registroactual);
+                        infoCobrosLiquidados.settablaCobrosRealizados_saldopendiente(infoCobrosLiquidados.gettablaCobrosRealizados_VALOR());
+                        infoCobrosLiquidados.escribir_TablaCobrosRealizados(conceptoactual);
+                        //MessageBox.Show("Paso por aqui 1 "+valor21.ToString()+" <= "+valor_concepto.ToString());
+                        valorconcepto = valor21;
+                        valor21 = 0;
+                        valorconcepto = variables.ejecutarAjusteUnidades(valorconcepto);
+                    } else {
+                        valor21 = valor21 - valorconcepto;
+                    }
+                    break;
+                case 980://queda este fundamento de la 980 es como un pago anticipado hay que preguntar cual es su verdadero orden si llega a ser mayor que el valor de los kw consumidos
+                    //llenar las variables para que el sistema rehaga los valores de este concepto con
+                    valorconcepto = Double.parseDouble(infoCobrosLiquidados.gettablaCobrosRealizados_VALOR().trim());
+                    valorconcepto = variables.ejecutarAjusteUnidades(valorconcepto);
+                    //el proceso debe de ser descontando este valor al sistem para que se ejecute lo que se requiere
+                    if (valor21 <= valorconcepto) {
+                        infoRegistroSalida.lectura_TablaRegistroSalida(VariablesGlobales.registroactual);
+                        infoRegistroSalida.settablaRegistroSalida_informe("PAGO 980 FOES ");
+                        variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";Concepto 980;" + getPhoneDate() + "-" + getPhoneHour();
+                        escribeResumenTiempo(variableResumenLiquidacion + " " + " Concepto 980 : Posicion Actual|" + VariablesGlobales.registroactual);
+                        infoRegistroSalida.escribir_TablaRegistroSalida(VariablesGlobales.registroactual);
+                        infoCobrosLiquidados.settablaCobrosRealizados_saldopendiente(infoCobrosLiquidados.gettablaCobrosRealizados_VALOR());
+                        infoCobrosLiquidados.escribir_TablaCobrosRealizados(conceptoactual);
+                        //MessageBox.Show("Paso por aqui 1 "+valor21.ToString()+" <= "+valor_concepto.ToString());
+                        valorconcepto = valor21;
+                        valor21 = 0;
+                        valorconcepto = variables.ejecutarAjusteUnidades(valorconcepto);
+                    } else {
+                        valor21 = valor21 - valorconcepto;
+                    }
+                    break;
+                case 988://queda este fundamento de la 980 es como un pago anticipado hay que preguntar cual es su verdadero orden si llega a ser mayor que el valor de los kw consumidos
+                    //llenar las variables para que el sistema rehaga los valores de este concepto con
+                    valorconcepto = Double.parseDouble(infoCobrosLiquidados.gettablaCobrosRealizados_VALOR().trim());
+                    valorconcepto = variables.ejecutarAjusteUnidades(valorconcepto);
+                    //el proceso debe de ser descontando este valor al sistem para que se ejecute lo que se requiere
+                    if (valor21 <= valorconcepto) {
+                        infoRegistroSalida.lectura_TablaRegistroSalida(VariablesGlobales.registroactual);
+                        infoRegistroSalida.settablaRegistroSalida_informe("PAGO 988 FOES ");
+                        variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";Concepto 988;" + getPhoneDate() + "-" + getPhoneHour();
+                        escribeResumenTiempo(variableResumenLiquidacion + " " + " Concepto 988 : Posicion Actual|" + VariablesGlobales.registroactual);
                         infoRegistroSalida.escribir_TablaRegistroSalida(VariablesGlobales.registroactual);
                         infoCobrosLiquidados.settablaCobrosRealizados_saldopendiente(infoCobrosLiquidados.gettablaCobrosRealizados_VALOR());
                         infoCobrosLiquidados.escribir_TablaCobrosRealizados(conceptoactual);
@@ -6480,12 +6487,31 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                         //toca mirar como es el cobro valorizado versus cobro de la liquidacion en pllemo, no si si el valorizado implica sumarle cuando es contribucion
 
-                        valorconcepto =  ejecutarLiquidacionConvenio(variables.pesosenergia,  variables.pesosenergia, infoCobrosLiquidados.gettablaCobrosRealizados_CONCEPTODECOBRO().trim());
-                        //verificar si el consumo menor a los periodos a liquidar
-                        if (parseStringToDouble(infoClienteSalida.getTablaClienteSalida_CONSUMOFACTURADO())>0 && parseStringToDouble(infoClienteSalida.getTablaClienteSalida_CONSUMOFACTURADO()) < parseStringToDouble(infoClienteEntrada.gettablaEntradaClientes_Bimestral()))
+                        if (parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral()) == 1)
                         {
-                            valorconcepto = valorconcepto  * parseStringToDouble(infoClienteEntrada.gettablaEntradaClientes_Bimestral());
+                            valorconcepto = ejecutarLiquidacionConvenio(variables.pesosenergia, variables.pesosenergia, infoCobrosLiquidados.gettablaCobrosRealizados_CONCEPTODECOBRO().trim());
                         }
+                        else
+                        {
+
+                            valorconcepto = ejecutarLiquidacionConvenio(PesosEnergiaConvenio, PesosEnergiaConvenio, infoCobrosLiquidados.gettablaCobrosRealizados_CONCEPTODECOBRO().trim());
+                         //algo diferente cuando es solo un kw
+                        if (parseStringToDouble(infoClienteSalida.getTablaClienteSalida_CONSUMOFACTURADO()) > 0 && parseStringToDouble(infoClienteSalida.getTablaClienteSalida_CONSUMOFACTURADO()) < 2)
+                        {
+                            if (!infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1CNCPTO().trim().equals("") && !infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO2CNCPTO().trim().equals(""))
+                            {
+                                valorconcepto = valorconcepto  * 2;
+                            }
+
+                        }
+                            PesosEnergiaReactConvenio=0;
+                            PesosEnergiaReactContrConvenio=0;
+                            PesosEnergiaConvenio=0;
+                            PesosEnergiaContrConvenio=0;
+
+                        }
+                        //verificar si el consumo menor a los periodos a liquidar
+
 
                         // Log.e("error5", "concepto 51 calculado " + valorconcepto);
 
@@ -6612,10 +6638,6 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         variables.pesosenergia = pesosEnergia;
 
-        // Se mantiene igual que en la version anterior.
-       /* if (variables.pesosenergia > 0) {
-            return (variables.pesosenergia * 15 / 100);
-        }*/
 
         String concepto1 = infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1CNCPTO().trim();
         String concepto2 = infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO2CNCPTO().trim();
@@ -6656,7 +6678,6 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 else
                      vlorTxt = infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1VLOR().trim().replace(",",".");
                 SumavlorTxt = parsearDecimal(vlorTxt);
-
                 rngomnmoTxt = infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1RNGOMNMO().trim();
                 rngomxmoTxt = infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1RNGOMXMO().trim();
                 tpemnmoTxt = infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1TPEMNMO().trim();
@@ -6665,11 +6686,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             case 2:
                 tpovlor = infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO2TPOVLOR().trim();
                 tpoprcntje = infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO2TPOPRCNTJE().trim();
-                if (infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1VLOR().trim().equals(""))
+/*                if (infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1VLOR().trim().equals(""))
                     vlorTxt ="0";
                 else
                     vlorTxt = infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1VLOR().trim().replace(",",".");
-                SumavlorTxt = parsearDecimal(vlorTxt);
+                SumavlorTxt = parsearDecimal(vlorTxt);*/
 
                 if (infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO2VLOR().trim().equals(""))
                     vlorTxt ="0";
@@ -6686,7 +6707,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             case 3:
                 tpovlor = infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO3TPOVLOR().trim();
                 tpoprcntje = infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO3TPOPRCNTJE().trim();
-                if (infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1VLOR().trim().equals(""))
+             /*   if (infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1VLOR().trim().equals(""))
                     vlorTxt ="0";
                 else
                     vlorTxt = infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1VLOR().trim().replace(",",".");
@@ -6696,7 +6717,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     vlorTxt ="0";
                 else
                     vlorTxt = infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO2VLOR().trim().replace(",",".");
-                SumavlorTxt += parsearDecimal(vlorTxt);
+                SumavlorTxt += parsearDecimal(vlorTxt);*/
 
                 if (infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO3VLOR().trim().equals(""))
                     vlorTxt ="0";
@@ -6718,14 +6739,15 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         double rangomaximo = Double.parseDouble(rngomxmoTxt);
         double topeminimo = Double.parseDouble(tpemnmoTxt);
         double topemaximo = Double.parseDouble(tpemxmoTxt);
-        double valor = SumavlorTxt / parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral());//dividirlo por el numero de meses
+        double valor = SumavlorTxt; // parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral());//dividirlo por el numero de meses
 // se reemplasa Double.parseDouble(vlorTxt.contains(",") ? vlorTxt.replace(",", ".") : vlorTxt)
 
         double consumoenergia = Double.parseDouble(infoClienteSalida.gettablaClienteSalida_CONSUMOFACTURADO().trim());
 
         // Sin rango definido: se liquida el valor fijo del convenio, tal cual.
         if ((rangominimo == 0) && (rangomaximo == 0)) {
-            return valor;
+
+           return valor * numeroConvenio;
             //antes se hacia sumatoria para procesar trimstral
         }
 
@@ -6735,8 +6757,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         }
 
         if (tpovlor.equals("F")) {
-            if (valor < topeminimo) return topeminimo;
-            if (valor > topemaximo) return topemaximo;
+            if (valor < topeminimo) return
+                    topeminimo * numeroConvenio;
+            if (valor > topemaximo) return
+                    topemaximo * numeroConvenio;
             return valor;
         }
 
@@ -6758,177 +6782,6 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         return 0;
     }
 
-
-
-
-    double EjecutarLiquidacionConvenioanterior(double Pesos_energia, double Pesos_enerviaValorizado) {
-        // Log.e("error1", Pesos_energia + " ejecutar liquidacion0 " + Pesos_enerviaValorizado);
-        //ESTO CAMBIA POR LOS DATOS QUE REALMENTE ME LLEGAN EN LOS TRES POSIBLES CONVENIOS Y SABER QUE HACER CON ELLOS
-
-      /* en estas variables estan las posibles tres convenios,
-        //pero creo que eso es un solo para trimestral como para el mensual
-        // ya es si por ejemplo puera que un cliente tubieera dos convenios diferentes o tres y el decida enviandole el codigo de convenio cual liquidar
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO2CNCPTO();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO2TPOVLOR();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO2TPOPRCNTJE();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO2VLOR();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO2RNGOMNMO();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO2RNGOMXMO();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO2TPEMNMO();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO2TPEMXMO();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO3CNCPTO();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO3TPOVLOR();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO3TPOPRCNTJE();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO3VLOR();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO3RNGOMNMO();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO3RNGOMXMO();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO3TPEMNMO();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO3TPEMXMO();
-
-
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1CNCPTO();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1TPOVLOR();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1TPOPRCNTJE();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1VLOR();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1RNGOMNMO();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1RNGOMXMO();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1TPEMNMO();
-        infoMedidorEntrada.gettablaMedidorEntrada_CNVNIO1TPEMXMO();*/
-
-        int primerconvenio = parseStringToInteger(infoCobrosLiquidados.gettablaCobrosRealizados_PRIMERCONVENIO().trim());
-        int nroconvenios = parseStringToInteger(infoCobrosLiquidados.gettablaCobrosRealizados_NROCONVENIOS().trim());
-
-        if (parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()) > 1)
-            nroconvenios = parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim());
-
-
-        double rangominimo, rangomaximo;
-        double topeminimo = 0, topemaximo;
-        double valor = 0, temporal = 0, sumartopes = 0;
-        double consumoenergia = Double.parseDouble(infoClienteSalida.gettablaClienteSalida_CONSUMOFACTURADO().trim());
-        variables.pesosenergia = Pesos_energia;
-
-        if (variables.pesosenergia>0) {
-            return (variables.pesosenergia * 15 / 100);
-        }
-
-        while (nroconvenios > 0) {
-
-            tablaConvenio.lectura_TablaConvenios(primerconvenio);
-            primerconvenio--;
-            rangominimo = Double.parseDouble(tablaConvenio.gettablaConvenios_RANGOMINIMO().trim());
-            rangomaximo = Double.parseDouble(tablaConvenio.gettablaConvenios_RANGOMAXIMO().trim());
-            topeminimo = Double.parseDouble(tablaConvenio.gettablaConvenios_TOPEMINIMO().trim());
-            topemaximo = Double.parseDouble(tablaConvenio.gettablaConvenios_TOPEMAXIMO().trim());
-            valor = Double.parseDouble(tablaConvenio.gettablaConvenios_VALOR().trim().contains(",") ? tablaConvenio.gettablaConvenios_VALOR().trim().replace(",", ".") : tablaConvenio.gettablaConvenios_VALOR());
-
-            if ((rangominimo == 0) && (rangomaximo == 0)) {
-
-                if (parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()) == 1) {
-                    return (valor);
-                } else {
-                    sumartopes += valor;
-                }
-
-                if (nroconvenios == 1)
-                    break;
-
-            } else if ((consumoenergia == 0) || ((consumoenergia >= rangominimo) && (consumoenergia <= rangomaximo))) {
-
-
-                if (tablaConvenio.gettablaConvenios_TIPOVALOR().equals("F")) {
-
-                    if (parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()) == 1) {
-
-                        if (valor < topeminimo) {
-                            return (topeminimo);
-                        }
-                        if (valor > topemaximo) {
-                            return (topemaximo);
-                        }
-                        return (valor);
-                    } else {
-                        if (valor < topeminimo)
-                            sumartopes += topeminimo;
-                        else if (valor > topemaximo)
-                            sumartopes += topemaximo;
-                        else
-                            sumartopes += valor;
-                        if (nroconvenios == 1)
-                            break;
-                    }
-                } else {
-
-                    if (tablaConvenio.gettablaConvenios_TIPOVALOR().equals("P")) {
-                        if (parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()) == 1)
-                            temporal = variables.pesosenergia * valor / (double) 100;
-                        else
-                            temporal = (variables.pesosenergia
-                                    / parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()))
-                                    * valor / (double) 100;
-
-                        if (tablaConvenio.gettablaConvenios_TIPOPORCENTUAL().trim().equals("R")) {
-
-                            if (parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()) == 1)
-
-                                temporal = Pesos_enerviaValorizado * valor / (double) 100;
-                            else
-                                temporal = (Pesos_enerviaValorizado
-                                        / parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()))
-                                        * valor / (double) 100;
-
-                        } else {
-                            if (tablaConvenio.gettablaConvenios_TIPOPORCENTUAL().trim().equals("V")) {
-
-                                if (parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()) == 1)
-
-                                    temporal = variables.pesosenergia * valor / (double) 100;
-                                else {
-
-                                    temporal = (variables.pesosenergia
-                                            / parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()))
-                                            * valor / (double) 100;
-                                }
-                            } else
-                                return (0);
-                        }
-
-                        if (parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()) == 1) {
-
-
-                            if (temporal > topemaximo) {
-                                return (topemaximo);
-                            }
-                            if (temporal < topeminimo) {
-                                return (topeminimo);
-                            }
-                            return (variables.ejecutarAjusteUnidades(temporal));
-
-                        } else {
-                            if (temporal > topemaximo) {
-                                sumartopes += topemaximo;
-                            } else if (temporal < topeminimo) {
-                                sumartopes += topeminimo;
-                            } else {
-                                sumartopes += temporal;
-                            }
-                            if (nroconvenios == 1)
-                                break;
-                        }
-                    } else
-                        return (0);
-                }
-            }
-            --nroconvenios;
-        }
-        if (parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()) != 1) {
-
-            return (variables.ejecutarAjusteUnidades(sumartopes));
-        } else
-            return (0);
-
-    }
-
     double ejecutarLiquidacionOtros(double pesosenergia) {
         double valor, temporal;
         variables.pesosenergia = pesosenergia;
@@ -6936,12 +6789,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         temporal = variables.pesosenergia * valor / (double) 100;
         return (temporal);
     }
-
+/*
     double ejecutarSubsidioEmpleado(double pesosenergia) {
         infoCobrosLiquidados.settablaCobrosRealizados_rangomaximo(reemplazarDatos(infoCobrosLiquidados.gettablaCobrosRealizados_RANGOMAXIMO()));
         infoCobrosLiquidados.settablaCobrosRealizados_rangomaximo("" + (variables.ejecutarAjusteUnidades(Double.parseDouble(infoCobrosLiquidados.gettablaCobrosRealizados_RANGOMAXIMO().trim()))));
 
-      /*  if (pesosenergia > (250 * parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()))) {
+        if (pesosenergia > (250 * parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()))) {
             if (infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim().equals("999999998")) {
                 if (Double.parseDouble(infoClienteSalida.gettablaClienteSalida_CONSUMOFACTURADO().trim()) <= 350 * Integer       .parseInt(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim())) {
                     return (pesosenergia - (250 * parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim())));
@@ -6951,12 +6804,14 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             } else if (Double.parseDouble(infoClienteSalida.gettablaClienteSalida_CONSUMOFACTURADO().trim()) <= 250 * Integer      .parseInt(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim())) {
                 return (pesosenergia - (250 * parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim())));
 
-            } else*/
+            } else
         return (valorLiquidacionEmpleado);
 
-      /*  } else
-            return (pesosenergia);*/
+        } else
+            return (pesosenergia);
     }
+  */
+
     double calcularSubsidioEmpleado(double pesosEnergia) { //si tiene subsidio quitarlo
 
         // necesitaria aqui entender lo de del verdadero tope maximo
@@ -13783,7 +13638,6 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                     predio_temporal = 1;
                     if ((variables.lect2 == variables.lactual
-                            && variables.lect3 == variables.lactual
                             && variables.nveces >= 2))// ||
 
                     {
@@ -13847,7 +13701,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                 } else if (estadoCritica == 3) {
                     variables.estado = "1"; // lectura muy baja
-                    if ((variables.lect2 == variables.lactual && variables.lect3 == variables.lactual) || (variables.nveces > 2)) {
+                    if (variables.lect2 == variables.lactual  || (variables.nveces >= 2)) {
                         reporteEstadoCritica = "CONSUMO BAJO";
                         Log.e("error", "escribe 10");
                         escribirTablasSalida();
@@ -13868,7 +13722,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                     reporteEstadoCritica = "CONSUMO ALTO";
                     mensajeT("DESV. GRAVE X DEBAJO!", msgCorto);
-
+                    if (variables.cactual>2000) {
+                        variables.cactual = (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediocliente().trim()) *
+                                             Double.parseDouble(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()) /
+                                             Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));
+                        variables.consumoactual = variables.cactual;
+                    }
                     if (estadoCritica == 2) {
                         variables.estado = "7";
                         mensajeT("DESV. MUY GRAVE X ENCIMA!", msgCorto);
@@ -13883,7 +13742,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 } else if (estadoCritica == 3) {                     // Consumo Bajo lectura menor a la anterior
                     imagenLiquid_3.setImageResource(R.drawable.imagen_consumobajo);
                 }
-                if ((variables.lect2 == variables.lactual && variables.lect3 == variables.lactual) && (variables.nveces > 2)) {
+                if (variables.lect2 == variables.lactual  && (variables.nveces >= 2)) {
                     if (estadoCritica == 2) {
                         reporteEstadoCritica = "CONSUMO ALTO";
                         Log.e("error", "escribe 11");
@@ -13902,7 +13761,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     return (1);
                 }
                 if (lectura_act.length() > 0) {
-                    if (variables.nveces >= 3) {
+                    if (variables.nveces >= 2) {
 
                         notificacion.setSmallIcon(android.R.drawable.stat_sys_warning);
                         notificacion.setContentTitle("Alerta");
@@ -13954,425 +13813,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         }
         return 0;
     }
-/*
-    private int evaluarLecturaAnaliticaOriginal(int primero, int N_veces, double l_actual, String Estado, String lectura_act, double c_actual) {
-        String UltimacuentaTres = "";
-        int tresvecesdiferente = 0;
-        int diales, contador_diales;
-        double potencia = 0;
-        long l_anterior, promedio, l_cadena;
-        String cadena = "";
-        int giro_del_registro;
-        double diferencia;
-        try {
 
-            if (variables.nveces <= 0)
-                if (infoRegistroSalida.gettablaRegistroSalida_INTENTOS().equals(" "))
-                    variables.nveces = 0;
-                else
-                    variables.nveces = parseStringToInteger(infoRegistroSalida.gettablaRegistroSalida_INTENTOS());
-            if (variables.nveces >= 9) {
-                mensajeT("INTENTO DE LECTURAS LLEGO A SU LIMITE", msgMedio);
-                //  Toast.makeText(getApplicationContext(), "INTENTO DE LECTURAS LLEGO A SU LIMITE", Toast.LENGTH_LONG).show();
-                return (0);
-            }
-
-            String promedio1 = infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediocliente().trim();// variables.DESENCAPSULAR(infoRegistroEntrada.EREGISTCONSUMOPROMEDIOCLIENTE,
-            // variables.CadenaEncapsulada)
-            String lecturaAnterior1 = infoRegistroEntrada.gettablaRegistroDeEntrada_Lecturaanterior().trim().replace(",", ".");// variables.DESENCAPSULAR(infoRegistroEntrada.EREGISTLECTURAANTERIOR,
-            // variables.CadenaEncapsulada);
-
-            if (promedio1.trim().equals(""))
-                promedio1 = "       0";
-
-            if (lecturaAnterior1.trim().equals(""))
-                lecturaAnterior1 = "       0";
-
-            l_anterior = Long.parseLong("" + parseStringToInteger(lecturaAnterior1));
-            promedio = Long.parseLong(promedio1);
-            if (variables.numdigitos == 0) {
-                if (!infoRegistroEntrada.gettablaRegistroDeEntrada_Digitos().trim().equals(""))
-                    diales = parseStringToInteger(infoRegistroEntrada.gettablaRegistroDeEntrada_Digitos());
-                else
-                    diales = 5;
-            } else {
-                diales = variables.numdigitos;
-                if (infoRegistroSalida.gettablaRegistroSalida_INFORME().trim().equals(""))
-                    infoRegistroSalida.settablaRegistroSalida_informe("CAMBIO DE DIGITOS " + diales);
-            }
-            if (diales == 0) {
-                mensajeT("MAL NUMERO ENTEROS", msgMedio);
-                // Toast.makeText(getApplicationContext(), "MAL NUMERO ENTEROS", Toast.LENGTH_LONG).show();
-                diales = 6;
-            }
-            reporteEstadoCritica = "";
-            potencia = 1;
-            contador_diales = diales;
-            while (contador_diales > 0) {
-                contador_diales--;
-                potencia = potencia * 10;
-            }
-            visualizarInformacionCliente(0);
-            //diferencia = (double) 0;
-            if (variables.nveces < 10) {
-                if (lectura_act.length() == 0) // la lectura no debe ser cero
-                {
-                    cadena = "0";// lectura_act;
-                } else {
-                    if (variables.nveces < 9) {
-                        variables.nveces++;
-                    }
-                    cadena = lectura_act;
-                }
-                primero = 0;
-                // activar un sonido o un lec aun no
-                l_cadena = Long.parseLong(cadena);
-                variables.lactual = parseStringToDouble(cadena);
-
-
-                if (infoRegistroSalida.gettablaRegistroSalida_LECTURAMODIFICADA1().trim().equals("") || infoRegistroSalida.gettablaRegistroSalida_LECTURAMODIFICADA1().trim().equals("0"))// variables.DESENCAPSULAR(infoRegistroSalida.SREGISTLECTURAMODIFICADA2,
-                // variables.CadenaEncapsulada)
-                {
-                    infoRegistroSalida.settablaRegistroSalida_lecturamodificada1(String.format("%1$10s", cadena.trim()));
-                    Log.e("error", "escribe 7");
-                    escribirTablasSalida();
-                } else if (infoRegistroSalida.gettablaRegistroSalida_LECTURAMODIFICADA2().trim().equals("") || infoRegistroSalida.gettablaRegistroSalida_LECTURAMODIFICADA2().trim().equals("0"))// variables.DESENCAPSULAR(infoRegistroSalida.SREGISTLECTURAMODIFICADA2,
-                // variables.CadenaEncapsulada)
-                {
-                    //infoRegistroSalida.settablaRegistroSalida_lecturamodificada2(infoRegistroSalida.gettablaRegistroSalida_LECTURAMODIFICADA1().trim());
-                    infoRegistroSalida.settablaRegistroSalida_lecturamodificada2(String.format("%1$10s", cadena.trim()));
-                    Log.e("error", "escribe 8");
-                    escribirTablasSalida();
-                }
-
-
-                // procurar que el consumo a evaluar sea correcto
-                if (variables.lactual < l_anterior) {
-                    variables.cactual = potencia + variables.lactual - l_anterior;
-                } else {
-                    variables.cactual = variables.lactual - l_anterior;
-                }
-
-                extraerPuntoDecimal();
-
-
-                variables.consumoactual = variables.cactual;
-                Log.e("error2", "consumo " + variables.consumoactual + "-" + promedio);
-
-                int diferencia2 = 0;
-                Log.e("error2", "consumo " + variables.consumoactual + "-" + promedio);
-                int diasAnalitica = (int) (variables.calcularNumerodeDias(infoMedidorEntrada.gettablaMedidorEntrada_Fechalectanterior().substring(6, 10) + infoMedidorEntrada.gettablaMedidorEntrada_Fechalectanterior().substring(3, 5) + infoMedidorEntrada.gettablaMedidorEntrada_Fechalectanterior().substring(0, 2)));
-                diasAnalitica = variables.diashoy - diasAnalitica;
-
-
-                diferencia2 = (int) ((variables.consumoactual * Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim())));// - promedio
-                variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";diferencia ;" + formateo(diferencia2) + "- dias " + diasAnalitica;
-                escribeResumenTiempo(variableResumenLiquidacion);
-                if (diasAnalitica > 0) {
-                    //diferencia = diferencia2 / diasAnalitica;
-                    //diferencia = diferencia * 30;
-
-                    // ESTO ES PARA CALCULAR LA DIFERENCIA EN LLANO si tien e sentido listo hago prueba
-                    //Aqui difvide teniendo en cuenta los decimales y los ajusta a 2 despues de realizar la operacion
-                    //diasAnalitica este dato se cambiaria a los 30 dias normales
-                    diasAnalitica = 30;
-                    BigDecimal consumoDivididoDias = new BigDecimal(diferencia2).divide(new BigDecimal(diasAnalitica), 2, RoundingMode.HALF_UP);
-                    BigDecimal result = consumoDivididoDias.multiply(new BigDecimal(30));//Aqui multplica por 30
-                    diferencia = result.doubleValue();
-                    Log.e("INFO", " CALCULO A 30 dias: " + diferencia);
-                    //result vendria siendo lo que usted llama diferencia
-                    // se recompone la analitica en elconsumo dia todo serapor 30dias
-
-                } else
-                    diferencia = diferencia2;
-
-//DIFERENCIA ES IGUAL A LA REGLA DEL CONSUMO POR DIA MULTIPLICADO POR 30 DIAS
-
-                variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";diferencia cambio ;" + formateo(diferencia) + "- dias " + diasAnalitica;
-                escribeResumenTiempo(variableResumenLiquidacion);
-
-                int estadoCritica = 0;
-
-                    //Algoritmo de sitio
-                    //0. Las que no tienen diferencia de lectura no se hace análisis de desviación
-                    //1. Se toma la lectura
-                    //2. si es estacional, o es nueva, cobrar como está en el campo de tipoDesviación será 'N'
-                    //2.1 Si tiene una investigación pendiente se debe cobrar por promedio: En el campo tipoDesviación 'P'
-                    //3. si está fuera de la resolución, pero está dentro de la validación anual o dentro del rango de
-                    //subsistencia y residencialidad facturar con una observación que signifique que no no está desviada
-                    //por el análisis de la empresa, Dejar nota que stá desviado pero por análisis de la empresa no se va a estudiar
-                    //4. Si está fuera de la resolución, también fuera de la analítica de la empresa, imprimir el recibo con
-                    //observación de desviacion y cobro por promedio (promerio normalizado), además se debe imprimir una
-                    //notificación para dejarle al usuario indicando que la cuenta va a ser visitada
-                    //5. Finalmente se imprime la factura con toma exitosa y se carga al SIEC.
-
-                Log.e("error2", "diferencia2 " + diferencia);
-                if (diferencia >= parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LI_BNDA_RES().trim())
-                        && diferencia <= parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LS_BNDA_RES().trim())) {
-                    estadoCritica = 1;
-
-                    variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";entro por normal ;" + formateo(diferencia) + "- con estos datos " +
-                            infoRegistroEntrada.gettablaRegistroDeEntrada_LI_BNDA_RES().trim() + "--" + infoRegistroEntrada.gettablaRegistroDeEntrada_LS_BNDA_RES().trim();
-                    escribeResumenTiempo(variableResumenLiquidacion);
-
-                    //por que entra por aqui
-
-                    variables.impresoraAnalitica = "CONSUMONORMAL R";
-                    //nuevo marcar para que procedamos con el comentario 2 la nueva novedad del sistema;
-                    infoRegistroSalida.settablaRegistroSalida_comentario2("000");
-                    if (infoRegistroEntrada.gettablaRegistroDeEntrada_LQDA_CSMO().trim().equals("P")) {
-                        infoRegistroSalida.settablaRegistroSalida_comentario2("912");
-                    }
-                    escribirTablasSalida();
-                } else if (diferencia > parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LS_BNDA_RES().trim())) {
-                    variables.impresoraAnalitica = "CONS. ALTO DV1";
-                    infoRegistroSalida.settablaRegistroSalida_comentario2("001");
-                    //escribirTablasSalida();
-                    if (diferencia > parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LS_CONS_SUBS()) &&
-                            parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LS_CONS_SUBS().trim()) > 0) {
-                        infoRegistroSalida.settablaRegistroSalida_comentario2("005");
-                        variables.impresoraAnalitica = "CONS. ALTO Da5";
-
-                        //diferencia > parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LS_BDA_TPO_US().trim()))
-                        if (infoRegistroEntrada.gettablaRegistroDeEntrada_CMBIO_CLSE().equals("0") &&
-                                infoRegistroEntrada.gettablaRegistroDeEntrada_CMBIO_NVEL().equals("0") &&
-                                infoRegistroEntrada.gettablaRegistroDeEntrada_NRMLZACION().equals("0")) {
-                            infoRegistroSalida.settablaRegistroSalida_comentario2("005");
-                            variables.impresoraAnalitica = "CONS. ALTO Db4";
-
-                            //SERIA INCLUIR AQUI LA TERCERA DELIMITACION Y ES SI SUPERA EL 200 POR CIENTO DEL PROMEDIO ANUAL REPORTADO EN PROMEDIO NORMALIZADO
-                            //se le quita el subir el 200% del promedio ya que se les presentaban muchas criticas * 2
-                            //if (parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_PRMDIO().trim()) == 0) {
-                            if (diferencia > parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LS_BDA_TPO_US()) &&
-                                    parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LS_BDA_TPO_US()) > 0) {
-                                    infoRegistroSalida.settablaRegistroSalida_comentario2("003");
-                                    variables.impresoraAnalitica = "CONS. ALTO DV3";
-                                    variables.consumoactual = (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_PRMDIO().trim()) / Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));// - promedio
-                                }
-
-                        } else {
-                            variables.impresoraAnalitica = "CONS. ALTO DV2";
-                            infoRegistroSalida.settablaRegistroSalida_comentario2("002");
-
-
-                        }
-
-                    }
-                    if (infoRegistroEntrada.gettablaRegistroDeEntrada_LQDA_CSMO().trim().equals("P")) {
-                        infoRegistroSalida.settablaRegistroSalida_comentario2("913");
-                    }
-                    escribirTablasSalida();
-                    estadoCritica = 2;
-                } else {
-
-                    infoRegistroSalida.settablaRegistroSalida_comentario2("010");
-
-                    if (diferencia2 > parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LI_BANDA_ANUAL().trim())) {
-                        variables.impresoraAnalitica = "CONS. BAJOR DV2";
-                        infoRegistroSalida.settablaRegistroSalida_comentario2("011");
-                        if (diferencia2 > parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LS_CONS_SUBS().trim())) {
-                            if (parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LS_CONS_SUBS().trim()) > 0) {
-                                infoRegistroSalida.settablaRegistroSalida_comentario2("012");
-                            } else {
-                                infoRegistroSalida.settablaRegistroSalida_comentario2("013");
-                            }
-                            variables.impresoraAnalitica = "CONS. BAJOR DV3";
-
-                        }
-
-                    }
-
-                    if (infoRegistroEntrada.gettablaRegistroDeEntrada_LQDA_CSMO().trim().equals("P")) {
-                        infoRegistroSalida.settablaRegistroSalida_comentario2("914");
-                    }
-
-                    escribirTablasSalida();
-                    variables.impresoraAnalitica = "CONS. BAJOR DV1";
-                    estadoCritica = 3;
-                }
-
-
-                ultimaCriticaLectura = "  ";
-                //este proceso aqui se iria del la seccion
-
-                //fin de lo que primero se quitaria
-
-                if (variables.lactual == l_anterior) {
-                    if (variables.nveces < 9) {
-                        variables.nveces++;
-                    }
-                    predio_temporal = 1;
-                    if ((variables.lect2 == variables.lactual && variables.lect3 == variables.lactual && variables.nveces >= 2))// ||
-                    {
-                        reporteEstadoCritica = "LECTURA IGUALES ";
-                        variables.estado = "2";
-                        Log.e("error", "escribe 9");
-                        escribirTablasSalida();
-
-                        // nuevo para solo visualizar el mensaje
-                        variables.consumoactual = 0;
-                        imagenLiquid_3.setImageResource(android.R.color.transparent);
-
-                        predio_temporal = VariablesGlobales.registroactual;
-                        variables.lect2 = -1;
-                        variables.lect3 = -1;
-
-                        return (1);
-                    } else {
-                        imagenLiquid_3.setImageResource(R.drawable.imagen_lecturasiguales);
-
-                        if (variables.lect2 == -1)
-                            variables.lect2 = variables.lactual;
-                        else {
-                            variables.lect3 = variables.lect2;
-                            variables.lect2 = variables.lactual;
-                        }
-                        return (0);
-                    }
-                }
-                giro_del_registro = 0;
-                if (variables.lactual < l_anterior) {
-                    giro_del_registro = 1;
-                    variables.lactual += potencia;
-                }
-                variables.cactual = variables.lactual - l_anterior;
-                extraerPuntoDecimal();
-                variables.consumoactual = variables.cactual;
-                int estadosanteriores = 0;
-
-                if (estadoCritica == 1) {
-                    estadosanteriores = 1;
-
-                    int correcto = 0;
-                    correcto = 1;
-
-                    if (correcto == 1) {
-                        mensajeT("CONSUMO NORMAL!", msgCorto);
-                        if (giro_del_registro != 0)
-                            variables.lactual -= potencia;
-                        variables.estado = "3";
-                        variables.lect2 = -1;
-                        variables.lect3 = -1;
-                        imagenLiquid_3.setImageResource(android.R.color.transparent);
-
-                        return (1);  // CONSUMO NORMAL
-                    }
-
-                } else if (estadoCritica == 3) {
-                    variables.estado = "1"; // lectura muy baja
-                    if ((variables.lect2 == variables.lactual && variables.lect3 == variables.lactual) || (variables.nveces > 2)) {
-                        reporteEstadoCritica = "CONSUMO BAJO";
-                        Log.e("error", "escribe 10");
-                        escribirTablasSalida();
-                        variables.lect2 = -1;
-                        variables.lect3 = -1;
-                        imagenLiquid_3.setImageResource(android.R.color.transparent);
-
-                        return (1);
-                    } else {
-                        imagenLiquid_3.setImageResource(R.drawable.imagen_consumobajo);
-                    }
-                    if (giro_del_registro > 0)
-                        variables.lactual -= potencia;
-                } else
-                // mostrar las desviaciones graves
-                {
-                    Log.e("error2", "valor desv. grave 2 " + promedio + "-" + variables.consumoactual + "-" + variables.cactual);
-
-                    reporteEstadoCritica = "CONSUMO ALTO";
-                    if (giro_del_registro > 0)
-                        mensajeT("DESV. GRAVE X DEBAJO! GIRO MED.", msgCorto);
-
-                    if (estadoCritica == 2 && giro_del_registro == 0) {
-                        variables.estado = "7";
-                        mensajeT("DESV. MUY GRAVE X ENCIMA!", msgCorto);
-                        reporteEstadoCritica = "CONSUMO ALTO";
-                    }
-                }
-
-                if (estadoCritica == 2) {
-                    imagenLiquid_3.setImageResource(R.drawable.imagen_consumoalto);
-
-                    variables.estado = "7";
-                } else if (estadoCritica == 3) {                     // Consumo Bajo lectura menor a la anterior
-                    imagenLiquid_3.setImageResource(R.drawable.imagen_consumobajo);
-                }
-
-                if ((variables.lect2 == variables.lactual && variables.lect3 == variables.lactual) && (variables.nveces > 2)) {
-                    if (estadoCritica == 2) {
-                        reporteEstadoCritica = "CONSUMO ALTO";
-                        Log.e("error", "escribe 11");
-                        escribirTablasSalida();
-                        imagenLiquid_3.setImageResource(R.drawable.imagen_consumoalto);
-                    }
-                    if (giro_del_registro > 0)
-                        variables.lactual -= potencia;
-
-                    if (variables.lactual < l_anterior)
-                        variables.estado = "8"; // consumo negativo.... posible
-                    // fraude
-
-                    if (infoRegistroEntrada.gettablaRegistroDeEntrada_LQDA_CSMO().equals("P") ||
-                            infoRegistroSalida.gettablaRegistroSalida_COMENTARIO2().equals("003")) {
-                        Log.e("error vamos a cobrar promedio ", "Promedio para cobrar es" + infoRegistroEntrada.gettablaRegistroDeEntrada_promedioNormalizado().trim());
-                        //a esto le falta algo ya que teemos otra variacion en observar como se comporta la trimestral
-                        variables.consumoactual = (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_PRMDIO().trim()) / Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));// - promedio
-
-                    }
-                    variables.lect2 = -1;
-                    variables.lect3 = -1;
-
-                    return (1);
-                }
-                if (lectura_act.length() > 0) {
-                    if (variables.nveces >= 3) {
-
-                        notificacion.setSmallIcon(android.R.drawable.stat_sys_warning);
-                        notificacion.setContentTitle("Alerta");
-                        notificacion.setTicker("Alerta!!!");
-                        notificacion.setContentText("* ULTIMO INTENTO *");
-                        nm.notify(NOTIF_ALERTA_ID, notificacion.build());
-                        mensajeT("* ULTIMOS INTENTOS *", msgCorto);
-                        //Toast.makeText(getApplicationContext(), "* ULTIMO INTENTO *", Toast.LENGTH_SHORT).show();
-
-                    } else if (l_cadena < diales) {
-                        mensajeT("REVISE NRO RUEDAS", msgCorto);
-                        //  Toast.makeText(getApplicationContext(), "REVISE NRO RUEDAS", Toast.LENGTH_SHORT).show();
-
-                        notificacion.setSmallIcon(android.R.drawable.stat_sys_warning);
-                        notificacion.setContentTitle("Alerta");
-                        notificacion.setTicker("Alerta!!!");
-                        notificacion.setContentText("REVISE NRO RUEDAS");
-                        nm.notify(NOTIF_ALERTA_ID, notificacion.build());
-
-                    } else {
-                        if (estadosanteriores == 1) {
-                            mensajeT("VERIFIQUE  LECTURA POR CONSUMOS ANTERIORES ALTOS", msgLargo);
-                        } else {
-                            mensajeT("VERIFIQUE  LECTURA", msgCorto);
-                        }
-                    }
-                }
-                if (variables.lect2 == -1)
-                    variables.lect2 = variables.lactual;
-                else
-                // if (variables.lect3 == -1)
-                {
-                    variables.lect3 = variables.lect2;
-                    variables.lect2 = variables.lactual;
-                }
-            } else {
-                return (1);
-            }
-        } catch (Exception e) {
-            Log.e("error", "critica " + e.getMessage());
-            mensajeT("Problemas en el procedimiento de Critica", msgLargo);
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    */
     //se modifica esta analitica para maximo dos intentos de lecturas la otra se deja igual
     private int evaluarLecturaAnalitica(int primero, int N_veces, double l_actual, String Estado, String lectura_act, double c_actual) {
         String UltimacuentaTres = "";
@@ -14384,7 +13825,6 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         int giro_del_registro;
         double diferencia;
         try {
-
             if (variables.nveces <= 0)
                 if (infoRegistroSalida.gettablaRegistroSalida_INTENTOS().equals(" "))
                     variables.nveces = 0;
@@ -14527,7 +13967,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                 Log.e("error2", "diferencia2 " + diferencia);
                 if ((diferencia >= parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LI_BNDA_RES().trim())
-                        && diferencia <= parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LS_BNDA_RES().trim())) && diferencia > 0) {
+                        && diferencia <= parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_LS_BNDA_RES().trim())) && diferencia != 0) {
                     estadoCritica = 1;
 
                     variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";entro por normal ;" + formateo(diferencia) + "- con estos datos " +
@@ -14568,7 +14008,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                                 variables.impresoraAnalitica = "CONS. ALTO DV3";
                                 //toca consultar porque aqui en el consumo alto se cobra el promedio de uun mes para los trimestrales
                                 //variables.consumoactual = (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediocliente().trim()) / Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));// - promedio
-                                variables.cactual = (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediocliente().trim()) / Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));// - promedio
+                                //NIEVO CAMBIO PARECE QUE AQUI AL CRITICAR LOS INVERTICOS EN OCASIONES HACE LA MULTIPLICACION POR LA PERIOSIDAD PERO AQUI HAY QUE MIRAR SI ES SIMPRE
+                                variables.cactual = (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediocliente().trim())
+                                        *Double.parseDouble(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()) / Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));// - promedio
+
+//
 //                                variables.consumoactual = (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_PRMDIO().trim()) / Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));// - promedio
                             }
 
@@ -14579,7 +14023,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                             if ((diferencia > (2000 * parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim())))  )
                             {
                                 //deberia de cambiar este concumo aqui
-                                variables.cactual = variables.cactual = (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediocliente().trim()) / Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));
+                                variables.cactual =  (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediocliente().trim())
+                                        * Double.parseDouble(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()) / Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));
                             }
                             else
                             {
@@ -14750,7 +14195,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         Log.e("error vamos a cobrar promedio ", "Promedio para cobrar es" + infoRegistroEntrada.gettablaRegistroDeEntrada_promedioNormalizado().trim());
                         //a esto le falta algo ya que teemos otra variacion en observar como se comporta la trimestral
                         //preguntar aqui si aqui se cobra como minimo es un mes del promedio real
-                        variables.consumoactual = (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediocliente().trim()) / Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));// - promedio
+                        variables.consumoactual = (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediocliente().trim())
+                                * Double.parseDouble(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim())
+                                / Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));// - promedio
                         //variables.consumoactual = (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_PRMDIO().trim()) / Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));// - promedio
 
                     }

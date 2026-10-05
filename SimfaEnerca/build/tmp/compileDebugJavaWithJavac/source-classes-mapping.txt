@@ -26,12 +26,20 @@ com/gselectroCaqueta/accesoyseguridad/TrackingLocationService.java
  com.gselectroCaqueta.accesoyseguridad.TrackingLocationService
  com.gselectroCaqueta.accesoyseguridad.TrackingLocationService$1
  com.gselectroCaqueta.accesoyseguridad.TrackingLocationService$2
-com/gselectroCaqueta/comunicaciones/BDComunicaciones.java
- com.gselectroCaqueta.comunicaciones.BDComunicaciones
-com/gselectroCaqueta/moduloLicencia/ActLicencia.java
- com.gselectroCaqueta.moduloLicencia.ActLicencia
- com.gselectroCaqueta.moduloLicencia.ActLicencia$1
- com.gselectroCaqueta.moduloLicencia.ActLicencia$2
+com/gselectroCaqueta/moduloanomalias/ModuloDeAnomalias.java
+ com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias
+ com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias$1
+ com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias$2
+ com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias$3
+ com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias$4
+ com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias$5
+ com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias$6
+com/gselectroCaqueta/modulocaptnovedlect/ModuloAdicionarVerificacion.java
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarVerificacion
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarVerificacion$1
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarVerificacion$2
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarVerificacion$Reloj
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarVerificacion$UsarGPS
 com/gsutil/DatosWS.java
  com.gsutil.DatosWS
 com/gsutil/Printzpl.java
@@ -45,10 +53,10 @@ com/gselectroCaqueta/comunicaciones/ConfigurarWEBFragment.java
  com.gselectroCaqueta.comunicaciones.ConfigurarWEBFragment$1
  com.gselectroCaqueta.comunicaciones.ConfigurarWEBFragment$AsyncCallWS
  com.gselectroCaqueta.comunicaciones.ConfigurarWEBFragment$OnHeadSelectedListener
-com/gselectroCaqueta/moduloMapas/MapsActivity.java
- com.gselectroCaqueta.moduloMapas.MapsActivity
- com.gselectroCaqueta.moduloMapas.MapsActivity$1
- com.gselectroCaqueta.moduloMapas.MapsActivity$2
+com/gselectroCaqueta/modulocaptnovedlect/ModuloAdicionarCertificado.java
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarCertificado
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarCertificado$1
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarCertificado$2
 com/gselectroCaqueta/modulobluetooth/DeviceListActivity.java
  com.gselectroCaqueta.modulobluetooth.DeviceListActivity
  com.gselectroCaqueta.modulobluetooth.DeviceListActivity$1
@@ -60,10 +68,16 @@ com/gselectroCaqueta/accesoyseguridad/BDifNull.java
  com.gselectroCaqueta.accesoyseguridad.BDifNull
 com/gselectroCaqueta/moduloMapas/NavigationHelper.java
  com.gselectroCaqueta.moduloMapas.NavigationHelper
-com/gselectroCaqueta/accesoyseguridad/ApuntadorCliente.java
- com.gselectroCaqueta.accesoyseguridad.ApuntadorCliente
-com/gselectroCaqueta/tablas/TablaEncabezado.java
- com.gselectroCaqueta.tablas.TablaEncabezado
+com/gselectroCaqueta/moduloanomalias/AlertaCuentaD.java
+ com.gselectroCaqueta.moduloanomalias.AlertaCuentaD
+ com.gselectroCaqueta.moduloanomalias.AlertaCuentaD$1
+ com.gselectroCaqueta.moduloanomalias.AlertaCuentaD$2
+com/gselectroCaqueta/moduloscannerhardware/ModuloScannerKT40Q.java
+ com.gselectroCaqueta.moduloscannerhardware.ModuloScannerKT40Q
+ com.gselectroCaqueta.moduloscannerhardware.ModuloScannerKT40Q$1
+ com.gselectroCaqueta.moduloscannerhardware.ModuloScannerKT40Q$2
+ com.gselectroCaqueta.moduloscannerhardware.ModuloScannerKT40Q$3
+ com.gselectroCaqueta.moduloscannerhardware.ModuloScannerKT40Q$4
 com/gselectroCaqueta/tablas/TablaClaseServicio.java
  com.gselectroCaqueta.tablas.TablaClaseServicio
 com/sonyericsson/util/ScalingUtilities.java
@@ -72,8 +86,13 @@ com/sonyericsson/util/ScalingUtilities.java
 com/gselectroCaqueta/modulocaptnovedlect/ModuloVerificaConsumo.java
  com.gselectroCaqueta.modulocaptnovedlect.ModuloVerificaConsumo
  com.gselectroCaqueta.modulocaptnovedlect.ModuloVerificaConsumo$1
-com/gsutil/WsConceptosLiquidados.java
- com.gsutil.WsConceptosLiquidados
+com/gselectroCaqueta/modulobusquedacuenta/ModuloConsultaNoEnviados.java
+ com.gselectroCaqueta.modulobusquedacuenta.ModuloConsultaNoEnviados
+ com.gselectroCaqueta.modulobusquedacuenta.ModuloConsultaNoEnviados$1
+ com.gselectroCaqueta.modulobusquedacuenta.ModuloConsultaNoEnviados$2
+ com.gselectroCaqueta.modulobusquedacuenta.ModuloConsultaNoEnviados$3
+ com.gselectroCaqueta.modulobusquedacuenta.ModuloConsultaNoEnviados$4
+ com.gselectroCaqueta.modulobusquedacuenta.ModuloConsultaNoEnviados$5
 com/gselectroCaqueta/tablas/TablaContadorSalida.java
  com.gselectroCaqueta.tablas.TablaContadorSalida
 com/gselectroCaqueta/comunicaciones/PagerAdapter.java
@@ -85,8 +104,10 @@ com/gselectroCaqueta/comunicaciones/BackupFotosFragment.java
  com.gselectroCaqueta.comunicaciones.BackupFotosFragment$OnHeadSelectedListener
 com/gselectroCaqueta/tablas/TablaConvenios.java
  com.gselectroCaqueta.tablas.TablaConvenios
-com/gselectroCaqueta/accesoyseguridad/CrudifNull.java
- com.gselectroCaqueta.accesoyseguridad.CrudifNull
+com/gselectroCaqueta/modulochat/Insertar.java
+ com.gselectroCaqueta.modulochat.Insertar
+ com.gselectroCaqueta.modulochat.Insertar$1
+ com.gselectroCaqueta.modulochat.Insertar$AsyncCallWS
 com/gselectroCaqueta/tablas/TablaMensajes.java
  com.gselectroCaqueta.tablas.TablaMensajes
 com/gselectroCaqueta/tablas/TablaTarifas.java
@@ -102,30 +123,34 @@ com/gselectroCaqueta/moduloscannerhardware/UnitechReceiverScan.java
  com.gselectroCaqueta.moduloscannerhardware.UnitechReceiverScan$1
 com/gselectroCaqueta/comunicaciones/CrudComunicaciones.java
  com.gselectroCaqueta.comunicaciones.CrudComunicaciones
-com/gselectroCaqueta/comunicaciones/Comunicaciones.java
- com.gselectroCaqueta.comunicaciones.Comunicaciones
- com.gselectroCaqueta.comunicaciones.Comunicaciones$1
- com.gselectroCaqueta.comunicaciones.Comunicaciones$10
- com.gselectroCaqueta.comunicaciones.Comunicaciones$11
- com.gselectroCaqueta.comunicaciones.Comunicaciones$12
- com.gselectroCaqueta.comunicaciones.Comunicaciones$13
- com.gselectroCaqueta.comunicaciones.Comunicaciones$2
- com.gselectroCaqueta.comunicaciones.Comunicaciones$3
- com.gselectroCaqueta.comunicaciones.Comunicaciones$4
- com.gselectroCaqueta.comunicaciones.Comunicaciones$5
- com.gselectroCaqueta.comunicaciones.Comunicaciones$6
- com.gselectroCaqueta.comunicaciones.Comunicaciones$7
- com.gselectroCaqueta.comunicaciones.Comunicaciones$8
- com.gselectroCaqueta.comunicaciones.Comunicaciones$9
- com.gselectroCaqueta.comunicaciones.Comunicaciones$AsyncCallWS
+com/gselectroCaqueta/modulocaptnovedlect/ModuloCaptNovLect.java
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$1
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$10
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$11
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$12
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$13
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$14
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$15
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$2
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$3
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$4
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$5
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$6
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$7
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$8
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$9
 com/gselectroCaqueta/accesoyseguridad/FechayHora.java
  com.gselectroCaqueta.accesoyseguridad.FechayHora
  com.gselectroCaqueta.accesoyseguridad.FechayHora$1
  com.gselectroCaqueta.accesoyseguridad.FechayHora$2
  com.gselectroCaqueta.accesoyseguridad.FechayHora$AsyncCallRed
  com.gselectroCaqueta.accesoyseguridad.FechayHora$UsarGPS
-com/gselectroCaqueta/tablas/TablaEntradaClientes.java
- com.gselectroCaqueta.tablas.TablaEntradaClientes
+com/gselectroCaqueta/modulocaptnovedlect/ModuloConfigFormatoImpresion.java
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloConfigFormatoImpresion
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloConfigFormatoImpresion$1
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloConfigFormatoImpresion$2
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloConfigFormatoImpresion$3
 com/gselectroCaqueta/modulocomentarios/PanelComentarios.java
  com.gselectroCaqueta.modulocomentarios.PanelComentarios
  com.gselectroCaqueta.modulocomentarios.PanelComentarios$1
@@ -143,8 +168,11 @@ com/gselectroCaqueta/accesoyseguridad/VariablesGlobales.java
  com.gselectroCaqueta.accesoyseguridad.VariablesGlobales
 com/gselectroCaqueta/moduloanomalias/AnomaliaDeNoLectura.java
  com.gselectroCaqueta.moduloanomalias.AnomaliaDeNoLectura
-com/gselectroCaqueta/tablas/Novedades.java
- com.gselectroCaqueta.tablas.Novedades
+com/gselectroCaqueta/moduloseleccionlote/ModuloSeleccionLote.java
+ com.gselectroCaqueta.moduloseleccionlote.ModuloSeleccionLote
+ com.gselectroCaqueta.moduloseleccionlote.ModuloSeleccionLote$1
+ com.gselectroCaqueta.moduloseleccionlote.ModuloSeleccionLote$2
+ com.gselectroCaqueta.moduloseleccionlote.ModuloSeleccionLote$3
 com/gselectroCaqueta/tablas/TablaAforadores.java
  com.gselectroCaqueta.tablas.TablaAforadores
 com/gselectroCaqueta/modulocambiodigitos/ModuloCambioDigitos.java
@@ -203,72 +231,6 @@ com/gselectroCaqueta/tablas/TablaCobrosRealizados.java
  com.gselectroCaqueta.tablas.TablaCobrosRealizados
 com/gselectroCaqueta/tablas/TablaRangos.java
  com.gselectroCaqueta.tablas.TablaRangos
-com/gselectroCaqueta/tablas/TablaFestivos.java
- com.gselectroCaqueta.tablas.TablaFestivos
-com/gselectroCaqueta/tablas/TablaCertificacion.java
- com.gselectroCaqueta.tablas.TablaCertificacion
-com/gselectroCaqueta/tablas/EnvioGPS.java
- com.gselectroCaqueta.tablas.EnvioGPS
-com/gselectroCaqueta/comunicaciones/Configurar_webIp.java
- com.gselectroCaqueta.comunicaciones.Configurar_webIp
- com.gselectroCaqueta.comunicaciones.Configurar_webIp$1
- com.gselectroCaqueta.comunicaciones.Configurar_webIp$2
- com.gselectroCaqueta.comunicaciones.Configurar_webIp$3
- com.gselectroCaqueta.comunicaciones.Configurar_webIp$4
- com.gselectroCaqueta.comunicaciones.Configurar_webIp$5
- com.gselectroCaqueta.comunicaciones.Configurar_webIp$AsyncCallWS
-com/gselectroCaqueta/tablas/Generica.java
- com.gselectroCaqueta.tablas.Generica
-com/gselectroCaqueta/tablas/TablaClienteSalida.java
- com.gselectroCaqueta.tablas.TablaClienteSalida
-com/gselectroCaqueta/modulocaptnovedlect/ModuloFirma.java
- com.gselectroCaqueta.modulocaptnovedlect.ModuloFirma
- com.gselectroCaqueta.modulocaptnovedlect.ModuloFirma$1
- com.gselectroCaqueta.modulocaptnovedlect.ModuloFirma$2
- com.gselectroCaqueta.modulocaptnovedlect.ModuloFirma$3
- com.gselectroCaqueta.modulocaptnovedlect.ModuloFirma$4
- com.gselectroCaqueta.modulocaptnovedlect.ModuloFirma$CustomView
-com/gselectroCaqueta/tablas/TablaEncabezado_NUEVAAAAAAAAAAA.java
- com.gselectroCaqueta.tablas.TablaEncabezado_NUEVAAAAAAAAAAA
-com/gselectroCaqueta/tablas/TablaRegistroSalida.java
- com.gselectroCaqueta.tablas.TablaRegistroSalida
-com/gselectroCaqueta/moduloreimpresion/ModuloReimpresion.java
- com.gselectroCaqueta.moduloreimpresion.ModuloReimpresion
- com.gselectroCaqueta.moduloreimpresion.ModuloReimpresion$1
- com.gselectroCaqueta.moduloreimpresion.ModuloReimpresion$2
- com.gselectroCaqueta.moduloreimpresion.ModuloReimpresion$3
- com.gselectroCaqueta.moduloreimpresion.ModuloReimpresion$AsyncCallWS
-com/gsutil/UtilsNet.java
- com.gsutil.UtilsNet
-com/gselectroCaqueta/modulobusquedacuenta/ModuloConsultaNoEnviados.java
- com.gselectroCaqueta.modulobusquedacuenta.ModuloConsultaNoEnviados
- com.gselectroCaqueta.modulobusquedacuenta.ModuloConsultaNoEnviados$1
- com.gselectroCaqueta.modulobusquedacuenta.ModuloConsultaNoEnviados$2
- com.gselectroCaqueta.modulobusquedacuenta.ModuloConsultaNoEnviados$3
- com.gselectroCaqueta.modulobusquedacuenta.ModuloConsultaNoEnviados$4
- com.gselectroCaqueta.modulobusquedacuenta.ModuloConsultaNoEnviados$5
-com/gselectroCaqueta/moduloanomalias/ModuloDeAnomalias.java
- com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias
- com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias$1
- com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias$2
- com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias$3
- com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias$4
- com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias$5
- com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias$6
-com/gselectroCaqueta/modulochat/Insertar.java
- com.gselectroCaqueta.modulochat.Insertar
- com.gselectroCaqueta.modulochat.Insertar$1
- com.gselectroCaqueta.modulochat.Insertar$AsyncCallWS
-com/gselectroCaqueta/modulocaptnovedlect/ModuloAdicionarVerificacion.java
- com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarVerificacion
- com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarVerificacion$1
- com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarVerificacion$2
- com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarVerificacion$Reloj
- com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarVerificacion$UsarGPS
-com/gselectroCaqueta/moduloGPS/ActGPS.java
- com.gselectroCaqueta.moduloGPS.ActGPS
- com.gselectroCaqueta.moduloGPS.ActGPS$1
- com.gselectroCaqueta.moduloGPS.ActGPS$MyLocationListener
 com/gselectroCaqueta/accesoyseguridad/MenuDeLiquidacion.java
  com.gselectroCaqueta.accesoyseguridad.MenuDeLiquidacion
  com.gselectroCaqueta.accesoyseguridad.MenuDeLiquidacion$1
@@ -314,41 +276,87 @@ com/gselectroCaqueta/modulobusquedacuenta/ModuloBusquedaCuenta.java
  com.gselectroCaqueta.modulobusquedacuenta.ModuloBusquedaCuenta$3
  com.gselectroCaqueta.modulobusquedacuenta.ModuloBusquedaCuenta$4
  com.gselectroCaqueta.modulobusquedacuenta.ModuloBusquedaCuenta$5
-com/gselectroCaqueta/modulocaptnovedlect/ModuloCaptNovLect.java
- com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect
- com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$1
- com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$10
- com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$11
- com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$12
- com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$13
- com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$14
- com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$15
- com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$2
- com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$3
- com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$4
- com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$5
- com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$6
- com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$7
- com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$8
- com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect$9
-com/gselectroCaqueta/modulocaptnovedlect/ModuloConfigFormatoImpresion.java
- com.gselectroCaqueta.modulocaptnovedlect.ModuloConfigFormatoImpresion
- com.gselectroCaqueta.modulocaptnovedlect.ModuloConfigFormatoImpresion$1
- com.gselectroCaqueta.modulocaptnovedlect.ModuloConfigFormatoImpresion$2
- com.gselectroCaqueta.modulocaptnovedlect.ModuloConfigFormatoImpresion$3
+com/gselectroCaqueta/tablas/EnvioGPS.java
+ com.gselectroCaqueta.tablas.EnvioGPS
+com/gselectroCaqueta/comunicaciones/Configurar_webIp.java
+ com.gselectroCaqueta.comunicaciones.Configurar_webIp
+ com.gselectroCaqueta.comunicaciones.Configurar_webIp$1
+ com.gselectroCaqueta.comunicaciones.Configurar_webIp$2
+ com.gselectroCaqueta.comunicaciones.Configurar_webIp$3
+ com.gselectroCaqueta.comunicaciones.Configurar_webIp$4
+ com.gselectroCaqueta.comunicaciones.Configurar_webIp$5
+ com.gselectroCaqueta.comunicaciones.Configurar_webIp$AsyncCallWS
+com/gselectroCaqueta/tablas/Generica.java
+ com.gselectroCaqueta.tablas.Generica
+com/gselectroCaqueta/tablas/TablaClienteSalida.java
+ com.gselectroCaqueta.tablas.TablaClienteSalida
+com/gselectroCaqueta/modulocaptnovedlect/ModuloFirma.java
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloFirma
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloFirma$1
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloFirma$2
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloFirma$3
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloFirma$4
+ com.gselectroCaqueta.modulocaptnovedlect.ModuloFirma$CustomView
+com/gselectroCaqueta/tablas/TablaEncabezado_NUEVAAAAAAAAAAA.java
+ com.gselectroCaqueta.tablas.TablaEncabezado_NUEVAAAAAAAAAAA
+com/gselectroCaqueta/tablas/TablaRegistroSalida.java
+ com.gselectroCaqueta.tablas.TablaRegistroSalida
+com/gselectroCaqueta/moduloreimpresion/ModuloReimpresion.java
+ com.gselectroCaqueta.moduloreimpresion.ModuloReimpresion
+ com.gselectroCaqueta.moduloreimpresion.ModuloReimpresion$1
+ com.gselectroCaqueta.moduloreimpresion.ModuloReimpresion$2
+ com.gselectroCaqueta.moduloreimpresion.ModuloReimpresion$3
+ com.gselectroCaqueta.moduloreimpresion.ModuloReimpresion$AsyncCallWS
+com/gsutil/UtilsNet.java
+ com.gsutil.UtilsNet
+com/gselectroCaqueta/tablas/TablaEncabezado.java
+ com.gselectroCaqueta.tablas.TablaEncabezado
+com/gselectroCaqueta/accesoyseguridad/ApuntadorCliente.java
+ com.gselectroCaqueta.accesoyseguridad.ApuntadorCliente
+com/gselectroCaqueta/comunicaciones/BDComunicaciones.java
+ com.gselectroCaqueta.comunicaciones.BDComunicaciones
+com/gselectroCaqueta/tablas/Novedades.java
+ com.gselectroCaqueta.tablas.Novedades
+com/gselectroCaqueta/moduloMapas/MapsActivity.java
+ com.gselectroCaqueta.moduloMapas.MapsActivity
+ com.gselectroCaqueta.moduloMapas.MapsActivity$1
+ com.gselectroCaqueta.moduloMapas.MapsActivity$2
+com/gselectroCaqueta/tablas/TablaFestivos.java
+ com.gselectroCaqueta.tablas.TablaFestivos
+com/gselectroCaqueta/tablas/TablaEntradaClientes.java
+ com.gselectroCaqueta.tablas.TablaEntradaClientes
+com/gselectroCaqueta/moduloGPS/ActGPS.java
+ com.gselectroCaqueta.moduloGPS.ActGPS
+ com.gselectroCaqueta.moduloGPS.ActGPS$1
+ com.gselectroCaqueta.moduloGPS.ActGPS$MyLocationListener
+com/gselectroCaqueta/tablas/TablaCertificacion.java
+ com.gselectroCaqueta.tablas.TablaCertificacion
 com/gselectroCaqueta/moduloscannerhardware/ModuloEscanerHardware.java
  com.gselectroCaqueta.moduloscannerhardware.ModuloEscanerHardware
  com.gselectroCaqueta.moduloscannerhardware.ModuloEscanerHardware$1
  com.gselectroCaqueta.moduloscannerhardware.ModuloEscanerHardware$2
-com/gselectroCaqueta/modulocaptnovedlect/ModuloAdicionarCertificado.java
- com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarCertificado
- com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarCertificado$1
- com.gselectroCaqueta.modulocaptnovedlect.ModuloAdicionarCertificado$2
-com/gselectroCaqueta/moduloseleccionlote/ModuloSeleccionLote.java
- com.gselectroCaqueta.moduloseleccionlote.ModuloSeleccionLote
- com.gselectroCaqueta.moduloseleccionlote.ModuloSeleccionLote$1
- com.gselectroCaqueta.moduloseleccionlote.ModuloSeleccionLote$2
- com.gselectroCaqueta.moduloseleccionlote.ModuloSeleccionLote$3
+com/gselectroCaqueta/comunicaciones/Comunicaciones.java
+ com.gselectroCaqueta.comunicaciones.Comunicaciones
+ com.gselectroCaqueta.comunicaciones.Comunicaciones$1
+ com.gselectroCaqueta.comunicaciones.Comunicaciones$10
+ com.gselectroCaqueta.comunicaciones.Comunicaciones$11
+ com.gselectroCaqueta.comunicaciones.Comunicaciones$12
+ com.gselectroCaqueta.comunicaciones.Comunicaciones$13
+ com.gselectroCaqueta.comunicaciones.Comunicaciones$2
+ com.gselectroCaqueta.comunicaciones.Comunicaciones$3
+ com.gselectroCaqueta.comunicaciones.Comunicaciones$4
+ com.gselectroCaqueta.comunicaciones.Comunicaciones$5
+ com.gselectroCaqueta.comunicaciones.Comunicaciones$6
+ com.gselectroCaqueta.comunicaciones.Comunicaciones$7
+ com.gselectroCaqueta.comunicaciones.Comunicaciones$8
+ com.gselectroCaqueta.comunicaciones.Comunicaciones$9
+ com.gselectroCaqueta.comunicaciones.Comunicaciones$AsyncCallWS
+com/gselectroCaqueta/moduloLicencia/ActLicencia.java
+ com.gselectroCaqueta.moduloLicencia.ActLicencia
+ com.gselectroCaqueta.moduloLicencia.ActLicencia$1
+ com.gselectroCaqueta.moduloLicencia.ActLicencia$2
+com/gselectroCaqueta/accesoyseguridad/CrudifNull.java
+ com.gselectroCaqueta.accesoyseguridad.CrudifNull
 com/gselectroCaqueta/accesoyseguridad/MenuPrincipal.java
  com.gselectroCaqueta.accesoyseguridad.MenuPrincipal
  com.gselectroCaqueta.accesoyseguridad.MenuPrincipal$1
@@ -362,13 +370,5 @@ com/gselectroCaqueta/accesoyseguridad/MenuPrincipal.java
  com.gselectroCaqueta.accesoyseguridad.MenuPrincipal$9
  com.gselectroCaqueta.accesoyseguridad.MenuPrincipal$AsyncCallWS
  com.gselectroCaqueta.accesoyseguridad.MenuPrincipal$UsarGPS
-com/gselectroCaqueta/moduloanomalias/AlertaCuentaD.java
- com.gselectroCaqueta.moduloanomalias.AlertaCuentaD
- com.gselectroCaqueta.moduloanomalias.AlertaCuentaD$1
- com.gselectroCaqueta.moduloanomalias.AlertaCuentaD$2
-com/gselectroCaqueta/moduloscannerhardware/ModuloScannerKT40Q.java
- com.gselectroCaqueta.moduloscannerhardware.ModuloScannerKT40Q
- com.gselectroCaqueta.moduloscannerhardware.ModuloScannerKT40Q$1
- com.gselectroCaqueta.moduloscannerhardware.ModuloScannerKT40Q$2
- com.gselectroCaqueta.moduloscannerhardware.ModuloScannerKT40Q$3
- com.gselectroCaqueta.moduloscannerhardware.ModuloScannerKT40Q$4
+com/gsutil/WsConceptosLiquidados.java
+ com.gsutil.WsConceptosLiquidados
