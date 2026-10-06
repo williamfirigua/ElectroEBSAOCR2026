@@ -106,11 +106,16 @@ import com.gselectroCaqueta.tablas.TablaEncabezado;
 import com.gselectroCaqueta.tablas.TablaEntradaClientes;
 import com.gselectroCaqueta.tablas.TablaFestivos;
 import com.gselectroCaqueta.tablas.TablaMedidorEntrada;
+import com.gselectroCaqueta.tablas.TablaMensajes;
 import com.gselectroCaqueta.tablas.TablaMunicipios;
 import com.gselectroCaqueta.tablas.TablaRangos;
 import com.gselectroCaqueta.tablas.TablaRegistroDeEntrada;
 import com.gselectroCaqueta.tablas.TablaRegistroSalida;
 import com.gselectroCaqueta.tablas.TablaTarifas;
+import com.gselectroCaqueta.impresion.AdaptadorMovil;
+import com.gselectroCaqueta.impresion.AjustesImpresora;
+import com.gselectroCaqueta.impresion.DatosFactura;
+import com.gselectroCaqueta.impresion.RenderFactura;
 import com.gsutil.AsyncResponse;
 import com.gsutil.DatosWS;
 import com.gsutil.Printzpl;
@@ -2765,6 +2770,108 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         }
     }
 
+    // =====================================================================================
+    // Impresion EBSA con plantilla CPCL (paquete com.gselectroCaqueta.impresion).
+    // Reemplaza a generarArchivoTextoImpresion() + procedimientoUnionArchivos() cuando la
+    // plantilla FORMATO_CORTA.CPCL esta instalada en DATOSDEENTRADA. Sin plantilla, la movil
+    // sigue imprimiendo con el mecanismo anterior (Impresion.log + IMPRIMIR.TXT).
+    // =====================================================================================
+
+    /** El formato nuevo se activa por la sola presencia de la plantilla en DATOSDEENTRADA. */
+    private boolean formatoEbsaActivo() {
+        return new File(VariablesGlobales.directorioactual + "/DATOSDEENTRADA/" + RenderFactura.PLANTILLA_CORTA).isFile();
+    }
+
+    /**
+     * Escribe LBLS/<cuenta>_<anio>_<mes>.LOG con el mismo nombre que hoy, asi
+     * procedimientoDeImpresionPagina(), la reimpresion y el indice L<ciclo> no cambian.
+     *
+     * @return 1 si el archivo quedo escrito; 0 si no (la causa queda en LOGEVENTOS.LOG)
+     */
+    private int generarFacturaConPlantilla() {
+        try {
+            // MENSAJES.TXT (DatosSoporte): mensaje de interes por CDGOMNSJE ("15087A" = municipio DANE + A/T).
+            // Si el archivo no esta, el adaptador sigue sin mensaje (la plantilla omite esas lineas).
+            TablaMensajes mensajes = new TablaMensajes();
+            if (!mensajes.abrir_TablaMensajes(VariablesGlobales.directorioactual + "/DATOSDEENTRADA/MENSAJES.TXT")) {
+                mensajes = null;
+            }
+            try {
+                AdaptadorMovil adaptador = new AdaptadorMovil(
+                        infoClienteEntrada, infoClienteSalida, infoMedidorEntrada, infoRegistroEntrada,
+                        infoRegistroSalida, infoCobrosLiquidados, descripcionConcepto, municipio, mensajes);
+
+                String version = "Version 26.01.14.A-11 Lect.1" + infoClienteSalida.gettablaClienteSalida_LECTOR().trim()
+                        + " Cont.APCSoluciones - " + (EsImpresora521 == 1 ? "ZQ-521" : "RW-420");
+
+                DatosFactura datos = adaptador.leer(descripcionTipoLectura(), version);
+                if (datos.mensaje.isEmpty() && !datos.codigoMensaje.isEmpty()) {
+                    utils.Log(logfile, "[MenuDeLiquidacion]generarFacturaConPlantilla(); cuenta " + datos.cuenta
+                            + " sin mensaje de interes: codigo " + datos.codigoMensaje + " no esta en MENSAJES.TXT"
+                            + (mensajes == null ? " (archivo no abierto)" : ""));
+                }
+
+                RenderFactura render = new RenderFactura(
+                        new File(VariablesGlobales.directorioactual + "/DATOSDEENTRADA"),
+                        new File(VariablesGlobales.directorioactual + "/LBLS"));
+                // Intensidad, corrimiento X/Y y modelo que guarda ModuloConfigFormatoImpresion (ValoresFormato.log).
+                AjustesImpresora ajustes = AjustesImpresora.leer(
+                        new File(VariablesGlobales.directorioactual + "/" + AjustesImpresora.ARCHIVO));
+                RenderFactura.Salida salida = render.generar(datos, ajustes);
+
+                if (!salida.faltantes.isEmpty()) {
+                    utils.Log(logfile, "[MenuDeLiquidacion]generarFacturaConPlantilla(); cuenta " + datos.cuenta
+                            + " claves sin dato en " + salida.plantilla + ": " + salida.faltantes);
+                }
+                if (salida.degradada) {
+                    utils.Log(logfile, "[MenuDeLiquidacion]generarFacturaConPlantilla(); cuenta " + datos.cuenta
+                            + " con aseo impresa con FORMATO_CORTA porque FORMATO_LARGA.CPCL no esta instalada");
+                }
+                registrarEnIndiceLbl(salida.archivo.getName());
+                escribeResumenTiempo("Factura con plantilla " + salida.plantilla + " " + ajustes + "|" + VariablesGlobales.registroactual);
+                return 1;
+            } finally {
+                if (mensajes != null) mensajes.Cerrar_TablaMensajes();
+            }
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]generarFacturaConPlantilla(); " + e.getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Texto de "Tipo lectura" de la factura ("Toma Exitosa", "Inmueble Sin Servicio"...).
+     * Misma resolucion que hace generarTextosMedidor() para causadesc, sin el prefijo " 0: ".
+     */
+    private String descripcionTipoLectura() {
+        String causa = infoRegistroSalida.gettablaRegistroSalida_CAUSADENOLECTURA().trim();
+        if (causa.isEmpty() || causa.equals("0")) return "Toma Exitosa";
+        if (anomaliaDeLectura.abrir_AnomaliaDeNoLectura(anomaliaDeLectura.getArchivo_AnomaliaDeNoLectura())) {
+            anomaliaDeLectura.buscarbinario_AnomaliaDeNoLectura(causa);
+            anomaliaDeLectura.Cerrar_AnomaliaDeNoLectura();
+            if (anomaliaDeLectura.getEncontro_AnomaliaDeNoLectura() > 0) {
+                return anomaliaDeLectura.getanomaliaDeNoLectura_DESCRIPCION().trim();
+            }
+        }
+        return "Causal " + causa;
+    }
+
+    /** Mismo registro en LBLS/L<ciclo><mun><sec><div> que hace procedimientoUnionArchivos(). */
+    private void registrarEnIndiceLbl(String nombreLog) throws IOException {
+        File indice = new File(VariablesGlobales.directorioactual + "/LBLS/" + "L" + Ciclo + Municipio + Seccion + Division);
+        if (!indice.exists()) indice.createNewFile();
+        BufferedReader r = new BufferedReader(new FileReader(indice));
+        try {
+            String l;
+            while ((l = r.readLine()) != null) {
+                if (l.length() >= 50 && l.substring(0, 50).trim().equals(nombreLog)) return;
+            }
+        } finally {
+            r.close();
+        }
+        utils.EscribirLinea(indice, String.format("%1$-50s", nombreLog) + ";X\r\n");
+    }
+
     private int procesoImpresionFactura(int dato) {
         // Log.e("error2", "procesoImpresionFactura");
 
@@ -2810,7 +2917,14 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
             }
             // Log.e("error", "entra a imp");
-            procedimientoUnionArchivos();
+            if (formatoEbsaActivo()) {
+                if (generarFacturaConPlantilla() == 0) {
+                    mensajeT("No se pudo generar la factura\ncon la plantilla EBSA.\nRevise LOGEVENTOS.LOG", msgMedio);
+                    return 0;
+                }
+            } else {
+                procedimientoUnionArchivos();
+            }
             reimprimirxerror = 0;
             if (indicadorManual == 0)
                 if (VariablesGlobales.habilitadaimpresora == 0 && indicadorManual == 0) {
@@ -2845,6 +2959,48 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         return (1);
     }
 
+    /**
+     * Envia un archivo CPCL tal cual esta en disco, byte a byte, en bloques de 20 renglones con la
+     * misma pausa que enviar_al_puerto(). No depende de numeros de linea ni de juego de caracteres:
+     * el formato con plantilla puede tener cualquier cantidad de lineas y trae el FNC1 (byte 0x86)
+     * del codigo de barras ya embebido en el dato. Reemplaza, solo para ese formato, el envio por
+     * renglones de procedimientoDeImpresionPagina(), que corta las lineas 60 y 61 en la columna 59.
+     */
+    private boolean enviarArchivoCpcl(File archivo) throws IOException, InterruptedException {
+        if (VariablesGlobales.btPrintService == null
+                || VariablesGlobales.btPrintService.getState() != btPrintFile.STATE_CONNECTED) {
+            mensajeT("La impresora no esta conectada", msgLargo);
+            return false;
+        }
+        byte[] datos = new byte[(int) archivo.length()];
+        RandomAccessFile raf = new RandomAccessFile(archivo, "r");
+        try {
+            raf.readFully(datos);
+        } finally {
+            raf.close();
+        }
+        final int renglonesPorBloque = 20;
+        int inicio = 0, renglones = 0;
+        for (int i = 0; i < datos.length; i++) {
+            if (datos[i] == '\n' && ++renglones == renglonesPorBloque) {
+                escribirBloqueImpresora(datos, inicio, i + 1);
+                inicio = i + 1;
+                renglones = 0;
+            }
+        }
+        if (inicio < datos.length) {
+            escribirBloqueImpresora(datos, inicio, datos.length);
+        }
+        return true;
+    }
+
+    private void escribirBloqueImpresora(byte[] datos, int desde, int hasta) throws InterruptedException {
+        byte[] bloque = new byte[hasta - desde];
+        System.arraycopy(datos, desde, bloque, 0, bloque.length);
+        VariablesGlobales.btPrintService.write(bloque);
+        Thread.sleep(50);
+    }
+
     private int procedimientoDeImpresionPagina(int dato) {
         // Log.e("errror", "entra a imprimir");
         String imprimira;
@@ -2872,6 +3028,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         try {
             tiempoInactivolaImpresora = 0;
 
+            if (formatoEbsaActivo()) {
+                // formato con plantilla: el archivo va completo y sin tocar
+                if (!enviarArchivoCpcl(file)) return 0;
+            } else
             if (dato == 0) {
                 fileName = VariablesGlobales.directorioactual + "/LBLS/" +
                         infoRegistroSalida.gettablaRegistroSalida_CUENTA().trim() + "_" + infoClienteEntrada.gettablaEntradaClientes_anio().trim() + "_" +
@@ -7235,7 +7395,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             lblInfoMedida.setText("ACTIVA");
         }
 
-        if (terminal.trim().equals("354379550180590") || terminal.trim().equals("351007491579959")
+        if (terminal.trim().equals("354379550180590") || terminal.trim().equals("351007491579959") || terminal.trim().equals("351007492166830")
         || terminal.trim().equals("358767141019390") || terminal.trim().equals("868995078034487")
                 || terminal.trim().equals("868995078034628")
         ) {

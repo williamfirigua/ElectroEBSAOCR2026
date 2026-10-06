@@ -384,7 +384,9 @@ public class GuiAcceso extends AppCompatActivity {
                             "\\Cic@@@@@@\\DatosSoporte\\TARIFAS.TXT \r\n" +
                             "\\Cic@@@@@@\\DatosSoporte\\MARCAS.TXT \r\n" +
                             "\\Cic@@@@@@\\DatosSoporte\\AFOROS.TXT \r\n" +
-                            "\\Cic@@@@@@\\DatosSoporte\\IDNOVEDADES.TXT";
+                            "\\Cic@@@@@@\\DatosSoporte\\IDNOVEDADES.TXT \r\n" +
+                            "\\Cic@@@@@@\\DatosSoporte\\FORMATO_CORTA.CPCL \r\n" +
+                            "\\Cic@@@@@@\\DatosSoporte\\FORMATO_LARGA.CPCL";
 
                     utils.WriteLine(file, ruta);
                 }
@@ -677,7 +679,7 @@ public class GuiAcceso extends AppCompatActivity {
         File directorio2 = new File(VariablesGlobales.directorioactual + "/DATOSDEENTRADA");
         String[] lista2 = directorio2.list();
 
-        String[] files = {"LOGEVENTOS.LOG", "PRINTER.LOG", "NOMBRE", "ACUERDOS.TXT", "CATEGORIASINF.TXT", "CAUSAS.TXT", "CENSO.TXT", "ESTADOS.TXT", "NOTIFICACIONES.TXT", "OBSERVA.TXT", "ADMINIST.TXT", "ADMINISTADORDEPDA.TXT", "ENVIOSGPRS.SDA", "LECTURAADMINISTRADA.TXT", "ACTIVID.TXT", "CAUSA_NL.TXT", "CLASE_SE.TXT", "CLIENTE.TXT", "CONVENIO.TXT", "DES_CONC.TXT", "DES_TARI.TXT", "EST_CLIE.TXT", "FECHAACONFIGURAR.TXT", "FESTIVOS.TXT", "GENERAL.TXT", "LECTOR.TXT", "MEDIDOR.TXT", "MUNICIP.TXT", "RANGOS.TXT", "REGISTRO.TXT", "TARIFAS.TXT"};//Son los archivos ubicados en el path};//Son los archivos ubicados en el path
+        String[] files = {"LOGEVENTOS.LOG", "PRINTER.LOG", "NOMBRE", "ACUERDOS.TXT", "CATEGORIASINF.TXT", "CAUSAS.TXT", "CENSO.TXT", "ESTADOS.TXT", "NOTIFICACIONES.TXT", "OBSERVA.TXT", "ADMINIST.TXT", "ADMINISTADORDEPDA.TXT", "ENVIOSGPRS.SDA", "LECTURAADMINISTRADA.TXT", "ACTIVID.TXT", "CAUSA_NL.TXT", "CLASE_SE.TXT", "CLIENTE.TXT", "CONVENIO.TXT", "DES_CONC.TXT", "DES_TARI.TXT", "EST_CLIE.TXT", "FECHAACONFIGURAR.TXT", "FESTIVOS.TXT", "GENERAL.TXT", "LECTOR.TXT", "MEDIDOR.TXT", "MUNICIP.TXT", "RANGOS.TXT", "REGISTRO.TXT", "TARIFAS.TXT", "FORMATO_CORTA.CPCL", "FORMATO_LARGA.CPCL"};//Son los archivos ubicados en el path};//Son los archivos ubicados en el path
 
         todoMayuscula(lista2, files, directorio2);
 

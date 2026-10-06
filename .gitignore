@@ -1,0 +1,33 @@
+# Gradle
+.gradle/
+**/build/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+
+# Android Studio Navigation
+.navigation/
+
+# Configuración local
+local.properties
+
+# Archivos generados
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Compilados
+*.apk
+*.aab
+
+# Temporales
+*.log
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+
+# Keystores
+*.jks
+*.keystore
