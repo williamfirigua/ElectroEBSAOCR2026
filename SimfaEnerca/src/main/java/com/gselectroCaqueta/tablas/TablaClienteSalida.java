@@ -44,6 +44,7 @@ public class TablaClienteSalida {
     String tablaClienteSalida_fechacorte;
     String tablaClienteSalida_nombrefoto;
     String tablaClienteSalida_distanciacalculada;
+    String tablaClienteSalida_VALORFACTURADOASEO;
     String tablaClienteSalida_FIN;
 
     public String gettablaClienteSalida_ANIO() {
@@ -253,6 +254,16 @@ public class TablaClienteSalida {
     public void settablaClienteSalida_distanciacalculada(String tablaClienteSalida_distanciacalculada) {
         this.tablaClienteSalida_distanciacalculada = tablaClienteSalida_distanciacalculada;
     }
+//nuevo campo para guardar el total del aseo
+public String gettablaClienteSalida_VALORFACTURADOASEO() {
+    return tablaClienteSalida_VALORFACTURADOASEO;
+}
+
+    public void settablaClienteSalida_VALORFACTURADOASEO(String tablaClienteSalida_VALORFACTURADOASEO) {
+        this.tablaClienteSalida_VALORFACTURADOASEO = tablaClienteSalida_VALORFACTURADOASEO;
+    }
+
+
 
     public String gettablaClienteSalida_FIN() {
         return tablaClienteSalida_FIN;
@@ -275,7 +286,7 @@ public class TablaClienteSalida {
     BufferedReader fin;
     byte[] byteArray;
     String archivo_TablaClienteSalida;
-    static final int LONGITUD_REGISTRO = 252;//247 -- CUENTA 9->10 (+1), fechavence 10->12 (+2), fechacorte 10->12 (+2). Verificado contra CLIENTE.SDA
+    static final int LONGITUD_REGISTRO = 252;//SE SUMARAN 1 CARACTERES PARA EL TOTALFACTURAASEO247 -- CUENTA 9->10 (+1), fechavence 10->12 (+2), fechacorte 10->12 (+2). Verificado contra CLIENTE.SDA
     private int total_TablaClienteSalida;
     int ultimo_TablaClienteSalida;
     int encontro_TablaClienteSalida;
@@ -341,7 +352,7 @@ public class TablaClienteSalida {
                 + tablaClienteSalida_FECHAIMPRESION + sep + tablaClienteSalida_Nromedidores + sep + tablaClienteSalida_primermedidor + sep + tablaClienteSalida_consumo1 + sep
                 + tablaClienteSalida_consumo2 + sep + tablaClienteSalida_consumo3 + sep + tablaClienteSalida_valor1 + sep + tablaClienteSalida_valor2 + sep + tablaClienteSalida_valor3 + sep
                 + tablaClienteSalida_fechavence + sep + tablaClienteSalida_fechacorte + sep + tablaClienteSalida_nombrefoto + sep + tablaClienteSalida_distanciacalculada + sep
-                + tablaClienteSalida_FIN;
+                + tablaClienteSalida_FIN; //tablaClienteSalida_VALORFACTURADOASEO + sep
       //  Log.e("error","cliente salida "+texto);
 //Log.e("error",texto.length()+" cliente salida "+LONGITUD_REGISTRO);
         try {
@@ -396,6 +407,7 @@ public class TablaClienteSalida {
             tablaClienteSalida_fechacorte = String.format("%-12s", tablaClienteSalida_fechacorte);//era 10
             tablaClienteSalida_nombrefoto = String.format("%-18s", tablaClienteSalida_nombrefoto);
             tablaClienteSalida_distanciacalculada = String.format("%-10s", tablaClienteSalida_distanciacalculada);
+            //tablaClienteSalida_VALORFACTURADOASEO = String.format("%-10s", tablaClienteSalida_VALORFACTURADOASEO);
             tablaClienteSalida_FIN = "\r\n";//el plano actual no lleva contenido despues de distanciacalculada
         } catch (Exception e) {
             System.out.println("Se presento problema al escribir en el archivo tablaClienteSalida.dat..");
@@ -450,6 +462,7 @@ public class TablaClienteSalida {
             settablaClienteSalida_fechacorte(texto.substring(207, 219));//fechacorte ahora 12 (era 10)
             settablaClienteSalida_nombrefoto(texto.substring(220, 238));
             settablaClienteSalida_distanciacalculada(texto.substring(239, 249));
+            //settablaClienteSalida_VALORFACTURADOASEO(texto.substring(250, 260));
             settablaClienteSalida_FIN("\r\n");//el plano actual no trae contenido despues de distanciacalculada
             ultimo_TablaClienteSalida = registro;
             // fin estructura
@@ -483,7 +496,6 @@ public class TablaClienteSalida {
             d.printStackTrace();
         }
     }
-
     /*public void lectura_TablaClienteSalidaII(int x) {
         try {
             encontro_TablaClienteSalida = 0;

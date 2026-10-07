@@ -15,7 +15,7 @@ import java.io.RandomAccessFile;
 /// </summary>
 public class EnvioGPS {
 
-    static final int LONGITUD_REGISTRO = 569;//567 -- CUENTA de 6 a 7 (+1), digitochequeo se queda en 3, marca se queda en 12
+    static final int LONGITUD_REGISTRO = 569 +11 ;//567 -- CUENTA de 6 a 7 (+1), digitochequeo se queda en 3, marca se queda en 12
     public String archivo_EnvioGPS;
     public int total_EnvioGPS;
     public int encontro_EnvioGPS;
@@ -87,7 +87,7 @@ public class EnvioGPS {
 
     String EnvioGPS_IDREGISTRO;
     String EnvioGPS_NROCONTADORDB;
-
+    String EnvioGPS_ValorFacturadoAseo;
 
     String EnvioGPS_CRNL;
     BufferedReader fin;
@@ -593,6 +593,13 @@ public class EnvioGPS {
         EnvioGPS_NROCONTADORDB = EnvioGPS_NROCONTADORDBs;
     }
 
+    public String getEnvioGPS_VALORFACTURADOASEO() {
+        return EnvioGPS_ValorFacturadoAseo;
+    }
+
+    public void setEnvioGPS_ValorFacturadoASEO(String EnvioGPS_ValorFacturadoAsseo) {
+        this.EnvioGPS_ValorFacturadoAseo = EnvioGPS_ValorFacturadoAseo;
+    }
 
 
     public Boolean abrir_EnvioGPS(String nombreArchivo) {
@@ -665,8 +672,7 @@ public class EnvioGPS {
                 + sep + EnvioGPS_NREGISTRADORES
                 + sep + EnvioGPS_IDREGISTRO
                 + sep + EnvioGPS_NROCONTADORDB
-
-
+                + sep + EnvioGPS_ValorFacturadoAseo
                 + sep + EnvioGPS_CRNL;
         try {
             Log.e("error",LONGITUD_REGISTRO+" envio gps "+texto.length());
@@ -756,7 +762,7 @@ public class EnvioGPS {
             EnvioGPS_NREGISTRADORES = String.format("%-2s", EnvioGPS_NREGISTRADORES);
             EnvioGPS_IDREGISTRO = String.format("%-10s", EnvioGPS_IDREGISTRO);
             EnvioGPS_NROCONTADORDB = String.format("%-1s", EnvioGPS_NROCONTADORDB);
-
+            EnvioGPS_ValorFacturadoAseo = String.format("%-10s", EnvioGPS_ValorFacturadoAseo);
             EnvioGPS_CRNL = "\r\n";
 
 
@@ -844,9 +850,11 @@ public class EnvioGPS {
             setEnvioGPS_CLASESERVICIO(texto.substring(544+1, 547+1));
             setEnvioGPS_NMEDIDORES(texto.substring(548+1, 549+1));
             setEnvioGPS_CLASESERVICIO(texto.substring(550+1, 552+1));
-            setEnvioGPS_IDREGISTRO(texto.substring(553+1, 563+1));
-            setEnvioGPS_NROCONTADORDB(texto.substring(564+1, 565+1));
-            setEnvioGPS_CRNL(texto.substring(566+1, 568+1));
+            setEnvioGPS_IDREGISTRO(texto.substring(554, 564));
+            setEnvioGPS_NROCONTADORDB(texto.substring(565, 566));
+            setEnvioGPS_ValorFacturadoASEO(texto.substring(567, 577));
+            setEnvioGPS_CRNL(texto.substring(578, 580));
+
 
             ultimo_EnvioGPS = registro;
             //fin estructura

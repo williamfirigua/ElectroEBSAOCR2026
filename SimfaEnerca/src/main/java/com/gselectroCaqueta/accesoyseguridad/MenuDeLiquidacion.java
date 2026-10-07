@@ -6323,7 +6323,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         return String.format("%04d%02d%03d%08d", anioNum, mesNum, codNum, kwh);
     }
 
-
+    double acobrarAseo = 0;
     private int ejecutarReliquidacionConceptos(double pesosenergia) {
 
         double valorconcepto, pesosajuste;
@@ -6344,6 +6344,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         int liquidounafinanciacion = 0;
 
         double acobrar = 0;
+
+        acobrarAseo = 0;
+
         double acobrarsindeuda = 0;
         variables.pesosenergia = pesosenergia;
         int codconcepto;
@@ -6731,6 +6734,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     // Log.e("error1", acobrar + "***************concepto5-" + valorconcepto);
 
                     break;
+                case 'A':
+                    acobrarAseo += valorconcepto;
+                    break;
 
                 case 'D':
                     // case 'F':
@@ -6744,6 +6750,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     // Log.e("error1", acobrar + "***************concepto0-" + valorconcepto);
 
                     break;
+                case 'Y':
+                    acobrarAseo -= valorconcepto;
+                    break;
+
             }
             --nroconceptos;
             ++conceptoactual;
@@ -6752,21 +6762,25 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         // Log.e("error1", "***********conceptos " + acobrar + "-" + infoCobrosLiquidados.gettablaCobrosRealizados_RANGOMAXIMO().trim());
         if (acobrar >= 0) {//ax?
-            if (liquidounafinanciacion == 1) {
+          /*  if (liquidounafinanciacion == 1) {
                 infoClienteSalida.settablaClienteSalida_VALORFACTURADO(("" + (int) variables.ejecutarAjusteUnidades(acobrar + Double.parseDouble(infoCobrosLiquidados.gettablaCobrosRealizados_RANGOMAXIMO().trim()))));
-            } else {
+            } else {*/
                 infoClienteSalida.settablaClienteSalida_VALORFACTURADO(("" + (int) variables.ejecutarAjusteUnidades(acobrar)).trim());
-            }
+          //  }
         } else {
-            if (liquidounafinanciacion == 1) {
+         /*   if (liquidounafinanciacion == 1) {
                 infoClienteSalida.settablaClienteSalida_VALORFACTURADO(("" + (int) variables.ejecutarAjusteUnidades(acobrar + Double.parseDouble(infoCobrosLiquidados.gettablaCobrosRealizados_RANGOMAXIMO().trim()))));
-            } else {
-                infoClienteSalida.settablaClienteSalida_VALORFACTURADO(("" + (int) variables.ejecutarAjusteUnidades(acobrar)).trim());
-            }
-        }
-
-        if (Double.parseDouble(infoClienteSalida.gettablaClienteSalida_VALORFACTURADO()) < 0)
+            } else {*/
+                //infoClienteSalida.settablaClienteSalida_VALORFACTURADO(("" + (int) variables.ejecutarAjusteUnidades(acobrar)).trim());
             infoClienteSalida.settablaClienteSalida_VALORFACTURADO("0");
+           // }
+        }
+        //necesito que me modifiquen la estructura de esta tabla cliente salida
+        infoClienteSalida.settablaClienteSalida_VALORFACTURADOASEO(("" + (int) variables.ejecutarAjusteUnidades(acobrarAseo)).trim());
+        //if (Double.parseDouble(infoClienteSalida.gettablaClienteSalida_VALORFACTURADO()) < 0)
+        //    infoClienteSalida.settablaClienteSalida_VALORFACTURADO("0");
+
+
 
         return 1;
     }
@@ -10192,13 +10206,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         infoRegistroSalida.settablaRegistroSalida_consumotomado("" + parseStringToInteger(
                                 infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediosector()));
                     }
-                    // if (infoRegistroEntrada..gettablaRegistroDeEntrada_Tipomedida().trim().equals("CT"))
-                    //     infoClienteSalida.settablaClienteSalida_consumo3("" + parseStringToInteger(infoRegistroSalida.gettablaRegistroSalida_CONSUMOTOMADO()));
-                    //  else
+
                     if (!infoRegistroEntrada.gettablaRegistroDeEntrada_tipoenergia().trim().equals("R"))
                         infoClienteSalida.settablaClienteSalida_consumo2("" + parseStringToInteger(infoRegistroSalida.gettablaRegistroSalida_CONSUMOTOMADO()));
                     else
                         infoClienteSalida.settablaClienteSalida_consumo1("" + parseStringToInteger(infoRegistroSalida.gettablaRegistroSalida_CONSUMOTOMADO()));
+
                 } else {
                     if (infoMedidorEntrada.gettablaMedidorEntrada_idcortado().trim().equals("1")) {
                         if (!infoRegistroEntrada.gettablaRegistroDeEntrada_Tipomedida().trim().equals("CT"))
@@ -12201,7 +12214,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 Log.e("INFO","guardarDatosAEnviarNuevo | nrocontadordb: " + nrocontadordb);
                 Log.e("INFO","guardarDatosAEnviarNuevo | InfoENtradanrocontadordb" + infoRegistroEntrada.gettablaRegistroDeEntrada_Digitos());
                 misenvios.setEnvioGPS_NROCONTADORDB(Intentos);
-
+                //nuevo campo
+                misenvios.setEnvioGPS_ValorFacturadoASEO("" + (int) acobrarAseo);
                 misenvios.setEnvioGPS_CRNL("\r\n");
 
                 misenvios.archivo_EnvioGPS = variables.directorioactual + "/DATOSDESALIDA/ENVIOSGPRS.SDA";
@@ -13929,6 +13943,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         Log.e("error", "escribe 11");
                         escribirTablasSalida();
                         imagenLiquid_3.setImageResource(R.drawable.imagen_consumoalto);
+                        if (infoRegistroEntrada.gettablaRegistroDeEntrada_tipoenergia().equals("R"))
+                        {
+                            variables.cactual =  (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediocliente().trim())
+                                                 * Double.parseDouble(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()) / Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));
+                        }
+
                     }
                     if (giro_del_registro > 0)
                         variables.lactual -= potencia;
@@ -14203,6 +14223,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 //                                variables.consumoactual = (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_PRMDIO().trim()) / Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));// - promedio
                             }
 
+
                         } else {
                             variables.impresoraAnalitica = "CONS. ALTO DV2";
                             infoRegistroSalida.settablaRegistroSalida_comentario2("002");
@@ -14210,8 +14231,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                             if ((diferencia > (2000 * parseStringToInteger(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim())))  )
                             {
                                 //deberia de cambiar este concumo aqui QUITAR POR AHORA Y VALIDAR
-                                variables.cactual =  (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediocliente().trim())
-                                        * Double.parseDouble(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()) / Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));
+                               // variables.cactual =  (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediocliente().trim())
+                               //         * Double.parseDouble(infoClienteEntrada.gettablaEntradaClientes_Bimestral().trim()) / Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Factormultipicacion().trim()));
                             }
                             else
                             {
