@@ -103,7 +103,7 @@ public final class RenderFactura {
     }
 
     public static String nombrePlantilla(DatosFactura d) {
-        return d.tieneAseo ? PLANTILLA_LARGA : PLANTILLA_CORTA;
+        return d.hayAseo() ? PLANTILLA_LARGA : PLANTILLA_CORTA;
     }
 
     /** {@code FORMATO_CORTA.CPCL} + modelo RW420 → {@code FORMATO_CORTA_RW420.CPCL} si existe; si no, la base. */

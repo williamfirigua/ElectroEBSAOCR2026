@@ -2805,6 +2805,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         + " Cont.APCSoluciones - " + (EsImpresora521 == 1 ? "ZQ-521" : "RW-420");
 
                 DatosFactura datos = adaptador.leer(descripcionTipoLectura(), version);
+                if (!datos.avisos.isEmpty()) {
+                    utils.Log(logfile, "[MenuDeLiquidacion]generarFacturaConPlantilla(); cuenta " + datos.cuenta
+                            + " avisos de lectura: " + datos.avisos);
+                }
                 if (datos.mensaje.isEmpty() && !datos.codigoMensaje.isEmpty()) {
                     utils.Log(logfile, "[MenuDeLiquidacion]generarFacturaConPlantilla(); cuenta " + datos.cuenta
                             + " sin mensaje de interes: codigo " + datos.codigoMensaje + " no esta en MENSAJES.TXT"

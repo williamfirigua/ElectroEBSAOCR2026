@@ -133,6 +133,8 @@ public final class AdaptadorMovil {
                 } else if (!reactiva && !activaLeida) {
                     m.consumo = (int) Math.round(Formatos.numero(clienteSalida.gettablaClienteSalida_CONSUMO2()));
                     d.activa = m;
+                    // MEDIDOR.TXT CUENTA_ASEO (lm_aseo_maestro): la cuenta tiene aseo aunque hoy no vengan cobros del bloque 4
+                    if (!t(medidor.gettablaMedidorEntrada_CUENTA_ASEO()).isEmpty()) d.tieneAseo = true;
                     d.consumoActual = m.consumo;
                     d.fechaLecturaAnterior = fechaAnterior;
                     d.fechaLecturaTomada = t(registroSalida.gettablaRegistroSalida_FECHALECTURA());
@@ -250,8 +252,11 @@ public final class AdaptadorMovil {
 
     /**
      * Misma lectura que {@code generarTextosConceptos}: INDICADORACTIVIDAD 'D' resta, 'X' es
-     * informativo (no se imprime ni suma), 'A'/'Y' son aseo (suman/restan al total de aseo).
-     * La descripción sale de DES_CONC.TXT por el puntero IDCONCEPTO; su DATO1 es el bloque.
+     * informativo (no se imprime ni suma). El bloque de la factura (1 detalle, 2 cartera, 3 externos,
+     * 4 aseo) viene en NROCONVENIOS de CO_COBRO.SDA, que el exportador reutiliza para eso; el catálogo
+     * DES_CONC.TXT aporta la descripción (por el puntero IDCONCEPTO), su propio bloque (DATO1, respaldo
+     * y diagnóstico) y el orden de impresión dentro del bloque (DATO2). 'A'/'Y' en el indicador es la
+     * marca de aseo del esquema anterior: se respeta como bloque 4 ('Y' resta).
      */
     private void leerConceptos(DatosFactura d) {
         int n = entero(cliente.gettablaEntradaClientes_nrocobros());
@@ -261,21 +266,25 @@ public final class AdaptadorMovil {
             for (int k = 0; k < n; k++) {
                 cobros.lectura_TablaCobrosRealizados(puntero + k);
                 String ind = t(cobros.gettablaCobrosRealizados_INDICADORACTIVIDAD());
-                long valor = Math.round(Formatos.numero(cobros.gettablaCobrosRealizados_VALOR().replace("-", "")));
                 if ("X".equals(ind)) continue;
-                if ("A".equals(ind) || "Y".equals(ind)) {
-                    d.tieneAseo = true;
-                    d.totalAseo += "A".equals(ind) ? valor : -valor;
-                    continue;
-                }
+                long valor = Math.round(Formatos.numero(cobros.gettablaCobrosRealizados_VALOR().replace("-", "")));
+                boolean resta = "D".equals(ind) || "Y".equals(ind);
                 int codigo = entero(cobros.gettablaCobrosRealizados_CONCEPTODECOBRO());
+                int bloque = DatosFactura.Concepto.bloqueDe(cobros.gettablaCobrosRealizados_NROCONVENIOS());
+                if ("A".equals(ind) || "Y".equals(ind)) bloque = 4;
+
                 String descripcion = descripcionConcepto(codigo);
-                char bloque = '\0';
+                int bloqueCatalogo = 0, orden = 0;
                 if (catalogoAbierto && descripciones.encontro_TablaDescripcionConceptos > 0) {
-                    String dato1 = descripciones.gettablaDescripcionConceptos_DATO1();
-                    if (dato1 != null && !dato1.trim().isEmpty()) bloque = dato1.trim().charAt(0);
+                    bloqueCatalogo = DatosFactura.Concepto.bloqueDe(descripciones.gettablaDescripcionConceptos_DATO1());
+                    Integer o = enteroOpcional(descripciones.gettablaDescripcionConceptos_DATO2());
+                    orden = o == null ? 0 : o;
                 }
-                d.conceptos.add(new DatosFactura.Concepto(codigo, descripcion, "D".equals(ind) ? -valor : valor, bloque));
+                if (bloque == 4 || (bloque == 0 && bloqueCatalogo == 4)) d.tieneAseo = true;
+                if (bloque != 0 && bloqueCatalogo != 0 && bloque != bloqueCatalogo) {
+                    d.avisos.add("concepto " + codigo + " bloque cobro=" + bloque + " catalogo=" + bloqueCatalogo);
+                }
+                d.conceptos.add(new DatosFactura.Concepto(codigo, descripcion, resta ? -valor : valor, bloque, bloqueCatalogo, orden));
             }
         } finally {
             if (catalogoAbierto) descripciones.Cerrar_TablaDescripcionConceptos();

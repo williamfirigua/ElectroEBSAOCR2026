@@ -27,8 +27,8 @@ import java.util.Map;
  * calidad.1..3 (fila compuesta: Mes Diu Dium Diug Fiu Fium Fiug)
  * foes.consumo .vunit .total .factura
  * financiacion, cuotas_ptes, ultimo_pago, fecha_ultimo_pago
- * detalle.1..9, cartera.1..7, externos.1..5        (filas compuestas, vacías si no hay)
- * total_periodo, cartera.total, externos.total, total_base_iva, iva, total_pagar (sin aseo),
+ * detalle.1..9, cartera.1..7, externos.1..5, aseo.1..6   (filas compuestas, vacías si no hay; bloques 1..4)
+ * total_periodo, cartera.total, externos.total, aseo.total, total_base_iva, iva, total_pagar (sin aseo),
  * total_aseo, total_cupon (con aseo)
  * pago_oportuno, suspension, fecha_vencimiento (dd MMM/yyyy)
  * ean128, ean128_legible, qr_url, version
@@ -39,6 +39,7 @@ public final class ContextoFactura {
     public static final int MAX_DETALLE = 9;
     public static final int MAX_CARTERA = 7;
     public static final int MAX_EXTERNOS = 5;
+    public static final int MAX_ASEO = 6;
     public static final int MAX_LIQ = 3;
     public static final int MAX_CALIDAD = 3;
 
@@ -48,7 +49,7 @@ public final class ContextoFactura {
     private ContextoFactura() {}
 
     public static Map<String, String> construir(DatosFactura d, Parametros p) {
-        return construir(d, p, new BloquesConceptos.ClasificadorPorCodigo());
+        return construir(d, p, new BloquesConceptos.ClasificadorPorCodigo(p.conceptoBloqueFuente()));
     }
 
     public static Map<String, String> construir(DatosFactura d, Parametros p, BloquesConceptos.Clasificador clasificador) {
@@ -220,20 +221,34 @@ public final class ContextoFactura {
     }
 
     private static BloquesConceptos.Resultado conceptos(DatosFactura d, Parametros p, BloquesConceptos.Clasificador cl, Map<String, String> c) {
-        BloquesConceptos.Resultado r = BloquesConceptos.agrupar(d.conceptos, cl);
+        BloquesConceptos.Resultado r = BloquesConceptos.agrupar(d.conceptos, cl, p.conceptoOrdenCatalogo());
         int ad = p.conceptoAnchoDesc(), av = p.conceptoAnchoValor();
         filas("detalle", BloquesConceptos.filas(r.periodo, MAX_DETALLE, ad, av), MAX_DETALLE, c);
         filas("cartera", BloquesConceptos.filas(r.cartera, MAX_CARTERA, ad, av), MAX_CARTERA, c);
         filas("externos", BloquesConceptos.filas(r.externos, MAX_EXTERNOS, ad, av), MAX_EXTERNOS, c);
+        filas("aseo", BloquesConceptos.filas(r.aseo, MAX_ASEO, ad, av), MAX_ASEO, c);
         c.put("total_periodo", Formatos.moneda(r.totalPeriodo));
         c.put("cartera.total", Formatos.moneda(r.totalCartera));
         c.put("externos.total", Formatos.moneda(r.totalExternos));
         c.put("total_base_iva", Formatos.moneda(d.totalBaseIva));
         c.put("iva", Formatos.moneda(d.iva));
         c.put("total_pagar", Formatos.moneda(r.totalPagar()));
-        c.put("total_aseo", d.tieneAseo ? Formatos.moneda(d.totalAseo) : "");
-        c.put("total_cupon", Formatos.moneda(r.totalPagar() + (d.tieneAseo ? d.totalAseo : 0)));
+        boolean hayAseo = tieneAseo(d, r);
+        c.put("aseo.total", hayAseo ? Formatos.moneda(totalAseo(d, r)) : "");
+        c.put("total_aseo", hayAseo ? Formatos.moneda(totalAseo(d, r)) : "");
+        c.put("total_cupon", Formatos.moneda(r.totalPagar() + totalAseo(d, r)));
         return r;
+    }
+
+    /** Hay aseo si el adaptador lo marcó (CUENTA_ASEO, indicador A/Y) o si algún cobro vino en el bloque 4. */
+    static boolean tieneAseo(DatosFactura d, BloquesConceptos.Resultado r) {
+        return d.hayAseo() || !r.aseo.isEmpty();
+    }
+
+    /** Total de aseo: la suma del bloque 4 si vino desagregado; si no, el acumulado que trajo el adaptador. */
+    static long totalAseo(DatosFactura d, BloquesConceptos.Resultado r) {
+        if (!tieneAseo(d, r)) return 0;
+        return r.aseo.isEmpty() ? d.totalAseo : r.totalAseo;
     }
 
     private static void filas(String prefijo, List<String> filas, int max, Map<String, String> c) {
@@ -354,7 +369,7 @@ public final class ContextoFactura {
         c.put("pago_oportuno", Formatos.fecha(d.fechaPagoOportuno, FECHA_LARGA));
         c.put("fecha_vencimiento", Formatos.fecha(d.fechaPagoOportuno, FECHA_LARGA));
         c.put("suspension", Formatos.fecha(d.fechaSuspension, FECHA_LARGA));
-        long totalCupon = bloques.totalPagar() + (d.tieneAseo ? d.totalAseo : 0);
+        long totalCupon = bloques.totalPagar() + totalAseo(d, bloques);
         c.put("ean128", CodigoBarras.gs1128(p.gln(), p.eanPrefijoRef(), d.cuenta, totalCupon, p.eanFnc1()));
         c.put("ean128_legible", CodigoBarras.legible(p.gln(), p.eanPrefijoRef(), d.cuenta, totalCupon));
         c.put("qr_url", p.qrUrl());

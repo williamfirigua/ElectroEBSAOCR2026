@@ -67,6 +67,10 @@ public final class Parametros {
     public int conceptoAnchoDesc()  { return entero("concepto.ancho_desc", 26); }
     /** Ancho del valor en las filas de conceptos (alineado a la derecha). */
     public int conceptoAnchoValor() { return entero("concepto.ancho_valor", 12); }
+    /** Quién decide el bloque de un concepto: {@code cobro} (NROCONVENIOS de CO_COBRO.SDA, por defecto) o {@code catalogo} (DATO1 de DES_CONC.TXT). */
+    public BloquesConceptos.Fuente conceptoBloqueFuente() { return BloquesConceptos.Fuente.de(texto("concepto.bloque", "cobro")); }
+    /** Orden dentro del bloque: {@code catalogo} (DATO2 de DES_CONC.TXT, por defecto) o {@code archivo} (como vienen en CO_COBRO.SDA). */
+    public boolean conceptoOrdenCatalogo() { return !"archivo".equalsIgnoreCase(texto("concepto.orden", "catalogo")); }
     /** GLN de EBSA para el AI (415) del código GS1-128. */
     public String gln()             { return texto("ean.gln", "7709998000483"); }
     /** Prefijo del AI (8020) antes de la cuenta a 10 dígitos. */
