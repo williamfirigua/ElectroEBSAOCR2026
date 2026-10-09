@@ -286,7 +286,7 @@ public String gettablaClienteSalida_VALORFACTURADOASEO() {
     BufferedReader fin;
     byte[] byteArray;
     String archivo_TablaClienteSalida;
-    static final int LONGITUD_REGISTRO = 252;//SE SUMARAN 1 CARACTERES PARA EL TOTALFACTURAASEO247 -- CUENTA 9->10 (+1), fechavence 10->12 (+2), fechacorte 10->12 (+2). Verificado contra CLIENTE.SDA
+    static final int LONGITUD_REGISTRO = 252+11;//SE SUMARAN 11 CARACTERES PARA EL TOTALFACTURAASEO247 -- CUENTA 9->10 (+1), fechavence 10->12 (+2), fechacorte 10->12 (+2). Verificado contra CLIENTE.SDA
     private int total_TablaClienteSalida;
     int ultimo_TablaClienteSalida;
     int encontro_TablaClienteSalida;
@@ -352,8 +352,8 @@ public String gettablaClienteSalida_VALORFACTURADOASEO() {
                 + tablaClienteSalida_FECHAIMPRESION + sep + tablaClienteSalida_Nromedidores + sep + tablaClienteSalida_primermedidor + sep + tablaClienteSalida_consumo1 + sep
                 + tablaClienteSalida_consumo2 + sep + tablaClienteSalida_consumo3 + sep + tablaClienteSalida_valor1 + sep + tablaClienteSalida_valor2 + sep + tablaClienteSalida_valor3 + sep
                 + tablaClienteSalida_fechavence + sep + tablaClienteSalida_fechacorte + sep + tablaClienteSalida_nombrefoto + sep + tablaClienteSalida_distanciacalculada + sep
-                + tablaClienteSalida_FIN; //tablaClienteSalida_VALORFACTURADOASEO + sep
-      //  Log.e("error","cliente salida "+texto);
+                + tablaClienteSalida_VALORFACTURADOASEO + sep + tablaClienteSalida_FIN;
+        //  Log.e("error","cliente salida "+texto);
 //Log.e("error",texto.length()+" cliente salida "+LONGITUD_REGISTRO);
         try {
             if (null != rFile && (texto.length() == LONGITUD_REGISTRO))
@@ -407,7 +407,7 @@ public String gettablaClienteSalida_VALORFACTURADOASEO() {
             tablaClienteSalida_fechacorte = String.format("%-12s", tablaClienteSalida_fechacorte);//era 10
             tablaClienteSalida_nombrefoto = String.format("%-18s", tablaClienteSalida_nombrefoto);
             tablaClienteSalida_distanciacalculada = String.format("%-10s", tablaClienteSalida_distanciacalculada);
-            //tablaClienteSalida_VALORFACTURADOASEO = String.format("%-10s", tablaClienteSalida_VALORFACTURADOASEO);
+            tablaClienteSalida_VALORFACTURADOASEO = String.format("%-10s", tablaClienteSalida_VALORFACTURADOASEO);
             tablaClienteSalida_FIN = "\r\n";//el plano actual no lleva contenido despues de distanciacalculada
         } catch (Exception e) {
             System.out.println("Se presento problema al escribir en el archivo tablaClienteSalida.dat..");
@@ -462,7 +462,7 @@ public String gettablaClienteSalida_VALORFACTURADOASEO() {
             settablaClienteSalida_fechacorte(texto.substring(207, 219));//fechacorte ahora 12 (era 10)
             settablaClienteSalida_nombrefoto(texto.substring(220, 238));
             settablaClienteSalida_distanciacalculada(texto.substring(239, 249));
-            //settablaClienteSalida_VALORFACTURADOASEO(texto.substring(250, 260));
+            settablaClienteSalida_VALORFACTURADOASEO(texto.substring(250, 260));
             settablaClienteSalida_FIN("\r\n");//el plano actual no trae contenido despues de distanciacalculada
             ultimo_TablaClienteSalida = registro;
             // fin estructura

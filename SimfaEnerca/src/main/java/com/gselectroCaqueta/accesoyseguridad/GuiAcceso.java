@@ -358,7 +358,7 @@ public class GuiAcceso extends AppCompatActivity {
                 if (!file.exists()) {
                     file.createNewFile();
 
-                    String ruta = "D:\\DEMOENRUTADOR_PEREIRA\\ \r\n" +
+                    String ruta = "D:\\ENRUTADOR_EBSA\\ \r\n" +
                             "ZIP SI                                 \r\n" +
                             "   Cic@@@@@@\\C!!!!!!!\\CLIENTE.TXT \r\n" +
                             "   Cic@@@@@@\\C!!!!!!!\\GENERAL.TXT \r\n" +

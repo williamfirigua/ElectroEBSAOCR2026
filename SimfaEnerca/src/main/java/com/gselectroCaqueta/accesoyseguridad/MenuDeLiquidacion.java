@@ -2879,16 +2879,17 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         double promedio = parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediocliente());
         // Log.e("error", "si imprime 3");
-        if (((Double.parseDouble(infoClienteSalida.gettablaClienteSalida_CONSUMO2()) + Double.parseDouble(infoClienteSalida.gettablaClienteSalida_CONSUMO3()) > 35000)) && (Double.parseDouble(PromedioCliente1) + Double.parseDouble(PromedioCliente2) + Double.parseDouble(PromedioCliente3)) * 3 < Double.parseDouble(infoClienteSalida.gettablaClienteSalida_CONSUMO2()) + Double.parseDouble(infoClienteSalida.gettablaClienteSalida_CONSUMO3())) {
+        /*if (((Double.parseDouble(infoClienteSalida.gettablaClienteSalida_CONSUMO2()) + Double.parseDouble(infoClienteSalida.gettablaClienteSalida_CONSUMO3()) > 35000)) && (Double.parseDouble(PromedioCliente1) + Double.parseDouble(PromedioCliente2) + Double.parseDouble(PromedioCliente3)) * 3 < Double.parseDouble(infoClienteSalida.gettablaClienteSalida_CONSUMO2()) + Double.parseDouble(infoClienteSalida.gettablaClienteSalida_CONSUMO3())) {
             if (!MODO.equals("AUTO"))
                 mensajeOk("NO SE IMPRIME POR: Consumo Medidores muy alto favor verificar cuenta..!!" + parseStringToDouble(infoClienteSalida.gettablaClienteSalida_CONSUMO3()) + parseStringToDouble(infoClienteSalida.gettablaClienteSalida_CONSUMO2()) + " \nde un Promedio " + parseStringToDouble(PromedioCliente1) + parseStringToDouble(PromedioCliente2) + Double.parseDouble(PromedioCliente3), "");
            // imprimirLabelRetencion();
            // return (0);
-        } else if (MODO.equals("")) {
+        } else*/
+        if (MODO.equals("")) {
             // Log.e("error2", "critica1 " + TieneCausal40);
             //nuevo proceso que retiene la facturacion si es criticado como 40
             if (TieneCausal40 != 0) {
-                mensajeOk("Factura no se Imprime por Critica 40\n" +
+                mensajeOk("Factura no se Imprime por Critica 18\n" +
                         "Cod. Cunta     : " + infoRegistroEntrada.gettablaRegistroDeEntrada_CUENTA() +
                         "\nLectura Ant  : " + infoRegistroEntrada.gettablaRegistroDeEntrada_Lecturaanterior() +
                         "\nLect.Tomada  : " + infoRegistroSalida.gettablaRegistroSalida_LECTURATOMADA() +
@@ -12215,7 +12216,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 Log.e("INFO","guardarDatosAEnviarNuevo | InfoENtradanrocontadordb" + infoRegistroEntrada.gettablaRegistroDeEntrada_Digitos());
                 misenvios.setEnvioGPS_NROCONTADORDB(Intentos);
                 //nuevo campo
-                misenvios.setEnvioGPS_ValorFacturadoASEO("" + (int) acobrarAseo);
+                misenvios.setEnvioGPS_ValorFacturadoASEO("" + infoClienteSalida.gettablaClienteSalida_VALORFACTURADOASEO());
                 misenvios.setEnvioGPS_CRNL("\r\n");
 
                 misenvios.archivo_EnvioGPS = variables.directorioactual + "/DATOSDESALIDA/ENVIOSGPRS.SDA";
