@@ -86,8 +86,20 @@ public final class DatosFactura {
     public long iva;
 
     // ---- aseo (factura larga). 0 y vacío en la corta.
+    /** Marca de aseo que pone quien llena el DTO (CUENTA_ASEO, indicador A/Y). Ver {@link #hayAseo()}. */
     public boolean tieneAseo;
+    /** Total de aseo ya acumulado por quien llena el DTO; se usa solo si no hay conceptos en el bloque 4. */
     public long totalAseo;
+
+    /** Avisos de lectura para la bitácora (p. ej. cobro y catálogo no coinciden en el bloque). No detienen la impresión. */
+    public final List<String> avisos = new ArrayList<>();
+
+    /** true si la cuenta lleva aseo: por la marca o porque algún cobro con valor vino en el bloque 4. */
+    public boolean hayAseo() {
+        if (tieneAseo) return true;
+        for (Concepto c : conceptos) if (c.bloque == 4 && c.valor != 0) return true;
+        return false;
+    }
 
     // ---- fechas de pago
     public String fechaPagoOportuno = "";
@@ -130,14 +142,46 @@ public final class DatosFactura {
         public final int codigo;
         public final String descripcion;
         public final long valor;               // con signo
-        /** 'P' período, 'C' cartera, 'E' externo; '\0' si el catálogo no lo trae. */
-        public final char bloque;
+        /**
+         * Bloque de la factura según el cobro ({@code CO_COBRO.SDA} NROCONVENIOS, reutilizado para esto):
+         * 1 detalle de la factura, 2 gestión cartera EBSA, 3 conceptos externos, 4 aseo; 0 si no viene.
+         */
+        public final int bloque;
+        /** Bloque según el catálogo ({@code DES_CONC.TXT} DATO1); 0 si no viene. Respaldo y diagnóstico. */
+        public final int bloqueCatalogo;
+        /** Orden de impresión dentro del bloque ({@code DES_CONC.TXT} DATO2); 0 = sin orden (va al final, en orden de archivo). */
+        public final int orden;
 
-        public Concepto(int codigo, String descripcion, long valor, char bloque) {
+        public Concepto(int codigo, String descripcion, long valor, int bloque, int bloqueCatalogo, int orden) {
             this.codigo = codigo;
             this.descripcion = descripcion == null ? "" : descripcion;
             this.valor = valor;
             this.bloque = bloque;
+            this.bloqueCatalogo = bloqueCatalogo;
+            this.orden = orden;
+        }
+
+        /** Compatibilidad: bloque como letra del catálogo viejo (P/C/E/A) o '\0'. */
+        public Concepto(int codigo, String descripcion, long valor, char letraBloque) {
+            this(codigo, descripcion, valor, 0, bloqueDe(String.valueOf(letraBloque)), 0);
+        }
+
+        /**
+         * Interpreta un indicador de bloque como viene en los planos: dígito 1..4, o letra
+         * P/C/E (período, cartera, externo) y A/Y (aseo) del esquema anterior. Otra cosa → 0.
+         */
+        public static int bloqueDe(String s) {
+            if (s == null) return 0;
+            String v = s.trim().toUpperCase();
+            if (v.isEmpty()) return 0;
+            char c = v.charAt(0);
+            switch (c) {
+                case '1': case 'P': return 1;
+                case '2': case 'C': return 2;
+                case '3': case 'E': return 3;
+                case '4': case 'A': case 'Y': return 4;
+                default: return 0;
+            }
         }
     }
 }
