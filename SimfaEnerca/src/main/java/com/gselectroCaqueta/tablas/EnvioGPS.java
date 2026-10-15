@@ -2,20 +2,33 @@ package com.gselectroCaqueta.tablas;
 
 import android.util.Log;
 
-import com.gselectroCaqueta.accesoyseguridad.VariablesGlobales;
 import com.gsutil.Utils;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.gselectroCaqueta.tablas.UtilPlanos.LATIN1;
 
 /// <summary>
+/// ENVIOSGPRS.SDA / CopiaRespaldoLecturas.sda - registro fijo de 580 bytes, solo se AGREGAN lineas.
+/// - Agregar es atomico entre TODAS las instancias (candado de clase): la posicion se calcula con el
+///   tamano real del archivo en el momento de escribir, asi dos flujos nunca escriben la misma linea.
+/// - Si el archivo termina con una linea incompleta (corte de energia, app cerrada), la siguiente
+///   escritura la reemplaza en lugar de dejar el resto del archivo corrido.
+/// - Corrige setEnvioGPS_ValorFacturadoASEO (el aseo llegaba "null") y la lectura de NREGISTRADORES.
+/// - Busqueda por indice en memoria (antes: recorrido completo por cada cuenta en ValidarNoEnviados).
 /// </summary>
 public class EnvioGPS {
 
-    static final int LONGITUD_REGISTRO = 569 +11 ;//567 -- CUENTA de 6 a 7 (+1), digitochequeo se queda en 3, marca se queda en 12
+    private static final String TAG = "ENVIOGPRS";
+    static final int LONGITUD_REGISTRO = 569 + 11; // 580: incluye VALORFACTURADOASEO
+    /** Candado comun a todas las instancias: el liquidador y el hilo de envio usan objetos distintos sobre el mismo archivo. */
+    private static final Object CANDADO_ARCHIVO = new Object();
+
     public String archivo_EnvioGPS;
     public int total_EnvioGPS;
     public int encontro_EnvioGPS;
@@ -90,16 +103,19 @@ public class EnvioGPS {
     String EnvioGPS_ValorFacturadoAseo;
 
     String EnvioGPS_CRNL;
-    BufferedReader fin;
-    byte[] byteArray;
+    BufferedReader fin;                                         // sin uso, se conserva por compatibilidad
+    private final byte[] bufferLectura = new byte[LONGITUD_REGISTRO];
+    private final byte[] bufferCorto = new byte[51];            // cuenta + nro contador (lectura Tipo2)
+    byte[] byteArray = bufferLectura;
     int ultimo_EnvioGPS;
     String buscar_EnvioGPS;
     String texto;
-    //    File ruta_sd = Environment.getExternalStorageDirectory();
-    //    File ruta_sd = new File('C:\\Users\\SGlobal\\Documents\\PruebasJava\\CensoSalida.txt');
     RandomAccessFile rFile;
     Utils utils = new Utils();
-    private int _fileSize;
+
+    // Indice para BuscarSecuencial_EnvioGPS (se reconstruye si el archivo crecio).
+    private final Map<String, Integer> indice = new HashMap<String, Integer>();
+    private long largoIndexado = -1;
 
     public String getEnvioGPS_CICLO() {
         return EnvioGPS_ciclo;
@@ -589,6 +605,10 @@ public class EnvioGPS {
         EnvioGPS_IDREGISTRO = envioGPS_IDREGISTRO;
     }
 
+    public String getEnvioGPS_NROCONTADORDB() {
+        return EnvioGPS_NROCONTADORDB;
+    }
+
     public void setEnvioGPS_NROCONTADORDB(String EnvioGPS_NROCONTADORDBs) {
         EnvioGPS_NROCONTADORDB = EnvioGPS_NROCONTADORDBs;
     }
@@ -597,60 +617,114 @@ public class EnvioGPS {
         return EnvioGPS_ValorFacturadoAseo;
     }
 
-    public void setEnvioGPS_ValorFacturadoASEO(String EnvioGPS_ValorFacturadoAsseo) {
-        this.EnvioGPS_ValorFacturadoAseo = EnvioGPS_ValorFacturadoAseo;
+    // CORREGIDO: antes asignaba el campo a si mismo (parametro "...Asseo") y el valor quedaba null,
+    // por eso el plano llegaba al servidor con "null" en el total de aseo.
+    public void setEnvioGPS_ValorFacturadoASEO(String valorFacturadoAseo) {
+        this.EnvioGPS_ValorFacturadoAseo = valorFacturadoAseo;
     }
 
+
+
+    // ------------------------------------------------------------------ apertura / cierre
 
     public Boolean abrir_EnvioGPS(String nombreArchivo) {
-        if (nombreArchivo.length() == 0) {
-            return false;
-        }
-        try {
-            rFile = new RandomAccessFile(nombreArchivo, "rw"); //C:/Users/SGlobal/Documents/Pruebas Java/CensoSalida.txt
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        archivo_EnvioGPS = nombreArchivo;
-        return abrir(archivo_EnvioGPS);
-    }
-
-
-    private Boolean abrir(String nombre_archivo) {
-        try {
-            _fileSize = (int) rFile.length();//Ax: fileSize
-
-            if (_fileSize > 0) {
-                byteArray = new byte[LONGITUD_REGISTRO];//Ax:  fileSize
-                rFile.readFully(byteArray, 0, LONGITUD_REGISTRO);//Ax: fileSize
-                // texto = new String(byteArray);
-                total_EnvioGPS = _fileSize / LONGITUD_REGISTRO;
-            } else {
-                byteArray = new byte[_fileSize];
-                rFile.readFully(byteArray, 0, _fileSize);
-                total_EnvioGPS = 0;
+        if (nombreArchivo == null || nombreArchivo.length() == 0) return false;
+        synchronized (CANDADO_ARCHIVO) {
+            cerrarSilencioso();
+            try {
+                rFile = new RandomAccessFile(nombreArchivo, "rw");
+                archivo_EnvioGPS = nombreArchivo;
+                total_EnvioGPS = (int) (rFile.length() / LONGITUD_REGISTRO);
+                largoIndexado = -1;
+                return true;
+            } catch (FileNotFoundException e) {
+                Log.e(TAG, "al abrir " + nombreArchivo + ": " + e.getMessage());
+                return false;
+            } catch (IOException e) {
+                Log.e(TAG, "al abrir1 " + e.getMessage());
+                return false;
             }
-            return true;
-        } catch (Exception ex) {
-            //       Log.e('Ficheros', 'Error al leer fichero desde tarjeta SD');
-            ex.printStackTrace();
-            return false;
         }
     }
 
     public void Cerrar_EnvioGPS() {
-        // cerrar el archivo abierto
-        try {
-            rFile.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        synchronized (CANDADO_ARCHIVO) {
+            cerrarSilencioso();
         }
     }
 
+    private void cerrarSilencioso() {
+        if (rFile == null) return;
+        try {
+            rFile.close();
+        } catch (IOException e) {
+            Log.e(TAG, "al cerrar " + e.getMessage());
+        }
+        rFile = null;
+    }
+
+    public void posicion_EnvioGPS(int registro, int tamano) {
+        synchronized (CANDADO_ARCHIVO) {
+            try {
+                rFile.seek((long) (registro - 1) * tamano);
+            } catch (IOException e) {
+                Log.e(TAG, "seek " + registro + ": " + e.getMessage());
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------ escritura
+
+    /**
+     * Uso actual de la app: escribir_EnvioGPS(total_EnvioGPS + 1) = AGREGAR.
+     * Una posicion mayor que el total que conoce este objeto se toma como AGREGAR al final real del archivo
+     * (recalculado aqui, dentro del candado). Una posicion ya existente reescribe esa linea solo si es de la
+     * misma cuenta y medidor.
+     */
     public boolean escribir_EnvioGPS(int posicion) {
-        posicion_EnvioGPS(posicion, LONGITUD_REGISTRO);
+        synchronized (CANDADO_ARCHIVO) {
+            if (rFile == null) {
+                UtilPlanos.evento(TAG, "[BLOQUEADO ENVIO] archivo cerrado, cuenta " + cuentaActual());
+                return false;
+            }
+            try {
+                int lineasCompletas = (int) (rFile.length() / LONGITUD_REGISTRO);
+                // total_EnvioGPS + 1 (o mas) es la forma en que la app pide AGREGAR. Ese total puede estar
+                // desactualizado si otro flujo agrego entretanto: se agrega al final REAL, nunca encima.
+                if (posicion < 1 || posicion > total_EnvioGPS || posicion > lineasCompletas) {
+                    return escribirEn(lineasCompletas + 1);        // agregar (pisa una linea final incompleta si la hay)
+                }
+                if (!esLaMismaLinea(posicion)) return false;
+                return escribirEn(posicion);
+            } catch (IOException e) {
+                Log.e(TAG, "escritura fallida: " + e.getMessage());
+                return false;
+            }
+        }
+    }
+
+    /** Forma explicita de agregar una linea al final. */
+    public boolean agregar_EnvioGPS() {
+        return escribir_EnvioGPS(Integer.MAX_VALUE);
+    }
+
+    private boolean esLaMismaLinea(int posicion) throws IOException {
+        rFile.seek((long) (posicion - 1) * LONGITUD_REGISTRO);
+        rFile.readFully(bufferCorto);
         rellenar_EnvioGPS();
-        String texto = EnvioGPS_ciclo + sep + EnvioGPS_mununicipio + sep + EnvioGPS_seccion + sep + EnvioGPS_departamento + sep + EnvioGPS_anno + sep +
+        String enDisco = new String(bufferCorto, 23, 28, LATIN1);   // cuenta(7);digito(3);nrocontador(16)
+        String enMemoria = EnvioGPS_cuenta + sep + EnvioGPS_digitochequeo + sep + EnvioGPS_NroContador;
+        if (!enDisco.equals(enMemoria)) {
+            UtilPlanos.evento(TAG, "[BLOQUEADO ENVIO] linea " + posicion + " es de " + enDisco.trim()
+                    + " y se intento escribir " + enMemoria.trim());
+            return false;
+        }
+        return true;
+    }
+
+    private boolean escribirEn(int posicion) throws IOException {
+        rellenar_EnvioGPS();
+        String linea = EnvioGPS_ciclo + sep + EnvioGPS_mununicipio + sep + EnvioGPS_seccion + sep + EnvioGPS_departamento + sep + EnvioGPS_anno + sep +
                 EnvioGPS_mes + sep + EnvioGPS_cuenta + sep + EnvioGPS_digitochequeo + sep + EnvioGPS_NroContador + sep + EnvioGPS_idcontador + sep +
                 EnvioGPS_lecturatomada + sep + EnvioGPS_causadenolectura + sep + EnvioGPS_descanomalia + sep + EnvioGPS_comentario + sep + EnvioGPS_desccomentario + sep +
                 EnvioGPS_fechayhoralectura + sep + EnvioGPS_CodLector + sep + EnvioGPS_primermedidor + sep + EnvioGPS_HoraImpresion + sep + EnvioGPS_NombreArchivo + sep +
@@ -666,240 +740,250 @@ public class EnvioGPS {
                 + sep + EnvioGPS_MARCALEIDO
                 + sep + EnvioGPS_OBSERVACION1
                 + sep + EnvioGPS_CLASESERVICIO
-
-                //nuevos para mayor control de los registros a enviar al siec
                 + sep + EnvioGPS_NMEDIDORES
                 + sep + EnvioGPS_NREGISTRADORES
                 + sep + EnvioGPS_IDREGISTRO
                 + sep + EnvioGPS_NROCONTADORDB
                 + sep + EnvioGPS_ValorFacturadoAseo
                 + sep + EnvioGPS_CRNL;
+        if (linea.length() != LONGITUD_REGISTRO) {
+            UtilPlanos.evento(TAG, "CADENA DAÑADA ENVIOGPRS (longitud " + linea.length() + "):\r\n" + linea);
+            return false;
+        }
+        rFile.seek((long) (posicion - 1) * LONGITUD_REGISTRO);
+        rFile.write(linea.getBytes(LATIN1));
+        total_EnvioGPS = Math.max(total_EnvioGPS, posicion);
+        return true;
+    }
+
+    private String cuentaActual() {
+        return (EnvioGPS_cuenta == null ? "" : EnvioGPS_cuenta.trim()) + (EnvioGPS_digitochequeo == null ? "" : EnvioGPS_digitochequeo.trim());
+    }
+
+    /** Campo nulo o vacio -> espacios; el aseo nulo o "null" -> "0" (el servidor tambien lo acepta como 0). */
+    private static String fmt(String formato, String valor) {
+        return String.format(formato, valor == null ? "" : valor);
+    }
+
+    public void rellenar_EnvioGPS() {
+        EnvioGPS_ciclo = fmt("%-3s", EnvioGPS_ciclo);
+        EnvioGPS_mununicipio = fmt("%-3s", EnvioGPS_mununicipio);
+        EnvioGPS_seccion = fmt("%-3s", EnvioGPS_seccion);
+        EnvioGPS_departamento = fmt("%-2s", EnvioGPS_departamento);
+        EnvioGPS_anno = fmt("%-4s", EnvioGPS_anno);
+        EnvioGPS_mes = fmt("%-2s", EnvioGPS_mes);
+        EnvioGPS_cuenta = fmt("%-7s", EnvioGPS_cuenta);
+        EnvioGPS_digitochequeo = fmt("%-3s", EnvioGPS_digitochequeo);
+        EnvioGPS_NroContador = fmt("%-16s", EnvioGPS_NroContador);
+        if (EnvioGPS_idcontador != null && EnvioGPS_idcontador.trim().length() > 3)
+            EnvioGPS_idcontador = EnvioGPS_idcontador.substring(0, 3);
+        EnvioGPS_idcontador = fmt("%-3s", EnvioGPS_idcontador);
+        EnvioGPS_lecturatomada = fmt("%-10s", EnvioGPS_lecturatomada);
+        EnvioGPS_causadenolectura = fmt("%-2s", EnvioGPS_causadenolectura);
+        EnvioGPS_descanomalia = fmt("%-30s", EnvioGPS_descanomalia);
+        EnvioGPS_comentario = fmt("%-2s", EnvioGPS_comentario);
+        EnvioGPS_desccomentario = fmt("%-30s", EnvioGPS_desccomentario);
+        EnvioGPS_fechayhoralectura = fmt("%-19s", EnvioGPS_fechayhoralectura);
+        EnvioGPS_CodLector = fmt("%-10s", EnvioGPS_CodLector);
+        EnvioGPS_primermedidor = fmt("%-5s", EnvioGPS_primermedidor);
+        EnvioGPS_HoraImpresion = fmt("%-8s", EnvioGPS_HoraImpresion);
+        EnvioGPS_NombreArchivo = fmt("%-12s", EnvioGPS_NombreArchivo);
+        EnvioGPS_Longitud = fmt("%-20s", EnvioGPS_Longitud);
+        EnvioGPS_Latitud = fmt("%-20s", EnvioGPS_Latitud);
+        EnvioGPS_NroSatelites = fmt("%-3s", EnvioGPS_NroSatelites);
+        EnvioGPS_Distancia = fmt("%-15s", EnvioGPS_Distancia);
+        EnvioGPS_FechaHoraSatelite = fmt("%-30s", EnvioGPS_FechaHoraSatelite);
+        EnvioGPS_AltitudSatelite = fmt("%-20s", EnvioGPS_AltitudSatelite);
+        EnvioGPS_Terminal = fmt("%-15s", EnvioGPS_Terminal);
+        EnvioGPS_IndicadorNovedad = fmt("%-1s", EnvioGPS_IndicadorNovedad);
+        EnvioGPS_Indcodbarras = fmt("%-1s", EnvioGPS_Indcodbarras);
+        EnvioGPS_Intentos = fmt("%-1s", EnvioGPS_Intentos);
+        EnvioGPS_criticapda = fmt("%-1s", EnvioGPS_criticapda);
+        EnvioGPS_ValorFacturado = fmt("%-10s", EnvioGPS_ValorFacturado);
+        EnvioGPS_ConsumoFacturado = fmt("%-10s", EnvioGPS_ConsumoFacturado);
+        EnvioGPS_SubContribucion = fmt("%-10s", EnvioGPS_SubContribucion);
+        EnvioGPS_Consumo1 = fmt("%-10s", EnvioGPS_Consumo1);
+        EnvioGPS_Consumo2 = fmt("%-10s", EnvioGPS_Consumo2);
+        EnvioGPS_Consumo3 = fmt("%-10s", EnvioGPS_Consumo3);
+        EnvioGPS_NroConceptos = fmt("%-2s", EnvioGPS_NroConceptos);
+        EnvioGPS_IndFacturacion = fmt("%-1s", EnvioGPS_IndFacturacion);
+        EnvioGPS_NroFactura = fmt("%-15s", EnvioGPS_NroFactura);
+        EnvioGPS_FechaVence = fmt("%-10s", EnvioGPS_FechaVence);
+        EnvioGPS_FechaCorte = fmt("%-10s", EnvioGPS_FechaCorte);
+        EnvioGPS_LecturaModificada1 = fmt("%-10s", EnvioGPS_LecturaModificada1);
+        EnvioGPS_LecturaModificada2 = fmt("%-10s", EnvioGPS_LecturaModificada2);
+        EnvioGPS_Digitos = fmt("%-1s", EnvioGPS_Digitos);
+        EnvioGPS_Procesado = fmt("%-1s", EnvioGPS_Procesado);
+        EnvioGPS_NumeroConceptos = fmt("%-2s", EnvioGPS_NumeroConceptos);
+        EnvioGPS_PrimerConcepto = fmt("%-6s", EnvioGPS_PrimerConcepto);
+        EnvioGPS_CritiaSIEC = fmt("%-2s", EnvioGPS_CritiaSIEC);
+        EnvioGPS_CodNovedad = fmt("%-4s", EnvioGPS_CodNovedad);
+        EnvioGPS_LecturaAnterior = fmt("%-10s", EnvioGPS_LecturaAnterior);
+        EnvioGPS_EstadoEnvio = fmt("%-1s", EnvioGPS_EstadoEnvio);
+        EnvioGPS_MARCACONTADOR = fmt("%-12s", EnvioGPS_MARCACONTADOR);
+        EnvioGPS_ULTIMOMEDIDORLEIDO = fmt("%-16s", EnvioGPS_ULTIMOMEDIDORLEIDO);
+        EnvioGPS_MARCALEIDO = fmt("%-12s", EnvioGPS_MARCALEIDO);
+        EnvioGPS_OBSERVACION1 = fmt("%-3s", EnvioGPS_OBSERVACION1);
+        EnvioGPS_CLASESERVICIO = fmt("%-3s", EnvioGPS_CLASESERVICIO);
+        EnvioGPS_NMEDIDORES = fmt("%-1s", EnvioGPS_NMEDIDORES);
+        EnvioGPS_NREGISTRADORES = fmt("%-2s", EnvioGPS_NREGISTRADORES);
+        EnvioGPS_IDREGISTRO = fmt("%-10s", EnvioGPS_IDREGISTRO);
+        EnvioGPS_NROCONTADORDB = fmt("%-1s", EnvioGPS_NROCONTADORDB);
+        String aseo = EnvioGPS_ValorFacturadoAseo == null ? "" : EnvioGPS_ValorFacturadoAseo.trim();
+        if (aseo.length() == 0 || aseo.equalsIgnoreCase("null")) aseo = "0";
+        EnvioGPS_ValorFacturadoAseo = fmt("%-10s", aseo);
+        EnvioGPS_CRNL = "\r\n";
+    }
+
+    // ------------------------------------------------------------------ lectura
+
+    public void lectura_EnvioGPS(int registro) {
+        synchronized (CANDADO_ARCHIVO) {
+            encontro_EnvioGPS = 0;
+            if (!leer(registro, bufferLectura)) return;
+            byte[] b = bufferLectura;
+            texto = null;
+            EnvioGPS_ciclo = new String(b, 0, 3, LATIN1);
+            EnvioGPS_mununicipio = new String(b, 4, 3, LATIN1);
+            EnvioGPS_seccion = new String(b, 8, 3, LATIN1);
+            EnvioGPS_departamento = new String(b, 12, 2, LATIN1);
+            EnvioGPS_anno = new String(b, 15, 4, LATIN1);
+            EnvioGPS_mes = new String(b, 20, 2, LATIN1);
+            EnvioGPS_cuenta = new String(b, 23, 7, LATIN1);
+            EnvioGPS_digitochequeo = new String(b, 31, 3, LATIN1);
+            EnvioGPS_NroContador = new String(b, 35, 16, LATIN1);
+            EnvioGPS_idcontador = new String(b, 52, 3, LATIN1);
+            EnvioGPS_lecturatomada = new String(b, 56, 10, LATIN1);
+            EnvioGPS_causadenolectura = new String(b, 67, 2, LATIN1);
+            EnvioGPS_descanomalia = new String(b, 70, 30, LATIN1);
+            EnvioGPS_comentario = new String(b, 101, 2, LATIN1);
+            EnvioGPS_desccomentario = new String(b, 104, 30, LATIN1);
+            EnvioGPS_fechayhoralectura = new String(b, 135, 19, LATIN1);
+            EnvioGPS_CodLector = new String(b, 155, 10, LATIN1);
+            EnvioGPS_primermedidor = new String(b, 166, 5, LATIN1);
+            EnvioGPS_HoraImpresion = new String(b, 172, 8, LATIN1);
+            EnvioGPS_NombreArchivo = new String(b, 181, 12, LATIN1);
+            EnvioGPS_Longitud = new String(b, 194, 20, LATIN1);
+            EnvioGPS_Latitud = new String(b, 215, 20, LATIN1);
+            EnvioGPS_NroSatelites = new String(b, 236, 3, LATIN1);
+            EnvioGPS_Distancia = new String(b, 240, 15, LATIN1);
+            EnvioGPS_FechaHoraSatelite = new String(b, 256, 30, LATIN1);
+            EnvioGPS_AltitudSatelite = new String(b, 287, 20, LATIN1);
+            EnvioGPS_Terminal = new String(b, 308, 15, LATIN1);
+            EnvioGPS_IndicadorNovedad = new String(b, 324, 1, LATIN1);
+            EnvioGPS_Indcodbarras = new String(b, 326, 1, LATIN1);
+            EnvioGPS_Intentos = new String(b, 328, 1, LATIN1);
+            EnvioGPS_criticapda = new String(b, 330, 1, LATIN1);
+            EnvioGPS_ValorFacturado = new String(b, 332, 10, LATIN1);
+            EnvioGPS_ConsumoFacturado = new String(b, 343, 10, LATIN1);
+            EnvioGPS_SubContribucion = new String(b, 354, 10, LATIN1);
+            EnvioGPS_Consumo1 = new String(b, 365, 10, LATIN1);
+            EnvioGPS_Consumo2 = new String(b, 376, 10, LATIN1);
+            EnvioGPS_Consumo3 = new String(b, 387, 10, LATIN1);
+            EnvioGPS_NroConceptos = new String(b, 398, 2, LATIN1);
+            EnvioGPS_IndFacturacion = new String(b, 401, 1, LATIN1);
+            EnvioGPS_NroFactura = new String(b, 403, 15, LATIN1);
+            EnvioGPS_FechaVence = new String(b, 419, 10, LATIN1);
+            EnvioGPS_FechaCorte = new String(b, 430, 10, LATIN1);
+            EnvioGPS_LecturaModificada1 = new String(b, 441, 10, LATIN1);
+            EnvioGPS_LecturaModificada2 = new String(b, 452, 10, LATIN1);
+            EnvioGPS_Digitos = new String(b, 463, 1, LATIN1);
+            EnvioGPS_Procesado = new String(b, 465, 1, LATIN1);
+            EnvioGPS_NumeroConceptos = new String(b, 467, 2, LATIN1);
+            EnvioGPS_PrimerConcepto = new String(b, 470, 6, LATIN1);
+            EnvioGPS_CritiaSIEC = new String(b, 477, 2, LATIN1);
+            EnvioGPS_CodNovedad = new String(b, 480, 4, LATIN1);
+            EnvioGPS_LecturaAnterior = new String(b, 485, 10, LATIN1);
+            EnvioGPS_EstadoEnvio = new String(b, 496, 1, LATIN1);
+            EnvioGPS_MARCACONTADOR = new String(b, 498, 12, LATIN1);
+            EnvioGPS_ULTIMOMEDIDORLEIDO = new String(b, 511, 16, LATIN1);
+            EnvioGPS_MARCALEIDO = new String(b, 528, 12, LATIN1);
+            EnvioGPS_OBSERVACION1 = new String(b, 541, 3, LATIN1);
+            EnvioGPS_CLASESERVICIO = new String(b, 545, 3, LATIN1);
+            EnvioGPS_NMEDIDORES = new String(b, 549, 1, LATIN1);
+            EnvioGPS_NREGISTRADORES = new String(b, 551, 2, LATIN1);   // CORREGIDO: antes se guardaba en CLASESERVICIO
+            EnvioGPS_IDREGISTRO = new String(b, 554, 10, LATIN1);
+            EnvioGPS_NROCONTADORDB = new String(b, 565, 1, LATIN1);
+            EnvioGPS_ValorFacturadoAseo = new String(b, 567, 10, LATIN1);
+            EnvioGPS_CRNL = new String(b, 578, 2, LATIN1);
+            ultimo_EnvioGPS = registro;
+        }
+    }
+
+    /** Para ConsultaNoEnviados: solo cuenta y numero de contador (lee 51 bytes, no 580). */
+    public void lectura_EnvioGPS_Tipo2(int registro) {
+        synchronized (CANDADO_ARCHIVO) {
+            encontro_EnvioGPS = 0;
+            if (!leer(registro, bufferCorto)) return;
+            EnvioGPS_cuenta = new String(bufferCorto, 23, 7, LATIN1);
+            EnvioGPS_NroContador = new String(bufferCorto, 35, 16, LATIN1);
+            ultimo_EnvioGPS = registro;
+        }
+    }
+
+    private boolean leer(int registro, byte[] destino) {
+        if (rFile == null || registro < 1 || registro > total_EnvioGPS) {
+            Log.e(TAG, "lectura fuera de rango o archivo cerrado: " + registro + " de " + total_EnvioGPS);
+            return false;
+        }
         try {
-            Log.e("error",LONGITUD_REGISTRO+" envio gps "+texto.length());
-            if (null != rFile && (texto.length() == LONGITUD_REGISTRO)) {
-                rFile.writeBytes(texto);
-                System.out.println("Los Datos fueron grabados correctamente");
-                return true;
-            } else {
-                File desc = new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/LOGEVENTOS.LOG"); //Ax: EJ: O108010.009
-                utils.EscribirLinea(desc,"CADENA DAÑADA ENVIOGPRS:"+"\r\n" + texto);
-                System.out.println("Se presento problema al escribir en el archivo; longitud Errada: tamaño texto: " + texto.length());
-                return false;
-            }
-        } catch (IOException ioe) {
-            Log.e("error","no envio gps "+ioe.getMessage());
-            System.out.println("Se presento problema al escribir en el archivo Longitud Errada: " + LONGITUD_REGISTRO);
+            rFile.seek((long) (registro - 1) * LONGITUD_REGISTRO);
+            rFile.readFully(destino);
+            return true;
+        } catch (IOException e) {
+            Log.e(TAG, "lectura fallida en linea " + registro + ": " + e.getMessage());
             return false;
         }
     }
 
-    public void rellenar_EnvioGPS() {
-        try {
-            EnvioGPS_ciclo = String.format("%-3s", EnvioGPS_ciclo);
-            EnvioGPS_mununicipio = String.format("%-3s", EnvioGPS_mununicipio);
-            EnvioGPS_seccion = String.format("%-3s", EnvioGPS_seccion);
-            EnvioGPS_departamento = String.format("%-2s", EnvioGPS_departamento);
-            EnvioGPS_anno = String.format("%-4s", EnvioGPS_anno);
-            EnvioGPS_mes = String.format("%-2s", EnvioGPS_mes);
-            EnvioGPS_cuenta = String.format("%-7s", EnvioGPS_cuenta);//era 6
-            EnvioGPS_digitochequeo = String.format("%-3s", EnvioGPS_digitochequeo);
-            EnvioGPS_NroContador = String.format("%-16s", EnvioGPS_NroContador);
-            if (EnvioGPS_idcontador.trim().length()>3)
-                EnvioGPS_idcontador=EnvioGPS_idcontador.substring(0,3);
+    // ------------------------------------------------------------------ busqueda (indice)
 
-            EnvioGPS_idcontador = String.format("%-3s", EnvioGPS_idcontador);
-            EnvioGPS_lecturatomada = String.format("%-10s", EnvioGPS_lecturatomada);
-            EnvioGPS_causadenolectura = String.format("%-2s", EnvioGPS_causadenolectura);
-            EnvioGPS_descanomalia = String.format("%-30s", EnvioGPS_descanomalia);
-            EnvioGPS_comentario = String.format("%-2s", EnvioGPS_comentario);
-            EnvioGPS_desccomentario = String.format("%-30s", EnvioGPS_desccomentario);
-            EnvioGPS_fechayhoralectura = String.format("%-19s", EnvioGPS_fechayhoralectura);
-            EnvioGPS_CodLector = String.format("%-10s", EnvioGPS_CodLector);
-            EnvioGPS_primermedidor = String.format("%-5s", EnvioGPS_primermedidor);
-            EnvioGPS_HoraImpresion = String.format("%-8s", EnvioGPS_HoraImpresion);
-            EnvioGPS_NombreArchivo = String.format("%-12s", EnvioGPS_NombreArchivo);
-            EnvioGPS_Longitud = String.format("%-20s", EnvioGPS_Longitud);
-            EnvioGPS_Latitud = String.format("%-20s", EnvioGPS_Latitud);
-            EnvioGPS_NroSatelites = String.format("%-3s", EnvioGPS_NroSatelites);
-            EnvioGPS_Distancia = String.format("%-15s", EnvioGPS_Distancia);
-            EnvioGPS_FechaHoraSatelite = String.format("%-30s", EnvioGPS_FechaHoraSatelite);
-            EnvioGPS_AltitudSatelite = String.format("%-20s", EnvioGPS_AltitudSatelite);
-            EnvioGPS_Terminal = String.format("%-15s", EnvioGPS_Terminal);
-            EnvioGPS_IndicadorNovedad = String.format("%-1s", EnvioGPS_IndicadorNovedad);
-            EnvioGPS_Indcodbarras = String.format("%-1s", EnvioGPS_Indcodbarras);
-            EnvioGPS_Intentos = String.format("%-1s", EnvioGPS_Intentos);
-            EnvioGPS_criticapda = String.format("%-1s", EnvioGPS_criticapda);
-            EnvioGPS_ValorFacturado = String.format("%-10s", EnvioGPS_ValorFacturado);
-            EnvioGPS_ConsumoFacturado = String.format("%-10s", EnvioGPS_ConsumoFacturado);
-            EnvioGPS_SubContribucion = String.format("%-10s", EnvioGPS_SubContribucion);
-            EnvioGPS_Consumo1 = String.format("%-10s", EnvioGPS_Consumo1);
-            EnvioGPS_Consumo2 = String.format("%-10s", EnvioGPS_Consumo2);
-            EnvioGPS_Consumo3 = String.format("%-10s", EnvioGPS_Consumo3);
-            EnvioGPS_NroConceptos = String.format("%-2s", EnvioGPS_NroConceptos);
-            EnvioGPS_IndFacturacion = String.format("%-1s", EnvioGPS_IndFacturacion);
-            EnvioGPS_NroFactura = String.format("%-15s", EnvioGPS_NroFactura);
-            EnvioGPS_FechaVence = String.format("%-10s", EnvioGPS_FechaVence);
-            EnvioGPS_FechaCorte = String.format("%-10s", EnvioGPS_FechaCorte);
-            EnvioGPS_LecturaModificada1 = String.format("%-10s", EnvioGPS_LecturaModificada1);
-            EnvioGPS_LecturaModificada2 = String.format("%-10s", EnvioGPS_LecturaModificada2);
-            EnvioGPS_Digitos = String.format("%-1s", EnvioGPS_Digitos);
-            EnvioGPS_Procesado = String.format("%-1s", EnvioGPS_Procesado);
-            EnvioGPS_NumeroConceptos = String.format("%-2s", EnvioGPS_NumeroConceptos);
-            EnvioGPS_PrimerConcepto = String.format("%-6s", EnvioGPS_PrimerConcepto);
-            EnvioGPS_CritiaSIEC = String.format("%-2s", EnvioGPS_CritiaSIEC);
-            EnvioGPS_CodNovedad = String.format("%-4s", EnvioGPS_CodNovedad);
-            EnvioGPS_LecturaAnterior = String.format("%-10s", EnvioGPS_LecturaAnterior);
-            EnvioGPS_EstadoEnvio = String.format("%-1s", EnvioGPS_EstadoEnvio);
-
-            EnvioGPS_MARCACONTADOR =  String.format("%-12s", EnvioGPS_MARCACONTADOR);
-            EnvioGPS_ULTIMOMEDIDORLEIDO =  String.format("%-16s", EnvioGPS_ULTIMOMEDIDORLEIDO);
-            EnvioGPS_MARCALEIDO =   String.format("%-12s", EnvioGPS_MARCALEIDO);
-            EnvioGPS_OBSERVACION1 = String.format("%-3s", EnvioGPS_OBSERVACION1);
-            EnvioGPS_CLASESERVICIO = String.format("%-3s", EnvioGPS_CLASESERVICIO);
-
-            //nuevos para mayor control de los registros a enviar al siec
-            EnvioGPS_NMEDIDORES = String.format("%-1s", EnvioGPS_NMEDIDORES);
-            EnvioGPS_NREGISTRADORES = String.format("%-2s", EnvioGPS_NREGISTRADORES);
-            EnvioGPS_IDREGISTRO = String.format("%-10s", EnvioGPS_IDREGISTRO);
-            EnvioGPS_NROCONTADORDB = String.format("%-1s", EnvioGPS_NROCONTADORDB);
-            EnvioGPS_ValorFacturadoAseo = String.format("%-10s", EnvioGPS_ValorFacturadoAseo);
-            EnvioGPS_CRNL = "\r\n";
-
-
-        } catch (Exception e) {
-            System.out.println("Se presento problema al escribir en el archivo EnvioGPS.dat..");
-            e.printStackTrace();
-        }
-        return;
+    private static String llave(String cuentaCompleta, String contador, String idcontador) {
+        String id = String.format("%1$3s", idcontador == null ? "" : idcontador.trim()).replace(" ", "0");
+        return UtilPlanos.normalizar(cuentaCompleta) + "|" + (contador == null ? "" : contador.trim().toUpperCase()) + "|" + id;
     }
 
-    public void posicion_EnvioGPS(int registro, int tamaño) {
-        try {
-            rFile.seek((registro - 1) * tamaño);
-        } catch (IOException e) {
-            e.printStackTrace();
+    /** Arma el indice leyendo solo los primeros 55 bytes de cada linea, en bloques. */
+    private void construirIndice() throws IOException {
+        indice.clear();
+        long largo = rFile.length();
+        int lineas = (int) (largo / LONGITUD_REGISTRO);
+        final int porBloque = 64;
+        byte[] bloque = new byte[porBloque * LONGITUD_REGISTRO];
+        int linea = 1;
+        while (linea <= lineas) {
+            int n = Math.min(porBloque, lineas - linea + 1);
+            rFile.seek((long) (linea - 1) * LONGITUD_REGISTRO);
+            rFile.readFully(bloque, 0, n * LONGITUD_REGISTRO);
+            for (int r = 0; r < n; r++) {
+                int base = r * LONGITUD_REGISTRO;
+                String cuenta = new String(bloque, base + 23, 7, LATIN1).trim() + new String(bloque, base + 31, 3, LATIN1).trim();
+                String k = llave(cuenta, new String(bloque, base + 35, 16, LATIN1), new String(bloque, base + 52, 3, LATIN1));
+                if (!indice.containsKey(k)) indice.put(k, linea + r);
+            }
+            linea += n;
         }
-    }
-
-    //Escribir los registros actual en el archivo en posicion
-    public void lectura_EnvioGPS(int registro) {
-        //String[] campos;
-        encontro_EnvioGPS = 0;
-        posicion_EnvioGPS(registro, LONGITUD_REGISTRO);
-        try {
-            //Ax: int fileSize = (int) rFile.length();
-            byteArray = new byte[LONGITUD_REGISTRO];//Ax: _fileSize
-            rFile.read(byteArray);//Ax: rFile.readFully(byteArray, 0, LONGITUD_REGISTRO);
-            texto = new String(byteArray);
-            setEnvioGPS_ciclo(texto.substring(0, 3));
-            setEnvioGPS_mununicipio(texto.substring(4, 7));
-            setEnvioGPS_seccion(texto.substring(8, 11));
-            setEnvioGPS_departamento(texto.substring(12, 14));
-            setEnvioGPS_anno(texto.substring(15, 19));
-            setEnvioGPS_mes(texto.substring(20, 22));
-            setEnvioGPS_cuenta(texto.substring(23, 30));//7 (era 6)
-            setEnvioGPS_digitochequeo(texto.substring(31, 34));
-            setEnvioGPS_NroContador(texto.substring(35, 51));
-            setEnvioGPS_idcontador(texto.substring(52, 55));
-            setEnvioGPS_lecturatomada(texto.substring(56, 66));
-            setEnvioGPS_causadenolectura(texto.substring(67, 69));
-            setEnvioGPS_descanomalia(texto.substring(70, 100));
-            setEnvioGPS_comentario(texto.substring(101, 103));
-            setEnvioGPS_desccomentario(texto.substring(104, 134));
-            setEnvioGPS_fechayhoralectura(texto.substring(135, 154));
-            setEnvioGPS_CodLector(texto.substring(155, 165));
-            setEnvioGPS_primermedidor(texto.substring(166, 171));
-            setEnvioGPS_HoraImpresion(texto.substring(172, 180));
-            setEnvioGPS_NombreArchivo(texto.substring(181, 193));
-            setEnvioGPS_Longitud(texto.substring(194, 214));
-            setEnvioGPS_Latitud(texto.substring(215, 235));
-            setEnvioGPS_NroSatelites(texto.substring(236, 239));
-            setEnvioGPS_Distancia(texto.substring(240, 255));
-            setEnvioGPS_FechaHoraSatelite(texto.substring(256, 286));
-            setEnvioGPS_AltitudSatelite(texto.substring(287, 307));
-            setEnvioGPS_Terminal(texto.substring(308, 323));
-            setEnvioGPS_IndicadorNovedad(texto.substring(324, 325));
-            setEnvioGPS_Indcodbarras(texto.substring(326, 327));
-            setEnvioGPS_Intentos(texto.substring(328, 329));
-            setEnvioGPS_criticapda(texto.substring(330, 331));
-            setEnvioGPS_ValorFacturado(texto.substring(332, 342));
-            setEnvioGPS_ConsumoFacturado(texto.substring(343, 353));
-            setEnvioGPS_SubContribucion(texto.substring(354, 364));
-            setEnvioGPS_Consumo1(texto.substring(365, 375));
-            setEnvioGPS_Consumo2(texto.substring(376, 386));
-            setEnvioGPS_Consumo3(texto.substring(387, 397));
-            setEnvioGPS_NroConceptos(texto.substring(398, 400));
-            setEnvioGPS_IndFacturacion(texto.substring(401, 402));
-            setEnvioGPS_NroFactura(texto.substring(403, 418));
-            setEnvioGPS_FechaVence(texto.substring(419, 429));
-            setEnvioGPS_FechaCorte(texto.substring(430, 440));
-            setEnvioGPS_LecturaModificada1(texto.substring(441, 451));
-            setEnvioGPS_LecturaModificada2(texto.substring(452, 462));
-            setEnvioGPS_Digitos(texto.substring(463, 464));
-            setEnvioGPS_Procesado(texto.substring(465, 466));
-            setEnvioGPS_NumeroConceptos(texto.substring(467, 469));
-            setEnvioGPS_PrimerConcepto(texto.substring(470, 476));
-            setEnvioGPS_CritiaSIEC(texto.substring(476+1, 478+1));
-            setEnvioGPS_CodNovedad(texto.substring(479+1, 483+1));
-            setEnvioGPS_LecturaAnterior(texto.substring(484+1, 494+1));
-            setEnvioGPS_EstadoEnvio(texto.substring(495+1, 496+1));
-            setEnvioGPS_MARCACONTADOR(texto.substring(497+1, 509+1));
-            setEnvioGPS_ULTIMOMEDIDORLEIDO(texto.substring(510+1, 526+1));
-            setEnvioGPS_MARCALEIDO(texto.substring(527+1, 539+1));
-            setEnvioGPS_OBSERVACION1(texto.substring(540+1, 543+1));
-            setEnvioGPS_CLASESERVICIO(texto.substring(544+1, 547+1));
-            setEnvioGPS_NMEDIDORES(texto.substring(548+1, 549+1));
-            setEnvioGPS_CLASESERVICIO(texto.substring(550+1, 552+1));
-            setEnvioGPS_IDREGISTRO(texto.substring(554, 564));
-            setEnvioGPS_NROCONTADORDB(texto.substring(565, 566));
-            setEnvioGPS_ValorFacturadoASEO(texto.substring(567, 577));
-            setEnvioGPS_CRNL(texto.substring(578, 580));
-
-
-            ultimo_EnvioGPS = registro;
-            //fin estructura
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    //Escribir los registros actual en el archivo en posicion
-    public void lectura_EnvioGPS_Tipo2(int registro) //Ax: es para no escribir toodos los registros que no se necesitan en el modulo consultanoenviados
-    {
-        encontro_EnvioGPS = 0;
-        posicion_EnvioGPS(registro, LONGITUD_REGISTRO);
-        try {
-            byteArray = new byte[LONGITUD_REGISTRO];
-            rFile.read(byteArray);
-            texto = new String(byteArray);
-            setEnvioGPS_cuenta(texto.substring(23, 30));//7 (era 6)
-            setEnvioGPS_NroContador(texto.substring(35, 51));
-            ultimo_EnvioGPS = registro;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        largoIndexado = largo;
+        total_EnvioGPS = lineas;
     }
 
     //por el momento no es requerido la critica es la misma
     public void BuscarSecuencial_EnvioGPS(String codigo, String contador, String idcontador) {
-        encontro_EnvioGPS = 0;
-        //buffer_EnvioGPS.Initialize();
-        for (int i = 0; i < (int) (total_EnvioGPS); i++) {
-            lectura_EnvioGPS(i + 1);
-
-            String idcont = String.format("%1$3s", idcontador.trim()).replace(" ", "0");
-            String idcont2 = String.format("%1$3s", EnvioGPS_idcontador.trim()).replace(" ", "0");
-            String CuentaReal = EnvioGPS_cuenta.trim() + EnvioGPS_digitochequeo.trim();
-            if (Double.parseDouble(codigo.trim()) == Double.parseDouble(CuentaReal) && contador.trim().toUpperCase().equals(EnvioGPS_NroContador.trim().toUpperCase()) && idcont.equals(idcont2)) {
-                encontro_EnvioGPS = i + 1;
-                posicion_EnvioGPS(i + 1, LONGITUD_REGISTRO);
-                i = (total_EnvioGPS) + 10;
-            } else {
-                encontro_EnvioGPS = 0;
+        synchronized (CANDADO_ARCHIVO) {
+            encontro_EnvioGPS = 0;
+            if (rFile == null) return;
+            try {
+                if (rFile.length() != largoIndexado) construirIndice();
+            } catch (IOException e) {
+                Log.e(TAG, "no se pudo indexar: " + e.getMessage());
+                return;
+            }
+            Integer linea = indice.get(llave(codigo, contador, idcontador));
+            if (linea != null) {
+                lectura_EnvioGPS(linea);
+                encontro_EnvioGPS = linea;
             }
         }
-        return;
     }
 
 }//end

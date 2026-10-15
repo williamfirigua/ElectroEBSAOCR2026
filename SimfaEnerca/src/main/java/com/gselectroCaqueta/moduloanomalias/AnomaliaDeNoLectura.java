@@ -190,14 +190,25 @@ public class AnomaliaDeNoLectura {
             e.printStackTrace();
         }
     }
-
+    /** "25" -> "025" con longitud 3. Si no es numérico o ya tiene la longitud, lo deja igual. */
+    public static String rellenarCeros(String valor, int longitud) {
+        if (valor == null) return "";
+        String v = valor.trim();
+        if (v.length() == 0 || v.length() >= longitud) return v;
+        for (int i = 0; i < v.length(); i++) {
+            if (!Character.isDigit(v.charAt(i))) return v;
+        }
+        StringBuilder sb = new StringBuilder(longitud);
+        for (int i = v.length(); i < longitud; i++) sb.append('0');
+        return sb.append(v).toString();
+    }
     public void buscarbinario_AnomaliaDeNoLectura(String codigo) {
         int salir = 0;
         int i = 0;
         int t = getTotal_AnomaliaDeNoLectura();
         int b = 0;
         lectura_AnomaliaDeNoLectura(1);
-        String uno = codigo.trim();
+        String uno = rellenarCeros(codigo.trim(),3);
         String otro = anomaliaDeNoLectura_CODIGO.trim();
         if (otro.equals(uno)) {
             posicion_AnomaliaDeNoLectura(i + 1, LONGITUD_REGISTRO);

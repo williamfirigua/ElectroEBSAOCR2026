@@ -732,21 +732,30 @@ public class ResumenEstadistico extends Activity {
 
             switch (infoClienteSalida.gettablaClienteSalida_INDFACTURACION()) {
                 case "F":
-                    VariablesGlobales.totalprediosleidos++;
-                    VariablesGlobales.totalprediosimpresos++;
+                    if (!miultimomedidor.equals(infoRegistroSalida.gettablaRegistroSalida_CUENTA())) {
+                        miultimomedidor = infoRegistroSalida.gettablaRegistroSalida_CUENTA();
+                        VariablesGlobales.totalprediosleidos++;
+                        VariablesGlobales.totalprediosimpresos++;
+                    }
                     break;
 
                 case "K":
-                    VariablesGlobales.totalprediosleidos++;
-                    VariablesGlobales.totalprediosliquidados++;
+                    if (!miultimomedidor.equals(infoRegistroSalida.gettablaRegistroSalida_CUENTA())) {
+                        miultimomedidor = infoRegistroSalida.gettablaRegistroSalida_CUENTA();
+                        VariablesGlobales.totalprediosleidos++;
+                        VariablesGlobales.totalprediosliquidados++;
+                    }
                     break;
 
                 case "L":
                     if(resultado == 0){
                         VariablesGlobales.totalprediosnofacturados++;
                     }else{
-                        VariablesGlobales.totalprediosleidos++;
-                        clientesConLectura++;
+                        if (!miultimomedidor.equals(infoRegistroSalida.gettablaRegistroSalida_CUENTA())) {
+                            miultimomedidor = infoRegistroSalida.gettablaRegistroSalida_CUENTA();
+                            VariablesGlobales.totalprediosleidos++;
+                            clientesConLectura++;
+                        }
                     }
                     break;
 
@@ -792,7 +801,7 @@ public class ResumenEstadistico extends Activity {
                 item.add("Registros Enviados al Server: " + RegistrosEnviados);
             }
         }
-        txtLeidos.setText("" + VariablesGlobales.getTotalregistrosleidos());
+        txtLeidos.setText("" + VariablesGlobales.totalprediosleidos);
         item.add("Total Registros     : " + infoRegistroSalida.getTotal_TablaRegistroSalida());//Totalsregist.ToString());
         item.add("Registradores Leidos: " + VariablesGlobales.getTotalregistrosleidos());//.Totalregistrosleidos.ToString());
 

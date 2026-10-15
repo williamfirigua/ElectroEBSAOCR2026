@@ -6,12 +6,19 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-/// <summary>
-/// Descripcion breve del archivo a generar...tablaCobrosRealizados
-/// </summary>
 
+import static com.gselectroCaqueta.tablas.UtilPlanos.LATIN1;
+
+/// <summary>
+/// S_COBRO (COBROS de salida) - registro fijo de 113 bytes.
+/// - Buffer reutilizable + readFully + Latin-1, acceso synchronized.
+/// - Antes de escribir verifica en disco que la posicion sea de la MISMA cuenta.
+///   (No se verifica el concepto porque el liquidador lo cambia a proposito: 607/608, vacio -> "0".)
+/// </summary>
 public class TablaCobrosRealizados { //Ax ya es: S_COBRO
-    static final int LONGITUD_REGISTRO = 113;//112 -- Nrocuentacliente de 9 a 10 digitos (2026)
+    private static final String TAG = "COBROS_SALIDA";
+    static final int LONGITUD_REGISTRO = 113; // Nrocuentacliente de 10 digitos (2026)
+
     String sep = ";";
     String tablaCobrosRealizados_Nrocuentacliente;
     String tablaCobrosRealizados_Conceptodecobro;
@@ -28,289 +35,220 @@ public class TablaCobrosRealizados { //Ax ya es: S_COBRO
     String tablaCobrosRealizados_rangomaximo;
     String tablaCobrosRealizados_periodofacturado;
     String tablaCobrosRealizados_FIN;
-    BufferedReader fin;
-    byte[] byteArray;
+
+    BufferedReader fin;                                         // sin uso, se conserva por compatibilidad
+    private final byte[] bufferLectura = new byte[LONGITUD_REGISTRO];
+    private final byte[] bufferVerificacion = new byte[LONGITUD_REGISTRO];
+    byte[] byteArray = bufferLectura;
     int total_TablaCobrosRealizados;
     int ultimo_TablaCobrosRealizados;
     int encontro_TablaCobrosRealizados;
     String buscar_TablaCobrosRealizados;
     String texto;
     RandomAccessFile rFile;
-    private int _fileSize;
     private String archivo_TablaCobrosRealizados;
 
-    public String gettablaCobrosRealizados_NROCUENTACLIENTE() {
-        return tablaCobrosRealizados_Nrocuentacliente;
-    }
+    // ------------------------------------------------------------------ getters / setters (sin cambios de nombre)
 
-    public void settablaCobrosRealizados_Nrocuentacliente(String tablaCobrosRealizados_Nrocuentacliente) {
-        this.tablaCobrosRealizados_Nrocuentacliente = tablaCobrosRealizados_Nrocuentacliente;
-    }
+    public String gettablaCobrosRealizados_NROCUENTACLIENTE() { return tablaCobrosRealizados_Nrocuentacliente; }
+    public void settablaCobrosRealizados_Nrocuentacliente(String v) { this.tablaCobrosRealizados_Nrocuentacliente = v; }
+    public String gettablaCobrosRealizados_CONCEPTODECOBRO() { return tablaCobrosRealizados_Conceptodecobro; }
+    public void settablaCobrosRealizados_Conceptodecobro(String v) { this.tablaCobrosRealizados_Conceptodecobro = v; }
+    public String gettablaCobrosRealizados_INDICADORACTIVIDAD() { return tablaCobrosRealizados_Indicadoractividad; }
+    public void settablaCobrosRealizados_Indicadoractividad(String v) { this.tablaCobrosRealizados_Indicadoractividad = v; }
+    public String gettablaCobrosRealizados_VALOR() { return tablaCobrosRealizados_Valor; }
+    public void settablaCobrosRealizados_Valor(String v) { this.tablaCobrosRealizados_Valor = v; }
+    public String gettablaCobrosRealizados_SALDOPENDIENTE() { return tablaCobrosRealizados_saldopendiente; }
+    public void settablaCobrosRealizados_saldopendiente(String v) { this.tablaCobrosRealizados_saldopendiente = v; }
+    public String gettablaCobrosRealizados_CUOTASPENDIENTES() { return tablaCobrosRealizados_cuotaspendientes; }
+    public void settablaCobrosRealizados_cuotaspendientes(String v) { this.tablaCobrosRealizados_cuotaspendientes = v; }
+    public String gettablaCobrosRealizados_IDCONCEPTO() { return tablaCobrosRealizados_idconcepto; }
+    public void settablaCobrosRealizados_idconcepto(String v) { this.tablaCobrosRealizados_idconcepto = v; }
+    public String gettablaCobrosRealizados_IDCONVENIO() { return tablaCobrosRealizados_idconvenio; }
+    public void settablaCobrosRealizados_idconvenio(String v) { this.tablaCobrosRealizados_idconvenio = v; }
+    public String gettablaCobrosRealizados_PRIMERCONVENIO() { return tablaCobrosRealizados_primerconvenio; }
+    public void settablaCobrosRealizados_primerconvenio(String v) { this.tablaCobrosRealizados_primerconvenio = v; }
+    public String gettablaCobrosRealizados_NROCONVENIOS() { return tablaCobrosRealizados_nroconvenios; }
+    public void settablaCobrosRealizados_nroconvenios(String v) { this.tablaCobrosRealizados_nroconvenios = v; }
+    public String gettablaCobrosRealizados_PORCENTAJE() { return tablaCobrosRealizados_porcentaje; }
+    public void settablaCobrosRealizados_porcentaje(String v) { this.tablaCobrosRealizados_porcentaje = v; }
+    public String gettablaCobrosRealizados_RANGOMINIMO() { return tablaCobrosRealizados_rangominimo; }
+    public void settablaCobrosRealizados_rangominimo(String v) { this.tablaCobrosRealizados_rangominimo = v; }
+    public String gettablaCobrosRealizados_RANGOMAXIMO() { return tablaCobrosRealizados_rangomaximo; }
+    public void settablaCobrosRealizados_rangomaximo(String v) { this.tablaCobrosRealizados_rangomaximo = v; }
+    public String gettablaCobrosRealizados_PERIODOFACTURADO() { return tablaCobrosRealizados_periodofacturado; }
+    public void settablaCobrosRealizados_periodofacturado(String v) { this.tablaCobrosRealizados_periodofacturado = v; }
+    public String gettablaCobrosRealizados_FIN() { return tablaCobrosRealizados_FIN; }
+    public void settablaCobrosRealizados_FIN(String v) { this.tablaCobrosRealizados_FIN = v; }
+    public String getArchivo_TablaCobrosRealizados() { return archivo_TablaCobrosRealizados; }
+    public void setArchivo_TablaCobrosRealizados(String v) { this.archivo_TablaCobrosRealizados = v; }
 
-    public String gettablaCobrosRealizados_CONCEPTODECOBRO() {
-        return tablaCobrosRealizados_Conceptodecobro;
-    }
+    // ------------------------------------------------------------------ apertura / cierre
 
-    public void settablaCobrosRealizados_Conceptodecobro(String tablaCobrosRealizados_Conceptodecobro) {
-        this.tablaCobrosRealizados_Conceptodecobro = tablaCobrosRealizados_Conceptodecobro;
-    }
-
-    public String gettablaCobrosRealizados_INDICADORACTIVIDAD() {
-        return tablaCobrosRealizados_Indicadoractividad;
-    }
-
-    public void settablaCobrosRealizados_Indicadoractividad(String tablaCobrosRealizados_Indicadoractividad) {
-        this.tablaCobrosRealizados_Indicadoractividad = tablaCobrosRealizados_Indicadoractividad;
-    }
-
-    public String gettablaCobrosRealizados_VALOR() {
-        return tablaCobrosRealizados_Valor;
-    }
-
-    public void settablaCobrosRealizados_Valor(String tablaCobrosRealizados_Valor) {
-        this.tablaCobrosRealizados_Valor = tablaCobrosRealizados_Valor;
-    }
-
-    public String gettablaCobrosRealizados_SALDOPENDIENTE() {
-        return tablaCobrosRealizados_saldopendiente;
-    }
-
-    public void settablaCobrosRealizados_saldopendiente(String tablaCobrosRealizados_saldopendiente) {
-        this.tablaCobrosRealizados_saldopendiente = tablaCobrosRealizados_saldopendiente;
-    }
-
-    public String gettablaCobrosRealizados_CUOTASPENDIENTES() {
-        return tablaCobrosRealizados_cuotaspendientes;
-    }
-
-    public void settablaCobrosRealizados_cuotaspendientes(String tablaCobrosRealizados_cuotaspendientes) {
-        this.tablaCobrosRealizados_cuotaspendientes = tablaCobrosRealizados_cuotaspendientes;
-    }
-
-    public String gettablaCobrosRealizados_IDCONCEPTO() {
-        return tablaCobrosRealizados_idconcepto;
-    }
-
-    public void settablaCobrosRealizados_idconcepto(String tablaCobrosRealizados_idconcepto) {
-        this.tablaCobrosRealizados_idconcepto = tablaCobrosRealizados_idconcepto;
-    }
-
-    public String gettablaCobrosRealizados_IDCONVENIO() {
-        return tablaCobrosRealizados_idconvenio;
-    }
-
-    public void settablaCobrosRealizados_idconvenio(String tablaCobrosRealizados_idconvenio) {
-        this.tablaCobrosRealizados_idconvenio = tablaCobrosRealizados_idconvenio;
-    }
-
-    public String gettablaCobrosRealizados_PRIMERCONVENIO() {
-        return tablaCobrosRealizados_primerconvenio;
-    }
-
-    public void settablaCobrosRealizados_primerconvenio(String tablaCobrosRealizados_primerconvenio) {
-        this.tablaCobrosRealizados_primerconvenio = tablaCobrosRealizados_primerconvenio;
-    }
-
-    public String gettablaCobrosRealizados_NROCONVENIOS() {
-        return tablaCobrosRealizados_nroconvenios;
-    }
-
-    public void settablaCobrosRealizados_nroconvenios(String tablaCobrosRealizados_nroconvenios) {
-        this.tablaCobrosRealizados_nroconvenios = tablaCobrosRealizados_nroconvenios;
-    }
-
-    public String gettablaCobrosRealizados_PORCENTAJE() {
-        return tablaCobrosRealizados_porcentaje;
-    }
-
-    public void settablaCobrosRealizados_porcentaje(String tablaCobrosRealizados_porcentaje) {
-        this.tablaCobrosRealizados_porcentaje = tablaCobrosRealizados_porcentaje;
-    }
-
-    public String gettablaCobrosRealizados_RANGOMINIMO() {
-        return tablaCobrosRealizados_rangominimo;
-    }
-
-    public void settablaCobrosRealizados_rangominimo(String tablaCobrosRealizados_rangominimo) {
-        this.tablaCobrosRealizados_rangominimo = tablaCobrosRealizados_rangominimo;
-    }
-
-    public String gettablaCobrosRealizados_RANGOMAXIMO() {
-        return tablaCobrosRealizados_rangomaximo;
-    }
-
-    public void settablaCobrosRealizados_rangomaximo(String tablaCobrosRealizados_rangomaximo) {
-        this.tablaCobrosRealizados_rangomaximo = tablaCobrosRealizados_rangomaximo;
-    }
-
-    public String gettablaCobrosRealizados_PERIODOFACTURADO() {
-        return tablaCobrosRealizados_periodofacturado;
-    }
-
-    public void settablaCobrosRealizados_periodofacturado(String tablaCobrosRealizados_periodofacturado) {
-        this.tablaCobrosRealizados_periodofacturado = tablaCobrosRealizados_periodofacturado;
-    }
-
-    public String gettablaCobrosRealizados_FIN() {
-        return tablaCobrosRealizados_FIN;
-    }
-
-    public void settablaCobrosRealizados_FIN(String tablaCobrosRealizados_FIN) {
-        this.tablaCobrosRealizados_FIN = tablaCobrosRealizados_FIN;
-    }
-
-    public Boolean abrir_TablaCobrosRealizados(String nombreArchivo) {
-        if (nombreArchivo.length() == 0) {
-            return false;
-        }
+    public synchronized Boolean abrir_TablaCobrosRealizados(String nombreArchivo) {
+        if (nombreArchivo == null || nombreArchivo.length() == 0) return false;
+        cerrarSilencioso();
         try {
             rFile = new RandomAccessFile(nombreArchivo, "rw");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        setArchivo_TablaCobrosRealizados(nombreArchivo);
-        return abrir(getArchivo_TablaCobrosRealizados());
-    }
-
-    private Boolean abrir(String nombre_archivo) {
-        try {
-            _fileSize = (int) rFile.length();
-
-            if (_fileSize > 0) {
-                byteArray = new byte[LONGITUD_REGISTRO];//Ax:  fileSize
-                rFile.readFully(byteArray, 0, LONGITUD_REGISTRO);//Ax: fileSize
-                // texto = new String(byteArray);
-                total_TablaCobrosRealizados = _fileSize / LONGITUD_REGISTRO;
-            } else {
-                byteArray = new byte[_fileSize];
-                rFile.readFully(byteArray, 0, _fileSize);
-                total_TablaCobrosRealizados = 0;
-            }
+            archivo_TablaCobrosRealizados = nombreArchivo;
+            total_TablaCobrosRealizados = (int) (rFile.length() / LONGITUD_REGISTRO);
             return true;
-        } catch (Exception ex) {
-            // Log.e('Ficheros', 'Error al leer fichero desde tarjeta SD');
-            ex.printStackTrace();
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "al abrir " + nombreArchivo + ": " + e.getMessage());
+            return false;
+        } catch (IOException e) {
+            Log.e(TAG, "al abrir1 " + e.getMessage());
             return false;
         }
     }
 
-    public void Cerrar_TablaCobrosRealizados() {
-        // cerrar el archivo abierto
+    public synchronized void Cerrar_TablaCobrosRealizados() {
+        cerrarSilencioso();
+    }
+
+    private void cerrarSilencioso() {
+        if (rFile == null) return;
         try {
             rFile.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(TAG, "al cerrar " + e.getMessage());
+        }
+        rFile = null;
+    }
+
+    public synchronized void posicion_TablaCobrosRealizados(int registro, int tamano) {
+        try {
+            rFile.seek((long) (registro - 1) * tamano);
+        } catch (IOException e) {
+            Log.e(TAG, "seek " + registro + ": " + e.getMessage());
         }
     }
 
-    public boolean escribir_TablaCobrosRealizados(int posicion) {
-        posicion_TablaCobrosRealizados(posicion, LONGITUD_REGISTRO);
+    // ------------------------------------------------------------------ lectura
+
+    public synchronized void lectura_TablaCobrosRealizados(int registro) {
+        encontro_TablaCobrosRealizados = 0;
+        if (rFile == null || registro < 1 || registro > total_TablaCobrosRealizados) {
+            Log.e(TAG, "lectura fuera de rango o archivo cerrado: " + registro + " de " + total_TablaCobrosRealizados);
+            return;
+        }
+        try {
+            rFile.seek((long) (registro - 1) * LONGITUD_REGISTRO);
+            rFile.readFully(bufferLectura);
+        } catch (IOException e) {
+            Log.e(TAG, "lectura fallida en posicion " + registro + ": " + e.getMessage());
+            return;
+        }
+        byte[] b = bufferLectura;
+        texto = null;
+        tablaCobrosRealizados_Nrocuentacliente = new String(b, 0, 10, LATIN1);
+        tablaCobrosRealizados_Conceptodecobro = new String(b, 11, 5, LATIN1);
+        tablaCobrosRealizados_Indicadoractividad = new String(b, 17, 1, LATIN1);
+        tablaCobrosRealizados_Valor = new String(b, 19, 10, LATIN1);
+        tablaCobrosRealizados_saldopendiente = new String(b, 30, 10, LATIN1);
+        tablaCobrosRealizados_cuotaspendientes = new String(b, 41, 2, LATIN1);
+        tablaCobrosRealizados_idconcepto = new String(b, 44, 3, LATIN1);
+        tablaCobrosRealizados_idconvenio = new String(b, 48, 1, LATIN1);
+        tablaCobrosRealizados_primerconvenio = new String(b, 50, 5, LATIN1);
+        tablaCobrosRealizados_nroconvenios = new String(b, 56, 2, LATIN1);
+        tablaCobrosRealizados_porcentaje = new String(b, 59, 6, LATIN1);
+        tablaCobrosRealizados_rangominimo = new String(b, 66, 10, LATIN1);
+        tablaCobrosRealizados_rangomaximo = new String(b, 77, 10, LATIN1);
+        tablaCobrosRealizados_periodofacturado = new String(b, 88, 22, LATIN1);
+        tablaCobrosRealizados_FIN = new String(b, 111, 2, LATIN1);
+        ultimo_TablaCobrosRealizados = registro;
+    }
+
+    // ------------------------------------------------------------------ escritura
+
+    /** Solo escribe si en disco, en esa posicion, esta la misma cuenta. */
+    public synchronized boolean escribir_TablaCobrosRealizados(int posicion) {
+        if (!enRango(posicion)) return false;
+        try {
+            rFile.seek((long) (posicion - 1) * LONGITUD_REGISTRO);
+            rFile.readFully(bufferVerificacion);
+        } catch (IOException e) {
+            bloqueo(posicion, "no se pudo verificar: " + e.getMessage());
+            return false;
+        }
+        String cuentaDisco = new String(bufferVerificacion, 0, 10, LATIN1);
+        if (!UtilPlanos.mismoValor(cuentaDisco, tablaCobrosRealizados_Nrocuentacliente)) {
+            bloqueo(posicion, "en disco esta la cuenta " + cuentaDisco.trim());
+            return false;
+        }
+        return escribirEnPosicion(posicion);
+    }
+
+    /** Escribe sin verificar (solo para reparaciones explicitas). */
+    public synchronized boolean escribirForzado_TablaCobrosRealizados(int posicion) {
+        if (!enRango(posicion)) return false;
+        Log.w(TAG, "Escritura forzada en posicion " + posicion + " cuenta " + tablaCobrosRealizados_Nrocuentacliente);
+        return escribirEnPosicion(posicion);
+    }
+
+    private boolean enRango(int posicion) {
+        if (rFile == null || posicion < 1 || posicion > total_TablaCobrosRealizados) {
+            bloqueo(posicion, "fuera de rango o archivo cerrado (total " + total_TablaCobrosRealizados + ")");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean escribirEnPosicion(int posicion) {
         rellenar_TablaCobrosRealizados();
-        String texto = tablaCobrosRealizados_Nrocuentacliente + sep + tablaCobrosRealizados_Conceptodecobro + sep + tablaCobrosRealizados_Indicadoractividad + sep + tablaCobrosRealizados_Valor + sep
+        String linea = tablaCobrosRealizados_Nrocuentacliente + sep + tablaCobrosRealizados_Conceptodecobro + sep + tablaCobrosRealizados_Indicadoractividad + sep + tablaCobrosRealizados_Valor + sep
                 + tablaCobrosRealizados_saldopendiente + sep + tablaCobrosRealizados_cuotaspendientes + sep + tablaCobrosRealizados_idconcepto + sep + tablaCobrosRealizados_idconvenio + sep
                 + tablaCobrosRealizados_primerconvenio + sep + tablaCobrosRealizados_nroconvenios + sep + tablaCobrosRealizados_porcentaje + sep + tablaCobrosRealizados_rangominimo + sep
                 + tablaCobrosRealizados_rangomaximo + sep + tablaCobrosRealizados_periodofacturado + sep + tablaCobrosRealizados_FIN;
+        if (linea.length() != LONGITUD_REGISTRO) {
+            UtilPlanos.evento(TAG, "CADENA DAÑADA COBROS (longitud " + linea.length() + ", posicion " + posicion + "):\r\n" + linea);
+            return false;
+        }
         try {
-            Log.e("error",LONGITUD_REGISTRO+" longitud co_cobro "+texto.length());
-            if (null != rFile && (texto.length() == LONGITUD_REGISTRO)) {
-                rFile.writeBytes(texto);
-                System.out.println("Los Datos fueron grabados correctamente");
-                return true;
-            } else {
-                System.out.println("Se presento problema al escribir en el archivo; longitud Errada: tamano texto: " + texto.length() + texto);
-                return false;
-            }
-        } catch (IOException ioe) {
-            System.out.println("Se presento problema al escribir en el archivo Longitud Errada: " + LONGITUD_REGISTRO);
+            rFile.seek((long) (posicion - 1) * LONGITUD_REGISTRO);
+            rFile.write(linea.getBytes(LATIN1));
+            return true;
+        } catch (IOException e) {
+            Log.e(TAG, "escritura fallida en posicion " + posicion + ": " + e.getMessage());
             return false;
         }
     }
 
-    public void rellenar_TablaCobrosRealizados() {
-        try {
-            tablaCobrosRealizados_Nrocuentacliente = String.format("%-10s", tablaCobrosRealizados_Nrocuentacliente);//era 9
-            tablaCobrosRealizados_Conceptodecobro = String.format("%-5s", tablaCobrosRealizados_Conceptodecobro);
-            tablaCobrosRealizados_Indicadoractividad = String.format("%-1s", tablaCobrosRealizados_Indicadoractividad);
-            tablaCobrosRealizados_Valor = String.format("%10s", tablaCobrosRealizados_Valor);//.replace(" ","0");
-            tablaCobrosRealizados_saldopendiente = String.format("%-10s", tablaCobrosRealizados_saldopendiente);
-            tablaCobrosRealizados_cuotaspendientes = String.format("%-2s", tablaCobrosRealizados_cuotaspendientes);
-            tablaCobrosRealizados_idconcepto = String.format("%-3s", tablaCobrosRealizados_idconcepto);
-            tablaCobrosRealizados_idconvenio = String.format("%-1s", tablaCobrosRealizados_idconvenio);
-            tablaCobrosRealizados_primerconvenio = String.format("%-5s", tablaCobrosRealizados_primerconvenio);
-            tablaCobrosRealizados_nroconvenios = String.format("%-2s", tablaCobrosRealizados_nroconvenios);
-            tablaCobrosRealizados_porcentaje = String.format("%-6s", tablaCobrosRealizados_porcentaje);
-            tablaCobrosRealizados_rangominimo = String.format("%-10s", tablaCobrosRealizados_rangominimo);
-            tablaCobrosRealizados_rangomaximo = String.format("%-10s", tablaCobrosRealizados_rangomaximo);
-            tablaCobrosRealizados_periodofacturado = String.format("%-22s", tablaCobrosRealizados_periodofacturado);
-            tablaCobrosRealizados_FIN = "\r\n";//= String.format("%-2s", tablaCobrosRealizados_FIN);
-        } catch (Exception e) {
-            System.out.println("Se presento problema al escribir en el archivo tablaCobrosRealizados.dat..");
-            e.printStackTrace();
-        }
-
-        return;
+    private void bloqueo(int posicion, String motivo) {
+        UtilPlanos.evento(TAG, "[BLOQUEADO COBRO] cuenta " + (tablaCobrosRealizados_Nrocuentacliente == null ? "" : tablaCobrosRealizados_Nrocuentacliente.trim())
+                + " concepto " + (tablaCobrosRealizados_Conceptodecobro == null ? "" : tablaCobrosRealizados_Conceptodecobro.trim())
+                + " intento escribir en posicion " + posicion + " -> " + motivo);
     }
 
-    public void posicion_TablaCobrosRealizados(int registro, int tamano) {
-        try {
-            rFile.seek((registro - 1) * tamano);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public synchronized void rellenar_TablaCobrosRealizados() {
+        tablaCobrosRealizados_Nrocuentacliente = String.format("%-10s", tablaCobrosRealizados_Nrocuentacliente);
+        tablaCobrosRealizados_Conceptodecobro = String.format("%-5s", tablaCobrosRealizados_Conceptodecobro);
+        tablaCobrosRealizados_Indicadoractividad = String.format("%-1s", tablaCobrosRealizados_Indicadoractividad);
+        tablaCobrosRealizados_Valor = String.format("%10s", tablaCobrosRealizados_Valor);
+        tablaCobrosRealizados_saldopendiente = String.format("%-10s", tablaCobrosRealizados_saldopendiente);
+        tablaCobrosRealizados_cuotaspendientes = String.format("%-2s", tablaCobrosRealizados_cuotaspendientes);
+        tablaCobrosRealizados_idconcepto = String.format("%-3s", tablaCobrosRealizados_idconcepto);
+        tablaCobrosRealizados_idconvenio = String.format("%-1s", tablaCobrosRealizados_idconvenio);
+        tablaCobrosRealizados_primerconvenio = String.format("%-5s", tablaCobrosRealizados_primerconvenio);
+        tablaCobrosRealizados_nroconvenios = String.format("%-2s", tablaCobrosRealizados_nroconvenios);
+        tablaCobrosRealizados_porcentaje = String.format("%-6s", tablaCobrosRealizados_porcentaje);
+        tablaCobrosRealizados_rangominimo = String.format("%-10s", tablaCobrosRealizados_rangominimo);
+        tablaCobrosRealizados_rangomaximo = String.format("%-10s", tablaCobrosRealizados_rangomaximo);
+        tablaCobrosRealizados_periodofacturado = String.format("%-22s", tablaCobrosRealizados_periodofacturado);
+        tablaCobrosRealizados_FIN = "\r\n";
     }
 
-    // Escribir los registros atual en el archivo en posicion
-    public void lectura_TablaCobrosRealizados(int registro) {
-        //String[] campos;
+    // ------------------------------------------------------------------ busqueda
+
+    public synchronized void buscarSecuencial_TablaCobrosRealizados(String codigo) {
         encontro_TablaCobrosRealizados = 0;
-        posicion_TablaCobrosRealizados(registro, LONGITUD_REGISTRO);
-        try {
-            //Ax: int fileSize = (int) rFile.length();
-            byteArray = new byte[LONGITUD_REGISTRO];//Ax: fileSize
-            rFile.read(byteArray);//Ax: rFile.readFully(byteArray, 0, LONGITUD_REGISTRO);
-            texto = new String(byteArray);
-            settablaCobrosRealizados_Nrocuentacliente(texto.substring(0, 10));//Nrocuentacliente ahora 10 digitos (era 9)
-            settablaCobrosRealizados_Conceptodecobro(texto.substring(11, 16));
-            settablaCobrosRealizados_Indicadoractividad(texto.substring(17, 18));
-            settablaCobrosRealizados_Valor(texto.substring(19, 29));
-            settablaCobrosRealizados_saldopendiente(texto.substring(30, 40));
-            settablaCobrosRealizados_cuotaspendientes(texto.substring(41, 43));
-            settablaCobrosRealizados_idconcepto(texto.substring(44, 47));
-            settablaCobrosRealizados_idconvenio(texto.substring(48, 49));
-            settablaCobrosRealizados_primerconvenio(texto.substring(50, 55));
-            settablaCobrosRealizados_nroconvenios(texto.substring(56, 58));
-            settablaCobrosRealizados_porcentaje(texto.substring(59, 65));
-            settablaCobrosRealizados_rangominimo(texto.substring(66, 76));
-            settablaCobrosRealizados_rangomaximo(texto.substring(77, 87));
-            settablaCobrosRealizados_periodofacturado(texto.substring(88, 110));
-            settablaCobrosRealizados_FIN(texto.substring(111, 113));
-            ultimo_TablaCobrosRealizados = registro;
-            // fin estructura
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void buscarSecuencial_TablaCobrosRealizados(String codigo) {
-        encontro_TablaCobrosRealizados = 0;
-        for (int i = 0; i < (int) (total_TablaCobrosRealizados); i++) {
-            lectura_TablaCobrosRealizados(i + 1);
-            if (Integer.parseInt(codigo.trim()) == Integer.parseInt(tablaCobrosRealizados_Nrocuentacliente.trim())) {
-                encontro_TablaCobrosRealizados = i + 1;
-                posicion_TablaCobrosRealizados(i + 1, LONGITUD_REGISTRO);
-                i = total_TablaCobrosRealizados + 10;
-            } else {
-                encontro_TablaCobrosRealizados = 0;
+        String buscado = UtilPlanos.normalizar(codigo);
+        for (int i = 1; i <= total_TablaCobrosRealizados; i++) {
+            lectura_TablaCobrosRealizados(i);
+            if (buscado.equals(UtilPlanos.normalizar(tablaCobrosRealizados_Nrocuentacliente))) {
+                encontro_TablaCobrosRealizados = i;
+                return;
             }
         }
-        return;
-    }
-
-    public String getArchivo_TablaCobrosRealizados() {
-        return archivo_TablaCobrosRealizados;
-    }
-
-    public void setArchivo_TablaCobrosRealizados(String archivo_TablaCobrosRealizados) {
-        this.archivo_TablaCobrosRealizados = archivo_TablaCobrosRealizados;
     }
 }

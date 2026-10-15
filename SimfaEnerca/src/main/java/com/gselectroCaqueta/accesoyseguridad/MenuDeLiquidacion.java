@@ -448,6 +448,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     String nombredelaImagen = "";//Ax: Captura el nombre del archivo de imagen
     String nombrefoto = ""; //Ax: lleva el nombre de la foto que se creara para despues mandarla a optimizar
     String nroContador1 = "";
+    String TipoEnergia1 = "";
     String nroContador2 = "";
     String nroContador3 = "";
     String nroContador4 = "";
@@ -1612,6 +1613,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     leerInformacionUsuario(3);
 
                     nroContador1 = infoRegistroEntrada.gettablaRegistroDeEntrada_nrocontador();//.gettablaRegistroDeEntrada_NROCONTADOR();
+                    TipoEnergia1 = infoRegistroEntrada.gettablaRegistroDeEntrada_tipoenergia();
                     //[enerca] idContador1 = infoRegistroEntrada.gettablaRegistroDeEntrada_contador();
                     lecturaTomada1 = infoRegistroSalida.gettablaRegistroSalida_LECTURATOMADA();
                     causadenolectura1 = String.format("%1$2s", infoRegistroSalida.gettablaRegistroSalida_CAUSADENOLECTURA().trim());
@@ -1643,6 +1645,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                     leerInformacionUsuario(3);
                     nroContador1 = infoRegistroEntrada.gettablaRegistroDeEntrada_nrocontador();//.gettablaRegistroDeEntrada_NROCONTADOR();
+                    TipoEnergia1 = infoRegistroEntrada.gettablaRegistroDeEntrada_tipoenergia();
                     //[enerca] idContador1 = infoRegistroEntrada.gettablaRegistroDeEntrada_contador();
                     lecturaTomada1 = infoRegistroSalida.gettablaRegistroSalida_LECTURATOMADA();
                     causadenolectura1 = String.format("%1$2s", infoRegistroSalida.gettablaRegistroSalida_CAUSADENOLECTURA().trim());
@@ -5083,6 +5086,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         }
         return 1;
     }
+ //  private static final java.util.concurrent.atomic.AtomicBoolean LIQUIDANDO = new java.util.concurrent.atomic.AtomicBoolean(false);
 
 
     private String IncluirDatosEnModoAutomatico() {//78000
@@ -7180,6 +7184,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         if (nroContador1.trim().equals("")) {
             nroContador1 = infoRegistroEntrada.gettablaRegistroDeEntrada_nrocontador();
+            TipoEnergia1 = infoRegistroEntrada.gettablaRegistroDeEntrada_tipoenergia();
             idContador1 = infoRegistroSalida.gettablaRegistroSalida_CONSECUTIVO();
             lecturaTomada1 = infoRegistroSalida.gettablaRegistroSalida_LECTURATOMADA();
             causadenolectura1 = String.format("%1$2s", infoRegistroSalida.gettablaRegistroSalida_CAUSADENOLECTURA().trim());
@@ -9078,6 +9083,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                                 misenvios.Cerrar_EnvioGPS();
                                 //este es el proceso de entrar a grabr la informacion en el archivo de envios ya que no se han enviado
                                 nroContador1 = infoRegistroEntrada.gettablaRegistroDeEntrada_nrocontador();
+                                TipoEnergia1 = infoRegistroEntrada.gettablaRegistroDeEntrada_tipoenergia();
                                 idContador1 = infoRegistroSalida.gettablaRegistroSalida_CONSECUTIVO();
                                 lecturaTomada1 = infoRegistroSalida.gettablaRegistroSalida_LECTURATOMADA();
 
@@ -9101,7 +9107,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                                 nrocontadordb = infoRegistroEntrada.gettablaRegistroDeEntrada_Digitos().trim();
                                 TipoMedida1 = infoRegistroEntrada.gettablaRegistroDeEntrada_Tipomedida();
                                 Log.e("INFO", "ValidarNoEnviados | va a entrar a guardarDatosAEnviarNuevo ");
-                                guardarDatosAEnviarNuevo(nroContador1, idContador1, lecturaTomada1, causadenolectura1, nrocontadordb, lecturaModificada11, lecturaModificada21, digitos1, criticaPDA1, lecturaAnterior1, 0);//,infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida1);
+                                guardarDatosAEnviarNuevo(nroContador1, idContador1, lecturaTomada1, causadenolectura1, nrocontadordb, lecturaModificada11, lecturaModificada21, digitos1, criticaPDA1, lecturaAnterior1, 0,TipoEnergia1);//,infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida1);
 
                                 //abrir de nuevo el archivo enviados backup
                                 misenvios.archivo_EnvioGPS = ArchivoNoEnviadosF.getAbsolutePath();
@@ -9489,6 +9495,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     private void limpiarMedidores() {
 
         nroContador1 = "";
+        TipoEnergia1 = "";
         idContador1 = "";
         lecturaTomada1 = "";
         causadenolectura1 = "";
@@ -10804,7 +10811,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     //  Log.e("error",indicadorManual+" evaluar "+evaluarLecturaRegistro(primero, variables.nveces, variables.lactual, variables.estado, lecturaact, variables.consumoactual));
                     Log.e("errors", "evaluar registro " + indicadorManual);
 
-                    if (!infoRegistroEntrada.gettablaRegistroDeEntrada_LQDA_CSMO().trim().equals("R") || infoRegistroEntrada.gettablaRegistroDeEntrada_LQDA_CSMO().trim().equals("")) {//estaba en N
+                    if (!infoRegistroEntrada.gettablaRegistroDeEntrada_LQDA_CSMO().trim().equals("R") || infoRegistroEntrada.gettablaRegistroDeEntrada_LQDA_CSMO().trim().equals("") || infoRegistroEntrada.gettablaRegistroDeEntrada_tipoenergia().trim().equals("R")) {//estaba en N
                         if (evaluarLecturaRegistro(primero, variables.nveces, variables.lactual, variables.estado, lecturaact, variables.consumoactual) == 0)
                             if (indicadorManual == 0) {// nuevo para cuando se le da automatico si esta en 1
                                 Log.e("errors", "evaluar registro1 " + indicadorManual);
@@ -11095,7 +11102,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 ) {
                     // nuevo proceso si la factura es superior al valor indicado se reporta para evaluarlo
 
-                    if (indicadorManual == 0) //nuevo para cuando se le da automatico si esta en 1
+                    if (indicadorManual == 0) //nuevo para cuando se le da automatico si esta en 1 no aplica estas opciones
                     {
                         mensajeNovedad = "";
 
@@ -11124,9 +11131,15 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                         if (MODO.equals("")) {
                             Log.e("error", "requiere novedad 1 " + String.format("%1$2s", infoRegistroSalida.gettablaRegistroSalida_CAUSADENOLECTURA().trim()).replace(" ", "0"));
-                            if (!String.format("%1$2s", infoRegistroSalida.gettablaRegistroSalida_CAUSADENOLECTURA().trim()).replace(" ", "0").equals("07"))
-                                adicionarNovedad(2, fuePromediado);
-                            Log.e("error", "requiere novedad 1");
+                            if (!String.format("%1$2s", infoRegistroSalida.gettablaRegistroSalida_CAUSADENOLECTURA().trim()).replace(" ", "0").equals("07")) {
+                                if (!terminal.trim().equals("354379550180590") && !terminal.trim().equals("351007491579959") && !terminal.trim().equals("351007492166830")
+                                        && !terminal.trim().equals("358767141019390") && !terminal.trim().equals("868995078034487")
+                                        && !terminal.trim().equals("868995078034628")
+                                ) {
+                                    adicionarNovedad(2, fuePromediado);
+                                    Log.e("error", "requiere novedad 1");
+                                }
+                            }
                             //se comenta   requierenovedad = 1;
                         }
                     }
@@ -11157,7 +11170,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             if (DebeTomarFotografia == 1) {
                 yaTomoFotoOcr = true;
                 Log.e("INFO","4 - SETEA EL VALOR DE yaTomoFotoOcr: " + yaTomoFotoOcr);
-                ejecutarProcesoDeFoto(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + "_" + infoClienteEntrada.gettablaEntradaClientes_mes().trim(), 1, tipoFotoDigital, 1, "", 1);
+                if (!terminal.trim().equals("354379550180590") && !terminal.trim().equals("351007491579959") && !terminal.trim().equals("351007492166830")
+                        && !terminal.trim().equals("358767141019390") && !terminal.trim().equals("868995078034487")
+                        && !terminal.trim().equals("868995078034628")
+                ) {
+
+                    ejecutarProcesoDeFoto(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + "_" + infoClienteEntrada.gettablaEntradaClientes_mes().trim(), 1, tipoFotoDigital, 1, "", 1);
+                }
             }
             variableTomarDatosLectura = true;
 
@@ -11217,7 +11236,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 Log.e("error", "novedad 4");
                 variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";PROCESAR LECTURA-2_2 ;" + getPhoneDate() + "-" + getPhoneHour();
                 escribeResumenTiempo(variableResumenLiquidacion + " " + " Entra a adicionarNovedad()");
-                adicionarNovedad(2, fuePromediado);
+                if (!terminal.trim().equals("354379550180590") && !terminal.trim().equals("351007491579959") && !terminal.trim().equals("351007492166830")
+                        && !terminal.trim().equals("358767141019390") && !terminal.trim().equals("868995078034487")
+                        && !terminal.trim().equals("868995078034628")
+                ) {
+                    adicionarNovedad(2, fuePromediado);
+                }
                 escribeResumenTiempo(variableResumenLiquidacion + " " + " Fin de adicionarNovedad()");
             }
             requierenovedad = 0;
@@ -11295,6 +11319,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     if (infoClienteEntrada.gettablaEntradaClientes_Clasedeservicio().trim().equals("IC") || infoClienteEntrada.gettablaEntradaClientes_Clasedeservicio().trim().equals("MC")) {
                         leerInformacionUsuario(3);
                         nroContador1 = infoRegistroEntrada.gettablaRegistroDeEntrada_nrocontador();
+                        TipoEnergia1 = infoRegistroEntrada.gettablaRegistroDeEntrada_tipoenergia();
                         idContador1 = infoRegistroSalida.gettablaRegistroSalida_CONSECUTIVO();
                         lecturaTomada1 = infoRegistroSalida.gettablaRegistroSalida_LECTURATOMADA();
                         causadenolectura1 = String.format("%1$2s", infoRegistroSalida.gettablaRegistroSalida_CAUSADENOLECTURA().trim());
@@ -11426,9 +11451,15 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     fotoynovedad = false;
                     Log.e("error", "novedad 5");
                     variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";PROCESAR LECTURA-3 ;" + getPhoneDate() + "-" + getPhoneHour();
+
                     escribeResumenTiempo(variableResumenLiquidacion + " " + " Entra a adicionarNovedad()");
-                    adicionarNovedad(2, 0);
-                    escribeResumenTiempo(variableResumenLiquidacion + " " + " Fin de adicionarNovedad()");
+                    if (!terminal.trim().equals("354379550180590") && !terminal.trim().equals("351007491579959") && !terminal.trim().equals("351007492166830")
+                            && !terminal.trim().equals("358767141019390") && !terminal.trim().equals("868995078034487")
+                            && !terminal.trim().equals("868995078034628")
+                    ) {
+                        adicionarNovedad(2, 0);
+                        escribeResumenTiempo(variableResumenLiquidacion + " " + " Fin de adicionarNovedad()");
+                    }
                     cod_cuentaUlt_foto = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
                     mesUlt_foto = infoClienteEntrada.gettablaEntradaClientes_mes().trim();
                     if (!yaEnvioFotografiaActual) {
@@ -11439,7 +11470,14 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                         variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";PROCESAR LECTURA-3 ;" + getPhoneDate() + "-" + getPhoneHour();
                         escribeResumenTiempo(variableResumenLiquidacion + " " + " Entra a ejecutarProcesoDeFoto()");
-                        ejecutarProcesoDeFoto(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + "_" + infoClienteEntrada.gettablaEntradaClientes_mes().trim(), 1, tipoFotoDigital, 0, "", 1);
+
+                        if (!terminal.trim().equals("354379550180590") && !terminal.trim().equals("351007491579959") && !terminal.trim().equals("351007492166830")
+                                && !terminal.trim().equals("358767141019390") && !terminal.trim().equals("868995078034487")
+                                && !terminal.trim().equals("868995078034628")
+                        ) {
+                            ejecutarProcesoDeFoto(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + "_" + infoClienteEntrada.gettablaEntradaClientes_mes().trim(), 1, tipoFotoDigital, 0, "", 1);
+                        }
+
                         escribeResumenTiempo(variableResumenLiquidacion + " " + " Fin de ejecutarProcesoDeFoto()");
                     }
                 }
@@ -11860,26 +11898,26 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
             guardarDatosAEnviarNuevo(nroContador1, idContador1, lecturaTomada1, causadenolectura1, nrocontadordb, lecturaModificada11,
                     lecturaModificada21, digitos1, criticaPDA1,
-                    lecturaAnterior1, misenvios.total_EnvioGPS);//, infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida1);
+                    lecturaAnterior1, misenvios.total_EnvioGPS, TipoEnergia1);//, infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida1);
         }
 
         if (!nroContador2.trim().equals("")) {
 
             guardarDatosAEnviarNuevo(nroContador2, idContador2, lecturaTomada2, causadenolectura2, nrocontadordb, lecturaModificada12,
                     lecturaModificada22, digitos2, criticaPDA2,
-                    lecturaAnterior2, misenvios.total_EnvioGPS);//, infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida2);
+                    lecturaAnterior2, misenvios.total_EnvioGPS,TipoEnergia1 );//, infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida2);
         }
 
         if (!nroContador3.trim().equals("")) {
 
             guardarDatosAEnviarNuevo(nroContador3, idContador3, lecturaTomada3, causadenolectura3, nrocontadordb, lecturaModificada13,
                     lecturaModificada23, digitos3, criticaPDA3,
-                    lecturaAnterior3, misenvios.total_EnvioGPS);//, infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida3);
+                    lecturaAnterior3, misenvios.total_EnvioGPS, TipoEnergia1);//, infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida3);
         }
         if (!nroContador4.trim().equals("")) {
             guardarDatosAEnviarNuevo(nroContador4, idContador4, lecturaTomada4, causadenolectura4, nrocontadordb, lecturaModificada14,
                     lecturaModificada24, digitos4, criticaPDA4,
-                    lecturaAnterior4, misenvios.total_EnvioGPS);//, infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida4);
+                    lecturaAnterior4, misenvios.total_EnvioGPS, TipoEnergia1);//, infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida4);
         }
        /* if (!nroContador5.trim().equals("")) {
 
@@ -11894,26 +11932,26 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             if (!nroContador1.trim().equals("")) {
                 guardarDatosAEnviarNuevo(nroContador1, idContador1, lecturaTomada1, causadenolectura1,
                         nrocontadordb, lecturaModificada11, lecturaModificada21, digitos1,
-                        criticaPDA1, lecturaAnterior1, misenvios.total_EnvioGPS);//, infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida1);
+                        criticaPDA1, lecturaAnterior1, misenvios.total_EnvioGPS, TipoEnergia1);//, infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida1);
             }
 
             if (!nroContador2.trim().equals("")) {
 
                 guardarDatosAEnviarNuevo(nroContador2, idContador2, lecturaTomada2, causadenolectura2,
                         nrocontadordb, lecturaModificada12, lecturaModificada22, digitos2,
-                        criticaPDA2, lecturaAnterior2, misenvios.total_EnvioGPS);//, infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida2);
+                        criticaPDA2, lecturaAnterior2, misenvios.total_EnvioGPS, TipoEnergia1);//, infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida2);
             }
 
             if (!nroContador3.trim().equals("")) {
 
                 guardarDatosAEnviarNuevo(nroContador3, idContador3, lecturaTomada3, causadenolectura3,
                         nrocontadordb, lecturaModificada13, lecturaModificada23, digitos3,
-                        criticaPDA3, lecturaAnterior3, misenvios.total_EnvioGPS);//, infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida3);
+                        criticaPDA3, lecturaAnterior3, misenvios.total_EnvioGPS, TipoEnergia1);//, infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida3);
             }
             if (!nroContador4.trim().equals("")) {
                 guardarDatosAEnviarNuevo(nroContador4, idContador4, lecturaTomada4, causadenolectura4, nrocontadordb, lecturaModificada14,
                         lecturaModificada24, digitos4, criticaPDA4,
-                        lecturaAnterior4, misenvios.total_EnvioGPS);//, infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida4);
+                        lecturaAnterior4, misenvios.total_EnvioGPS, TipoEnergia1);//, infoClienteEntrada.gettablaEntradaClientes_Cuenta(),TipoMedida4);
             }
 
         } catch (Exception ex) {
@@ -11925,11 +11963,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     private void guardarDatosAEnviarNuevo(String NroContador, String IdContador, String
             LecturaTomada, String causadenolectura, String Intentos, String LecturaModificada1, String
                                                   LecturaModificada2,
-                                          String Digitos, String criticaPDA, String lecturaanterior, int procedimiento)//, String cuenta, String tipomedida)
+                                          String Digitos, String criticaPDA, String lecturaanterior, int procedimiento, String TipoEnergia)//, String cuenta, String tipomedida)
     {
         try {
             variables.datodebusqueda = "";
             tomarLector();
+            if (causadenolectura.trim().length()>2)
+                causadenolectura =causadenolectura.substring(1,3);
             Log.e("INFO", "guardarDatosAEnviarNuevo | infoClienteSalida.lector: " + infoClienteSalida.gettablaClienteSalida_LECTOR().trim());
             if (!infoClienteSalida.gettablaClienteSalida_LECTOR().trim().equals("")) {
 
@@ -12218,7 +12258,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 misenvios.setEnvioGPS_IDREGISTRO(infoClienteEntrada.gettablaEntradaClientes_Lugarultimopago().trim());
                 Log.e("INFO","guardarDatosAEnviarNuevo | nrocontadordb: " + nrocontadordb);
                 Log.e("INFO","guardarDatosAEnviarNuevo | InfoENtradanrocontadordb" + infoRegistroEntrada.gettablaRegistroDeEntrada_Digitos());
-                misenvios.setEnvioGPS_NROCONTADORDB(Intentos);
+                misenvios.setEnvioGPS_NROCONTADORDB(TipoEnergia);
                 //nuevo campo
                 misenvios.setEnvioGPS_ValorFacturadoASEO("" + infoClienteSalida.gettablaClienteSalida_VALORFACTURADOASEO());
                 misenvios.setEnvioGPS_CRNL("\r\n");

@@ -1,18 +1,26 @@
 package com.gselectroCaqueta.tablas;
 
-import com.gselectroCaqueta.accesoyseguridad.VariablesGlobales;
+import android.util.Log;
+
 import com.gsutil.Utils;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-/// <summary>
-/// Descripcion breve del archivo a generar...tablaContadorSalida
-/// </summary>
 
+import static com.gselectroCaqueta.tablas.UtilPlanos.LATIN1;
+
+/// <summary>
+/// S_CONTAD (MEDIDOR.SDA de salida) - registro fijo de 112 bytes.
+/// - Ya no carga el archivo completo en memoria (antes: ~1,1 MB al abrir y otro ~1,1 MB en CADA lectura).
+/// - Buffer reutilizable + readFully + Latin-1.
+/// - Acceso synchronized y verificacion de cuenta + numero de medidor antes de escribir.
+/// </summary>
 public class TablaContadorSalida {
+    private static final String TAG = "MEDIDOR_SALIDA";
+    static final int LONGITUD_REGISTRO = 112; // CUENTA 10, MARCA 10, NROregistroS 1. Verificado contra MEDIDOR.SDA
+
     String sep = ";";
     String tablaContadorSalida_Cuenta;
     String tablaContadorSalida_MARCA;
@@ -29,276 +37,217 @@ public class TablaContadorSalida {
     String tablaContadorSalida_ESTADOCRITICA;
     String tablaContadorSalida_FIN;
 
-    public String gettablaContadorSalida_CUENTA() {
-        return tablaContadorSalida_Cuenta;
-    }
-
-    public void settablaContadorSalida_Cuenta(String tablaContadorSalida_Cuenta) {
-        this.tablaContadorSalida_Cuenta = tablaContadorSalida_Cuenta;
-    }
-
-    public String gettablaContadorSalida_MARCA() {
-        return tablaContadorSalida_MARCA;
-    }
-
-    public void settablaContadorSalida_MARCA(String tablaContadorSalida_MARCA) {
-        this.tablaContadorSalida_MARCA = tablaContadorSalida_MARCA;
-    }
-
-    public String gettablaContadorSalida_NUMERO() {
-        return tablaContadorSalida_NUMero;
-    }
-
-    public void settablaContadorSalida_NUMero(String tablaContadorSalida_NUMero) {
-        this.tablaContadorSalida_NUMero = tablaContadorSalida_NUMero;
-    }
-
-    public String gettablaContadorSalida_FECHALECTURA() {
-        return tablaContadorSalida_Fechalectura;
-    }
-
-    public void settablaContadorSalida_Fechalectura(String tablaContadorSalida_Fechalectura) {
-        this.tablaContadorSalida_Fechalectura = tablaContadorSalida_Fechalectura;
-    }
-
-    public String gettablaContadorSalida_HORALECTURA() {
-        return tablaContadorSalida_HORALECTURA;
-    }
-
-    public void settablaContadorSalida_HORALECTURA(String tablaContadorSalida_HORALECTURA) {
-        this.tablaContadorSalida_HORALECTURA = tablaContadorSalida_HORALECTURA;
-    }
-
-    public String gettablaContadorSalida_ULTIMOMEDIDORLEIDO() {
-        return tablaContadorSalida_ULTIMOMEDIDORLEIDO;
-    }
-
-    public void settablaContadorSalida_ULTIMOMEDIDORLEIDO(String tablaContadorSalida_ULTIMOMEDIDORLEIDO) {
-        this.tablaContadorSalida_ULTIMOMEDIDORLEIDO = tablaContadorSalida_ULTIMOMEDIDORLEIDO;
-    }
-
-    public String gettablaContadorSalida_MARCAMEDIDORLEIDO() {
-        return tablaContadorSalida_MARCAMEDIDORLEIDO;
-    }
-
-    public void settablaContadorSalida_MARCAMEDIDORLEIDO(String tablaContadorSalida_MARCAMEDIDORLEIDO) {
-        this.tablaContadorSalida_MARCAMEDIDORLEIDO = tablaContadorSalida_MARCAMEDIDORLEIDO;
-    }
-
-    public String gettablaContadorSalida_NROREGISTROS() {
-        return tablaContadorSalida_NROregistroS;
-    }
-
-    public void settablaContadorSalida_NROregistroS(String tablaContadorSalida_NROregistroS) {
-        this.tablaContadorSalida_NROregistroS = tablaContadorSalida_NROregistroS;
-    }
-
-    public String gettablaContadorSalida_PRIMERREGISTRO() {
-        return tablaContadorSalida_PRIMERREGISTRO;
-    }
-
-    public void settablaContadorSalida_PRIMERREGISTRO(String tablaContadorSalida_PRIMERREGISTRO) {
-        this.tablaContadorSalida_PRIMERREGISTRO = tablaContadorSalida_PRIMERREGISTRO;
-    }
-
-    public String gettablaContadorSalida_CLIENTE() {
-        return tablaContadorSalida_CLIENTE;
-    }
-
-    public void settablaContadorSalida_CLIENTE(String tablaContadorSalida_CLIENTE) {
-        this.tablaContadorSalida_CLIENTE = tablaContadorSalida_CLIENTE;
-    }
-
-    public String gettablaContadorSalida_TIEMPO() {
-        return tablaContadorSalida_TIEMPO;
-    }
-
-    public void settablaContadorSalida_TIEMPO(String tablaContadorSalida_TIEMPO) {
-        this.tablaContadorSalida_TIEMPO = tablaContadorSalida_TIEMPO;
-    }
-
-    public String gettablaContadorSalida_FUEPROMEDIADO() {
-        return tablaContadorSalida_FUEPROMEDIADO;
-    }
-
-    public void settablaContadorSalida_FUEPROMEDIADO(String tablaContadorSalida_FUEPROMEDIADO) {
-        this.tablaContadorSalida_FUEPROMEDIADO = tablaContadorSalida_FUEPROMEDIADO;
-    }
-
-    public String gettablaContadorSalida_ESTADOCRITICA() {
-        return tablaContadorSalida_ESTADOCRITICA;
-    }
-
-    public void settablaContadorSalida_ESTADOCRITICA(String tablaContadorSalida_ESTADOCRITICA) {
-        this.tablaContadorSalida_ESTADOCRITICA = tablaContadorSalida_ESTADOCRITICA;
-    }
-
-    public String gettablaContadorSalida_FIN() {
-        return tablaContadorSalida_FIN;
-    }
-
-    public void settablaContadorSalida_FIN(String tablaContadorSalida_FIN) {
-        this.tablaContadorSalida_FIN = tablaContadorSalida_FIN;
-    }
-
-    BufferedReader fin;
-    byte[] byteArray;
+    BufferedReader fin;                                         // sin uso, se conserva por compatibilidad
+    private final byte[] bufferLectura = new byte[LONGITUD_REGISTRO];
+    private final byte[] bufferVerificacion = new byte[LONGITUD_REGISTRO];
+    byte[] byteArray = bufferLectura;
     private String archivo_TablaContadorSalida;
-    static final int LONGITUD_REGISTRO = 112;//114 -- CUENTA 9->10 (+1), MARCA 12->10 (-2), NROregistroS 2->1 (-1). Verificado contra MEDIDOR.SDA
     int total_TablaContadorSalida;
     int ultimo_TablaContadorSalida;
     int encontro_TablaContadorSalida;
     String buscar_TablaContadorSalida;
     String texto;
-    // File ruta_sd = Environment.getExternalStorageDirectory();
-    // File ruta_sd = new File('C:\\Users\\SGlobal\\Documents\\PruebasJava\\CensoSalida.txt');
     RandomAccessFile rFile;
     Utils utils = new Utils();
 
-    public Boolean abrir_TablaContadorSalida(String nombreArchivo) {
-        if (nombreArchivo.length() == 0) {
-            return false;
-        }
-        try {
-            rFile = new RandomAccessFile(nombreArchivo, "rw"); // C:/Users/SGlobal/Documents/Pruebas Java/CensoSalida.txt
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        setArchivo_TablaContadorSalida(nombreArchivo);
-        return abrir(getArchivo_TablaContadorSalida());
-    }
+    // ------------------------------------------------------------------ getters / setters (sin cambios de nombre)
 
-    private Boolean abrir(String nombre_archivo) {
+    public String gettablaContadorSalida_CUENTA() { return tablaContadorSalida_Cuenta; }
+    public void settablaContadorSalida_Cuenta(String v) { this.tablaContadorSalida_Cuenta = v; }
+    public String gettablaContadorSalida_MARCA() { return tablaContadorSalida_MARCA; }
+    public void settablaContadorSalida_MARCA(String v) { this.tablaContadorSalida_MARCA = v; }
+    public String gettablaContadorSalida_NUMERO() { return tablaContadorSalida_NUMero; }
+    public void settablaContadorSalida_NUMero(String v) { this.tablaContadorSalida_NUMero = v; }
+    public String gettablaContadorSalida_FECHALECTURA() { return tablaContadorSalida_Fechalectura; }
+    public void settablaContadorSalida_Fechalectura(String v) { this.tablaContadorSalida_Fechalectura = v; }
+    public String gettablaContadorSalida_HORALECTURA() { return tablaContadorSalida_HORALECTURA; }
+    public void settablaContadorSalida_HORALECTURA(String v) { this.tablaContadorSalida_HORALECTURA = v; }
+    public String gettablaContadorSalida_ULTIMOMEDIDORLEIDO() { return tablaContadorSalida_ULTIMOMEDIDORLEIDO; }
+    public void settablaContadorSalida_ULTIMOMEDIDORLEIDO(String v) { this.tablaContadorSalida_ULTIMOMEDIDORLEIDO = v; }
+    public String gettablaContadorSalida_MARCAMEDIDORLEIDO() { return tablaContadorSalida_MARCAMEDIDORLEIDO; }
+    public void settablaContadorSalida_MARCAMEDIDORLEIDO(String v) { this.tablaContadorSalida_MARCAMEDIDORLEIDO = v; }
+    public String gettablaContadorSalida_NROREGISTROS() { return tablaContadorSalida_NROregistroS; }
+    public void settablaContadorSalida_NROregistroS(String v) { this.tablaContadorSalida_NROregistroS = v; }
+    public String gettablaContadorSalida_PRIMERREGISTRO() { return tablaContadorSalida_PRIMERREGISTRO; }
+    public void settablaContadorSalida_PRIMERREGISTRO(String v) { this.tablaContadorSalida_PRIMERREGISTRO = v; }
+    public String gettablaContadorSalida_CLIENTE() { return tablaContadorSalida_CLIENTE; }
+    public void settablaContadorSalida_CLIENTE(String v) { this.tablaContadorSalida_CLIENTE = v; }
+    public String gettablaContadorSalida_TIEMPO() { return tablaContadorSalida_TIEMPO; }
+    public void settablaContadorSalida_TIEMPO(String v) { this.tablaContadorSalida_TIEMPO = v; }
+    public String gettablaContadorSalida_FUEPROMEDIADO() { return tablaContadorSalida_FUEPROMEDIADO; }
+    public void settablaContadorSalida_FUEPROMEDIADO(String v) { this.tablaContadorSalida_FUEPROMEDIADO = v; }
+    public String gettablaContadorSalida_ESTADOCRITICA() { return tablaContadorSalida_ESTADOCRITICA; }
+    public void settablaContadorSalida_ESTADOCRITICA(String v) { this.tablaContadorSalida_ESTADOCRITICA = v; }
+    public String gettablaContadorSalida_FIN() { return tablaContadorSalida_FIN; }
+    public void settablaContadorSalida_FIN(String v) { this.tablaContadorSalida_FIN = v; }
+    public String getArchivo_TablaContadorSalida() { return archivo_TablaContadorSalida; }
+    public void setArchivo_TablaContadorSalida(String v) { this.archivo_TablaContadorSalida = v; }
+
+    // ------------------------------------------------------------------ apertura / cierre
+
+    public synchronized Boolean abrir_TablaContadorSalida(String nombreArchivo) {
+        if (nombreArchivo == null || nombreArchivo.length() == 0) return false;
+        cerrarSilencioso();
         try {
-            int fileSize = (int) rFile.length();
-            byteArray = new byte[fileSize];
-            rFile.readFully(byteArray, 0, fileSize);
-            texto = new String(byteArray);
-            total_TablaContadorSalida = fileSize / LONGITUD_REGISTRO;
+            rFile = new RandomAccessFile(nombreArchivo, "rw");
+            archivo_TablaContadorSalida = nombreArchivo;
+            total_TablaContadorSalida = (int) (rFile.length() / LONGITUD_REGISTRO); // ya NO se lee el archivo completo
             return true;
-        } catch (Exception ex) {
-            // Log.e('Ficheros', 'Error al leer fichero desde tarjeta SD');
-            ex.printStackTrace();
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "al abrir " + nombreArchivo + ": " + e.getMessage());
+            return false;
+        } catch (IOException e) {
+            Log.e(TAG, "al abrir1 " + e.getMessage());
             return false;
         }
     }
 
-    public void Cerrar_TablaContadorSalida() {
-        // cerrar el archivo abierto
+    public synchronized void Cerrar_TablaContadorSalida() {
+        cerrarSilencioso();
+    }
+
+    private void cerrarSilencioso() {
+        if (rFile == null) return;
         try {
             rFile.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(TAG, "al cerrar " + e.getMessage());
+        }
+        rFile = null;
+    }
+
+    public synchronized void posicion_TablaContadorSalida(int registro, int tamano) {
+        try {
+            rFile.seek((long) (registro - 1) * tamano);
+        } catch (IOException e) {
+            Log.e(TAG, "seek " + registro + ": " + e.getMessage());
         }
     }
 
-    public boolean escribir_TablaContadorSalida(int posicion) {
-        posicion_TablaContadorSalida(posicion, LONGITUD_REGISTRO);
+    // ------------------------------------------------------------------ lectura
+
+    public synchronized void lectura_TablaContadorSalida(int registro) {
+        encontro_TablaContadorSalida = 0;
+        if (rFile == null || registro < 1 || registro > total_TablaContadorSalida) {
+            Log.e(TAG, "lectura fuera de rango o archivo cerrado: " + registro + " de " + total_TablaContadorSalida);
+            return;
+        }
+        try {
+            rFile.seek((long) (registro - 1) * LONGITUD_REGISTRO);
+            rFile.readFully(bufferLectura);
+        } catch (IOException e) {
+            Log.e(TAG, "lectura fallida en posicion " + registro + ": " + e.getMessage());
+            return;
+        }
+        byte[] b = bufferLectura;
+        texto = null;
+        tablaContadorSalida_Cuenta = new String(b, 0, 10, LATIN1);
+        tablaContadorSalida_MARCA = new String(b, 11, 10, LATIN1);
+        tablaContadorSalida_NUMero = new String(b, 22, 16, LATIN1);
+        tablaContadorSalida_Fechalectura = new String(b, 39, 8, LATIN1);
+        tablaContadorSalida_HORALECTURA = new String(b, 48, 6, LATIN1);
+        tablaContadorSalida_ULTIMOMEDIDORLEIDO = new String(b, 55, 16, LATIN1);
+        tablaContadorSalida_MARCAMEDIDORLEIDO = new String(b, 72, 12, LATIN1);
+        tablaContadorSalida_NROregistroS = new String(b, 85, 1, LATIN1);
+        tablaContadorSalida_PRIMERREGISTRO = new String(b, 87, 5, LATIN1);
+        tablaContadorSalida_CLIENTE = new String(b, 93, 5, LATIN1);
+        tablaContadorSalida_TIEMPO = new String(b, 99, 5, LATIN1);
+        tablaContadorSalida_FUEPROMEDIADO = new String(b, 105, 1, LATIN1);
+        tablaContadorSalida_ESTADOCRITICA = new String(b, 107, 2, LATIN1);
+        tablaContadorSalida_FIN = "\r\n";
+        ultimo_TablaContadorSalida = registro;
+    }
+
+    // ------------------------------------------------------------------ escritura
+
+    /** Solo escribe si en disco, en esa posicion, esta la misma cuenta y el mismo numero de medidor. */
+    public synchronized boolean escribir_TablaContadorSalida(int posicion) {
+        if (!enRango(posicion)) return false;
+        try {
+            rFile.seek((long) (posicion - 1) * LONGITUD_REGISTRO);
+            rFile.readFully(bufferVerificacion);
+        } catch (IOException e) {
+            bloqueo(posicion, "no se pudo verificar: " + e.getMessage());
+            return false;
+        }
+        String cuentaDisco = new String(bufferVerificacion, 0, 10, LATIN1);
+        String numeroDisco = new String(bufferVerificacion, 22, 16, LATIN1);
+        if (!UtilPlanos.mismoValor(cuentaDisco, tablaContadorSalida_Cuenta)
+                || !numeroDisco.trim().equals(tablaContadorSalida_NUMero == null ? "" : tablaContadorSalida_NUMero.trim())) {
+            bloqueo(posicion, "en disco esta " + cuentaDisco.trim() + "/" + numeroDisco.trim());
+            return false;
+        }
+        return escribirEnPosicion(posicion);
+    }
+
+    /** Escribe sin verificar (solo para reparaciones explicitas). */
+    public synchronized boolean escribirForzado_TablaContadorSalida(int posicion) {
+        if (!enRango(posicion)) return false;
+        Log.w(TAG, "Escritura forzada en posicion " + posicion + " cuenta " + tablaContadorSalida_Cuenta);
+        return escribirEnPosicion(posicion);
+    }
+
+    private boolean enRango(int posicion) {
+        if (rFile == null || posicion < 1 || posicion > total_TablaContadorSalida) {
+            bloqueo(posicion, "fuera de rango o archivo cerrado (total " + total_TablaContadorSalida + ")");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean escribirEnPosicion(int posicion) {
         rellenar_TablaContadorSalida();
-        String texto = tablaContadorSalida_Cuenta + sep + tablaContadorSalida_MARCA + sep + tablaContadorSalida_NUMero + sep + tablaContadorSalida_Fechalectura + sep + tablaContadorSalida_HORALECTURA
+        String linea = tablaContadorSalida_Cuenta + sep + tablaContadorSalida_MARCA + sep + tablaContadorSalida_NUMero + sep + tablaContadorSalida_Fechalectura + sep + tablaContadorSalida_HORALECTURA
                 + sep + tablaContadorSalida_ULTIMOMEDIDORLEIDO + sep + tablaContadorSalida_MARCAMEDIDORLEIDO + sep + tablaContadorSalida_NROregistroS + sep + tablaContadorSalida_PRIMERREGISTRO + sep
                 + tablaContadorSalida_CLIENTE + sep + tablaContadorSalida_TIEMPO + sep + tablaContadorSalida_FUEPROMEDIADO + sep + tablaContadorSalida_ESTADOCRITICA + sep + tablaContadorSalida_FIN;
+        if (linea.length() != LONGITUD_REGISTRO) {
+            UtilPlanos.evento(TAG, "CADENA DAÑADA MEDIDORES (longitud " + linea.length() + ", posicion " + posicion + "):\r\n" + linea);
+            return false;
+        }
         try {
-            if (null != rFile && (texto.length() == LONGITUD_REGISTRO)) {
-                rFile.writeBytes(texto);
-                System.out.println("Los Datos fueron grabados correctamente");
-                return true;
-            } else {
-                File desc = new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/LOGEVENTOS.LOG"); //Ax: EJ: O108010.009
-                utils.EscribirLinea(desc,"CADENA DAÑADA MEDIDORES:"+"\r\n" + texto);
-                System.out.println("Se presento problema al escribir en el archivo; longitud Errada: tamano texto: " + texto.length() + texto);
-                return false;
-            }
-        } catch (IOException ioe) {
-            System.out.println("Se presento problema al escribir en el archivo Longitud Errada: " + LONGITUD_REGISTRO);
+            rFile.seek((long) (posicion - 1) * LONGITUD_REGISTRO);
+            rFile.write(linea.getBytes(LATIN1));
+            return true;
+        } catch (IOException e) {
+            Log.e(TAG, "escritura fallida en posicion " + posicion + ": " + e.getMessage());
             return false;
         }
     }
 
-    public void rellenar_TablaContadorSalida() {
-        try {
-            tablaContadorSalida_Cuenta = String.format("%-10s", tablaContadorSalida_Cuenta);//era 9
-            tablaContadorSalida_MARCA = String.format("%-10s", tablaContadorSalida_MARCA);//era 12
-            tablaContadorSalida_NUMero = String.format("%-16s", tablaContadorSalida_NUMero);
-            tablaContadorSalida_Fechalectura = String.format("%-8s", tablaContadorSalida_Fechalectura);
-            tablaContadorSalida_HORALECTURA = String.format("%-6s", tablaContadorSalida_HORALECTURA);
-            tablaContadorSalida_ULTIMOMEDIDORLEIDO = String.format("%-16s", tablaContadorSalida_ULTIMOMEDIDORLEIDO);
-            tablaContadorSalida_MARCAMEDIDORLEIDO = String.format("%-12s", tablaContadorSalida_MARCAMEDIDORLEIDO);
-            tablaContadorSalida_NROregistroS = String.format("%-1s", tablaContadorSalida_NROregistroS);//era 2
-            tablaContadorSalida_PRIMERREGISTRO = String.format("%-5s", tablaContadorSalida_PRIMERREGISTRO);
-            tablaContadorSalida_CLIENTE = String.format("%-5s", tablaContadorSalida_CLIENTE);
-            tablaContadorSalida_TIEMPO = String.format("%-5s", tablaContadorSalida_TIEMPO);
-            tablaContadorSalida_FUEPROMEDIADO = String.format("%-1s", tablaContadorSalida_FUEPROMEDIADO);
-            tablaContadorSalida_ESTADOCRITICA = String.format("%-2s", tablaContadorSalida_ESTADOCRITICA);
-            tablaContadorSalida_FIN = "\r\n";//el plano actual no lleva contenido despues de ESTADOCRITICA
-        } catch (Exception e) {
-            System.out.println("Se presento problema al escribir en el archivo tablaContadorSalida.dat..");
-            e.printStackTrace();
-        }
-
-        return;
+    private void bloqueo(int posicion, String motivo) {
+        UtilPlanos.evento(TAG, "[BLOQUEADO MEDIDOR] cuenta " + (tablaContadorSalida_Cuenta == null ? "" : tablaContadorSalida_Cuenta.trim())
+                + " medidor " + (tablaContadorSalida_NUMero == null ? "" : tablaContadorSalida_NUMero.trim())
+                + " intento escribir en posicion " + posicion + " -> " + motivo);
     }
 
-    public void posicion_TablaContadorSalida(int registro, int tamano) {
-        try {
-            rFile.seek((registro - 1) * tamano);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public synchronized void rellenar_TablaContadorSalida() {
+        tablaContadorSalida_Cuenta = String.format("%-10s", tablaContadorSalida_Cuenta);
+        tablaContadorSalida_MARCA = String.format("%-10s", tablaContadorSalida_MARCA);
+        tablaContadorSalida_NUMero = String.format("%-16s", tablaContadorSalida_NUMero);
+        tablaContadorSalida_Fechalectura = String.format("%-8s", tablaContadorSalida_Fechalectura);
+        tablaContadorSalida_HORALECTURA = String.format("%-6s", tablaContadorSalida_HORALECTURA);
+        tablaContadorSalida_ULTIMOMEDIDORLEIDO = String.format("%-16s", tablaContadorSalida_ULTIMOMEDIDORLEIDO);
+        tablaContadorSalida_MARCAMEDIDORLEIDO = String.format("%-12s", tablaContadorSalida_MARCAMEDIDORLEIDO);
+        tablaContadorSalida_NROregistroS = String.format("%-1s", tablaContadorSalida_NROregistroS);
+        tablaContadorSalida_PRIMERREGISTRO = String.format("%-5s", tablaContadorSalida_PRIMERREGISTRO);
+        tablaContadorSalida_CLIENTE = String.format("%-5s", tablaContadorSalida_CLIENTE);
+        tablaContadorSalida_TIEMPO = String.format("%-5s", tablaContadorSalida_TIEMPO);
+        tablaContadorSalida_FUEPROMEDIADO = String.format("%-1s", tablaContadorSalida_FUEPROMEDIADO);
+        tablaContadorSalida_ESTADOCRITICA = String.format("%-2s", tablaContadorSalida_ESTADOCRITICA);
+        tablaContadorSalida_FIN = "\r\n";
     }
 
-    // Escribir los registros atual en el archivo en posicion
-    public void lectura_TablaContadorSalida(int registro) {
-        String[] campos;
+    // ------------------------------------------------------------------ busqueda
+
+    public synchronized void buscarSecuencial_TablaContadorSalida(String codigo) {
         encontro_TablaContadorSalida = 0;
-        posicion_TablaContadorSalida(registro, LONGITUD_REGISTRO);
-        try {
-            int fileSize = (int) rFile.length();
-            byteArray = new byte[fileSize];
-            rFile.readFully(byteArray, 0, LONGITUD_REGISTRO);
-            texto = new String(byteArray);
-            settablaContadorSalida_Cuenta(texto.substring(0, 10));//CUENTA ahora 10 digitos (era 9)
-            settablaContadorSalida_MARCA(texto.substring(11, 21));//MARCA ahora 10 (era 12)
-            settablaContadorSalida_NUMero(texto.substring(22, 38));
-            settablaContadorSalida_Fechalectura(texto.substring(39, 47));
-            settablaContadorSalida_HORALECTURA(texto.substring(48, 54));
-            settablaContadorSalida_ULTIMOMEDIDORLEIDO(texto.substring(55, 71));
-            settablaContadorSalida_MARCAMEDIDORLEIDO(texto.substring(72, 84));
-            settablaContadorSalida_NROregistroS(texto.substring(85, 86));//NROregistroS ahora 1 (era 2)
-            settablaContadorSalida_PRIMERREGISTRO(texto.substring(87, 92));
-            settablaContadorSalida_CLIENTE(texto.substring(93, 98));
-            settablaContadorSalida_TIEMPO(texto.substring(99, 104));
-            settablaContadorSalida_FUEPROMEDIADO(texto.substring(105, 106));
-            settablaContadorSalida_ESTADOCRITICA(texto.substring(107, 109));
-            settablaContadorSalida_FIN("\r\n");//el plano actual no trae contenido despues de ESTADOCRITICA
-            ultimo_TablaContadorSalida = registro;
-            // fin estructura
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void buscarSecuencial_TablaContadorSalida(String codigo) {
-        encontro_TablaContadorSalida = 0;
-        for (int i = 0; i < (int) (total_TablaContadorSalida); i++) {
-            lectura_TablaContadorSalida(i + 1);
-            if (Integer.parseInt(codigo.trim()) == Integer.parseInt(tablaContadorSalida_Cuenta.trim())) {
-                encontro_TablaContadorSalida = i + 1;
-                posicion_TablaContadorSalida(i + 1, LONGITUD_REGISTRO);
-                i = total_TablaContadorSalida + 10;
-            } else {
-                encontro_TablaContadorSalida = 0;
+        String buscado = UtilPlanos.normalizar(codigo);
+        for (int i = 1; i <= total_TablaContadorSalida; i++) {
+            lectura_TablaContadorSalida(i);
+            if (buscado.equals(UtilPlanos.normalizar(tablaContadorSalida_Cuenta))) {
+                encontro_TablaContadorSalida = i;
+                return;
             }
         }
-        return;
     }
-
-    public String getArchivo_TablaContadorSalida() {
-        return archivo_TablaContadorSalida;
-    }
-
-    public void setArchivo_TablaContadorSalida(String archivo_TablaContadorSalida) {
-        this.archivo_TablaContadorSalida = archivo_TablaContadorSalida;
-    }
-
 }

@@ -1045,7 +1045,7 @@ public class TablaMedidorEntrada { //Ax ya es: E_CONTAD
             return false;
         }
         try {
-            rFile = new RandomAccessFile(nombreArchivo, "rw");
+            rFile = new RandomAccessFile(nombreArchivo, "r");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return false;
