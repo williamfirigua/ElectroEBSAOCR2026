@@ -929,44 +929,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             }
         });
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_menu, new String[]{" MENÚ... \u25bc "
-                , "Capturar Anomalía"
-                , "Reimprimir Factura"
-                , "Anterior Predio"
-                , "Capturar Novedad Lect"
-                , "Modificar Nro Digitos"
-                , "Buscar Cliente"
-                , "Des/Habilitar Impresora"
-                , "Des/Asociar Impresora"
-                , "Config. Preimpreso Fact"
-                , "Estadistica Del Proceso"
-                , "Tomar Foto"
-                , "Utilidades"
-                , "Enviar Facturacion Gprs"
-                , "Procesar Reenvio Gprs"
-                , "Evaluar Noenviadas Gprs"
-                //, "Reconstruir Envio Cuenta"
-                , "Liquidación Automática"
-                , "Enviar Fotos"
-                , "Activar Wifi"
-                , "Mapa"
-                , "Envio Registros"
-                , "Volver"
-        });
-        spinnerMenu.setAdapter(adapter);
 
-        spinnerMenu.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                opcionMenu(position);
-                spinnerMenu.setSelection(0);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parentView) {
-            }
-        });
-        spinnerMenu.setSelection(0);
 //
 //        txtLecturaActual.addTextChangedListener(new TextWatcher() {
 //
