@@ -465,7 +465,7 @@ public class TablaRegistroSalida { //Ax esta es S_REGIST, ya
     private void registrarBloqueo(int posicion, String motivo) {
         escribirEvento("[BLOQUEADO] cuenta " + (tablaRegistroSalida_cuenta == null ? "" : tablaRegistroSalida_cuenta.trim())
                 + " consec " + (tablaRegistroSalida_consecutivo == null ? "" : tablaRegistroSalida_consecutivo.trim())
-                + " intento escribir en posicion " + posicion + " -> " + motivo);
+                + " intento escribir en posicion " + posicion + " -> " + motivo+"\r\n");
     }
 
     private void escribirEvento(String mensaje) {

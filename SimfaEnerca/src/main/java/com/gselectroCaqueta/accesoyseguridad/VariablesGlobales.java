@@ -1288,7 +1288,7 @@ public class VariablesGlobales {
     }
 
     public int evaluarConServicio(String variable) {
-        if ((variable.equals("Z"))) {
+        if ((variable.equals("X"))) {
             return (0);
         }
         return (1);
