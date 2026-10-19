@@ -18,9 +18,20 @@ import android.widget.Toast;
 
 import com.gselectroCaqueta.accesoyseguridad.R;
 import com.gselectroCaqueta.accesoyseguridad.VariablesGlobales;
+import com.gselectroCaqueta.sync.ApiMovil;
+import com.gselectroCaqueta.sync.ColaEnvio;
+import com.gselectroCaqueta.sync.ColaEnvioSqlite;
+import com.gselectroCaqueta.sync.ConfigSync;
+import com.gselectroCaqueta.sync.Json;
+import com.gselectroCaqueta.sync.MotorSincronizacion;
+import com.gselectroCaqueta.sync.SincronizacionService;
 import com.gselectroCaqueta.tablas.EnvioGPS;
 
+import androidx.appcompat.app.AlertDialog;
+
 import java.io.File;
+import java.util.List;
+import java.util.Map;
 
 public class ModuloConsultaNoEnviados extends AppCompatActivity {
 
@@ -55,6 +66,12 @@ public class ModuloConsultaNoEnviados extends AppCompatActivity {
 
     int registroactual = 1; //Ax: para llenar la tabla de arriba antes de los conteos y no influir en otras cosas.
     int registrolimite = 20; //Ax: limite de paginacion.
+
+    // Envío por API REST: lo no enviado está en la cola (ebsa_sync.db), no en ENVIOGPRS<serial>.SDA, que en
+    // ese modo no se genera; ENVIOSGPRS.SDA queda completo como respaldo.
+    boolean modoRest;
+    ColaEnvioSqlite cola;
+    Button btnSubirRespaldo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,7 +140,13 @@ public class ModuloConsultaNoEnviados extends AppCompatActivity {
             }
         });
 
-        ModuloConsultaNoEnviados_Load();
+        modoRest = ConfigSync.modoRest(this);
+        if (modoRest) {
+            prepararModoRest();
+            cargarRest();
+        } else {
+            ModuloConsultaNoEnviados_Load();
+        }
 
     }//End onCreate
 
@@ -186,6 +209,10 @@ public class ModuloConsultaNoEnviados extends AppCompatActivity {
     }
 
     private void LeerNoEnviados() {
+        if (modoRest) {
+            leerRest();
+            return;
+        }
 
         tabla.removeAllViews();
         tabla.refreshDrawableState();
@@ -322,6 +349,125 @@ public class ModuloConsultaNoEnviados extends AppCompatActivity {
 //        String deviceIMEI = tManager.getDeviceId();
 //        return deviceIMEI;
 //    }
+
+    // ------------------------------------------------------------------ modo REST (cola)
+
+    private void prepararModoRest() {
+        cola = ColaEnvioSqlite.de(this);
+        findViewById(R.id.filaAccionesRest).setVisibility(View.VISIBLE);
+        btnSubirRespaldo = (Button) findViewById(R.id.btnSubirRespaldo);
+
+        findViewById(R.id.btnEnviarAhora).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SincronizacionService.solicitar(ModuloConsultaNoEnviados.this);
+                mensajes("Enviando lo pendiente en segundo plano");
+            }
+        });
+        findViewById(R.id.btnReintentarRechazados).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int n = 0;
+                for (String t : new String[]{ColaEnvio.LIQUIDACION, ColaEnvio.LBL, ColaEnvio.FOTO, ColaEnvio.TRACKING}) {
+                    n += cola.reintentarErrores(t);
+                }
+                if (n > 0) SincronizacionService.solicitar(ModuloConsultaNoEnviados.this);
+                mensajes(n > 0 ? n + " rechazados vuelven a enviarse" : "No hay rechazados");
+                cargarRest();
+            }
+        });
+        btnSubirRespaldo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                subirRespaldo();
+            }
+        });
+    }
+
+    private void cargarRest() {
+        int pendientes = cola.contar(ColaEnvio.LIQUIDACION, ColaEnvio.PENDIENTE);
+        int rechazadas = cola.contar(ColaEnvio.LIQUIDACION, ColaEnvio.ERROR);
+        int archivos = cola.contar(ColaEnvio.FOTO, ColaEnvio.PENDIENTE) + cola.contar(ColaEnvio.LBL, ColaEnvio.PENDIENTE);
+        total = pendientes + rechazadas;
+        txtregnoenviados.setText(total + (rechazadas > 0 ? " (" + rechazadas + " rech.)" : "") + " · archivos " + archivos);
+        if (cabecera.getChildCount() == 0) agregarCabecera();
+        ((TextView) ((TableRow) cabecera.getChildAt(0)).getChildAt(1)).setText("ESTADO");
+        registroactual = 1;
+        leerRest();
+        if (total == 0) mensajes("No hay lecturas pendientes de envío");
+    }
+
+    private void leerRest() {
+        tabla.removeAllViews();
+        List<ColaEnvioSqlite.NoEnviado> filas = cola.noEnviados(ColaEnvio.LIQUIDACION, registroactual - 1, registrolimite);
+        for (ColaEnvioSqlite.NoEnviado f : filas) {
+            String cuenta = "?";
+            try {
+                Map<String, Object> l = (Map<String, Object>) Json.objeto(f.elemento.datos).get("lectura");
+                cuenta = Json.texto(l, "cod_cuenta") + " " + Json.texto(l, "indicador");
+            } catch (RuntimeException ignored) {
+            }
+            String estado;
+            if (f.estado == ColaEnvio.ERROR) {
+                String m = f.motivo == null ? "" : f.motivo;
+                estado = "Rechazada: " + (m.length() > 60 ? m.substring(0, 60) + "…" : m);
+            } else {
+                estado = f.elemento.intentos > 0 ? "Pendiente (" + f.elemento.intentos + " intentos)" : "Pendiente";
+            }
+            llenarTabla(cuenta, estado);
+        }
+        registroactual += filas.size();
+        lblpos.setText(total < 1 ? "0/0" : (registroactual - 1) + "/" + total);
+    }
+
+    /** POST /api/v1/liquidaciones/planos con ENVIOSGPRS.SDA y CO_COBRO.SDA; lo ya recibido sale duplicado. */
+    private void subirRespaldo() {
+        final File envio = new File(path + "/DATOSDESALIDA/ENVIOSGPRS.SDA");
+        final File cobros = new File(path + "/DATOSDESALIDA/CO_COBRO.SDA");
+        if (!envio.isFile() || envio.length() == 0) {
+            mensajes("No hay ENVIOSGPRS.SDA para subir");
+            return;
+        }
+        final ConfigSync cfg = new ConfigSync(this);
+        if (cfg.baseApi().isEmpty()) {
+            mensajes("Abra primero la liquidación para tomar la URL de la API");
+            return;
+        }
+        btnSubirRespaldo.setEnabled(false);
+        mensajes("Subiendo respaldo…");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                MotorSincronizacion.Resumen r = new MotorSincronizacion.Resumen();
+                MotorSincronizacion motor = new MotorSincronizacion(new ApiMovil(cfg.baseApi()), cola, cfg, cfg, null);
+                final ApiMovil.Respuesta resp = motor.subirRespaldo(envio, cobros, r);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        btnSubirRespaldo.setEnabled(true);
+                        mostrarResultadoRespaldo(resp);
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private void mostrarResultadoRespaldo(ApiMovil.Respuesta resp) {
+        String texto;
+        if (resp.ok()) {
+            texto = "Líneas: " + Json.texto(resp.cuerpo, "lineas")
+                    + "\nNuevas: " + Json.texto(resp.cuerpo, "aceptados")
+                    + "\nYa estaban en el servidor: " + Json.texto(resp.cuerpo, "duplicados")
+                    + "\nRechazadas: " + Json.texto(resp.cuerpo, "rechazados");
+        } else if (resp.codigo == 0) {
+            texto = "Sin sesión: " + resp.error + "\nIngrese de nuevo con su clave.";
+        } else if (resp.codigo == ApiMovil.SIN_RED) {
+            texto = "Sin conexión con el servidor. Intente cuando tenga señal.";
+        } else {
+            texto = "El servidor no recibió el respaldo (" + resp + ")";
+        }
+        new AlertDialog.Builder(this).setTitle("Respaldo de lecturas").setMessage(texto).setPositiveButton("Aceptar", null).show();
+    }
 
     private void mensajes(String msg) {
         //Toast.makeText(MenuDeLiquidacion.this, msg, Toast.LENGTH_LONG).show();

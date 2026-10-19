@@ -173,10 +173,9 @@ public class AnomaliaDeNoLectura {
         setEncontro_AnomaliaDeNoLectura(0);
         posicion_AnomaliaDeNoLectura(registro, LONGITUD_REGISTRO);
         try {
-            int fileSize = (int) rFile.length();
-            byteArray = new byte[fileSize];
+            if (byteArray == null || byteArray.length < LONGITUD_REGISTRO) byteArray = new byte[LONGITUD_REGISTRO];
             rFile.readFully(byteArray, 0, LONGITUD_REGISTRO);
-            texto = new String(byteArray);
+            texto = new String(byteArray, 0, LONGITUD_REGISTRO);
             setanomaliaDeNoLectura_CODIGO(texto.substring(0, 3));
             setanomaliaDeNoLectura_DESCRIPCION(texto.substring(4, 42));
             setanomaliaDeNoLectura_TIPO(texto.substring(43, 44));
@@ -202,112 +201,45 @@ public class AnomaliaDeNoLectura {
         for (int i = v.length(); i < longitud; i++) sb.append('0');
         return sb.append(v).toString();
     }
-    public void buscarbinario_AnomaliaDeNoLectura(String codigo) {
-        int salir = 0;
+    /**
+     * Codigo normalizado para comparar: sin espacios y sin ceros a la izquierda ("  5", "005" y "5" -> "5").
+     * CAUSA_NL.TXT se genera con relleno de espacios y algunos llamadores rellenaban con ceros; antes se
+     * comparaban como texto y "005" no encontraba "  5".
+     */
+    public static String normalizarCodigo(String codigo) {
+        String t = codigo == null ? "" : codigo.trim();
         int i = 0;
-        int t = getTotal_AnomaliaDeNoLectura();
-        int b = 0;
-        lectura_AnomaliaDeNoLectura(1);
-        String uno = rellenarCeros(codigo.trim(),3);
-        String otro = anomaliaDeNoLectura_CODIGO.trim();
-        if (otro.equals(uno)) {
-            posicion_AnomaliaDeNoLectura(i + 1, LONGITUD_REGISTRO);
-            setEncontro_AnomaliaDeNoLectura(1);
-        } else {
-            lectura_AnomaliaDeNoLectura(getTotal_AnomaliaDeNoLectura());
-            otro = anomaliaDeNoLectura_CODIGO.trim().equals("") ? "0" : anomaliaDeNoLectura_CODIGO.trim();
-            if ((Integer.parseInt(uno)) > (Integer.parseInt(otro))) {
-                setEncontro_AnomaliaDeNoLectura(0);
-            } else {
-                while (salir == 0) {
-                    i = (b + t) / 2;
-                    lectura_AnomaliaDeNoLectura(i + 1);
-                    otro = anomaliaDeNoLectura_CODIGO.trim();
-                    if (otro.equals(uno)) {
-                        setEncontro_AnomaliaDeNoLectura(i);
-                        posicion_AnomaliaDeNoLectura(i + 1, LONGITUD_REGISTRO);
-                        salir = 1;
-                    } else {
-                        if (b == i) {
-                            lectura_AnomaliaDeNoLectura(i + 2);
-                            otro = anomaliaDeNoLectura_CODIGO.trim();
-                            if (uno == otro) {
-                                setEncontro_AnomaliaDeNoLectura(i);
-                                posicion_AnomaliaDeNoLectura(i + 1, LONGITUD_REGISTRO);
-                            } else {
-                                setEncontro_AnomaliaDeNoLectura(0);
-                            }
-                            salir = 1;
-                        } else {
-                            if (Integer.parseInt(uno) > Integer.parseInt(otro)) {
-                                b = i;
-                            } else {
-                                if (i - b == 1) {
-                                    b = i;
-                                }
-                                t = i;
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        while (i < t.length() - 1 && t.charAt(i) == '0') i++;
+        return t.substring(i).toUpperCase();
     }
 
-    // metodos de busqueda que hay que llevar a parametros ojooo
+    /**
+     * Busca la causa por codigo comparando normalizado (ver normalizarCodigo). El catalogo tiene pocas decenas
+     * de registros, asi que se recorre completo: no depende de que el archivo venga ordenado ni del relleno.
+     * Si la encuentra deja cargados sus campos, posiciona el archivo en ese registro y encontro = posicion (>= 1);
+     * si no, encontro = 0.
+     */
+    public void buscarbinario_AnomaliaDeNoLectura(String codigo) {
+        String buscado = normalizarCodigo(codigo);
+        int total = getTotal_AnomaliaDeNoLectura();
+        if (buscado.isEmpty() || total <= 0) {
+            setEncontro_AnomaliaDeNoLectura(0);
+            return;
+        }
+        for (int r = 1; r <= total; r++) {
+            lectura_AnomaliaDeNoLectura(r);
+            if (normalizarCodigo(anomaliaDeNoLectura_CODIGO).equals(buscado)) {
+                posicion_AnomaliaDeNoLectura(r, LONGITUD_REGISTRO);
+                setEncontro_AnomaliaDeNoLectura(r);
+                return;
+            }
+        }
+        setEncontro_AnomaliaDeNoLectura(0);
+    }
 
+    /** Misma busqueda que buscarbinario_AnomaliaDeNoLectura (antes convertia a double y fallaba con codigos no numericos). */
     public void Buscarbinariocausanl(String codigo) {
-        int salir = 0;
-        int i = 0;
-        double t = getTotal_AnomaliaDeNoLectura();
-        int b = 0;
-        lectura_AnomaliaDeNoLectura(1);
-        // MessageBox.Show("llego esto: " + codigo);
-        double uno = Double.parseDouble(codigo);
-        double otro = Double.parseDouble(anomaliaDeNoLectura_CODIGO);
-        if (otro == uno) {
-            posicion_AnomaliaDeNoLectura(i + 1, LONGITUD_REGISTRO);
-            setEncontro_AnomaliaDeNoLectura(1);
-        } else {
-            lectura_AnomaliaDeNoLectura(getTotal_AnomaliaDeNoLectura());
-            otro = Double.parseDouble(anomaliaDeNoLectura_CODIGO);
-            if (uno > otro) {
-                setEncontro_AnomaliaDeNoLectura(0);
-            } else {
-                while (salir == 0) {
-                    i = (int) ((b + t) / 2);
-                    lectura_AnomaliaDeNoLectura(i + 1);
-                    otro = Double.parseDouble(anomaliaDeNoLectura_CODIGO);
-                    if (uno == otro) {
-                        setEncontro_AnomaliaDeNoLectura(1);
-                        posicion_AnomaliaDeNoLectura(i + 1, LONGITUD_REGISTRO);
-                        salir = 1;
-                    } else {
-                        if (b == i) {
-                            lectura_AnomaliaDeNoLectura(i + 2);
-                            otro = Double.parseDouble(anomaliaDeNoLectura_CODIGO);
-                            if (uno == otro) {
-                                setEncontro_AnomaliaDeNoLectura(1);
-                                posicion_AnomaliaDeNoLectura(i + 1, LONGITUD_REGISTRO);
-                            } else {
-                                setEncontro_AnomaliaDeNoLectura(0);
-                            }
-                            salir = 1;
-                        } else {
-                            if (uno > otro)
-                                b = i;
-                            else {
-                                if (i - b == 1) {
-                                    b = i;
-                                }
-                                t = i;
-                            }
-                        }
-                    }
-                }/* fin while */
-            }/* fin else */
-        }/* fin else */
-        return;
+        buscarbinario_AnomaliaDeNoLectura(codigo);
     }
 
     public String getArchivo_AnomaliaDeNoLectura() {

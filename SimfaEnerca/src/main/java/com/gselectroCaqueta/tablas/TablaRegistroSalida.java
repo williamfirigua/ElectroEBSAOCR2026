@@ -147,8 +147,12 @@ public class TablaRegistroSalida { //Ax esta es S_REGIST, ya
             return false;
         }
         archivo_TablaRegistroSalida = nombreArchivo;
+        archivoAbierto = nombreArchivo;
         try {
-            total_TablaRegistroSalida = (int) (rFile.length() / LONGITUD_REGISTRO);
+            long longitud = rFile.length();
+            total_TablaRegistroSalida = (int) (longitud / LONGITUD_REGISTRO);
+            invalidarBloque();
+            if (indiceVigente(nombreArchivo, longitud)) return true;
             construirIndices();
             return true;
         } catch (IOException ex) {
@@ -157,22 +161,71 @@ public class TablaRegistroSalida { //Ax esta es S_REGIST, ya
         }
     }
 
+    /** true si hay un archivo abierto (el que indica getArchivo_TablaRegistroSalida()). */
+    public synchronized boolean estaAbierto_TablaRegistroSalida() {
+        return rFile != null;
+    }
+
     public synchronized void Cerrar_TablaRegistroSalida() {
         cerrarSilencioso();
     }
 
     private void cerrarSilencioso() {
         if (rFile == null) return;
+        long longitud = -1;
+        try {
+            longitud = rFile.length();
+        } catch (IOException ignored) {
+        }
         try {
             rFile.close();
         } catch (IOException e) {
             Log.e(TAG, "al cerrar " + e.getMessage());
+            longitud = -1;
         }
         rFile = null;
+        recordarIndice(longitud);
+        archivoAbierto = null;
+    }
+
+    // ------------------------------------------------------------------ vigencia del indice
+    // La liquidacion abre y cierra REGISTRO.SDA varias veces por factura; antes cada apertura recorria
+    // el archivo completo para reconstruir los indices. Ahora se conservan si, desde el ultimo cierre,
+    // el archivo no cambio (misma ruta, longitud y fecha de modificacion) y nadie hizo una escritura
+    // forzada (la unica que cambia la cuenta de una posicion). Las escrituras propias ya actualizan el
+    // indice en escribirEnPosicion().
+
+    private static final java.util.concurrent.atomic.AtomicLong generacionForzada = new java.util.concurrent.atomic.AtomicLong();
+    private String indiceArchivo;
+    private long indiceLongitud = -1;
+    private long indiceModificado = -1;
+    private long indiceGeneracion = -1;
+    private boolean indiceDivergente = false;
+    /** Ruta realmente abierta; archivo_TablaRegistroSalida es publico y puede cambiar con el archivo abierto. */
+    private String archivoAbierto;
+
+    private void recordarIndice(long longitud) {
+        if (longitud < 0 || archivoAbierto == null || indiceDivergente) {
+            indiceArchivo = null;
+            indiceDivergente = false;
+            return;
+        }
+        indiceArchivo = archivoAbierto;
+        indiceLongitud = longitud;
+        indiceModificado = new File(archivoAbierto).lastModified();
+        indiceGeneracion = generacionForzada.get();
+    }
+
+    private boolean indiceVigente(String nombreArchivo, long longitud) {
+        return nombreArchivo.equals(indiceArchivo)
+                && longitud == indiceLongitud
+                && new File(nombreArchivo).lastModified() == indiceModificado
+                && generacionForzada.get() == indiceGeneracion;
     }
 
     /** Recorre el archivo UNA vez en bloques grandes y arma los indices cuenta+consecutivo -> posicion. */
     private void construirIndices() throws IOException {
+        indiceDivergente = false;
         indiceCuentaConsecutivo.clear();
         indiceCuenta.clear();
         if (total_TablaRegistroSalida == 0) return;
@@ -317,17 +370,56 @@ public class TablaRegistroSalida { //Ax esta es S_REGIST, ya
             return false;
         }
         Log.w(TAG, "Escritura forzada en posicion " + posicion + " cuenta " + tablaRegistroSalida_cuenta);
-        return escribirEnPosicion(posicion);
+        boolean ok = escribirEnPosicion(posicion);
+        // Cambia la cuenta de una posicion: el indice en memoria (de esta y otras instancias) ya no sirve.
+        generacionForzada.incrementAndGet();
+        return ok;
     }
 
-    private boolean escribirEnPosicion(int posicion) {
+    /**
+     * Agrega el registro actual al final de {@code destino} (archivo de respaldo), alineado a
+     * LONGITUD_REGISTRO, sin cerrar ni reabrir este archivo. Reemplaza en GuardarBackup() el ciclo
+     * cerrar REGISTRO.SDA -> abrir backup (indexandolo entero) -> escribir -> reabrir REGISTRO.SDA
+     * (indexandolo otra vez), que se hacia en cada factura.
+     */
+    public synchronized boolean anexarCopia_TablaRegistroSalida(java.io.File destino) {
+        String linea = armarLinea();
+        if (linea.length() != LONGITUD_REGISTRO) {
+            escribirEvento("CADENA DAÑADA REGISTRADORES (respaldo, longitud " + linea.length() + "):\r\n" + linea);
+            return false;
+        }
+        RandomAccessFile r = null;
+        try {
+            r = new RandomAccessFile(destino, "rw");
+            long registros = r.length() / LONGITUD_REGISTRO; // mismo calculo que total al abrir
+            r.seek(registros * LONGITUD_REGISTRO);
+            r.write(linea.getBytes(LATIN1));
+            return true;
+        } catch (IOException e) {
+            Log.e(TAG, "respaldo en " + destino + ": " + e.getMessage());
+            return false;
+        } finally {
+            if (r != null) {
+                try {
+                    r.close();
+                } catch (IOException ignored) {
+                }
+            }
+        }
+    }
+
+    private String armarLinea() {
         rellenar_TablaRegistroSalida();
-        String linea = tablaRegistroSalida_cliente + sep + tablaRegistroSalida_contador + sep + tablaRegistroSalida_anio + sep + tablaRegistroSalida_mes + sep + tablaRegistroSalida_cuenta + sep
+        return tablaRegistroSalida_cliente + sep + tablaRegistroSalida_contador + sep + tablaRegistroSalida_anio + sep + tablaRegistroSalida_mes + sep + tablaRegistroSalida_cuenta + sep
                 + tablaRegistroSalida_marca + sep + tablaRegistroSalida_nrocontador + sep + tablaRegistroSalida_consecutivo + sep + tablaRegistroSalida_lecturatomada + sep
                 + tablaRegistroSalida_consumotomado + sep + tablaRegistroSalida_consumocalculado + sep + tablaRegistroSalida_causadenolectura + sep + tablaRegistroSalida_comentario1 + sep
                 + tablaRegistroSalida_comentario2 + sep + tablaRegistroSalida_informe + sep + tablaRegistroSalida_intentos + sep + tablaRegistroSalida_modificaciones + sep
                 + tablaRegistroSalida_lecturamodificada1 + sep + tablaRegistroSalida_lecturamodificada2 + sep + tablaRegistroSalida_fechalectura + sep + tablaRegistroSalida_horalectura + sep
                 + tablaRegistroSalida_leido + sep + tablaRegistroSalida_fin;
+    }
+
+    private boolean escribirEnPosicion(int posicion) {
+        String linea = armarLinea();
 
         if (linea.length() != LONGITUD_REGISTRO) {
             escribirEvento("CADENA DAÑADA REGISTRADORES (longitud " + linea.length() + ", posicion " + posicion + "):\r\n" + linea);
@@ -338,7 +430,10 @@ public class TablaRegistroSalida { //Ax esta es S_REGIST, ya
             rFile.write(linea.getBytes(LATIN1));
             if (posicion > total_TablaRegistroSalida) total_TablaRegistroSalida = posicion;
             invalidarBloque();
-            indiceCuentaConsecutivo.put(llave(tablaRegistroSalida_cuenta, tablaRegistroSalida_consecutivo), posicion);
+            Integer previa = indiceCuentaConsecutivo.put(llave(tablaRegistroSalida_cuenta, tablaRegistroSalida_consecutivo), posicion);
+            // Llave repetida en otra posicion: construirIndices() se quedaria con la primera y este indice
+            // con la ultima. Se conserva el comportamiento de siempre forzando la reconstruccion al reabrir.
+            if (previa != null && previa != posicion) indiceDivergente = true;
             String c = normalizar(tablaRegistroSalida_cuenta);
             if (!indiceCuenta.containsKey(c)) indiceCuenta.put(c, posicion);
             return true;
@@ -374,12 +469,7 @@ public class TablaRegistroSalida { //Ax esta es S_REGIST, ya
     }
 
     private void escribirEvento(String mensaje) {
-        Log.e(TAG, mensaje);
-        try {
-            utils.EscribirLinea(new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/LOGEVENTOS.LOG"), mensaje);
-        } catch (Exception e) {
-            Log.e(TAG, "no se pudo escribir LOGEVENTOS: " + e.getMessage());
-        }
+        UtilPlanos.evento(TAG, mensaje);
     }
 
     // ------------------------------------------------------------------ busquedas (por indice)

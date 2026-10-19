@@ -10,6 +10,10 @@ import com.gselectroCaqueta.tablas.TablaMunicipios;
 import com.gselectroCaqueta.tablas.TablaRegistroDeEntrada;
 import com.gselectroCaqueta.tablas.TablaRegistroSalida;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -47,7 +51,7 @@ public final class AdaptadorMovil {
     /**
      * @param mensajes {@code TablaMensajes} ya abierta sobre {@code DATOSDEENTRADA/MENSAJES.TXT}, o null.
      *                 Con ella, el mensaje de interés se resuelve por {@code CDGOMNSJE} (caída 18,
-     *                 "15087A" = municipio DANE + tipo A/T) cuando {@code Informacionadicional} viene vacío.
+     *                 "15087A" = municipio DANE + tipo A/T).
      */
     public AdaptadorMovil(TablaEntradaClientes cliente, TablaClienteSalida clienteSalida,
                           TablaMedidorEntrada medidor, TablaRegistroDeEntrada registro,
@@ -134,7 +138,17 @@ public final class AdaptadorMovil {
                     m.consumo = (int) Math.round(Formatos.numero(clienteSalida.gettablaClienteSalida_CONSUMO2()));
                     d.activa = m;
                     // MEDIDOR.TXT CUENTA_ASEO (lm_aseo_maestro): la cuenta tiene aseo aunque hoy no vengan cobros del bloque 4
-                    if (!t(medidor.gettablaMedidorEntrada_CUENTA_ASEO()).isEmpty()) d.tieneAseo = true;
+                    if (!t(medidor.gettablaMedidorEntrada_CUENTA_ASEO()).isEmpty()) {
+                        d.tieneAseo = true;
+                        leerAseo(d);
+                    }
+                    d.desvCambioClase = t(registro.gettablaRegistroDeEntrada_CMBIO_CLSE());
+                    d.desvCambioNivel = t(registro.gettablaRegistroDeEntrada_CMBIO_NVEL());
+                    d.desvNormalizacion = t(registro.gettablaRegistroDeEntrada_NRMLZACION());
+                    d.analitica = t(registroSalida.gettablaRegistroSalida_COMENTARIO2());
+                    d.lsBandaTipoUso = Formatos.numero(registro.gettablaRegistroDeEntrada_LS_BDA_TPO_US());
+                    d.lsBandaAnual = Formatos.numero(registro.gettablaRegistroDeEntrada_LS_BNDA_ANUAL());
+                    d.lsConsumoSubsistencia = Formatos.numero(registro.gettablaRegistroDeEntrada_LS_CONS_SUBS());
                     d.consumoActual = m.consumo;
                     d.fechaLecturaAnterior = fechaAnterior;
                     d.fechaLecturaTomada = t(registroSalida.gettablaRegistroSalida_FECHALECTURA());
@@ -148,6 +162,80 @@ public final class AdaptadorMovil {
                 }
             }
         }
+    }
+
+    /**
+     * Estructura de aseo (lm_aseo_maestro) del medidor ya posicionado: MEDIDOR.TXT campos 21..87 son,
+     * en el mismo orden, As_8 (CUENTA_ASEO) … As_74 (PPARTICIPACION) del Excel del diseñador.
+     */
+    private void leerAseo(DatosFactura d) {
+        d.aseo.put(8, t(medidor.gettablaMedidorEntrada_CUENTA_ASEO()));
+        d.aseo.put(9, t(medidor.gettablaMedidorEntrada_DIAS_LIQUIDADOS()));
+        d.aseo.put(10, t(medidor.gettablaMedidorEntrada_periodo()));
+        d.aseo.put(11, t(medidor.gettablaMedidorEntrada_TIPO_PRODUCTOR()));
+        d.aseo.put(12, t(medidor.gettablaMedidorEntrada_estrato()));
+        d.aseo.put(13, t(medidor.gettablaMedidorEntrada_CVRNAR()));
+        d.aseo.put(14, t(medidor.gettablaMedidorEntrada_CVRNANR()));
+        d.aseo.put(15, t(medidor.gettablaMedidorEntrada_VBARAUA()));
+        d.aseo.put(16, t(medidor.gettablaMedidorEntrada_VBARAUNA()));
+        d.aseo.put(17, t(medidor.gettablaMedidorEntrada_COSTO_FIJO()));
+        d.aseo.put(18, t(medidor.gettablaMedidorEntrada_VOLUMEN()));
+        d.aseo.put(19, t(medidor.gettablaMedidorEntrada_DENSIDAD()));
+        d.aseo.put(20, t(medidor.gettablaMedidorEntrada_URO()));
+        d.aseo.put(21, t(medidor.gettablaMedidorEntrada_UNRO()));
+        d.aseo.put(22, t(medidor.gettablaMedidorEntrada_URD()));
+        d.aseo.put(23, t(medidor.gettablaMedidorEntrada_UNRD()));
+        d.aseo.put(24, t(medidor.gettablaMedidorEntrada_contribucion()));
+        d.aseo.put(25, t(medidor.gettablaMedidorEntrada_subsidio()));
+        d.aseo.put(26, t(medidor.gettablaMedidorEntrada_BARRIDO()));
+        d.aseo.put(27, t(medidor.gettablaMedidorEntrada_RECOLECCION()));
+        d.aseo.put(28, t(medidor.gettablaMedidorEntrada_PODA()));
+        d.aseo.put(29, t(medidor.gettablaMedidorEntrada_CORTE_CESPED()));
+        d.aseo.put(30, t(medidor.gettablaMedidorEntrada_ESCOMBROS()));
+        d.aseo.put(31, t(medidor.gettablaMedidorEntrada_TRBL()));
+        d.aseo.put(32, t(medidor.gettablaMedidorEntrada_TRLU()));
+        d.aseo.put(33, t(medidor.gettablaMedidorEntrada_TRRA()));
+        d.aseo.put(34, t(medidor.gettablaMedidorEntrada_TAFA()));
+        d.aseo.put(35, t(medidor.gettablaMedidorEntrada_TRA()));
+        d.aseo.put(36, t(medidor.gettablaMedidorEntrada_TRNA()));
+        d.aseo.put(37, t(medidor.gettablaMedidorEntrada_TAFNA()));
+        d.aseo.put(38, t(medidor.gettablaMedidorEntrada_TTSM()));
+        d.aseo.put(39, t(medidor.gettablaMedidorEntrada_TRBLM1()));
+        d.aseo.put(40, t(medidor.gettablaMedidorEntrada_TRLUM1()));
+        d.aseo.put(41, t(medidor.gettablaMedidorEntrada_TRRAM1()));
+        d.aseo.put(42, t(medidor.gettablaMedidorEntrada_TAFAM1()));
+        d.aseo.put(43, t(medidor.gettablaMedidorEntrada_TRAM1()));
+        d.aseo.put(44, t(medidor.gettablaMedidorEntrada_TRNAM1()));
+        d.aseo.put(45, t(medidor.gettablaMedidorEntrada_TAFNAM1()));
+        d.aseo.put(46, t(medidor.gettablaMedidorEntrada_TTSMM1()));
+        d.aseo.put(47, t(medidor.gettablaMedidorEntrada_TRBLM2()));
+        d.aseo.put(48, t(medidor.gettablaMedidorEntrada_TRLUM2()));
+        d.aseo.put(49, t(medidor.gettablaMedidorEntrada_TRRAM2()));
+        d.aseo.put(50, t(medidor.gettablaMedidorEntrada_TAFAM2()));
+        d.aseo.put(51, t(medidor.gettablaMedidorEntrada_TRAM2()));
+        d.aseo.put(52, t(medidor.gettablaMedidorEntrada_TRNAM2()));
+        d.aseo.put(53, t(medidor.gettablaMedidorEntrada_TAFNAM2()));
+        d.aseo.put(54, t(medidor.gettablaMedidorEntrada_TTSMM2()));
+        d.aseo.put(55, t(medidor.gettablaMedidorEntrada_MES_1()));
+        d.aseo.put(56, t(medidor.gettablaMedidorEntrada_MES_2()));
+        d.aseo.put(57, t(medidor.gettablaMedidorEntrada_MES_3()));
+        d.aseo.put(58, t(medidor.gettablaMedidorEntrada_MES_4()));
+        d.aseo.put(59, t(medidor.gettablaMedidorEntrada_MES_5()));
+        d.aseo.put(60, t(medidor.gettablaMedidorEntrada_VALOR_FACTURA_1()));
+        d.aseo.put(61, t(medidor.gettablaMedidorEntrada_VALOR_FACTURA_2()));
+        d.aseo.put(62, t(medidor.gettablaMedidorEntrada_VALOR_FACTURA_3()));
+        d.aseo.put(63, t(medidor.gettablaMedidorEntrada_VALOR_FACTURA_4()));
+        d.aseo.put(64, t(medidor.gettablaMedidorEntrada_VALOR_FACTURA_5()));
+        d.aseo.put(65, t(medidor.gettablaMedidorEntrada_SALDO_COVID()));
+        d.aseo.put(66, t(medidor.gettablaMedidorEntrada_DEUDA_CASTIGADA()));
+        d.aseo.put(67, t(medidor.gettablaMedidorEntrada_DIFERIDO_COVID()));
+        d.aseo.put(68, t(medidor.gettablaMedidorEntrada_SALDO_NO_COVID()));
+        d.aseo.put(69, t(medidor.gettablaMedidorEntrada_RECLAMACION()));
+        d.aseo.put(70, t(medidor.gettablaMedidorEntrada_DIFERIDO_NO_COVID()));
+        d.aseo.put(71, t(medidor.gettablaMedidorEntrada_NOTA1()));
+        d.aseo.put(72, t(medidor.gettablaMedidorEntrada_NOTA2()));
+        d.aseo.put(73, t(medidor.gettablaMedidorEntrada_MENSAJE()));
+        d.aseo.put(74, t(medidor.gettablaMedidorEntrada_PPARTICIPACION()));
     }
 
     /** periodo1/ano1/consumo1 es el más reciente (CNSMOANTRIOR1); se conserva ese orden. */
@@ -186,11 +274,11 @@ public final class AdaptadorMovil {
         d.cargaInstalada = t(cliente.gettablaEntradaClientes_cargainstalada());
         d.ruta = t(cliente.gettablaEntradaClientes_Ruta());
         d.propiedadActivos = "";   // sin fuente en esta versión: imprime "???"
-        d.mensaje = t(cliente.gettablaEntradaClientes_Informacionadicional());
-        if (d.mensaje.isEmpty()) {
-            d.codigoMensaje = t(cliente.gettablaEntradaClientes_CDGOMNSJE());
-            d.mensaje = mensajePorCodigo(d.codigoMensaje);
-        }
+        // Información de interés = MSGE por CDGOMNSJE (caída 18) en MENSAJES.TXT. Informacionadicional (campo 16)
+        // ya no se usa aquí: desde el 13-oct la móvil lo muestra como "Mensaje programado" al lector
+        // (actividad 99) y no debe salir impreso en la factura.
+        d.codigoMensaje = t(cliente.gettablaEntradaClientes_CDGOMNSJE());
+        d.mensaje = mensajePorCodigo(d.codigoMensaje);
     }
 
     /**
@@ -200,12 +288,44 @@ public final class AdaptadorMovil {
      */
     private String mensajePorCodigo(String codigo) {
         if (mensajes == null || codigo.isEmpty()) return "";
-        mensajes.buscarbinario_TablaMensajes(codigo);
-        if (mensajes.encontro_TablaMensajes == 0) return "";
-        // buscarbinario deja cargado el registro que comparó; se verifica que sea el pedido
-        if (!codigo.equals(t(mensajes.gettablaMensajes_CODIGO()))) return "";
-        return t(mensajes.gettablaMensajes_DESCRIPCION());
+        Map<String, String> catalogo = catalogoMensajes(mensajes);
+        String texto = catalogo.get(codigo);
+        return texto == null ? "" : texto;
     }
+
+    /**
+     * MENSAJES.TXT completo en memoria (382 registros, ~100 KB), leído una vez por archivo y fecha de
+     * modificación. No se usa {@code buscarbinario_TablaMensajes}: el archivo viene ordenado por el código
+     * relleno con espacios a la izquierda (" 5001A" < "15001A") y la búsqueda compara el código sin
+     * espacios ("5001A" > "15001A"), así que no encuentra códigos que sí están, entre ellos 15001A (Tunja).
+     */
+    private static synchronized Map<String, String> catalogoMensajes(TablaMensajes tabla) {
+        String archivo = tabla.getArchivo_TablaMensajes();
+        File f = archivo == null ? null : new File(archivo);
+        long version = f == null ? 0 : f.lastModified() ^ f.length();
+        if (mensajesCache != null && archivo != null && archivo.equals(mensajesArchivo) && version == mensajesVersion) {
+            return mensajesCache;
+        }
+        Map<String, String> m = new HashMap<>(512);
+        // Registros de 266 bytes (TablaMensajes.LONGITUD_REGISTRO): se lee hasta el último sin pasar del final,
+        // para no provocar el EOF que la tabla anota como error en LOGEVENTOS.LOG.
+        int total = f != null && f.isFile() ? (int) Math.min(MAX_MENSAJES, f.length() / LONGITUD_MENSAJE) : MAX_MENSAJES;
+        for (int i = 1; i <= total && tabla.lectura_TablaMensajes(i) == 1; i++) {
+            String cod = t(tabla.gettablaMensajes_CODIGO());
+            if (!cod.isEmpty() && !m.containsKey(cod)) m.put(cod, t(tabla.gettablaMensajes_DESCRIPCION()));
+        }
+        mensajesCache = Collections.unmodifiableMap(m);
+        mensajesArchivo = archivo;
+        mensajesVersion = version;
+        return mensajesCache;
+    }
+
+    /** Tope de seguridad del recorrido; el catálogo real trae 382 registros. */
+    private static final int MAX_MENSAJES = 20000;
+    private static final int LONGITUD_MENSAJE = 266;
+    private static Map<String, String> mensajesCache;
+    private static String mensajesArchivo;
+    private static long mensajesVersion;
 
     private void leerTarifaYCostos(DatosFactura d) {
         d.valorKwh = Formatos.numero(cliente.gettablaEntradaClientes_MDDOR1VLORKWH());

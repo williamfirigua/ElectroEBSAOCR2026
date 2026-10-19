@@ -71,7 +71,10 @@ public final class ContextoFactura {
         costos(d, c, bloques);
         calidad(d, c);
         foesYComercial(d, c);
+        aseo(d, p, c, bloques);
+        desviacion(d, p, c);
         pie(d, p, c, bloques);
+        parrafos(p, c);
         return c;
     }
 
@@ -227,6 +230,12 @@ public final class ContextoFactura {
         filas("cartera", BloquesConceptos.filas(r.cartera, MAX_CARTERA, ad, av), MAX_CARTERA, c);
         filas("externos", BloquesConceptos.filas(r.externos, MAX_EXTERNOS, ad, av), MAX_EXTERNOS, c);
         filas("aseo", BloquesConceptos.filas(r.aseo, MAX_ASEO, ad, av), MAX_ASEO, c);
+        // Descripción y valor por separado, para fuentes proporcionales (SCALE-TEXT + SCALE-TEXT-DER)
+        // Filas que tiene la plantilla por bloque (;@SET concepto.filas.cartera=5); lo que no cabe va a "Otros conceptos".
+        columnas("detalle", r.periodo, p.conceptoFilas("detalle", MAX_DETALLE), c);
+        columnas("cartera", r.cartera, p.conceptoFilas("cartera", MAX_CARTERA), c);
+        columnas("externos", r.externos, p.conceptoFilas("externos", MAX_EXTERNOS), c);
+        columnas("aseo", r.aseo, p.conceptoFilas("aseo", MAX_ASEO), c);
         c.put("total_periodo", Formatos.moneda(r.totalPeriodo));
         c.put("cartera.total", Formatos.moneda(r.totalCartera));
         c.put("externos.total", Formatos.moneda(r.totalExternos));
@@ -249,6 +258,25 @@ public final class ContextoFactura {
     static long totalAseo(DatosFactura d, BloquesConceptos.Resultado r) {
         if (!tieneAseo(d, r)) return 0;
         return r.aseo.isEmpty() ? d.totalAseo : r.totalAseo;
+    }
+
+    /** {prefijo}.N.desc y {prefijo}.N.valor; si no caben, la última fila agrupa el resto en "Otros conceptos". */
+    private static void columnas(String prefijo, List<DatosFactura.Concepto> l, int max, Map<String, String> c) {
+        int visibles = l.size() <= max ? l.size() : max - 1;
+        for (int i = 1; i <= max; i++) {
+            String desc = "", valor = "";
+            if (i <= visibles) {
+                desc = l.get(i - 1).descripcion.trim();
+                valor = Formatos.moneda(l.get(i - 1).valor);
+            } else if (i == max && l.size() > max) {
+                long otros = 0;
+                for (int k = visibles; k < l.size(); k++) otros += l.get(k).valor;
+                desc = "Otros conceptos";
+                valor = Formatos.moneda(otros);
+            }
+            c.put(prefijo + "." + i + ".desc", desc);
+            c.put(prefijo + "." + i + ".valor", valor);
+        }
     }
 
     private static void filas(String prefijo, List<String> filas, int max, Map<String, String> c) {
@@ -296,10 +324,32 @@ public final class ContextoFactura {
     }
 
     private static void mensaje(DatosFactura d, Parametros p, Map<String, String> c) {
-        List<String> lineas = partirPalabras(d.mensaje, p.mensajeAncho(), p.mensajeLineas());
+        List<String> lineas = FuenteMetricas.conoce(p.mensajeFuente())
+                ? partirPorAncho(d.mensaje, p.mensajeFuente(), p.mensajePuntos(), p.mensajeAnchoPx(), p.mensajeLineas())
+                : partirPalabras(d.mensaje, p.mensajeAncho(), p.mensajeLineas());
         for (int i = 1; i <= p.mensajeLineas(); i++) {
             c.put("mensaje." + i, i <= lineas.size() ? lineas.get(i - 1) : "");
         }
+    }
+
+    /** Como {@link #partirPalabras} pero midiendo cada línea con la fuente TTF real (puntos de impresora). */
+    public static List<String> partirPorAncho(String texto, String fuente, double puntos, int anchoPx, int maxLineas) {
+        List<String> out = new ArrayList<>(maxLineas);
+        if (texto == null) return out;
+        String linea = "";
+        for (String palabra : texto.trim().split("\\s+")) {
+            if (palabra.isEmpty()) continue;
+            String prueba = linea.isEmpty() ? palabra : linea + " " + palabra;
+            if (!linea.isEmpty() && FuenteMetricas.ancho(fuente, puntos, prueba) > anchoPx) {
+                out.add(linea);
+                if (out.size() == maxLineas) return out;
+                linea = palabra;
+            } else {
+                linea = prueba;
+            }
+        }
+        if (!linea.isEmpty() && out.size() < maxLineas) out.add(linea);
+        return out;
     }
 
     /** Parte por palabras sin cortar ninguna; lo que no cabe en las líneas disponibles se pierde. */
@@ -341,8 +391,20 @@ public final class ContextoFactura {
 
     private static void calidad(DatosFactura d, Map<String, String> c) {
         for (int i = 1; i <= MAX_CALIDAD; i++) {
-            if (i > d.calidad.size()) { c.put("calidad." + i, ""); continue; }
+            if (i > d.calidad.size()) {
+                c.put("calidad." + i, "");
+                for (String k : new String[]{"mes", "diu", "dium", "diug", "fiu", "fium", "fiug"}) c.put("calidad." + i + "." + k, "");
+                continue;
+            }
             DatosFactura.Calidad q = d.calidad.get(i - 1);
+            // Por columna, para SCALE-TEXT: calidad.N.mes / .diu / .dium / .diug / .fiu / .fium / .fiug
+            c.put("calidad." + i + ".mes", q.mes.trim());
+            c.put("calidad." + i + ".diu", dec(q.diu, 2));
+            c.put("calidad." + i + ".dium", dec(q.dium, 1));
+            c.put("calidad." + i + ".diug", dec(q.diug, 1));
+            c.put("calidad." + i + ".fiu", dec(q.fiu, 1));
+            c.put("calidad." + i + ".fium", dec(q.fium, 1));
+            c.put("calidad." + i + ".fiug", dec(q.fiug, 1));
             // Orden impreso en la factura oficial: Mes Diu Dium Diug Fiu Fium Fiug
             c.put("calidad." + i, Formatos.izquierda(q.mes.trim(), 4)
                     + Formatos.derecha(dec(q.diu, 2), 6) + Formatos.derecha(dec(q.dium, 1), 6) + Formatos.derecha(dec(q.diug, 1), 6)
@@ -393,5 +455,167 @@ public final class ContextoFactura {
 
     private static String vacioSiCero(String v) {
         return Formatos.esVacio(v) || Formatos.numero(v) == 0 ? "" : enteroOTexto(v);
+    }
+
+    // ------------------------------------------------------------------ aseo (factura larga)
+
+    /**
+     * {As_n}: columna n de la estructura de aseo del Excel, tal cual llega (recortada).
+     * Derivadas:
+     * <pre>
+     * aseo.vbna / aseo.cvna      residencial si viene, si no no residencial (As_15|As_16, As_13|As_14)
+     * aseo.servicio .subsidio .aprovechamiento .incentivo .otros     desglose del bloque 4 por código
+     * aseo.total                 Σ bloque 4 (VALOR A PAGAR ASEO)
+     * aseo.punto_atencion        As_71 + " " + As_72
+     * aseo.obs.1..N              As_73 partido por ancho (N = ;@SET aseo.obs.lineas, 5 por defecto)
+     * </pre>
+     */
+    private static void aseo(DatosFactura d, Parametros p, Map<String, String> c, BloquesConceptos.Resultado r) {
+        for (Map.Entry<Integer, String> e : d.aseo.entrySet()) {
+            c.put("As_" + e.getKey(), e.getValue() == null ? "" : e.getValue().trim());
+        }
+        if (!tieneAseo(d, r)) return;
+        // Con aseo pero sin estructura (cuenta sin CUENTA_ASEO en MEDIDOR.TXT): campos en blanco, no "???".
+        for (int n = 1; n <= 74; n++) c.putIfAbsent("As_" + n, "");
+        c.put("As_3", d.cuenta.trim());
+        c.put("aseo.vbna", primeroConDato(d.aseo.get(15), d.aseo.get(16)));
+        c.put("aseo.cvna", primeroConDato(d.aseo.get(13), d.aseo.get(14)));
+        c.put("aseo.punto_atencion", (t(d.aseo.get(71)) + " " + t(d.aseo.get(72))).trim());
+
+        java.util.Set<Integer> servicio = codigos(p.aseoCodigos("servicio", "460,461,462,480"));
+        java.util.Set<Integer> subsidio = codigos(p.aseoCodigos("subsidio", "463"));
+        java.util.Set<Integer> aprovech = codigos(p.aseoCodigos("aprovechamiento", "465"));
+        java.util.Set<Integer> incentivo = codigos(p.aseoCodigos("incentivo", "466"));
+        long sServ = 0, sSub = 0, sApr = 0, sInc = 0, sOtr = 0;
+        for (DatosFactura.Concepto x : r.aseo) {
+            if (servicio.contains(x.codigo)) sServ += x.valor;
+            else if (subsidio.contains(x.codigo)) sSub += x.valor;
+            else if (aprovech.contains(x.codigo)) sApr += x.valor;
+            else if (incentivo.contains(x.codigo)) sInc += x.valor;
+            else sOtr += x.valor;
+        }
+        c.put("aseo.servicio", Formatos.moneda(sServ));
+        c.put("aseo.subsidio", Formatos.moneda(sSub));
+        c.put("aseo.aprovechamiento", Formatos.moneda(sApr));
+        c.put("aseo.incentivo", Formatos.moneda(sInc));
+        c.put("aseo.otros", Formatos.moneda(sOtr));
+
+        String obs = t(d.aseo.get(73));
+        int maxObs = Math.max(1, p.entero("aseo.obs.lineas", 5));
+        List<String> lineas = FuenteMetricas.conoce(p.mensajeFuente())
+                ? partirPorAncho(obs, p.mensajeFuente(), p.mensajePuntos(), p.aseoObsAnchoPx(), maxObs)
+                : partirPalabras(obs, 80, maxObs);
+        for (int i = 1; i <= maxObs; i++) c.put("aseo.obs." + i, i <= lineas.size() ? lineas.get(i - 1) : "");
+    }
+
+    private static java.util.Set<Integer> codigos(String lista) {
+        java.util.Set<Integer> s = new java.util.HashSet<>();
+        for (String x : lista.split("[,; ]+")) {
+            if (x.trim().isEmpty()) continue;
+            try { s.add(Integer.parseInt(x.trim())); } catch (NumberFormatException ignored) { }
+        }
+        return s;
+    }
+
+    private static String primeroConDato(String a, String b) {
+        return !t(a).isEmpty() ? t(a) : t(b);
+    }
+
+    private static String t(String s) {
+        return s == null ? "" : s.trim();
+    }
+
+    // ------------------------------------------------------------------ notificación de desviación
+
+    /**
+     * regla_desviacion: la regla de analítica de EBSA por la que se exceptuó la visita (documento de EBSA
+     * "Reglas de desviaciones", CREG 105 007 de 2024). Cada regla tiene su clave de texto en la plantilla
+     * ({@code ;@SET desviacion.<clave>=Regla N: …}):
+     * <pre>
+     *   001  no supera el consumo de subsistencia (consumo &lt;= LS_CONS_SUBS) . subsistencia   (Regla 2)
+     *   002  NRMLZACION / CMBIO_CLSE / CMBIO_NVEL en 1 (la primera por número) normalizacion  (Regla 3)
+     *                                                                          clase          (Regla 4)
+     *                                                                          nivel          (Regla 5)
+     *   005  dentro de la banda por tipo de uso (consumo &lt;= LS_BDA_TPO_US) .. tipo_uso       (Regla 7)
+     *        si no, dentro del máximo anual (consumo &lt;= LS_BNDA_ANUAL) ....... anual          (Regla 6)
+     * </pre>
+     * Es el mismo orden del algoritmo de EBSA: primero las reglas que no son de banda, después las de banda.
+     * {@code ;@SET desviacion.<código>=} sigue sirviendo para fijar un texto por código. Sin texto: vacía (???).
+     */
+    private static void desviacion(DatosFactura d, Parametros p, Map<String, String> c) {
+        String codigo = t(d.analitica);
+        String regla = "";
+        String clave = claveRegla(d, codigo);
+        if (clave != null) regla = p.desvTexto(clave, "");
+        if (regla.isEmpty() && !codigo.isEmpty()) regla = p.desvTexto(codigo, "");
+        c.put("analitica", codigo);
+        c.put("regla_clave", clave == null ? "" : clave);
+        c.put("regla_desviacion", regla);
+    }
+
+    /** Clave de la regla que exceptuó la visita, o null si el código no es de excepción o ninguna regla cuadra. */
+    static String claveRegla(DatosFactura d, String codigo) {
+        switch (codigo) {
+            case "001":
+                // La móvil también deja 001 cuando no hay límite de subsistencia (LS_CONS_SUBS = 0):
+                // ahí la Regla 2 no es la que exceptúa y no se afirma.
+                return d.lsConsumoSubsistencia > 0 && d.consumoActual <= d.lsConsumoSubsistencia ? "subsistencia" : null;
+            case "002":
+                if ("1".equals(t(d.desvNormalizacion))) return "normalizacion";
+                if ("1".equals(t(d.desvCambioClase))) return "clase";
+                if ("1".equals(t(d.desvCambioNivel))) return "nivel";
+                return null;
+            case "005":
+                double consumo = d.consumoActual;
+                if (d.lsBandaTipoUso > 0 && consumo <= d.lsBandaTipoUso) return "tipo_uso";
+                if (consumo <= d.lsBandaAnual) return "anual";
+                return null;
+            default:
+                // Sin código (bosquejos, reimpresión antigua): por bandera, como antes.
+                if (codigo.isEmpty()) {
+                    if ("1".equals(t(d.desvNormalizacion))) return "normalizacion";
+                    if ("1".equals(t(d.desvCambioClase))) return "clase";
+                    if ("1".equals(t(d.desvCambioNivel))) return "nivel";
+                }
+                return null;
+        }
+    }
+
+    // ------------------------------------------------------------------ párrafos de texto corrido
+
+    private static final java.util.regex.Pattern PARRAFO = java.util.regex.Pattern.compile("parrafo\\.([A-Za-z0-9_]+)");
+    private static final java.util.regex.Pattern CLAVE = java.util.regex.Pattern.compile("\\{([^{}|]+)\\}"); // "}" escapada: el regex ICU de Android no la acepta suelta
+
+    /**
+     * Texto corrido con datos (cartas): {@code ;@SET parrafo.regla=... debido a la {regla_desviacion}.} se arma
+     * con las claves de la factura y se parte por ancho real en {@code parrafo.regla.1..N}. Una clave sin dato
+     * queda como el faltante ({@code ???}), porque dentro de una frase no se puede omitir la línea.
+     * Medidas comunes: {@code parrafo.fuente} (DINCOND.TTF), {@code parrafo.puntos} (7, el ancho del SCALE-TEXT),
+     * {@code parrafo.ancho_px} (756), {@code parrafo.lineas} (8).
+     */
+    private static void parrafos(Parametros p, Map<String, String> c) {
+        String fuente = p.texto("parrafo.fuente", "DINCOND.TTF");
+        double puntos = Double.parseDouble(p.texto("parrafo.puntos", "7"));
+        int ancho = p.entero("parrafo.ancho_px", 756);
+        int lineas = p.entero("parrafo.lineas", 8);
+        for (Map.Entry<String, String> e : p.todos().entrySet()) {
+            java.util.regex.Matcher m = PARRAFO.matcher(e.getKey());
+            if (!m.matches() || esMedidaDeParrafo(m.group(1))) continue;
+            java.util.regex.Matcher k = CLAVE.matcher(e.getValue());
+            StringBuffer texto = new StringBuffer();
+            while (k.find()) {
+                String v = t(c.get(k.group(1).trim()));
+                k.appendReplacement(texto, java.util.regex.Matcher.quoteReplacement(v.isEmpty() ? p.faltante() : v));
+            }
+            k.appendTail(texto);
+            List<String> partes = partirPorAncho(texto.toString(), fuente, puntos, ancho, lineas);
+            for (int i = 0; i < lineas; i++) {
+                c.put("parrafo." + m.group(1) + "." + (i + 1), i < partes.size() ? partes.get(i) : "");
+            }
+        }
+    }
+
+    private static boolean esMedidaDeParrafo(String nombre) {
+        return nombre.equals("fuente") || nombre.equals("puntos") || nombre.equals("lineas") || nombre.equals("ancho_px");
     }
 }

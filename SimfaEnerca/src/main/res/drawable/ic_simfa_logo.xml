@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Logo SIM-FA (facturación en sitio): recibo con rayo. Vectorial: se ve nítido en cualquier pantalla y pesa 1 KB. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#FF0D47A1" android:pathData="M24,0 h60 a24,24 0 0 1 24,24 v60 a24,24 0 0 1 -24,24 h-60 a24,24 0 0 1 -24,-24 v-60 a24,24 0 0 1 24,-24 z" />
+    <path android:fillColor="#FF1565C0" android:pathData="M18,108 C40,80 70,70 108,72 V84 a24,24 0 0 1 -24,24 z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M38,24 h32 a4,4 0 0 1 4,4 v54 l-5,-4 -5,4 -5,-4 -5,4 -5,-4 -5,4 -5,-4 -5,4 V28 a4,4 0 0 1 4,-4 z" />
+    <path android:fillColor="#FF90A4AE" android:pathData="M41,32 h16 v4 h-16 z M41,40 h26 v3 h-26 z" />
+    <path android:fillColor="#FFFFB300" android:pathData="M59,44 L46,62 h9 l-4,14 L65,56 h-9 l4,-12 z" />
+</vector>

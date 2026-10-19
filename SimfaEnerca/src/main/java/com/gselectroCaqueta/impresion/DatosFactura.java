@@ -112,6 +112,31 @@ public final class DatosFactura {
     /** Valores crudos por número de caída del Excel, para {@code {n}} en la plantilla. */
     public final Map<Integer, String> caidas = new LinkedHashMap<>();
 
+    /**
+     * Estructura de aseo de la cuenta (lm_aseo_maestro): clave n = As_n del Excel del diseñador
+     * (As_8 CUENTA_ASEO … As_74 PPARTICIPACION). Llega en MEDIDOR.TXT campos 21..87 (As_n = campo n+13).
+     */
+    public final Map<Integer, String> aseo = new LinkedHashMap<>();
+
+    /** Reglas de desviación de la cuenta (REGISTRO.TXT 56..58): cambio de clase, cambio de nivel, normalización. */
+    public String desvCambioClase = "", desvCambioNivel = "", desvNormalizacion = "";
+
+    /**
+     * Resultado de la analítica de desviación de la móvil (REGISTRO salida COMENTARIO2): 000 normal,
+     * 001 alto DV1, 005 alto Da5/Db4, 002 alto DV2 (exceptuado por regla), 003 alto DV3 (se visita).
+     * Decide qué carta acompaña a la factura (ver {@link RenderFactura#plantillaCarta}).
+     */
+    public String analitica = "";
+
+    /**
+     * Bandas de analítica de EBSA (LM_SUSCRIPTOR_DSVCCION, REGISTRO.TXT): límite superior por tipo de uso
+     * (promedio del ciclo y clase, Regla 7) y máximo anual (Regla 6). 0 = no viene. Solo para elegir la regla
+     * que se imprime en la carta del 005; no intervienen en la liquidación.
+     */
+    public double lsBandaTipoUso, lsBandaAnual;
+    /** LS_CONS_SUBS tal como viene (límite de subsistencia de la analítica, Regla 2). 0 = no viene. */
+    public double lsConsumoSubsistencia;
+
     public static final class PeriodoConsumo {
         public final int anio;
         public final int mes;

@@ -87,6 +87,8 @@ public class VariablesGlobales {
     public static Date fechahoraGPS = new Date();
     public static String activar_validar_horario = "0";
     public static String directorioactual = "";
+    public static String vrsDerechos = "";
+    public static String versionApp = "";
     public static String fechaproceso = "";
     public static String directorioBackUp = ""; //Ax: aqui guardara los Backups, si no existe sera igua al: directorioactual
     // Name of the connected device

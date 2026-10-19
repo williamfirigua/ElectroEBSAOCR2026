@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Menu lateral de la liquidacion (reemplaza al Spinner "MENU..."). Cada item se traduce a
+     opcionMenu(n) en MenuDeLiquidacion.opcionDeMenuLateral(); los numeros no cambian. -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="Lectura">
+        <menu>
+            <item android:id="@+id/nav_anomalia" android:icon="@drawable/ic_nav_warning" android:title="Capturar Anomalía" />
+            <item android:id="@+id/nav_novedad" android:icon="@drawable/ic_nav_note_add" android:title="Capturar Novedad Lect" />
+            <item android:id="@+id/nav_foto" android:icon="@drawable/ic_nav_camera" android:title="Tomar Foto" />
+            <item android:id="@+id/nav_anterior_predio" android:icon="@drawable/ic_nav_history" android:title="Anterior Predio" />
+            <item android:id="@+id/nav_digitos" android:icon="@drawable/ic_nav_edit" android:title="Modificar Nro Dígitos" />
+            <item android:id="@+id/nav_buscar" android:icon="@drawable/ic_nav_search" android:title="Buscar Cliente" />
+            <item android:id="@+id/nav_mapa" android:icon="@drawable/ic_nav_map" android:title="Mapa" />
+        </menu>
+    </item>
+
+    <item android:title="Impresión">
+        <menu>
+            <item android:id="@+id/nav_reimprimir" android:icon="@drawable/ic_nav_print" android:title="Reimprimir Factura" />
+            <item android:id="@+id/nav_habilitar_impresora" android:icon="@drawable/ic_nav_power" android:title="Des/Habilitar Impresora" />
+            <item android:id="@+id/nav_asociar_impresora" android:icon="@drawable/ic_nav_bluetooth" android:title="Des/Asociar Impresora" />
+            <item android:id="@+id/nav_preimpreso" android:icon="@drawable/ic_nav_tune" android:title="Config. Preimpreso Fact" />
+            <item android:id="@+id/nav_liquidacion_automatica" android:icon="@drawable/ic_nav_flash" android:title="Liquidación Automática" />
+        </menu>
+    </item>
+
+    <item android:title="Envíos">
+        <menu>
+            <item android:id="@+id/nav_enviar_facturacion" android:icon="@drawable/ic_nav_send" android:title="Enviar Facturación GPRS" />
+            <item android:id="@+id/nav_reenvio" android:icon="@drawable/ic_nav_sync" android:title="Procesar Reenvío GPRS" />
+            <item android:id="@+id/nav_no_enviadas" android:icon="@drawable/ic_nav_report" android:title="Evaluar No Enviadas GPRS" />
+            <item android:id="@+id/nav_enviar_fotos" android:icon="@drawable/ic_nav_upload" android:title="Enviar Fotos" />
+            <item android:id="@+id/nav_envio_registros" android:icon="@drawable/ic_nav_list" android:title="Envío Registros" />
+            <item android:id="@+id/nav_wifi" android:icon="@drawable/ic_nav_wifi" android:title="Activar Wifi" />
+        </menu>
+    </item>
+
+    <item android:title="Otros">
+        <menu>
+            <item android:id="@+id/nav_estadistica" android:icon="@drawable/ic_nav_bar_chart" android:title="Estadística del Proceso" />
+            <item android:id="@+id/nav_utilidades" android:icon="@drawable/ic_nav_build" android:title="Utilidades" />
+            <item android:id="@+id/nav_volver" android:icon="@drawable/ic_nav_exit" android:title="Volver" />
+        </menu>
+    </item>
+</menu>

@@ -1,148 +1,175 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Busqueda de cliente (ModuloBusquedaCuenta), con el diseno de la app de lecturas EMSA: criterio en chips,
+  campo de busqueda y resultados que se filtran mientras se digita (indice en memoria). Sin busqueda por ruta.
+  Ids conservados: rgBotones, rb*, txtBuscar, btnvol, cabeceraDatos, tablaResumenDatos.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="#FFF5F6FA"
+    android:orientation="vertical"
     tools:context="com.gselectroCaqueta.modulobusquedacuenta.ModuloBusquedaCuenta">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:orientation="vertical">
+        android:layout_height="48dp"
+        android:background="@color/ocrePop"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="4dp"
+        android:paddingEnd="12dp">
 
-        <TableRow
+        <Button
+            android:id="@+id/btnvol"
+            style="?android:attr/borderlessButtonStyle"
             android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:background="@drawable/titulo"
-            android:gravity="right"
-            android:stretchColumns="1"
-            android:weightSum="4">
+            android:layout_height="48dp"
+            android:text="‹ Volver"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|center"
-                android:layout_weight="1"
-                android:background="@color/orangehuila"
-                android:gravity="center|bottom"
-                android:text="BUSQUEDA"
-                android:textColor="@color/white"
-                android:textSize="15dp"
-                android:textStyle="bold">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:text="BÚSQUEDA DE USUARIO"
+            android:textColor="@color/white"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
-            </TextView>
-        </TableRow>
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:scrollbars="none">
 
         <RadioGroup
             android:id="@+id/rgBotones"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:orientation="vertical"
-            android:showDividers="middle|none">
+            android:orientation="horizontal">
 
             <RadioButton
                 android:id="@+id/rbContador"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/nro_medidor" />
-
+                android:layout_height="48dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_chip"
+                android:button="@null"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:text="Medidor"
+                android:textColor="@color/texto_chip"
+                android:textSize="16sp"
+                android:textStyle="bold" />
             <RadioButton
                 android:id="@+id/rbCuenta"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/nro_cuenta" />
-
-            <RadioButton
-                android:id="@+id/rbRuta"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ruta" />
-
+                android:layout_height="48dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_chip"
+                android:button="@null"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:text="Cuenta"
+                android:textColor="@color/texto_chip"
+                android:textSize="16sp"
+                android:textStyle="bold" />
             <RadioButton
                 android:id="@+id/rbDireccion"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/direccion" />
-
+                android:layout_height="48dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_chip"
+                android:button="@null"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:text="Dirección"
+                android:textColor="@color/texto_chip"
+                android:textSize="16sp"
+                android:textStyle="bold" />
             <RadioButton
                 android:id="@+id/rbNombre"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/nombre" />
-
-        </RadioGroup>
-
-        <EditText
-            android:id="@+id/txtBuscar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/rgBotones"
-            android:ems="10"
-            android:hint="@string/digite_valor_a_buscar"
-            android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceLarge">
-
-            <requestFocus />
-        </EditText>
-
-        <Button
-            android:id="@+id/btnvol"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/btnvolver"
-            android:background="@drawable/borde_redondo"
-            android:text="Volver" />
-
-        <HorizontalScrollView
-            android:id="@+id/horizontalView"
-            android:layout_width="wrap_content"
-            android:layout_height="150dp"
-            android:layout_alignLeft="@+id/rgBotones"
-            android:layout_alignParentBottom="true"
-            android:layout_marginTop="15px"
-            android:scrollbars="horizontal">
-
-            <LinearLayout
+                android:layout_height="48dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_chip"
+                android:button="@null"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:text="Nombre"
+                android:textColor="@color/texto_chip"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+            <RadioButton
+                android:id="@+id/rbRuta"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:orientation="vertical">
+                android:layout_height="48dp"
+                android:text="@string/ruta"
+                android:visibility="gone" />
+        </RadioGroup>
+    </HorizontalScrollView>
 
-                <TableLayout
-                    android:id="@+id/cabeceraDatos"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"></TableLayout>
+    <EditText
+        android:id="@+id/txtBuscar"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/bg_input"
+        android:hint="@string/digite_valor_a_buscar"
+        android:imeOptions="actionDone"
+        android:importantForAutofill="no"
+        android:inputType="number"
+        android:maxLength="63"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:singleLine="true"
+        android:textSize="20sp"
+        android:textStyle="bold">
 
-                <ScrollView
-                    android:id="@+id/scroll"
-                    android:layout_width="wrap_content"
-                    android:layout_height="280dp"
-                    android:scrollbars="horizontal|vertical">
+        <requestFocus />
+    </EditText>
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
+    <TextView
+        android:id="@+id/txtTipoBusqueda"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="10dp"
+        android:text="Buscando por: Medidor"
+        android:textColor="#FF1976D2"
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
-                        <TableLayout
-                            android:id="@+id/tablaResumenDatos"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:clickable="true"></TableLayout>
-                    </LinearLayout>
-                </ScrollView>
-            </LinearLayout>
-        </HorizontalScrollView>
+    <TableLayout
+        android:id="@+id/cabeceraDatos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
+    <ScrollView
+        android:id="@+id/scroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="8dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_tarjeta_cliente"
+        android:fillViewport="true"
+        android:padding="1dp">
 
-
-    </LinearLayout>
-</RelativeLayout>
+        <TableLayout
+            android:id="@+id/tablaResumenDatos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </ScrollView>
+</LinearLayout>

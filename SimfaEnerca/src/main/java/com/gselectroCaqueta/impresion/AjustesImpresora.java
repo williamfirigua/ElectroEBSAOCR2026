@@ -57,6 +57,8 @@ public final class AjustesImpresora {
     private static final Pattern QR = Pattern.compile(
             "^(B|VB|BARCODE|VBARCODE)\\s+(QR)\\s+(-?\\d+)\\s+(-?\\d+)(.*)$");
     private static final Pattern PCX = Pattern.compile("^(PCX)\\s+(-?\\d+)\\s+(-?\\d+)(.*)$");
+    private static final Pattern ESCALADO = Pattern.compile(
+            "^(SCALE-TEXT|VSCALE-TEXT|SCALE-TO-FIT)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(-?\\d+)\\s+(-?\\d+)(.*)$");
     private static final Pattern TONE = Pattern.compile("^TONE\\s+-?\\d+\\s*$");
     /** Solo la cabecera de etiqueta {@code ! offset hres vres alto cantidad}; no los {@code ! U1 ...}. */
     private static final Pattern CABECERA = Pattern.compile("^(!\\s+\\d+\\s+\\d+\\s+\\d+\\s+)(\\d+)(\\s+\\d+\\s*)$");
@@ -118,7 +120,7 @@ public final class AjustesImpresora {
     public String aplicar(String linea) {
         if (esNeutro() || linea.isEmpty()) return linea;
         char c = linea.charAt(0);
-        if (c == 'T' || c == 'V') {
+        if ((c == 'T' || c == 'V') && !linea.startsWith("VSCALE")) {
             Matcher m = TEXTO.matcher(linea);
             if (m.matches()) {
                 return m.group(1) + ' ' + m.group(2) + ' ' + m.group(3) + ' '
@@ -153,6 +155,14 @@ public final class AjustesImpresora {
             if (q.matches()) return q.group(1) + ' ' + q.group(2) + ' ' + x(q.group(3)) + ' ' + y(q.group(4)) + q.group(5);
             Matcher b = BARRA.matcher(linea);
             if (b.matches()) return barra(b);
+            return linea;
+        }
+        if (c == 'S' || (c == 'V' && linea.startsWith("VSCALE"))) {
+            Matcher m = ESCALADO.matcher(linea);
+            if (m.matches()) {
+                return m.group(1) + ' ' + m.group(2) + ' ' + m.group(3) + ' ' + m.group(4) + ' '
+                        + x(m.group(5)) + ' ' + y(m.group(6)) + m.group(7);
+            }
             return linea;
         }
         if (c == 'P') {

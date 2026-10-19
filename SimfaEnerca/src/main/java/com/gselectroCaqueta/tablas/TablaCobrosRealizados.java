@@ -17,7 +17,7 @@ import static com.gselectroCaqueta.tablas.UtilPlanos.LATIN1;
 /// </summary>
 public class TablaCobrosRealizados { //Ax ya es: S_COBRO
     private static final String TAG = "COBROS_SALIDA";
-    static final int LONGITUD_REGISTRO = 113; // Nrocuentacliente de 10 digitos (2026)
+    public static final int LONGITUD_REGISTRO = 113; // Nrocuentacliente de 10 digitos (2026)
 
     String sep = ";";
     String tablaCobrosRealizados_Nrocuentacliente;
@@ -98,6 +98,26 @@ public class TablaCobrosRealizados { //Ax ya es: S_COBRO
             return false;
         } catch (IOException e) {
             Log.e(TAG, "al abrir1 " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Abre en modo solo lectura. Lo usa el hilo de envío para leer CO_COBRO.SDA directamente en vez de
+     * una copia completa del archivo por factura: los registros son de longitud fija y la liquidación
+     * solo agrega al final o reescribe en su sitio los de la cuenta en curso, así que los registros ya
+     * referenciados por ENVIOGPRS no se mueven. {@code total} se fija al abrir.
+     */
+    public synchronized Boolean abrirSoloLectura_TablaCobrosRealizados(String nombreArchivo) {
+        if (nombreArchivo == null || nombreArchivo.length() == 0) return false;
+        cerrarSilencioso();
+        try {
+            rFile = new RandomAccessFile(nombreArchivo, "r");
+            archivo_TablaCobrosRealizados = nombreArchivo;
+            total_TablaCobrosRealizados = (int) (rFile.length() / LONGITUD_REGISTRO);
+            return true;
+        } catch (IOException e) {
+            Log.e(TAG, "al abrir (lectura) " + nombreArchivo + ": " + e.getMessage());
             return false;
         }
     }

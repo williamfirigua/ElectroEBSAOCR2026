@@ -7,4 +7,8 @@
     <dimen name="destination_height">250dip</dimen>
     <dimen name="fab_margin">16dp</dimen>
 
+    <!-- Liquidacion: pantallas bajas (menos de 640dp) usan teclas y lista de causas mas bajas
+         para que el detalle del cliente conserve espacio. Ver values-h640dp. -->
+    <dimen name="tecla_alto">46dp</dimen>
+    <dimen name="lista_causas_alto">220dp</dimen>
 </resources>

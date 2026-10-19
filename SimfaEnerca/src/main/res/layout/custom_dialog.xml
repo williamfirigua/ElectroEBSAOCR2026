@@ -33,7 +33,7 @@
                         android:layout_height="51dp"
                         android:layout_marginTop="5dp"
                         android:layout_marginLeft="12dp"
-                        android:src="@drawable/ic_launcher1"
+                        android:src="@drawable/ic_simfa_logo"
                         tools:ignore="ContentDescription"/>
 
                     <TextView
@@ -93,4 +93,4 @@
             </TableRow>
         </TableLayout>
     </androidx.cardview.widget.CardView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

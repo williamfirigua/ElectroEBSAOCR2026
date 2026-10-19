@@ -21,6 +21,13 @@ import java.util.UUID;
  */
 public class btPrintFile {
     // Constants that indicate the current connection state
+    /**
+     * Candado de escritura al socket. ConnectedThread.write lo toma por llamada y ColaImpresion por
+     * trabajo completo, asi un envio directo (reimpresion, prueba de cabeza) no se intercala entre los
+     * bloques de una factura en cola. Es reentrante (monitor de Java).
+     */
+    public static final Object BLOQUEO_ESCRITURA = new Object();
+
     public static final int STATE_IDLE = 0;       // we're doing nothing
     public static final int STATE_LISTEN = 1;     // now listening for incoming connections
     public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
@@ -220,14 +227,107 @@ public class btPrintFile {
     private void connectionLost() {
         addText("connectionLost()");
         setState(STATE_DISCONNECTED);
+        // Ya no se deshabilita la impresora por perder el enlace (impresora apagada, lejos, sin bateria):
+        // la siguiente impresion reconecta sola (reconectarSincrono). Deshabilitarla sigue siendo decision
+        // del tecnico desde el menu "Des/Habilitar Impresora".
 
         // Send a failure message back to the Activity
         Message msg = mHandler.obtainMessage(msgTypes.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
-        bundle.putString(msgTypes.TOAST, "Conexion con el dispositivo se ha perdido");
+        bundle.putString(msgTypes.TOAST, "Conexion con la impresora perdida: se reconectara al imprimir");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
-        VariablesGlobales.habilitadaimpresora = 0;
+    }
+
+    /**
+     * Reconecta con la ultima impresora usada, bloqueando al llamador hasta {@code timeoutMs} (como el
+     * Bluetooth_Printer de la app de lecturas EMSA). Llamar SOLO desde un hilo de trabajo (ColaImpresion),
+     * nunca desde la pantalla. Intento normal por SPP con vigilante de tiempo (Android espera ~9 s si la
+     * impresora esta apagada) y, si falla sin agotar el tiempo, un intento por el canal RFCOMM 1.
+     *
+     * @return true si quedo conectada (o ya lo estaba).
+     */
+    /** true si hay una impresora asociada en esta sesion (aunque el enlace este caido). */
+    public synchronized boolean tieneImpresoraAsociada() {
+        return mDevice != null;
+    }
+
+    public boolean reconectarSincrono(long timeoutMs) {
+        final BluetoothDevice dispositivo;
+        synchronized (this) {
+            if (mState == STATE_CONNECTED && mConnectedThread != null) return true;
+            dispositivo = mDevice;
+            if (dispositivo == null || mAdapter == null || !mAdapter.isEnabled()) return false;
+            if (mConnectThread != null) {
+                mConnectThread.cancel();
+                mConnectThread = null;
+            }
+            setState(STATE_CONNECTING);
+        }
+        mAdapter.cancelDiscovery();
+        BluetoothSocket socket = conectarConLimite(dispositivo, timeoutMs);
+        if (socket == null) {
+            synchronized (this) {
+                setState(STATE_DISCONNECTED);
+            }
+            Log.w(TAG, "reconectarSincrono: sin conexion con " + dispositivo.getAddress());
+            return false;
+        }
+        connected(socket, dispositivo);
+        Log.i(TAG, "reconectarSincrono: reconectada " + dispositivo.getAddress());
+        return true;
+    }
+
+    private BluetoothSocket conectarConLimite(BluetoothDevice dispositivo, long timeoutMs) {
+        final java.util.concurrent.atomic.AtomicBoolean resuelto = new java.util.concurrent.atomic.AtomicBoolean(false);
+        final java.util.concurrent.atomic.AtomicBoolean vencido = new java.util.concurrent.atomic.AtomicBoolean(false);
+        BluetoothSocket socket = null;
+        try {
+            socket = dispositivo.createInsecureRfcommSocketToServiceRecord(UUID_SPP);
+            final BluetoothSocket vigilado = socket;
+            Thread vigilante = new Thread(() -> {
+                long limite = System.currentTimeMillis() + timeoutMs;
+                try {
+                    while (System.currentTimeMillis() < limite) {
+                        if (resuelto.get()) return;
+                        Thread.sleep(100);
+                    }
+                    if (!resuelto.get()) {
+                        vencido.set(true);
+                        vigilado.close(); // desbloquea el connect() colgado
+                    }
+                } catch (Exception ignored) {
+                }
+            }, "bt-vigilante");
+            vigilante.setDaemon(true);
+            vigilante.start();
+            try {
+                socket.connect();
+            } finally {
+                resuelto.set(true);
+            }
+            return socket;
+        } catch (Exception e) {
+            cerrarSilencioso(socket);
+            if (vencido.get()) return null; // la impresora no responde: no se insiste
+        }
+        try { // segundo intento por el canal 1 (algunos modulos no publican bien el SDP)
+            BluetoothSocket alterno = (BluetoothSocket) dispositivo.getClass()
+                    .getMethod("createRfcommSocket", int.class).invoke(dispositivo, 1);
+            if (alterno == null) return null;
+            alterno.connect();
+            return alterno;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static void cerrarSilencioso(BluetoothSocket s) {
+        if (s == null) return;
+        try {
+            s.close();
+        } catch (IOException ignored) {
+        }
     }
 
     /**
@@ -435,7 +535,14 @@ public class btPrintFile {
                     mHandler.obtainMessage(msgTypes.MESSAGE_READ, bytes, -1, buffer).sendToTarget();
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
-                    connectionLost();
+                    // Solo el hilo vigente reporta la perdida: al reconectar, connected() cierra el socket
+                    // del hilo anterior y su read() falla; sin esta guarda dejaba el estado en DESCONECTADO
+                    // justo despues de conectar.
+                    boolean vigente;
+                    synchronized (btPrintFile.this) {
+                        vigente = (mConnectedThread == this);
+                    }
+                    if (vigente) connectionLost();
                     break;
                 }
             }
@@ -447,18 +554,19 @@ public class btPrintFile {
          * @param buffer The bytes to write
          */
         public boolean write(byte[] buffer) {
-            addText("write...");
-            try {
-                mmOutStream.write(buffer);
-
-                // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(msgTypes.MESSAGE_WRITE, -1, -1, buffer)
-                        .sendToTarget();
-            } catch (IOException e) {
-                Log.e(TAG, "Exception during write", e);
-                return false;
+            // Sin MESSAGE_WRITE ni addText por escritura: cada uno posteaba al hilo UI y el handler
+            // convertía el CPCL completo a String y lo acumulaba en un ArrayAdapter que nadie muestra
+            // (memoria creciente y trabajo en el hilo de la pantalla en cada factura).
+            // synchronized: dos llamadores (cola de impresión y rutas legadas) no intercalan bytes.
+            synchronized (BLOQUEO_ESCRITURA) {
+                try {
+                    mmOutStream.write(buffer);
+                    mmOutStream.flush();
+                } catch (IOException e) {
+                    Log.e(TAG, "Exception during write", e);
+                    return false;
+                }
             }
-            addText("write done");
             return true;
         }
 

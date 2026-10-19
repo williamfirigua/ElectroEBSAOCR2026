@@ -643,7 +643,7 @@ public class ActLicencia extends AppCompatActivity implements View.OnClickListen
         Vibrator v = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         v.vibrate(500);
         AlertDialog.Builder alertConfCreado = new AlertDialog.Builder(this);
-        alertConfCreado.setIcon(R.drawable.ic_launcher1);
+        alertConfCreado.setIcon(R.drawable.ic_simfa_logo);
         alertConfCreado
                 .setMessage(mensaje)
                 .setTitle("Alerta")

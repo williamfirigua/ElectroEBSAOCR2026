@@ -20,6 +20,10 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
+import com.gselectroCaqueta.sync.ColaEnvio;
+import com.gselectroCaqueta.sync.ColaEnvioSqlite;
+import com.gselectroCaqueta.sync.ConfigSync;
+import com.gselectroCaqueta.sync.SincronizacionService;
 import com.gsutil.Utils;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -37,6 +41,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
@@ -61,8 +66,12 @@ import okhttp3.Response;
  *   TrackingLocationService.iniciar(this, codOperador);   // en onCreate
  *   TrackingLocationService.detener(this);                // en onDestroy
  *
- * Envío: POST {apiUrl}tracking/ubicaciones   (apiUrl = cadenaURLapi, termina en /api/)
- *   Body: { "cod_operador": <int>, "ubicaciones": [ {lat,lng,precision,timestamp}, ... ] }
+ * Envío, según el modo de la terminal (ConfigSync):
+ *  - REST (API v1): cada punto va a la cola persistente ebsa_sync.db con id propio y la hora de captura del
+ *    GPS; SincronizacionService lo despacha a /api/v1/tracking/ubicaciones con el token del técnico. Nada se
+ *    filtra ni se descarta aquí: la depuración la hace en la noche tracking:migrar-historico.
+ *  - SOAP (legado): como antes, lote en memoria a POST {apiUrl}tracking/ubicaciones
+ *    Body: { "cod_operador": <int>, "ubicaciones": [ {lat,lng,precision,timestamp}, ... ] }
  */
 public class TrackingLocationService extends Service {
 
@@ -114,7 +123,12 @@ public class TrackingLocationService extends Service {
     private Handler handler;
 
     private final Utils utils = new Utils();
-    private File logfile; // puede quedar null si no hay ruta disponible (logging a archivo se omite)
+    private File logfile;
+
+    // Modo REST: cola persistente; se avisa al servicio de envío cada PUNTOS_POR_AVISO puntos.
+    private static final int PUNTOS_POR_AVISO = 10;
+    private ConfigSync configSync;
+    private int puntosSinAviso = 0; // puede quedar null si no hay ruta disponible (logging a archivo se omite)
 
     // ==================== CICLO DE VIDA ====================
 
@@ -128,6 +142,7 @@ public class TrackingLocationService extends Service {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         logfile = resolveLogFile();
+        configSync = new ConfigSync(this);
         logEvento("[onCreate] Ventana horaria quemada: "
                 + WINDOW_START_HOUR + ":00 - " + WINDOW_END_HOUR + ":00");
 
@@ -242,6 +257,10 @@ public class TrackingLocationService extends Service {
             pausarTracking();
             return;
         }
+        if (configSync.modoRest()) {
+            encolarUbicacion(location);
+            return;
+        }
         try {
             JSONObject punto = new JSONObject();
             punto.put("lat",       location.getLatitude());
@@ -264,12 +283,45 @@ public class TrackingLocationService extends Service {
         }
     }
 
+    /**
+     * Modo REST: el punto queda en SQLite antes de cualquier intento de red, así que sobrevive a falta de
+     * señal y a reinicios. id = UUID: el servidor ignora reenvíos del mismo punto. timestamp = hora del fix
+     * GPS (no la de proceso) con zona horaria; el servidor lo asigna al día en que se capturó.
+     */
+    private void encolarUbicacion(Location location) {
+        try {
+            JSONObject punto = new JSONObject();
+            String id = UUID.randomUUID().toString();
+            punto.put("id",        id);
+            punto.put("lat",       location.getLatitude());
+            punto.put("lng",       location.getLongitude());
+            punto.put("precision", location.getAccuracy());
+            long t = location.getTime() > 0 ? location.getTime() : System.currentTimeMillis();
+            // "capturado_en" es el nombre del contrato de /api/v1 (el APK del 16-oct mandaba "timestamp").
+            punto.put("capturado_en", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.US).format(new Date(t)));
+            ColaEnvioSqlite.de(this).encolar(ColaEnvio.TRACKING, id, punto.toString(), null);
+            if (++puntosSinAviso >= PUNTOS_POR_AVISO) {
+                puntosSinAviso = 0;
+                SincronizacionService.despertar();
+            }
+        } catch (Exception e) {
+            logEvento("[encolarUbicacion] Error: " + e.getMessage());
+        }
+    }
+
     // ==================== ENVÍO DE UBICACIONES ====================
 
     private final Runnable enviarBatchTask = new Runnable() {
         @Override
         public void run() {
-            if (isWithinWindowNow()) enviarBatch();
+            if (configSync != null && configSync.modoRest()) {
+                if (puntosSinAviso > 0) {
+                    puntosSinAviso = 0;
+                    SincronizacionService.despertar();
+                }
+            } else if (isWithinWindowNow()) {
+                enviarBatch();
+            }
             handler.postDelayed(this, BATCH_SEND_INTERVAL_MS);
         }
     };

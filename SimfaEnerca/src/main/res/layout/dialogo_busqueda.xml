@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Busqueda unica (modulobusquedacuenta.DialogoBusqueda): medidor, cuenta, nombre o direccion. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="16dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="16dp">
+
+    <EditText
+        android:id="@+id/txtBusquedaUnica"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Medidor, cuenta, nombre o dirección"
+        android:imeOptions="actionSearch|flagNoExtractUi"
+        android:importantForAutofill="no"
+        android:inputType="textNoSuggestions|textCapCharacters"
+        android:maxLength="60"
+        android:maxLines="1"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/txtEstadoBusqueda"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:textColor="@color/grayPop"
+        android:textSize="13sp" />
+
+    <ListView
+        android:id="@+id/listaBusqueda"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/lista_causas_alto"
+        android:divider="#FFD5DAE8"
+        android:dividerHeight="1dp" />
+</LinearLayout>

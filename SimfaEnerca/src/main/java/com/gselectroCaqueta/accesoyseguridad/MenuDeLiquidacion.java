@@ -82,7 +82,7 @@ import com.gselectroCaqueta.moduloMapas.MapsActivity;
 import com.gselectroCaqueta.moduloMapas.NavigationHelper;
 import com.gselectroCaqueta.moduloanomalias.AlertaCuentaD;
 import com.gselectroCaqueta.moduloanomalias.AnomaliaDeNoLectura;
-import com.gselectroCaqueta.moduloanomalias.ModuloDeAnomalias;
+import com.gselectroCaqueta.moduloanomalias.DialogoCausas;
 import com.gselectroCaqueta.modulobluetooth.DeviceListActivity;
 import com.gselectroCaqueta.modulobluetooth.btPrintFile;
 import com.gselectroCaqueta.modulobluetooth.msgTypes;
@@ -94,6 +94,13 @@ import com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect;
 import com.gselectroCaqueta.modulocaptnovedlect.ModuloConfigFormatoImpresion;
 import com.gselectroCaqueta.moduloscannerhardware.ModuloEscanerHardware;
 import com.gselectroCaqueta.moduloscannerhardware.ModuloScannerKT40Q;
+import com.gselectroCaqueta.sync.ArchivoParaEnvio;
+import com.gselectroCaqueta.sync.ColaEnvio;
+import com.gselectroCaqueta.sync.ColaEnvioSqlite;
+import com.gselectroCaqueta.sync.ColectorLiquidacion;
+import com.gselectroCaqueta.sync.ConfigSync;
+import com.gselectroCaqueta.sync.LectorCoCobro;
+import com.gselectroCaqueta.sync.SincronizacionService;
 import com.gselectroCaqueta.tablas.EnvioGPS;
 import com.gselectroCaqueta.tablas.Generica;
 import com.gselectroCaqueta.tablas.TablaClaseServicio;
@@ -114,6 +121,7 @@ import com.gselectroCaqueta.tablas.TablaRegistroSalida;
 import com.gselectroCaqueta.tablas.TablaTarifas;
 import com.gselectroCaqueta.impresion.AdaptadorMovil;
 import com.gselectroCaqueta.impresion.AjustesImpresora;
+import com.gselectroCaqueta.impresion.ColaImpresion;
 import com.gselectroCaqueta.impresion.DatosFactura;
 import com.gselectroCaqueta.impresion.RenderFactura;
 import com.gsutil.AsyncResponse;
@@ -152,7 +160,6 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     ImageButton imagenPrinter;
     private static int TAKE_PICTURE = 1;
     private AudioManager audiom;
-    Spinner spinnerMenu;
     TablaEncabezado tablaEncabezado = new TablaEncabezado();
     public final int ADICINCERTIFCAD_REQUEST_CODE = 6680;//Ax para Recibir de la actividad del Modulo de Adicionar Verificacion
     public final int ADICINRVERFCION_REQUEST_CODE = 6679;//Ax para Recibir de la actividad del Modulo de Adicionar Verificacion
@@ -487,6 +494,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     TablaClaseServicio tablaClaseServicio = new TablaClaseServicio();
     TablaClienteSalida infoClienteSalida = new TablaClienteSalida();
     TablaCobrosRealizados infoCobrosLiquidados = new TablaCobrosRealizados();
+    // Envío por API v1: líneas de ENVIOGPRS de la cuenta en curso, se encolan al terminar guardarEnvioGPRS*.
+    private final ColectorLiquidacion colectorLiquidacion = new ColectorLiquidacion();
     TablaContadorSalida medidorSalida = new TablaContadorSalida();
     TablaConvenios tablaConvenio = new TablaConvenios();
     TablaDescripcionConceptos descripcionConcepto = new TablaDescripcionConceptos();
@@ -498,10 +507,30 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     TablaRegistroSalida infoRegistroSalida = new TablaRegistroSalida();
     TablaTarifas tablaTarifa = new TablaTarifas();
     TableLayout tablaResumen;
-    TableRow fila;
-    TableRow.LayoutParams layoutCampo;
-    TableRow.LayoutParams layoutFila;
-    TableRow.LayoutParams layoutValor;
+    // Tarjeta del cliente (cuenta, nombre, direccion) y filas reutilizables del detalle.
+    TextView txtCabCuenta;
+    TextView txtCabNombre;
+    TextView txtCabDireccion;
+    TextView txtCabMarca;
+    TextView txtTipoMedida;
+    TextView txtSentidoRuta;
+    // Indicador de envio (como en Lecturas): visible mientras haya tareas AsyncCallWS en curso.
+    View progressEnvio;
+    private int enviosEnCurso = 0;
+
+    /** Llamar en el hilo UI al iniciar una tarea de envio. */
+    private void iniciarIndicadorEnvio() {
+        enviosEnCurso++;
+        if (progressEnvio != null) progressEnvio.setVisibility(View.VISIBLE);
+    }
+
+    /** Llamar en el hilo UI al terminar (o cancelarse) una tarea de envio. */
+    private void finalizarIndicadorEnvio() {
+        if (enviosEnCurso > 0) enviosEnCurso--;
+        if (enviosEnCurso == 0 && progressEnvio != null) progressEnvio.setVisibility(View.INVISIBLE);
+    }
+    private final java.util.ArrayList<View> filasDetalle = new java.util.ArrayList<>();
+    private int filasDetalleUsadas = 0;
     // TextView lblHoraFechaActual;
     TextView lblInfoMedida;
     //TextView lblLectura;
@@ -649,12 +678,17 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         final View activityRootView = findViewById(R.id.panelLecturas1);
 
         rs = this.getResources();
+        // tablaResumen se usa como contenedor vertical de filas item_dato_cliente (ver llenarListaCliente).
+        // Antes: TableRow por codigo con setStretchAllColumns(true), que anulaba los pesos 1:3 y deformaba las filas.
         tablaResumen = (TableLayout) findViewById(R.id.tablaResumen);
-        tablaResumen.setStretchAllColumns(true);
-        tablaResumen.setStretchAllColumns(true);
-        layoutFila = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT);
-        layoutCampo = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1.0f);
-        layoutValor = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 3.0f);
+        txtCabCuenta = (TextView) findViewById(R.id.txtCabCuenta);
+        txtCabNombre = (TextView) findViewById(R.id.txtCabNombre);
+        txtCabDireccion = (TextView) findViewById(R.id.txtCabDireccion);
+        txtCabMarca = (TextView) findViewById(R.id.txtCabMarca);
+        txtTipoMedida = (TextView) findViewById(R.id.txtTipoMedida);
+        txtSentidoRuta = (TextView) findViewById(R.id.txtSentidoRuta);
+        progressEnvio = findViewById(R.id.progressEnvio);
+        configurarMenuLateral();
 
 //        btnActivaScanner = (ImageButton) findViewById(R.id.btnActivaScanner);
 //        btnFotografia = (ImageButton) findViewById(R.id.btnFotografia);
@@ -664,7 +698,6 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         // txtInformeEscrito = (TextView) findViewById(R.id.txtInformeEscrito);
         // lblLectura = (TextView) findViewById(R.id.lblLectura);
-        spinnerMenu = (Spinner) findViewById(R.id.spinnerMenu);
         txtMedidorCuenta = (TextView) findViewById(R.id.txtMedidorCuenta);
         lblInfoMedida = (TextView) findViewById(R.id.lblInfoMedida);
         txtElectura = (EditText) findViewById(R.id.txtElectura);
@@ -896,44 +929,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             }
         });
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_menu, new String[]{" MENÚ... \u25bc "
-                , "Capturar Anomalía"
-                , "Reimprimir Factura"
-                , "Anterior Predio"
-                , "Capturar Novedad Lect"
-                , "Modificar Nro Digitos"
-                , "Buscar Cliente"
-                , "Des/Habilitar Impresora"
-                , "Des/Asociar Impresora"
-                , "Config. Preimpreso Fact"
-                , "Estadistica Del Proceso"
-                , "Tomar Foto"
-                , "Utilidades"
-                , "Enviar Facturacion Gprs"
-                , "Procesar Reenvio Gprs"
-                , "Evaluar Noenviadas Gprs"
-                //, "Reconstruir Envio Cuenta"
-                , "Liquidación Automática"
-                , "Enviar Fotos"
-                , "Activar Wifi"
-                , "Mapa"
-                , "Envio Registros"
-                , "Volver"
-        });
-        spinnerMenu.setAdapter(adapter);
-
-        spinnerMenu.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                opcionMenu(position);
-                spinnerMenu.setSelection(0);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parentView) {
-            }
-        });
-        spinnerMenu.setSelection(0);
+        // El menu "MENU..." (Spinner) se reemplazo por el menu lateral: ver configurarMenuLateral().
 //
 //        txtLecturaActual.addTextChangedListener(new TextWatcher() {
 //
@@ -1005,6 +1001,14 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 //            }
 //        });
 
+        imagenChat.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                if (infoClienteEntrada.gettablaEntradaClientes_Actividad().trim().equals("99")) {
+                    MensajeriaCliente();
+                }
+            }
+        });
         btnAdelante.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -1014,6 +1018,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 abrirArchivosDeFacturacion();
                 avanzarRegistro();
                 visualizarInformacionCliente(0);
+                if (infoClienteEntrada.gettablaEntradaClientes_Actividad().trim().equals("99")) {
+                    imagenChat.setImageResource(R.drawable.chat_msg_si);
+                }
                 cerrarArchivosFacturacion();
                 variables.impresora = "   ";
             }
@@ -1028,6 +1035,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 abrirArchivosDeFacturacion();
                 retrocedeRegistro();
                 visualizarInformacionCliente(0);
+                if (infoClienteEntrada.gettablaEntradaClientes_Actividad().trim().equals("99")) {
+                    imagenChat.setImageResource(R.drawable.chat_msg_si);
+                }
                 cerrarArchivosFacturacion();
                 variables.impresora = "   ";
             }
@@ -1061,17 +1071,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             }
         });
 
-        // Altura del scroll proporcional a la pantalla
-        android.util.DisplayMetrics dm = new android.util.DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(dm);
-        // Reservar 40% de la pantalla para el scroll, minimo 80dp, maximo 400dp
-        int scrollH = (int)(dm.heightPixels * 0.30f);
-        int minH = (int)(80 * dm.density);
-        int maxH = (int)(400 * dm.density);
-        if (scrollH < minH) scrollH = minH;
-        if (scrollH > maxH) scrollH = maxH;
-        scroll.getLayoutParams().height = scrollH;
-        scroll.requestLayout();
+        // La altura del detalle la reparte el layout (layout_weight); ya no se fija en pixeles.
 
 //        //Ax: detecta si el teclado virtual(softkey) esta presente y aumenta el Scrollview.
 //        activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -1102,6 +1102,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // mensajeT("GPS No esta activo", msgLargo);
         }
+        // ===== ENVÍO POR API v1 (cola + SincronizacionService) =====
+        iniciarSincronizacion();
+
         // ===== RASTREO GPS (tracking) =====
         try {
             if (getParamsWs() && cadenaURLapi != null && !cadenaURLapi.isEmpty()) {
@@ -1129,8 +1132,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         }
 
         LocationManager locationmanager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        LocationListener mlocListener = new UsarGPS();
-        locationmanager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, mlocListener);
+        gpsManager = locationmanager;
+        gpsListener = new UsarGPS();
+        // 1 s / 0 m como siempre: la distancia al predio y la validacion de rango dependen de recibir la
+        // posicion aunque el lector este quieto. Se libera en onDestroy (antes nunca se liberaba).
+        locationmanager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, gpsListener);
 
         if (!locationmanager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             mensajeT("GPS No esta activo", msgLargo);
@@ -1185,25 +1191,99 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         // lecturaActual();
     }// end_onCreate
 
+    // Menu lateral (reemplaza el Spinner "MENU..."), como en la app de Lecturas.
+    private androidx.drawerlayout.widget.DrawerLayout drawerLayout;
+
+    private void configurarMenuLateral() {
+        drawerLayout = (androidx.drawerlayout.widget.DrawerLayout) findViewById(R.id.drawer_layout);
+        com.google.android.material.navigation.NavigationView nav =
+                (com.google.android.material.navigation.NavigationView) findViewById(R.id.nav_view);
+        View btnMenu = findViewById(R.id.btnMenu);
+        // Solo se abre con el boton: un deslizamiento desde el borde derecho competiria con el gesto
+        // "atras" del sistema y con las teclas 3/6/9/OK pegadas al borde.
+        drawerLayout.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(androidx.core.view.GravityCompat.END));
+        nav.setNavigationItemSelectedListener(item -> {
+            drawerLayout.closeDrawer(androidx.core.view.GravityCompat.END);
+            int opcion = opcionDeMenuLateral(item.getItemId());
+            if (opcion > 0) {
+                code.setLength(0);
+                // Tras cerrar el menu, para que dialogos y pantallas no compitan con la animacion.
+                drawerLayout.postDelayed(() -> opcionMenu(opcion), 220);
+            }
+            return false; // sin item "marcado": es un menu de acciones
+        });
+    }
+
+    /** Item del menu lateral -> numero de opcionMenu() (los mismos del Spinner anterior). */
+    private static int opcionDeMenuLateral(int itemId) {
+        if (itemId == R.id.nav_anomalia) return 1;
+        if (itemId == R.id.nav_reimprimir) return 2;
+        if (itemId == R.id.nav_anterior_predio) return 3;
+        if (itemId == R.id.nav_novedad) return 4;
+        if (itemId == R.id.nav_digitos) return 5;
+        if (itemId == R.id.nav_buscar) return 6;
+        if (itemId == R.id.nav_habilitar_impresora) return 7;
+        if (itemId == R.id.nav_asociar_impresora) return 8;
+        if (itemId == R.id.nav_preimpreso) return 9;
+        if (itemId == R.id.nav_estadistica) return 10;
+        if (itemId == R.id.nav_foto) return 11;
+        if (itemId == R.id.nav_utilidades) return 12;
+        if (itemId == R.id.nav_enviar_facturacion) return 13;
+        if (itemId == R.id.nav_reenvio) return 14;
+        if (itemId == R.id.nav_no_enviadas) return 15;
+        if (itemId == R.id.nav_liquidacion_automatica) return 16;
+        if (itemId == R.id.nav_enviar_fotos) return 17;
+        if (itemId == R.id.nav_wifi) return 18;
+        if (itemId == R.id.nav_mapa) return 19;
+        if (itemId == R.id.nav_envio_registros) return 20;
+        if (itemId == R.id.nav_volver) return 21;
+        return 0;
+    }
+
+    // GPS de la pantalla (coordenada de la factura y distancia al predio). Campos para poder liberarlo.
+    private LocationManager gpsManager;
+    private LocationListener gpsListener;
+
     @Override
     protected void onDestroy() {
+        if (gpsManager != null && gpsListener != null) {
+            try {
+                gpsManager.removeUpdates(gpsListener);
+            } catch (Exception e) {
+                utils.Log(logfile, "[MenuDeLiquidacion]onDestroy() gps -> " + e.getMessage());
+            }
+            gpsListener = null;
+        }
+        bitacoraTiempos.vaciar();
         super.onDestroy();
         try {
             TrackingLocationService.detener(this);
         } catch (Exception e) {
             utils.Log(logfile, "[MenuDeLiquidacion]onDestroy() tracking -> " + e.getMessage());
         }
+        // Termina de despachar lo pendiente y se detiene solo (no se corta un envío en curso).
+        SincronizacionService.alSalir();
     }
 
     @Override
     public void onClick(View view) {
         String cadena = sparseArray.get(view.getId());
+        // Primer digito de la lectura: se despierta la impresora mientras el tecnico termina de digitar
+        // (la primera factura tras un rato sin imprimir esperaba ~2 s a que la ZQ520 saliera del ahorro).
+        if (code.length() == 0 && VariablesGlobales.habilitadaimpresora == 1 && indicadorManual == 0) {
+            ColaImpresion.despertar(VariablesGlobales.btPrintService);
+        }
         code.append(cadena);
         txtElectura.setText(code);
     }
 
     @Override
     public void onBackPressed() {
+        if (drawerLayout != null && drawerLayout.isDrawerOpen(androidx.core.view.GravityCompat.END)) {
+            drawerLayout.closeDrawer(androidx.core.view.GravityCompat.END);
+            return;
+        }
         // Log.e("error", "hace el back 1");
         try {
             if (myThread.isAlive()) {
@@ -1216,6 +1296,20 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         finish();
     }
 
+
+    private boolean MensajeriaCliente() {//Ax: MENSAJERIA ESPECIAL
+        String Mensaje = infoClienteEntrada.gettablaEntradaClientes_Informacionadicional().trim();
+
+        new AlertDialog.Builder(this)
+                .setTitle("Mensaje programado")
+                .setMessage(Mensaje.toUpperCase())
+                .setPositiveButton("OK", (dialog, which) -> {
+                    dialog.dismiss();
+                })
+                .show();
+
+        return true;
+    }
 //    @Override
 //    public void onResume() {
 //        super.onResume();
@@ -1540,6 +1634,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             nombreBackup = String.format("%1$4s", infoClienteEntrada.gettablaEntradaClientes_Ciclo().trim()).replace(" ", "0") + String.format("%1$3s", infoClienteEntrada.gettablaEntradaClientes_Municipio().trim()).replace(" ", "0")
                     + String.format("%1$4s", infoClienteEntrada.gettablaEntradaClientes_anio().trim()).replace(" ", "0") + String.format("%1$2s", infoClienteEntrada.gettablaEntradaClientes_mes().trim()).replace(" ", "0");
             // Log.e("error", " nombreBackup " + nombreBackup);
+
+            if (infoClienteEntrada.gettablaEntradaClientes_Actividad().trim().equals("99")) {
+                imagenChat.setImageResource(R.drawable.chat_msg_si);
+            }
             cerrarArchivosFacturacion();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -1675,18 +1773,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             apuntadortarifaCT = 0;
             apuntadortarifareactiva = 0;
 
-            String nombreArchivoCob1 = VariablesGlobales.directorioactual + "/DATOSDESALIDA/CO_COBRO.SDA";
-            String nombreArchivoCobH = VariablesGlobales.directorioactual + "/DATOSDESALIDA/CO_COBROHILOS.SDA";
-
-            File archivoCob1 = new File(nombreArchivoCob1);
-            File archivoCobH = new File(nombreArchivoCobH);
-
-            if (procesandoenvioenHilos == 0) {
-                if (archivoCobH.exists())
-                    archivoCobH.delete();
-
-                VariablesGlobales.copyFile(nombreArchivoCob1, nombreArchivoCobH, false);
-            }
+            // Ya no se copia CO_COBRO.SDA completo a CO_COBROHILOS.SDA: el hilo de envio lee CO_COBRO.SDA
+            // en solo lectura (ver EnviarAlServidorFacturacion).
             envioFacturacionHilos();
 
             limpiarMedidores();
@@ -1714,6 +1802,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
     private void envioFacturacionHilos() {
+        if (ConfigSync.modoRest(this)) {
+            // API v1: lo liquidado ya está en la cola (encolarLiquidacion); ENVIOSGPRS.SDA queda de respaldo
+            // para POST /api/v1/liquidaciones/planos.
+            SincronizacionService.solicitar(this);
+            return;
+        }
 
         String nuevoEnviosGprsda = VariablesGlobales.directorioactual + "/DATOSDESALIDA/ENVIOGPRS" + serialPDA + ".SDA";
         String EnviosGprsda = VariablesGlobales.directorioactual + "/DATOSDESALIDA/ENVIOSGPRS.SDA";
@@ -1898,13 +1992,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
             //utils.Log(logfile, "[MenuDeLiquidacion]EnviarAlServidorFacturacion();;;" + "primer proceso");
 
-            InfoCobrosHilos.setArchivo_TablaCobrosRealizados(VariablesGlobales.directorioactual + "/DATOSDESALIDA/CO_COBROHILOS.SDA");//usa
-            //validar si no existe copiar cobros a esta localizacion
-            File file_CobroHilos = new File(InfoCobrosHilos.getArchivo_TablaCobrosRealizados());
-
-            if (!file_CobroHilos.exists()) {
-                utils.CrearCopia(VariablesGlobales.directorioactual + "/DATOSDESALIDA/CO_COBRO.SDA", file_CobroHilos.getAbsolutePath());
-            }
+            // Lectura directa de CO_COBRO.SDA en solo lectura (antes, de una copia completa por factura).
+            // Registros de 113 bytes en posicion fija: los que ENVIOGPRS referencia ya estan escritos.
+            InfoCobrosHilos.setArchivo_TablaCobrosRealizados(VariablesGlobales.directorioactual + "/DATOSDESALIDA/CO_COBRO.SDA");
+            File copiaHilosObsoleta = new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/CO_COBROHILOS.SDA");
+            if (copiaHilosObsoleta.exists()) copiaHilosObsoleta.delete(); // ya no se usa; libera 5-17 MB
 
             File file_cobroHilosSerial = new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/COBROSSALIDA" + serialPDA + ".SDA");//Ax: nuevo nombre
 
@@ -1922,7 +2014,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 if (MisEnviosHilos.total_EnvioGPS > 0) {
 
                     try {
-                        if (InfoCobrosHilos.abrir_TablaCobrosRealizados(InfoCobrosHilos.getArchivo_TablaCobrosRealizados())) {
+                        if (InfoCobrosHilos.abrirSoloLectura_TablaCobrosRealizados(InfoCobrosHilos.getArchivo_TablaCobrosRealizados())) {
                             abrioarchivo = 2;
                             int TotalEnviados = 0;
                             RandomAccessFile rFile;
@@ -2408,7 +2500,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 builder.setTitle("Mensaje de Reimpresion");
                 builder.setMessage("Cliente ya se encuentra facturado.\nDesea Reimprimir la Factura?");
 
-                builder.setIcon(R.drawable.ic_launcher1);
+                builder.setIcon(R.drawable.ic_simfa_logo);
 
                 builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
 
@@ -2710,7 +2802,15 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             if(yaimprimioRetiene) return;
             if (VariablesGlobales.habilitadaimpresora == 0 || indicadorManual == 1) return;
             if (VariablesGlobales.btPrintService == null) return;
-            if (VariablesGlobales.btPrintService.getState() != btPrintFile.STATE_CONNECTED) return;
+            if (VariablesGlobales.btPrintService.getState() != btPrintFile.STATE_CONNECTED
+                    && !VariablesGlobales.btPrintService.tieneImpresoraAsociada()) return; // la cola reconecta
+            // Carta con plantilla segun la analitica (NOTIFICACION_DESVIACION / NOTIFICACION_VISITA, ;@SET carta.analitica).
+            // Si ninguna plantilla aplica al codigo, sigue la carta desvia.pcx de siempre (caso 003 / DV3).
+            if (plantillaCartaAnalitica() != null) {
+                File carta = generarCartaConPlantilla();
+                if (carta != null) yaimprimioRetiene = enviarArchivoCpcl(carta);
+                return;
+            }
 
             String nombre   = infoClienteEntrada.gettablaEntradaClientes_Nombre().trim();
             String direccion = infoClienteEntrada.gettablaEntradaClientes_Direccion().trim();
@@ -2746,26 +2846,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                             "T 7 0 140  165 " + nombre + "\r\n" +
                             "T 7 0 150  195 " + direccion + "\r\n" +
                             "PRINT\r\n";
-            String trozo = "";
-            int tamano = label.length();
-            byte[] outputData;
-            int i = 0;
-
-            for (i = 0; i <= label.length(); ) {
-                if (tamano >= 35)
-                    trozo = label.substring(i, (i + 35));
-                else
-                    trozo = label.substring(i, (i + tamano));
-                outputData = trozo.getBytes();
-
-                tamano -= 35;
-                i = i + 35;
-                /*if (!VariablesGlobales.btPrintService.write(outputData)) {
-                    return (-1);
-                }*/
-                VariablesGlobales.btPrintService.write(outputData);
-            }
-            yaimprimioRetiene = true;
+            // Por la misma cola que la factura: sale despues de ella y sin intercalar bytes.
+            yaimprimioRetiene = ColaImpresion.encolar(VariablesGlobales.btPrintService, label.getBytes(),
+                    "retencion " + cuenta, (ok, detalle) -> {
+                        if (!ok) utils.Log(logfile, "[MenuDeLiquidacion]imprimirLabelRetencion(): " + detalle);
+                    });
 
         } catch (Exception e) {
             yaimprimioRetiene = false;
@@ -2783,6 +2868,60 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     /** El formato nuevo se activa por la sola presencia de la plantilla en DATOSDEENTRADA. */
     private boolean formatoEbsaActivo() {
         return new File(VariablesGlobales.directorioactual + "/DATOSDEENTRADA/" + RenderFactura.PLANTILLA_CORTA).isFile();
+    }
+
+    /**
+     * Codigo de la analitica de desviacion de la lectura actual (COMENTARIO2); DV3 sin codigo cuenta como 003.
+     * Solo lee lo que dejo la analitica: no la cambia. Las cartas son de consumo alto, y el 001 tambien lo deja
+     * "CONS. CERO DV1" (lecturas iguales): si la etiqueta de la analitica no es "CONS. ALTO ...", no hay carta.
+     */
+    private String codigoAnalitica() {
+        String codigo = infoRegistroSalida.gettablaRegistroSalida_COMENTARIO2().trim();
+        String etiqueta = infoClienteSalida.gettablaClienteSalida_IMPRESORA().trim();
+        if (codigo.isEmpty() && etiqueta.equals("CONS. ALTO DV3")) codigo = "003";
+        if (!etiqueta.startsWith("CONS. ALTO")) return "";
+        return codigo;
+    }
+
+    /** Plantilla de carta que corresponde a la analitica de la lectura actual; null si ninguna instalada la pide. */
+    private String plantillaCartaAnalitica() {
+        try {
+            return new RenderFactura(new File(VariablesGlobales.directorioactual + "/DATOSDEENTRADA"),
+                    new File(VariablesGlobales.directorioactual + "/LBLS")).plantillaCarta(codigoAnalitica());
+        } catch (Throwable e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]plantillaCartaAnalitica(); " + e);
+            return null;
+        }
+    }
+
+    /**
+     * Escribe LBLS/<cuenta>_<anio>_<mes>_DESV.LOG (o _VISITA) con la plantilla de carta que pide la analitica
+     * y lo devuelve; null si no aplica ninguna o algo falla (la causa queda en LOGEVENTOS.LOG).
+     */
+    private File generarCartaConPlantilla() {
+        String codigo = codigoAnalitica();
+        try {
+            AdaptadorMovil adaptador = new AdaptadorMovil(
+                    infoClienteEntrada, infoClienteSalida, infoMedidorEntrada, infoRegistroEntrada,
+                    infoRegistroSalida, infoCobrosLiquidados, descripcionConcepto, municipio, null);
+            DatosFactura datos = adaptador.leer(descripcionTipoLectura(), "");
+            datos.analitica = codigo; // el que disparo la entrega, aunque el adaptador relea el registro
+            RenderFactura render = new RenderFactura(
+                    new File(VariablesGlobales.directorioactual + "/DATOSDEENTRADA"),
+                    new File(VariablesGlobales.directorioactual + "/LBLS"));
+            RenderFactura.Salida salida = render.generarCarta(datos, AjustesImpresora.leer(
+                    new File(VariablesGlobales.directorioactual + "/" + AjustesImpresora.ARCHIVO)));
+            if (salida == null) return null;
+            if (!salida.faltantes.isEmpty()) {
+                utils.Log(logfile, "[MenuDeLiquidacion]generarCartaConPlantilla(); cuenta " + datos.cuenta
+                        + " " + salida.plantilla + " claves sin dato: " + salida.faltantes);
+            }
+            escribeResumenTiempo("Carta " + salida.plantilla + " analitica " + codigo + "|" + VariablesGlobales.registroactual);
+            return salida.archivo;
+        } catch (Throwable e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]generarCartaConPlantilla(); analitica " + codigo + " " + e);
+            return null;
+        }
     }
 
     /**
@@ -2804,8 +2943,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         infoClienteEntrada, infoClienteSalida, infoMedidorEntrada, infoRegistroEntrada,
                         infoRegistroSalida, infoCobrosLiquidados, descripcionConcepto, municipio, mensajes);
 
-                String version = "Version 26.01.14.A-11 Lect.1" + infoClienteSalida.gettablaClienteSalida_LECTOR().trim()
-                        + " Cont.APCSoluciones - " + (EsImpresora521 == 1 ? "ZQ-521" : "RW-420");
+                String version = VariablesGlobales.versionApp + " Lect.1" + infoClienteSalida.gettablaClienteSalida_LECTOR().trim()
+                        + " Cont.ATI - " + (EsImpresora521 == 1 ? "ZQ-521" : "RW-420");
 
                 DatosFactura datos = adaptador.leer(descripcionTipoLectura(), version);
                 if (!datos.avisos.isEmpty()) {
@@ -2840,8 +2979,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             } finally {
                 if (mensajes != null) mensajes.Cerrar_TablaMensajes();
             }
-        } catch (Exception e) {
-            utils.Log(logfile, "[MenuDeLiquidacion]generarFacturaConPlantilla(); " + e.getMessage());
+        } catch (Throwable e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]generarFacturaConPlantilla(); " + e);
             return 0;
         }
     }
@@ -2852,7 +2991,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
      */
     private String descripcionTipoLectura() {
         String causa = infoRegistroSalida.gettablaRegistroSalida_CAUSADENOLECTURA().trim();
-        if (causa.isEmpty() || causa.equals("0")) return "Toma Exitosa";
+        // 18 = consumo alto DV3 (lo pone la analitica): la factura oficial de EBSA lo imprime como "Toma Exitosa";
+        // el aviso de visita va solo en la carta.
+        if (causa.isEmpty() || causa.equals("0") || causa.equals("18")) return "Toma Exitosa";
         if (anomaliaDeLectura.abrir_AnomaliaDeNoLectura(anomaliaDeLectura.getArchivo_AnomaliaDeNoLectura())) {
             anomaliaDeLectura.buscarbinario_AnomaliaDeNoLectura(causa);
             anomaliaDeLectura.Cerrar_AnomaliaDeNoLectura();
@@ -2863,20 +3004,44 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         return "Causal " + causa;
     }
 
+    // Nombres ya presentes en el indice L<ciclo>...; se lee el archivo una vez por indice y sesion
+    // en lugar de recorrerlo completo en cada factura (crece con la ruta).
+    private final java.util.Set<String> nombresIndiceLbl = new java.util.HashSet<>();
+    private String rutaIndiceLblCargado = null;
+    private long tamanoIndiceLblCargado = -1;
+
     /** Mismo registro en LBLS/L<ciclo><mun><sec><div> que hace procedimientoUnionArchivos(). */
     private void registrarEnIndiceLbl(String nombreLog) throws IOException {
+        // Cada impresión: si el LBL cambió (reimpresión) es otro elemento y el servidor lo reemplaza.
+        encolarArchivoRest(ColaEnvio.LBL, new File(VariablesGlobales.directorioactual + "/LBLS/" + nombreLog));
         File indice = new File(VariablesGlobales.directorioactual + "/LBLS/" + "L" + Ciclo + Municipio + Seccion + Division);
         if (!indice.exists()) indice.createNewFile();
-        BufferedReader r = new BufferedReader(new FileReader(indice));
-        try {
-            String l;
-            while ((l = r.readLine()) != null) {
-                if (l.length() >= 50 && l.substring(0, 50).trim().equals(nombreLog)) return;
+        String ruta = indice.getAbsolutePath();
+        // Se recarga si cambia la ruta o si otro proceso modifico el archivo (el tamano no cuadra).
+        if (!ruta.equals(rutaIndiceLblCargado) || indice.length() != tamanoIndiceLblCargado) {
+            nombresIndiceLbl.clear();
+            BufferedReader r = new BufferedReader(new FileReader(indice));
+            try {
+                String l;
+                while ((l = r.readLine()) != null) {
+                    if (l.length() >= 50) nombresIndiceLbl.add(l.substring(0, 50).trim());
+                }
+            } finally {
+                r.close();
             }
-        } finally {
-            r.close();
+            rutaIndiceLblCargado = ruta;
         }
-        utils.EscribirLinea(indice, String.format("%1$-50s", nombreLog) + ";X\r\n");
+        if (nombresIndiceLbl.contains(nombreLog)) {
+            tamanoIndiceLblCargado = indice.length();
+            return;
+        }
+        if (utils.EscribirLinea(indice, String.format("%1$-50s", nombreLog) + ";X\r\n")) {
+            nombresIndiceLbl.add(nombreLog);
+            tamanoIndiceLblCargado = indice.length();
+        } else {
+            rutaIndiceLblCargado = null; // se relee en la proxima factura y se reintenta
+            utils.Log(logfile, "[MenuDeLiquidacion]registrarEnIndiceLbl(); no se pudo escribir " + nombreLog + " en " + ruta);
+        }
     }
 
     private int procesoImpresionFactura(int dato) {
@@ -2902,7 +3067,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         "\nLect.Tomada  : " + infoRegistroSalida.gettablaRegistroSalida_LECTURATOMADA() +
                         "\nConsumo Calc.: " + (parseStringToDouble(infoRegistroSalida.gettablaRegistroSalida_LECTURATOMADA()) - parseStringToDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Lecturaanterior())) +
                         "\nLiqui.Factura: " + infoClienteSalida.gettablaClienteSalida_VALORFACTURADO() +
-                        "\nVersion App  : " + "2026-01-14-1", "");
+                        "\nVersion App  : " + VariablesGlobales.versionApp, "");
             //    imprimirLabelRetencion();
              //   return (0);
             }//retener factura cuando es rutal y el consumo es exagerado de la siguiente manera
@@ -2968,15 +3133,19 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
     /**
-     * Envia un archivo CPCL tal cual esta en disco, byte a byte, en bloques de 20 renglones con la
-     * misma pausa que enviar_al_puerto(). No depende de numeros de linea ni de juego de caracteres:
-     * el formato con plantilla puede tener cualquier cantidad de lineas y trae el FNC1 (byte 0x86)
-     * del codigo de barras ya embebido en el dato. Reemplaza, solo para ese formato, el envio por
-     * renglones de procedimientoDeImpresionPagina(), que corta las lineas 60 y 61 en la columna 59.
+     * Encola un archivo CPCL tal cual esta en disco (byte a byte, con el FNC1 0x86 embebido) en
+     * {@link ColaImpresion} y retorna sin esperar a la impresora: la pantalla queda libre para la
+     * siguiente cuenta mientras sale el papel. Antes se enviaba en el hilo UI en bloques de 20
+     * renglones con Thread.sleep(50) entre bloques.
+     *
+     * @return true si quedo en cola; false si la impresora no esta conectada o no se pudo leer.
      */
-    private boolean enviarArchivoCpcl(File archivo) throws IOException, InterruptedException {
+    private boolean enviarArchivoCpcl(File archivo) throws IOException {
+        // Con el enlace caido pero la impresora ya asociada en la sesion, se encola igual: la cola
+        // reconecta sola (hasta 4 s) antes de enviar.
         if (VariablesGlobales.btPrintService == null
-                || VariablesGlobales.btPrintService.getState() != btPrintFile.STATE_CONNECTED) {
+                || (VariablesGlobales.btPrintService.getState() != btPrintFile.STATE_CONNECTED
+                && !VariablesGlobales.btPrintService.tieneImpresoraAsociada())) {
             mensajeT("La impresora no esta conectada", msgLargo);
             return false;
         }
@@ -2987,26 +3156,43 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         } finally {
             raf.close();
         }
-        final int renglonesPorBloque = 20;
-        int inicio = 0, renglones = 0;
-        for (int i = 0; i < datos.length; i++) {
-            if (datos[i] == '\n' && ++renglones == renglonesPorBloque) {
-                escribirBloqueImpresora(datos, inicio, i + 1);
-                inicio = i + 1;
-                renglones = 0;
+        final String nombre = archivo.getName();
+        return ColaImpresion.encolar(VariablesGlobales.btPrintService, datos, nombre, (ok, detalle) -> {
+            escribeResumenTiempo("Impresion " + (ok ? "OK " : "FALLO ") + detalle);
+            if (!ok) {
+                utils.Log(logfile, "[MenuDeLiquidacion]enviarArchivoCpcl(); " + detalle);
+                runOnUiThread(() -> preguntarReimpresion(archivo, detalle));
             }
-        }
-        if (inicio < datos.length) {
-            escribirBloqueImpresora(datos, inicio, datos.length);
-        }
-        return true;
+        });
     }
 
-    private void escribirBloqueImpresora(byte[] datos, int desde, int hasta) throws InterruptedException {
-        byte[] bloque = new byte[hasta - desde];
-        System.arraycopy(datos, desde, bloque, 0, bloque.length);
-        VariablesGlobales.btPrintService.write(bloque);
-        Thread.sleep(50);
+    // Archivos con la pregunta de reimpresion abierta: si fallan varios seguidos no se apilan dialogos iguales.
+    private final java.util.Set<String> reimpresionesPreguntadas = new java.util.HashSet<>();
+
+    /**
+     * La impresion fallo (la impresora no respondio o se corto el envio). No se reintenta sola: el tecnico
+     * decide si la vuelve a mandar. "Reimprimir" reenvia el mismo .LOG (la cola reconecta antes de enviar).
+     */
+    private void preguntarReimpresion(final File archivo, String detalle) {
+        if (isFinishing() || !reimpresionesPreguntadas.add(archivo.getAbsolutePath())) return;
+        new AlertDialog.Builder(this)
+                .setTitle("No se pudo imprimir")
+                .setMessage(archivo.getName() + "\n" + detalle + "\n\n¿Desea reimprimir?")
+                .setCancelable(false)
+                .setPositiveButton("Reimprimir", (d, w) -> {
+                    reimpresionesPreguntadas.remove(archivo.getAbsolutePath());
+                    try {
+                        escribeResumenTiempo("Reimpresion por decision del tecnico " + archivo.getName());
+                        enviarArchivoCpcl(archivo);
+                    } catch (IOException e) {
+                        mensajeT("No se pudo leer " + archivo.getName(), msgLargo);
+                    }
+                })
+                .setNegativeButton("No", (d, w) -> {
+                    reimpresionesPreguntadas.remove(archivo.getAbsolutePath());
+                    escribeResumenTiempo("Reimpresion descartada por el tecnico " + archivo.getName());
+                })
+                .show();
     }
 
     private int procedimientoDeImpresionPagina(int dato) {
@@ -3363,6 +3549,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     if (cont == 0) {
                         utils.EscribirLinea(impresiones, String.format("%1$-50s", archivoLog.substring(archivoLog.lastIndexOf("/") + 1, archivoLog.length())) + ";X\r\n");
                     }
+                    encolarArchivoRest(ColaEnvio.LBL, new File(archivoLog));
 
                 } catch (Exception e) {
                     utils.Log(logfile, "[MenuDeLiquidacion]procedimientoUnionArchivos(); " + e.getMessage());
@@ -3388,13 +3575,49 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             mensajeT("Archivo no existe: " + archivoImp + "\n o " + archivoProcesado, msgLargo);
     }
 
-    protected int generarArchivoTextoImpresion() {
+    // Texto del formato anterior (IMPRIMIR.TXT) armado en memoria mientras corre
+    // generarArchivoTextoImpresion(); null fuera de ese metodo (entonces se escribe directo como antes).
+    private StringBuilder bufferImpresion = null;
 
-        String comando;
+    /**
+     * Arma el texto del formato anterior en memoria y lo escribe UNA vez al final, y solo si se va a usar
+     * (sin plantilla EBSA). Antes cada renglon abria/cerraba IMPRIMIR.TXT (~90 veces por factura) aunque
+     * con plantilla el archivo nunca se leia. Los generarTextos* se siguen ejecutando: tienen efectos
+     * sobre el estado de la liquidacion y generarTextosMedidor() puede cancelar la impresion.
+     */
+    protected int generarArchivoTextoImpresion() {
         leerInformacionUsuario(3);
         if (indicadorManual == 1) {
             return 1;
         }
+        bufferImpresion = new StringBuilder(8192);
+        try {
+            return generarArchivoTextoImpresionEnBuffer();
+        } finally {
+            String texto = bufferImpresion.toString();
+            bufferImpresion = null;
+            if (!formatoEbsaActivo()) volcarArchivoImpresion(texto);
+        }
+    }
+
+    private void volcarArchivoImpresion(String texto) {
+        File archivo = new File(VariablesGlobales.directorioactual + "/DatosDeEntrada/imprimir.txt");
+        try {
+            if (archivo.exists()) archivo.delete();
+            RandomAccessFile w = new RandomAccessFile(archivo, "rw");
+            try {
+                w.writeBytes(texto);
+            } finally {
+                w.close();
+            }
+        } catch (IOException e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]volcarArchivoImpresion(); " + e.getMessage());
+        }
+    }
+
+    private int generarArchivoTextoImpresionEnBuffer() {
+
+        String comando;
         variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";generarArchivoTextoImpresion ;" + getPhoneDate() + "-" + getPhoneHour();
         escribeResumenTiempo(variableResumenLiquidacion + " " + " Entra a generarArchivoTextoImpresion()");
 
@@ -4346,6 +4569,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
     private void generarArchivoCabecera(String textoImpresion) {
+        if (bufferImpresion != null) {
+            bufferImpresion.setLength(0);
+            bufferImpresion.append(textoImpresion);
+            return;
+        }
 
         String nombreDeArchivoImpresion = VariablesGlobales.directorioactual + "/DatosDeEntrada/imprimir.txt";
 
@@ -4675,6 +4903,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     private void escribaTextoDeImpresion(String textoImpresion) {
 
         textoImpresion += "\r\n";
+        if (bufferImpresion != null) {
+            bufferImpresion.append(textoImpresion);
+            return;
+        }
 
         String nombreDeArchivoImpresion = VariablesGlobales.directorioactual + "/DATOSDEENTRADA/IMPRIMIR.TXT";
 
@@ -7382,11 +7614,17 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         // lblLectura.setText("");
 
+        if (infoClienteEntrada.gettablaEntradaClientes_Actividad().trim().equals("99")) {
+            imagenChat.setImageResource(R.drawable.chat_msg_si);
+        }else {
+            imagenChat.setImageResource(R.drawable.chat_msg_no);
+        }
 
         temp = infoClienteEntrada.gettablaEntradaClientes_Ruta().trim();
         arma_cuentasGps[3] = temp;
 
-        txtMedidorCuenta.setText("M: " + infoRegistroEntrada.gettablaRegistroDeEntrada_nrocontador().trim() + "|Ind: " + infoRegistroSalida.gettablaRegistroSalida_CONSECUTIVO().trim());
+        // Medidor en grande: es lo que el lector identifica en la calle.
+        txtMedidorCuenta.setText("MED " + infoRegistroEntrada.gettablaRegistroDeEntrada_nrocontador().trim());
 
         tablaResumen.refreshDrawableState();
         llenarListaCliente("DIRECCION", infoClienteEntrada.gettablaEntradaClientes_Direccion().trim());
@@ -7411,13 +7649,18 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         llenarListaCliente("CLASE SERVICIO", infoClienteEntrada.gettablaEntradaClientes_Clasedeservicio());
         llenarListaCliente("SENTIDO RUTA", "[" + mensajepantalla + lblpuntero.getText());
-        if (infoRegistroEntrada.gettablaRegistroDeEntrada_tipoenergia().equals("R")) {
-            lblInfoMedida.setTextColor(Color.rgb(154, 154, 0));
-            lblInfoMedida.setText("RE-ACTIVA");
-        } else {
-            lblInfoMedida.setTextColor(Color.rgb(0, 154, 0));
-            lblInfoMedida.setText("ACTIVA");
+        // Tipo de medida siempre visible en la tarjeta: REACTIVA en rojo, ACTIVA en verde, texto blanco
+        // (antes amarillo oliva 154,154,0, ilegible al sol). lblInfoMedida conserva su uso: lo pueden
+        // reemplazar POSTAL/PROVISIONAL/CORTADO..., por eso el tipo va aparte.
+        boolean reactiva = infoRegistroEntrada.gettablaRegistroDeEntrada_tipoenergia().equals("R");
+        if (txtTipoMedida != null) {
+            txtTipoMedida.setText(reactiva ? "REACTIVA" : "ACTIVA");
+            txtTipoMedida.setBackgroundResource(reactiva ? R.drawable.bg_chip_reactiva : R.drawable.bg_chip_activa);
         }
+        // ACTIVA/REACTIVA ya esta en la tarjeta: lblInfoMedida solo aparece para estados especiales
+        // (POSTAL, PROVISIONAL, INTEGRA., TESTIGO, CORTADO), que se asignan mas abajo.
+        lblInfoMedida.setText("");
+        lblInfoMedida.setVisibility(View.GONE);
 
         if (terminal.trim().equals("354379550180590") || terminal.trim().equals("351007491579959") || terminal.trim().equals("351007492166830")
         || terminal.trim().equals("358767141019390") || terminal.trim().equals("868995078034487")
@@ -7505,6 +7748,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             llenarListaCliente("PROCESO", "Solo Entrega");
         else
             llenarListaCliente("ESTADO PROCESO", "FACTURACION");
+        actualizarDistanciaPredio(); // distancia de ESTA cuenta (antes quedaba la de la anterior hasta mover el GPS)
 
         // txtInformeEscrito.setText("Menu Liquidacion");
 
@@ -7517,6 +7761,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             imagenLiquid_1.setImageResource(R.drawable.imagen_postal);
             lblInfoMedida.setTextColor(Color.rgb(0, 0, 255));
             lblInfoMedida.setText("POSTAL");
+            lblInfoMedida.setVisibility(View.VISIBLE);
 
        // } else if (infoRegistroEntrada.getTablaRegistroDeEntrada_critica1().trim().equals("99") || infoRegistroEntrada.getTablaRegistroDeEntrada_critica1().trim().equals("97")) {
        //     lblInfoMedida.setTextColor(Color.rgb(255, 128, 0));
@@ -7527,19 +7772,23 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             imagenLiquid_1.setImageResource(R.drawable.imagen_contratada);
             lblInfoMedida.setTextColor(Color.rgb(255, 128, 0));
             lblInfoMedida.setText("PROVISIONAL");//DIRECTO
+            lblInfoMedida.setVisibility(View.VISIBLE);
             txtElectura.setText("0");
         } else if (infoClienteEntrada.gettablaEntradaClientes_Clasedeservicio().trim().equals("IC")) {
             imagenLiquid_1.setImageResource(R.drawable.imagen_integrador);
             lblInfoMedida.setTextColor(Color.rgb(255, 0, 128));
             lblInfoMedida.setText("INTEGRA.");
+            lblInfoMedida.setVisibility(View.VISIBLE);
         } else if (infoRegistroEntrada.gettablaRegistroDeEntrada_Tipomedida().trim().equals("CT")) {
             imagenLiquid_1.setImageResource(R.drawable.imagen_testigo);
             lblInfoMedida.setTextColor(Color.rgb(102, 0, 204));
             lblInfoMedida.setText("TESTIGO");
+            lblInfoMedida.setVisibility(View.VISIBLE);
         } else if (infoMedidorEntrada.gettablaMedidorEntrada_idcortado().trim().equals("1")) {
             imagenLiquid_1.setImageResource(R.drawable.imagen_cortado);
             lblInfoMedida.setTextColor(Color.rgb(255, 0, 0));
             lblInfoMedida.setText("CORTADO");
+            lblInfoMedida.setVisibility(View.VISIBLE);
         } else if (infoClienteEntrada.gettablaEntradaClientes_Facturadomiciliada().trim().equals("N")) {
             // no imprime factura
         } else {
@@ -7573,45 +7822,79 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         }
     }
 
+    // Campos que van a la tarjeta del cliente y no como fila del detalle.
+    private static final java.util.Set<String> CAMPOS_TARJETA = new java.util.HashSet<>(java.util.Arrays.asList(
+            "DIRECCION", "NOMBRE", "CUENTA", "MARCA", "SENTIDO RUTA"));
+    // Campos que exigen atencion del lector: fila resaltada.
+    private static final java.util.Set<String> CAMPOS_ALERTA = new java.util.HashSet<>(java.util.Arrays.asList(
+            "ANOMALIA NO LECT", "OBLIGA GPS", "OBLIGA OCR", "COMENTARIO"));
+
+    /**
+     * Agrega una fila Campo/Valor al detalle del cliente. Las filas se reutilizan entre cuentas
+     * (antes se creaban ~19 TableRow y ~38 TextView en cada cambio de cuenta).
+     */
     private void llenarListaCliente(String campo, String valor) {
-
-        TextView txtCampo;
-        TextView txtValor;
-
-        fila = new TableRow(this);
-        fila.setLayoutParams(layoutFila);
-
-        txtCampo = new TextView(this);
-        txtValor = new TextView(this);
-
-        txtCampo.setText(campo);
-        txtCampo.setGravity(Gravity.LEFT);
-        txtCampo.setTextAppearance(this, R.style.etiqueta);
-        txtCampo.setBackgroundResource(R.drawable.tabla_celda);
-        txtCampo.setLayoutParams(layoutCampo);
-
-        txtValor.setText(valor);
-        txtValor.setGravity(Gravity.LEFT);
-        txtValor.setTextAppearance(this, R.style.campo);
-        txtValor.setBackgroundResource(R.drawable.tabla_celda);
-        txtValor.setLayoutParams(layoutValor);
-
-        fila.addView(txtCampo);
-        fila.addView(txtValor);
-        tablaResumen.addView(fila);
+        String v = valor == null ? "" : valor;
+        if (CAMPOS_TARJETA.contains(campo)) {
+            TextView destino;
+            String texto = v;
+            switch (campo) {
+                case "CUENTA":
+                    destino = txtCabCuenta;
+                    texto = "Cta " + v;
+                    break;
+                case "NOMBRE":
+                    destino = txtCabNombre;
+                    break;
+                case "MARCA":
+                    destino = txtCabMarca;
+                    texto = "Marca: " + v;
+                    break;
+                case "SENTIDO RUTA":
+                    destino = txtSentidoRuta;
+                    break;
+                default:
+                    destino = txtCabDireccion;
+            }
+            if (destino != null) {
+                destino.setText(texto);
+                return;
+            }
+        }
+        View fila;
+        if (filasDetalleUsadas < filasDetalle.size()) {
+            fila = filasDetalle.get(filasDetalleUsadas);
+        } else {
+            fila = getLayoutInflater().inflate(R.layout.item_dato_cliente, tablaResumen, false);
+            filasDetalle.add(fila);
+            tablaResumen.addView(fila);
+        }
+        filasDetalleUsadas++;
+        ((TextView) fila.findViewById(R.id.txtCampoDato)).setText(campo);
+        ((TextView) fila.findViewById(R.id.txtValorDato)).setText(v);
+        // Valor vacio con alerta (p.ej. sin comentario) no se resalta.
+        boolean alerta = CAMPOS_ALERTA.contains(campo) && !v.trim().isEmpty();
+        fila.setBackgroundResource(alerta ? R.drawable.bg_fila_alerta : R.drawable.bg_fila_dato);
+        fila.setVisibility(View.VISIBLE);
     }
 
     private void borrarListaInformacionCliente() {
-        if (tablaResumen != null) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    tablaResumen.removeAllViews();
-                }
-            });
-        } else {
+        if (tablaResumen == null) {
             Log.e("borrarLista", "tablaResumen es null -- revisar donde se inicializa");
+            return;
         }
+        Runnable limpiar = () -> {
+            for (View f : filasDetalle) f.setVisibility(View.GONE);
+            if (scroll != null) scroll.scrollTo(0, 0); // cada cuenta arranca arriba
+            filasDetalleUsadas = 0;
+            if (txtCabCuenta != null) txtCabCuenta.setText("");
+            if (txtCabNombre != null) txtCabNombre.setText("");
+            if (txtCabDireccion != null) txtCabDireccion.setText("");
+            if (txtCabMarca != null) txtCabMarca.setText("");
+            if (txtSentidoRuta != null) txtSentidoRuta.setText("");
+        };
+        // Igual que antes: si ya estamos en el hilo UI se ejecuta en el acto.
+        runOnUiThread(limpiar);
     }
 
     private int leerInformacionUsuario(int tipo) {
@@ -8090,12 +8373,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 builder2.setTitle("ALERTA EVALUAR ENVIOS");
                 builder2.setMessage("DESEA EVALUAR SI TODAS SUS LECTURAS FUERON ENVIADAS? ");
 
-                builder2.setIcon(R.drawable.ic_launcher1);
+                builder2.setIcon(R.drawable.ic_simfa_logo);
 
                 builder2.setPositiveButton("Si", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                         myThread.interrupt();
+                        ColaImpresion.esperarVacia(3000); // no cortar una factura en curso (< 5 s de ANR)
                         VariablesGlobales.btPrintService.stop();
                         mensajeAdm(MenuDeLiquidacion.this); // No enviados
                         metodo = "ValidarNoEnviados";
@@ -8176,7 +8460,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 //                builder3.setTitle("ALERTA ENVIO REGISTROS");
 //                builder3.setMessage("DESEA REALIZAR EL ENVIO DE LOS REGISTROS? ");
 //
-//                builder3.setIcon(R.drawable.ic_launcher1);
+//                builder3.setIcon(R.drawable.ic_simfa_logo);
 //
 //                builder3.setPositiveButton("Si", new DialogInterface.OnClickListener() {
 //                    public void onClick(DialogInterface dialog, int which) {
@@ -8541,7 +8825,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 //                builder2.setTitle("ALERTA EVALUAR ENVIOS");
 //                builder2.setMessage("DESEA EVALUAR SI TODAS SUS LECTURAS FUERON ENVIADAS? ");
 //
-//                builder2.setIcon(R.drawable.ic_launcher1);
+//                builder2.setIcon(R.drawable.ic_simfa_logo);
 //
 //                builder2.setPositiveButton("Si", new DialogInterface.OnClickListener() {
 //                    public void onClick(DialogInterface dialog, int which) {
@@ -8663,18 +8947,21 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             if (!fileName.exists()) {
                 fileName.createNewFile();
             }
-            // Log.e("error3", "ruta file " + fileName.getAbsolutePath());
-            infoRegistroSalida.Cerrar_TablaRegistroSalida();
-            infoRegistroSalida.setArchivo_TablaRegistroSalida(fileName.getAbsolutePath());
-            infoRegistroSalida.abrir_TablaRegistroSalida(infoRegistroSalida.getArchivo_TablaRegistroSalida());
-            int totalRegistros = infoRegistroSalida.getTotal_TablaRegistroSalida() + 1;
+            // Se agrega el registro al respaldo sin cerrar/reabrir REGISTRO.SDA: antes se cerraba, se abria el
+            // respaldo indexandolo entero, se escribia y se reabria REGISTRO.SDA indexandolo otra vez.
             variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";GuardarBackup;" + getPhoneDate() + "-" + getPhoneHour();
-            escribeResumenTiempo(variableResumenLiquidacion + " " + "GuardarBackup: Posicion Actual|" + VariablesGlobales.registroactual + " | totalregistros: " + totalRegistros);
-            infoRegistroSalida.escribir_TablaRegistroSalida(totalRegistros);
-            infoRegistroSalida.Cerrar_TablaRegistroSalida();
+            escribeResumenTiempo(variableResumenLiquidacion + " " + "GuardarBackup: Posicion Actual|" + VariablesGlobales.registroactual);
+            if (!infoRegistroSalida.anexarCopia_TablaRegistroSalida(fileName)) {
+                utils.Log(logfile, "[MenuDeLiquidacion]GuardarBackup: no se pudo anexar a " + fileName.getAbsolutePath());
+            }
 
-            infoRegistroSalida.setArchivo_TablaRegistroSalida(VariablesGlobales.directorioactual + "/DATOSDESALIDA/REGISTRO.SDA");
-            infoRegistroSalida.abrir_TablaRegistroSalida(infoRegistroSalida.getArchivo_TablaRegistroSalida());
+            // Mismo estado final que antes: REGISTRO.SDA abierto.
+            String registroSda = VariablesGlobales.directorioactual + "/DATOSDESALIDA/REGISTRO.SDA";
+            if (!infoRegistroSalida.estaAbierto_TablaRegistroSalida()
+                    || !registroSda.equals(infoRegistroSalida.getArchivo_TablaRegistroSalida())) {
+                infoRegistroSalida.setArchivo_TablaRegistroSalida(registroSda);
+                infoRegistroSalida.abrir_TablaRegistroSalida(registroSda);
+            }
         } catch (Exception ex) {
             // Log.e("error3", "error file " + ex.getMessage());
             utils.Log(logfile, "[MenuDeLiquidacion]GuardarBackup: " + ex.getMessage());
@@ -9236,7 +9523,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         builder.setTitle("Alerta de Liquidacion Carga Instalada");
         builder.setMessage("Desea Reprocesar el Cliente?");
 
-        builder.setIcon(R.drawable.ic_launcher1);
+        builder.setIcon(R.drawable.ic_simfa_logo);
 
         builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
@@ -9471,7 +9758,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 archivo1.delete();
             }
 
-            envioHilos_CertPostal_Censo_Aforos_Novedades(true, true, true, true, true); //Se hace envio de  "novedades", "aforos", "censo" "certificado",
+            // EBSA no usa novedades ni aforos (la captura de novedades esta comentada): no se arman ni se envian.
+            envioHilos_CertPostal_Censo_Aforos_Novedades(false, false, true, true, true); //Se hace envio de "censo" "certificado",
 
         } catch (Exception e) {
             mensajeT("Problema cerrando Formulario de Lecturas", msgMedio);
@@ -9586,7 +9874,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 builder.setMessage("Ya termino de realizar\n la Facturacion? " + VariablesGlobales.totalprediosleidos + " == "
                         + infoClienteEntrada.getTotal_TablaEntradaClientes());
 
-                builder.setIcon(R.drawable.ic_launcher1);
+                builder.setIcon(R.drawable.ic_simfa_logo);
 
                 builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -9675,13 +9963,22 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             VariablesGlobales.datodebusqueda = "";
 
             try {
-                //Ax: Abre el modulo y se identifica con el ID (ANOMALIA_REQUEST_CODE), que mas adelante se recupera valor en 'onActivityResult' para procesar la anomalia
-                Intent intent = new Intent(MenuDeLiquidacion.this, ModuloDeAnomalias.class);
-                intent.putExtra("Algo", "");
-                startActivityForResult(intent, ANOMALIA_REQUEST_CODE);
+                // Dialogo sobre la misma pantalla (antes: Activity ModuloDeAnomalias + onActivityResult 6676).
+                DialogoCausas.mostrar(this, VariablesGlobales.directorioactual + "/DATOSDEENTRADA/CAUSA_NL.TXT",
+                        new DialogoCausas.Callback() {
+                            @Override
+                            public void alElegir(String snumero) {
+                                aplicarCausaElegida(snumero);
+                            }
+
+                            @Override
+                            public void alCancelar() {
+                                medidorCero = false; // igual que al volver de ModuloDeAnomalias sin elegir
+                            }
+                        });
 
             } catch (Exception e) {
-                mensajeT("Error al iniciar actividad de Anomalias" + e.getMessage(), msgLargo);
+                mensajeT("Error al abrir las causas de no lectura " + e.getMessage(), msgLargo);
                 //  Toast.makeText(getApplicationContext(), "Error al iniciar actividad de Anomalias" + e.getMessage(), Toast.LENGTH_LONG).show();
             }
 
@@ -9711,6 +10008,39 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
     //Ax...
+    /**
+     * Mismo tratamiento que tenia el retorno de ModuloDeAnomalias (onActivityResult 6676): valida el codigo
+     * contra CAUSA_NL.TXT dejando cargado anomaliaDeLectura (ingresarAnomaliaNoLectura lo usa sin volver a
+     * buscar) y procesa. La confirmacion "Acepta Anomalia seleccionada?" ya la hizo el dialogo con
+     * Aceptar / segundo toque, por eso no se pregunta otra vez.
+     */
+    private void aplicarCausaElegida(String snumero) {
+        medidorCero = false;
+        causal = snumero == null ? "" : snumero;
+        if (anomaliaDeLectura.abrir_AnomaliaDeNoLectura(anomaliaDeLectura.getArchivo_AnomaliaDeNoLectura())) {
+            anomaliaDeLectura.buscarbinario_AnomaliaDeNoLectura(causal);
+            anomaliaDeLectura.Cerrar_AnomaliaDeNoLectura();
+        }
+        if (anomaliaDeLectura.getEncontro_AnomaliaDeNoLectura() == 0) {
+            mensajeT("Anomalia no existe en la Tabla\n" + causal.trim(), msgCorto);
+            causal = "";
+            return;
+        }
+        // Se usa el codigo tal como esta en CAUSA_NL.TXT (3 posiciones, relleno con espacios): es el mismo
+        // valor que devolvia la lista de ModuloDeAnomalias y el que procesarAnomaliaSeleccionada recorta.
+        causal = String.format("%-3s", anomaliaDeLectura.getanomaliaDeNoLectura_CODIGO());
+        escribeResumenTiempo("Causa " + causal.trim() + " " + anomaliaDeLectura.getanomaliaDeNoLectura_DESCRIPCION().trim()
+                + "|" + VariablesGlobales.registroactual);
+        // Las causas 9 y 15 conservan la confirmacion explicita que pedia ModuloDeAnomalias.
+        String codigo = AnomaliaDeNoLectura.normalizarCodigo(causal);
+        if (codigo.equals("9") || codigo.equals("15")) {
+            MostrarAlertDialog("Causas no lectura", "Acepta Anomalia seleccionada?\n" + causal.trim() + " "
+                    + anomaliaDeLectura.getanomaliaDeNoLectura_DESCRIPCION().trim(), "ProcesarAnomalias");
+            return;
+        }
+        ProcesarAnomalias();
+    }
+
     public void ProcesarAnomalias() {
         abrirArchivosDeFacturacion();
         procesarAnomaliaSeleccionada(causal);
@@ -9725,7 +10055,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         builder.setTitle(titulo);
         builder.setMessage(mensaje);
-        builder.setIcon(R.drawable.ic_launcher1);
+        builder.setIcon(R.drawable.ic_simfa_logo);
 
         builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
 
@@ -9736,6 +10066,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 switch (NombreMetodo) { //Esto es para reusar este metodo 'MostrarAlertDialog' con mas llamados en 'NombreMetodo'
                     case "ProcesarAnomalias":
                         ProcesarAnomalias();
+                        break;
+
+                    case "ProcesarCuentaDirecta": // [SI] liquidar medida: lo mismo que hacia el retorno de AlertaCuentaD
+                        banderaCuentaContratada = 1;
+                        abrirArchivosDeFacturacion();
+                        procesarLectura(1, 0, lecturaT, "XY");
+                        banderaCuentaContratada = 0;
                         break;
 
                     case "ProcesarLectura":
@@ -9783,6 +10120,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     case "liquidacionautomatica":
                         MODO = "AUTO";
                         myThread.interrupt();
+                        ColaImpresion.esperarVacia(3000); // no cortar una factura en curso (< 5 s de ANR)
                         VariablesGlobales.btPrintService.stop();
                         msgAdmon = String.format("%-42s", "LIQUIDACION AUTOMATICA");
                         mensajeAdm(MenuDeLiquidacion.this);
@@ -9854,6 +10192,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     case "ProcesarAnomalias":
                         causal = "";
                         break;
+                    case "ProcesarCuentaDirecta": // [NO]: no liquida; la novedad se registra desde el menu
+                        activaLectorBarras = true;
+                        cerrarArchivosFacturacion();
+                        break;
                     case "ProcesarLectura":
                         activaLectorBarras = true;
                         cerrarArchivosFacturacion();
@@ -9924,6 +10266,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 switch (NombreMetodo) {
                     case "ProcesarAnomalias":
                         causal = "";
+                        break;
+                    case "ProcesarCuentaDirecta": // [NO]: no liquida; la novedad se registra desde el menu
+                        activaLectorBarras = true;
+                        cerrarArchivosFacturacion();
                         break;
                     case "ProcesarLectura":
                         activaLectorBarras = true;
@@ -10476,7 +10822,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             builder.setMessage("Ya termino de realizar\n la Facturacion? " + VariablesGlobales.totalprediosleidos + " == "
                     + infoClienteEntrada.getTotal_TablaEntradaClientes());
 
-            builder.setIcon(R.drawable.ic_launcher1);
+            builder.setIcon(R.drawable.ic_simfa_logo);
 
             builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
 
@@ -10617,21 +10963,16 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                             if (indicadorManual == 0) //nuevo para cuando se le da automatico si esta en 1
                             {
                                 lecturaT = "0"; //txtElectura.getText().toString().trim();
-                                Intent inte = new Intent();
-
-
+                                // Dialogo en la misma ventana (antes Activity AlertaCuentaD + onActivityResult 6685):
+                                // no se sale de la liquidacion ni se pierden apuntadores.
                                     if (infoMedidorEntrada.gettablaMedidorEntrada_idcortado().trim().equals("1")) {
                                         //  alertasCuentasD("MEDIDOR RETIRADO\n" + "[SI] LIQUIDAR MEDIDA\n[NO]APLICAR NOVEDAD?");
-                                        inte.putExtra("mensaje", "MEDIDOR RETIRADO\n" + "[SI] LIQUIDAR MEDIDA\n[NO]APLICAR NOVEDAD?");
-                                        inte.setClass(this, AlertaCuentaD.class);
-                                        startActivityForResult(inte, ALERTACUENTADIRECTA_REQUEST_CODE);
+                                        MostrarAlertDialog("ALERTA DE RETIRADOS", "MEDIDOR RETIRADO\n" + "[SI] LIQUIDAR MEDIDA\n[NO] APLICAR NOVEDAD?", "ProcesarCuentaDirecta");
                                         // MostrarAlertDialog("ALERTA DE RETIRASOS", "MEDIDOR RETIRADO\n" + "[SI] LIQUIDAR MEDIDA\n[NO]APLICAR NOVEDAD?", "procesarLectura2");
                                         // RespuestaPreguntaPro = MessageBox.Show("MEDIDOR RETIRADO\n" + "[SI] LIQUIDAR MEDIDA\n[NO]APLICAR NOVEDAD?", "ALERTA DE RETIRASOS", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
                                     } else {
                                         // alertasCuentasD("CARGA DIRECTA\n" + "[SI] LIQUIDAR MEDIDA \n \n[NO] PROCESAR NOVEDAD");
-                                        inte.putExtra("mensaje", "CARGA DIRECTA\n" + "[SI] LIQUIDAR MEDIDA \n \n[NO] PROCESAR NOVEDAD");
-                                        inte.setClass(this, AlertaCuentaD.class);
-                                        startActivityForResult(inte, ALERTACUENTADIRECTA_REQUEST_CODE);
+                                        MostrarAlertDialog("ALERTA DE CTA. DIRECTAS", "CARGA DIRECTA\n" + "[SI] LIQUIDAR MEDIDA\n[NO] PROCESAR NOVEDAD", "ProcesarCuentaDirecta");
                                     }
                                     variables.estado = "3";
 
@@ -11611,18 +11952,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             guardarEnvioGPRSNuevo(1);
             escribeResumenTiempo(variableResumenLiquidacion + " " + " Fin de guardarEnvioGPRSNuevo()");
 
-            if (indicadorManual == 0) {// proceso especial para mover el archivo de archivo de cobros
-                String nombreArchivoCobro = VariablesGlobales.directorioactual + "/DATOSDESALIDA/CO_COBRO.SDA";
-                String nombreArchivoCobH = VariablesGlobales.directorioactual + "/DATOSDESALIDA/CO_COBROHILOS.SDA";
-
-                File archivoCobH = new File(nombreArchivoCobH);
-
-                if (procesandoenvioenHilos == 0) {
-                    if (archivoCobH.exists())
-                        archivoCobH.delete();
-
-                    VariablesGlobales.copyFile(nombreArchivoCobro, nombreArchivoCobH, false);
-                }
+            if (indicadorManual == 0) {
+                // Antes: copia completa de CO_COBRO.SDA (5-17 MB) a CO_COBROHILOS.SDA en cada factura, en el
+                // hilo UI. El hilo de envio ahora lee CO_COBRO.SDA en solo lectura (EnviarAlServidorFacturacion).
                 variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";PROCESAR LECTURA-3 ;" + getPhoneDate() + "-" + getPhoneHour();
                 escribeResumenTiempo(variableResumenLiquidacion + " " + " Entra a envioFacturacionHilos()");
                 envioFacturacionHilos();
@@ -11679,7 +12011,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
 
             if ((infoRegistroSalida.gettablaRegistroSalida_COMENTARIO2().equals("003")
-                    || infoClienteSalida.gettablaClienteSalida_IMPRESORA().trim().equals("CONS. ALTO DV3")) && indicadorManual == 0) {
+                    || infoClienteSalida.gettablaClienteSalida_IMPRESORA().trim().equals("CONS. ALTO DV3")
+                    || plantillaCartaAnalitica() != null) && indicadorManual == 0) {
                 entrega_carta = 1;
                 variableResumenLiquidacion = "Entra a entregar carta por" + infoRegistroSalida.gettablaRegistroSalida_COMENTARIO2() + "||" + infoClienteSalida.gettablaClienteSalida_IMPRESORA().trim();
                 escribeResumenTiempo(variableResumenLiquidacion);
@@ -11893,6 +12226,15 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
     private void guardarEnvioGPRS(int i) {
+        colectorLiquidacion.descartar();
+        try {
+            guardarEnvioGPRSRegistradores();
+        } finally {
+            encolarLiquidacion();
+        }
+    }
+
+    private void guardarEnvioGPRSRegistradores() {
 
         if (!nroContador1.trim().equals("")) {
 
@@ -11928,6 +12270,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
     private void guardarEnvioGPRSNuevo(int procedimiento) {
+        colectorLiquidacion.descartar();
         try {
             if (!nroContador1.trim().equals("")) {
                 guardarDatosAEnviarNuevo(nroContador1, idContador1, lecturaTomada1, causadenolectura1,
@@ -11957,7 +12300,69 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         } catch (Exception ex) {
             Log.e("ERROR", "[MenuDeLiquidacion] guardarEnvioGPRSNuevo(): " + ex);
 
+        } finally {
+            encolarLiquidacion();
         }
+    }
+
+    /**
+     * API v1: encola como JSON las líneas que se acaban de escribir en ENVIOSGPRS.SDA para esta cuenta (con
+     * sus conceptos de CO_COBRO) y despierta el envío. Se encola aunque no haya señal: la cola es persistente.
+     * En modo SOAP no hace nada (el envío sigue por envioFacturacionHilos).
+     */
+    private void encolarLiquidacion() {
+        if (colectorLiquidacion.vacio()) return;
+        if (!ConfigSync.modoRest(this)) {
+            colectorLiquidacion.descartar();
+            return;
+        }
+        try {
+            List<String> avisos = new ArrayList<>();
+            int n = colectorLiquidacion.encolar(ColaEnvioSqlite.de(this),
+                    new LectorCoCobro(new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/CO_COBRO.SDA")),
+                    !"L".equals(variables.tipoDeRuta), avisos);
+            for (String a : avisos) utils.Log(logfile, "[MenuDeLiquidacion]encolarLiquidacion(); " + a);
+            escribeResumenTiempo(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";encolarLiquidacion;" + n + " items");
+        } catch (Exception ex) {
+            // La línea ya está en ENVIOSGPRS.SDA: se recupera con la carga de planos de respaldo.
+            colectorLiquidacion.descartar();
+            utils.Log(logfile, "[MenuDeLiquidacion]encolarLiquidacion(); no se encoló la cuenta "
+                    + infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + " -> " + ex);
+        }
+    }
+
+    /** Arranca SincronizacionService si la terminal envía por API v1 o si quedó algo en la cola. */
+    private void iniciarSincronizacion() {
+        try {
+            ConfigSync cfg = new ConfigSync(this);
+            if (getParamsWs() && cadenaURLapi != null && !cadenaURLapi.isEmpty()) {
+                cfg.configurar(cadenaURLapi, serialPDA, VariablesGlobales.versionApp);
+            }
+            ColaEnvioSqlite cola = ColaEnvioSqlite.de(this);
+            // Fotos y LBL rechazados se reintentan una vez por apertura (pudo ser un ajuste del servidor ya corregido).
+            cola.reintentarErrores(ColaEnvio.FOTO);
+            cola.reintentarErrores(ColaEnvio.LBL);
+            if (cfg.modoRest() || cola.proximoIntento() >= 0) {
+                SincronizacionService.solicitar(this);
+            }
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion] iniciarSincronizacion -> " + e);
+        }
+    }
+
+    /** API v1: encola una foto o un LBL ya terminados (el envío lo hace SincronizacionService). */
+    private boolean encolarArchivoRest(String tipo, File archivo) {
+        if (!ConfigSync.modoRest(this)) return false;
+        try {
+            boolean ok = ArchivoParaEnvio.encolar(ColaEnvioSqlite.de(this), tipo, archivo,
+                    infoClienteEntrada.gettablaEntradaClientes_anio(), infoClienteEntrada.gettablaEntradaClientes_mes(),
+                    Ciclo, Municipio + Seccion + Division);
+            if (!ok) utils.Log(logfile, "[MenuDeLiquidacion]encolarArchivoRest(); no encolado " + tipo + " " + archivo);
+            SincronizacionService.solicitar(this);
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]encolarArchivoRest(); " + tipo + " " + archivo + " -> " + e);
+        }
+        return true;
     }
 
     private void guardarDatosAEnviarNuevo(String NroContador, String IdContador, String
@@ -12056,8 +12461,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                 misenvios.setEnvioGPS_comentario(temp1);
 
-                misenvios.setEnvioGPS_desccomentario("Version 26.01.14.1");//"se cambia el24.11.29.1 29 del 22 Con Comentario";variables.datodebusqueda
-                misenvios.setEnvioGPS_MARCALEIDO("Vers260114.1");//ultimaMARCALEIDO.trim()
+                //misenvios.setEnvioGPS_desccomentario("Version 26.01.14.1");//"se cambia el24.11.29.1 29 del 22 Con Comentario";variables.datodebusqueda
+                misenvios.setEnvioGPS_desccomentario(VariablesGlobales.versionApp);
+                //misenvios.setEnvioGPS_MARCALEIDO("Vers260114.1");//ultimaMARCALEIDO.trim()
+                // MARCALEIDO mide 12: "Ver0.0.1-261013" (15) dejaba la linea de ENVIOGPRS en 583 y se rechazaba
+                // (la lectura no quedaba para envio). Sin el prefijo "Ver" cabe completa: "0.0.1-261013".
+                misenvios.setEnvioGPS_MARCALEIDO(VariablesGlobales.versionApp); // version completa: MARCALEIDO ahora es de 15
 
                 if (!infoRegistroSalida.gettablaRegistroSalida_FECHALECTURA().trim().equals("")) {//Axx: revisar esto!
                     misenvios.setEnvioGPS_fechayhoralectura(
@@ -12290,6 +12699,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                         misenvios.escribir_EnvioGPS(misenvios.total_EnvioGPS + 1);
                         misenvios.total_EnvioGPS++;
+                        colectorLiquidacion.agregar(misenvios); // copia ya: misenvios se reutiliza
 
                         misenvios.Cerrar_EnvioGPS();
                         //crea la copia de seguridad del archivo de lecturas
@@ -12900,7 +13310,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         /*metodo = "AvanzarLecturas";
                         TaskHelper.execute(new AsyncCallWS(), metodo);*/
 
-                        EnviarFotos();
+                        if (!encolarArchivoRest(ColaEnvio.FOTO, nombrefotoFile)) EnviarFotos();
                     }
 //                    String cadenaFoto = String.format("%11s", idFoto) + ";" + String.format("%9s", cuentaFoto) + ";" + String.format("%1$-50s", nombrefoto.substring(nombrefoto.lastIndexOf("/") + 1, nombrefoto.length())) + ";\r\n";
 //                    if (!utils2.leerArchivoFotos(foto, nombrefoto.substring(nombrefoto.lastIndexOf("/") + 1, nombrefoto.length()))) {
@@ -12988,6 +13398,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     //----------------------------------------------------------------------------------------------------------------PROCESO DEENVIODEFOTOS NUEVO
     //revisa el archivo F, por los no enviados y envia de a 50
     public void EnviarFotos() {
+        if (ConfigSync.modoRest(this)) { // API v1: las fotos van por la cola (encolarArchivoRest)
+            SincronizacionService.solicitar(this);
+            return;
+        }
         try {
             String respuesta;
             int cantFotos = 20;
@@ -14797,23 +15211,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 cerrarArchivosFacturacion();
             }
         } else if (requestCode == ANOMALIA_REQUEST_CODE) {
+            // Ya no se lanza ModuloDeAnomalias; se conserva por si otra pantalla devolviera este codigo.
             medidorCero = false;
-            if (resultCode == RESULT_OK) {
-
-                causal = data.getStringExtra("snumero"); //Recupera el numero de anomalia
-
-                if (anomaliaDeLectura.abrir_AnomaliaDeNoLectura(anomaliaDeLectura.getArchivo_AnomaliaDeNoLectura())) {
-                    anomaliaDeLectura.buscarbinario_AnomaliaDeNoLectura(causal);
-                    anomaliaDeLectura.Cerrar_AnomaliaDeNoLectura();
-                }
-                if (anomaliaDeLectura.getEncontro_AnomaliaDeNoLectura() == 0) {
-                    causal = "";
-                    mensajeT("Anomalia no existe en la Tabla\n" + causal, msgCorto);
-                    // Toast.makeText(getApplicationContext(), "Anomalia no existe en la Tabla\n" + causal, Toast.LENGTH_LONG).show();
-                } else {
-                    // Ax: se ejecuta el alertdialog asincrono para que el codigo continue y salga de onActivityResult y se pueda ver la vista this
-                    MostrarAlertDialog("Causas no lectura", "Acepta Anomalia seleccionada?\n" + causal + " " + anomaliaDeLectura.getanomaliaDeNoLectura_DESCRIPCION(), "ProcesarAnomalias");
-                }
+            if (resultCode == RESULT_OK && data != null) {
+                aplicarCausaElegida(data.getStringExtra("snumero"));
             }
         } else if (requestCode == BUSQUEDA_REQUEST_CODE) {
 
@@ -14854,7 +15255,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 try {
                     //esto si vamos a registrar si la foto se tomo o no se tomo
                     abrirArchivosDeFacturacion();
-                    ProbarWS();
+                    if (ConfigSync.modoRest(this)) {
+                        SincronizacionService.solicitar(this); // API v1: la cola sale sola; no hace falta probar el SOAP
+                    } else {
+                        ProbarWS();
+                    }
                     //  Log.e("error", "trata envia. ");
 
                 } catch (Exception ex) {
@@ -15068,6 +15473,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     private void Desasociar() {
 
         try { //Ax: esta parte trata de cerrar cualquier conexion, pero puede que no exista tal conexion
+            ColaImpresion.esperarVacia(3000); // no cortar una factura en curso (< 5 s de ANR)
             VariablesGlobales.btPrintService.stop();
         } catch (Exception ex) {
         }
@@ -15133,6 +15539,43 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 //        }
 //    }
 
+    /**
+     * Muestra la distancia entre la ultima posicion GPS y el predio de la cuenta en pantalla (verde dentro del
+     * rango permitido, rojo fuera). Se llama en cada posicion nueva y al cambiar de cuenta, para que nunca
+     * quede la distancia de la cuenta anterior.
+     */
+    private void actualizarDistanciaPredio() {
+        if (txtDistancia == null) return;
+        String cx = infoClienteEntrada.gettablaEntradaClientes_cordenadax();
+        String cy = infoClienteEntrada.gettablaEntradaClientes_cordenaday();
+        cx = cx == null ? "" : cx.trim(); // null si aun no se ha leido ninguna cuenta
+        cy = cy == null ? "" : cy.trim();
+        boolean predioSinCoordenadas = cx.isEmpty() || parseStringToDouble(cx) == 0 || cy.isEmpty() || parseStringToDouble(cy) == 0;
+        double latActual = parseStringToDouble(VariablesGlobales.coorTempLongitud.trim().isEmpty() ? "0" : VariablesGlobales.coorTempLongitud.trim());
+        if (predioSinCoordenadas) {
+            txtDistancia.setText("SIN COORD.");
+            txtDistancia.setBackgroundColor(Color.TRANSPARENT);
+            txtDistancia.setTextColor(Color.DKGRAY);
+            return;
+        }
+        if ((int) latActual == 0) {
+            txtDistancia.setText("SIN GPS");
+            txtDistancia.setBackgroundColor(Color.TRANSPARENT);
+            txtDistancia.setTextColor(Color.DKGRAY);
+            return;
+        }
+        int distancia = (int) variables.evaluarDistanciaAlPredio(parseStringToDouble(VariablesGlobales.coorTempLongitud),
+                parseStringToDouble(VariablesGlobales.coorTempLatitud), parseStringToDouble(cy), parseStringToDouble(cx));
+        txtDistancia.setText(distancia + " - Mts.");
+        if (distancia < parseStringToInteger(VariablesGlobales.getDistanciagps())) {
+            txtDistancia.setBackgroundColor(Color.GREEN);
+            txtDistancia.setTextColor(Color.BLACK);
+        } else {
+            txtDistancia.setBackgroundColor(Color.RED);
+            txtDistancia.setTextColor(Color.WHITE);
+        }
+    }
+
     public void muestraPosicionActual(Location loc) {
 //        Log.e("error", "no toma posicion0 ");
 
@@ -15172,26 +15615,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             if (VariablesGlobales.coorTempLatitud.length() > 16) {
                 VariablesGlobales.coorTempLatitud = VariablesGlobales.coorTempLatitud.substring(0, 15);
             }
-//este seria el punto donde sacar la distancia del predio a la coordenada actual del predio
-            if ((int) loc.getLatitude() != 0 && !infoClienteEntrada.gettablaEntradaClientes_cordenadax().trim().equals("") &&
-                    !infoClienteEntrada.gettablaEntradaClientes_cordenadax().trim().equals("0")
-                    && !infoClienteEntrada.gettablaEntradaClientes_cordenadax().trim().equals("0.00"))
-            {
-
-                int distancia = 999;
-                Log.e("errorDistancia", VariablesGlobales.coorTempLatitud + " data long " + VariablesGlobales.coorTempLongitud+" Coord x"+infoClienteEntrada.gettablaEntradaClientes_cordenadax()+" Coordy"+infoClienteEntrada.gettablaEntradaClientes_cordenaday());
-                distancia = (int) variables.evaluarDistanciaAlPredio(parseStringToDouble(VariablesGlobales.coorTempLongitud), parseStringToDouble(VariablesGlobales.coorTempLatitud), parseStringToDouble(infoClienteEntrada.gettablaEntradaClientes_cordenaday().trim()), parseStringToDouble(infoClienteEntrada.gettablaEntradaClientes_cordenadax().trim()));
-                txtDistancia.setText(Integer.toString(distancia).trim()+ " - Mts.");
-                if (distancia < parseStringToInteger(VariablesGlobales.getDistanciagps()))
-                {
-                    txtDistancia.setBackgroundColor(Color.GREEN);
-                    txtDistancia.setTextColor(Color.BLACK);
-
-                }else {
-                    txtDistancia.setBackgroundColor(Color.RED);
-                    txtDistancia.setTextColor(Color.WHITE);
-                }
+            // Distancia al predio de la cuenta en pantalla. Si la cuenta se valido sin GPS (aun no habia
+            // posicion), se vuelve a validar ahora que la hay: asi el aviso de "fuera de rango" funciona.
+            if (estadoUbicacion == UBI_SIN_GPS && (int) loc.getLatitude() != 0) {
+                estadoUbicacion = UBI_NO_VALIDADO;
+                validarUbicacionContraPredioActual();
             }
+            actualizarDistanciaPredio();
 
 
 
@@ -15488,9 +15918,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             Log.e("error", "colilla36 " + comando);
             //escribaTextoDeImpresion("Version 21.12.17.1-Android Lect. " + infoClienteSalida.gettablaClienteSalida_LECTOR().trim() + " Cont.ElecroRedes");//se cambia a el 22
             if (EsImpresora521 == 1)
-                escribaTextoDeImpresion("Version 26.01.14.A-11 Lect.1" + infoClienteSalida.gettablaClienteSalida_LECTOR().trim() + " Cont.APCSoluciones  - ZQ-521");//ersion 24.11.29.A-11 Lect
+                escribaTextoDeImpresion(VariablesGlobales.versionApp + " Lect.1" + infoClienteSalida.gettablaClienteSalida_LECTOR().trim() + " Cont.ATI  - ZQ-521");//ersion 24.11.29.A-11 Lect
             else
-                escribaTextoDeImpresion("Version 26.01.14.A-11 Lect.1" + infoClienteSalida.gettablaClienteSalida_LECTOR().trim() + " Cont.APCSoluciones  - RW-420");
+                escribaTextoDeImpresion(VariablesGlobales.versionApp + " Lect.1" + infoClienteSalida.gettablaClienteSalida_LECTOR().trim() + " Cont.ATI  - RW-420");
 
         } catch (Exception e) {
             Log.e("error", "colilla " + e.getMessage());
@@ -16030,7 +16460,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             builder.setTitle(titulo);
             builder.setMessage(mensaje);
 
-            builder.setIcon(R.drawable.ic_launcher1);
+            builder.setIcon(R.drawable.ic_simfa_logo);
 
             builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
@@ -16402,6 +16832,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
+            finalizarIndicadorEnvio();
             String msg = "";
 
             switch (metodo) {
@@ -16518,16 +16949,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         cerrarArchivosFacturacion();
 
 
-                        String NombreArchivoCob1 = VariablesGlobales.directorioactual + "/DATOSDESALIDA/CO_COBRO.SDA";
-                        String NombreArchivoCobH = VariablesGlobales.directorioactual + "/DATOSDESALIDA/CO_COBROHILOS.SDA";
-
-                        if (procesandoenvioenHilos == 0) {
-                            File Archivo3 = new File(NombreArchivoCobH);
-                            if (Archivo3.exists())
-                                Archivo3.delete();
-                            //copiar a cobros para el reembio
-                            VariablesGlobales.copyFile(NombreArchivoCob1, NombreArchivoCobH, false);
-                        }
+                        // El reenvio lee CO_COBRO.SDA directamente; ya no hace falta la copia CO_COBROHILOS.SDA.
                         Log.e("INFO", "PROCESO CONCLUIDO CON:\n" + "No Leidas: " + Noleidas + "\n" + "Recuperadas para Enviar: " + LeidasNoenviadas);
                         mensajeOk("PROCESO CONCLUIDO CON:\n" + "No Leidas: " + Noleidas + "\n" + "Recuperadas para Enviar: " + LeidasNoenviadas, "");
                     } else {
@@ -16577,6 +16999,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         @Override
         protected void onPreExecute() {
+            iniciarIndicadorEnvio();
+        }
+
+        @Override
+        protected void onCancelled() {
+            finalizarIndicadorEnvio();
         }
 
         @Override
@@ -17022,38 +17450,23 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
 
+    /** Una sola instancia por proceso: el hilo y el archivo abierto sobreviven a recrear la Activity. */
+    private static final com.gsutil.BitacoraAsincrona bitacoraTiempos = new com.gsutil.BitacoraAsincrona("bitacora-tiempos");
+
+    /**
+     * Linea en DATOSDESALIDA/RESUMENTIEMPO.SDA con marca "yyyy-MM-dd HH:mm:ss.SSS|" (antes sin hora y
+     * abriendo/cerrando el archivo en el hilo UI ~50 veces por factura). Seguro desde cualquier hilo.
+     */
     private void escribeResumenTiempo(String texto) {
-
-        texto += "\r\n";
-        //Date d = new Date();
-        //texto = texto + " " + d;
-        File fileName = new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/RESUMENTIEMPO.SDA");
-
-        try {
-            RandomAccessFile rFile = new RandomAccessFile(fileName, "rw");
-
-            if (!fileName.exists()) {
-                rFile.writeBytes(texto);
-                rFile.close();
-            } else {
-
-                rFile.seek(rFile.length());
-                rFile.writeBytes(texto);
-                rFile.close();
-            }
-
-        } catch (FileNotFoundException e) {
-
-            e.printStackTrace();
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
-        }
+        bitacoraTiempos.escribir(new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/RESUMENTIEMPO.SDA"), texto);
     }
 
 
     public void enviarLbls() {
+        if (ConfigSync.modoRest(this)) { // API v1: los LBL van por la cola (encolarArchivoRest)
+            SincronizacionService.solicitar(this);
+            return;
+        }
         try {
             Log.e("error3", "intenta enviar ");
             String respuesta;
@@ -17482,4 +17895,4 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
 //fin de lo nuevo
-}
+}

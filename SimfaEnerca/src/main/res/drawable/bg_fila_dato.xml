@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fila de la tabla de datos del cliente: un solo fondo por fila (antes cada celda dibujaba su borde). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <solid android:color="#FFFFFFFF" />
+        </shape>
+    </item>
+    <item android:gravity="bottom">
+        <shape>
+            <size android:height="1dp" />
+            <solid android:color="#FFD5DAE8" />
+        </shape>
+    </item>
+</layer-list>

@@ -40,11 +40,28 @@ final class UtilPlanos {
 
     /** Deja constancia en LOGEVENTOS.LOG (y en logcat). Nunca lanza excepciones. */
     static void evento(String tag, String mensaje) {
-        Log.e(tag, mensaje);
+        // Un bloqueo es una escritura fuera de lugar: se anota quién la pidió para encontrarla en el flujo.
+        String m = mensaje.startsWith("[BLOQUEADO") ? mensaje + " | desde " + origen() : mensaje;
+        Log.e(tag, m);
         try {
-            UTILS.EscribirLinea(new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/LOGEVENTOS.LOG"), mensaje);
+            // Con fecha y salto de línea, como el resto de LOGEVENTOS (antes quedaba pegado a la línea siguiente).
+            UTILS.Log(new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/LOGEVENTOS.LOG"), m);
         } catch (Exception e) {
             Log.e(tag, "no se pudo escribir LOGEVENTOS: " + e.getMessage());
         }
+    }
+
+    /** Los primeros métodos de la app (fuera de tablas/) en la pila: quién llamó a la escritura. */
+    static String origen() {
+        StringBuilder sb = new StringBuilder();
+        int n = 0;
+        for (StackTraceElement e : new Throwable().getStackTrace()) {
+            String c = e.getClassName();
+            if (!c.startsWith("com.gselectroCaqueta") || c.startsWith("com.gselectroCaqueta.tablas.")) continue;
+            if (n > 0) sb.append(" < ");
+            sb.append(c.substring(c.lastIndexOf('.') + 1)).append('.').append(e.getMethodName()).append(':').append(e.getLineNumber());
+            if (++n == 5) break;
+        }
+        return n == 0 ? "?" : sb.toString();
     }
 }

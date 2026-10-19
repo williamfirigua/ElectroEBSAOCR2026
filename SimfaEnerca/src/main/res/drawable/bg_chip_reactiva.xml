@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Etiqueta de tipo de medida en la tarjeta del cliente (texto blanco, alto contraste al sol). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#FFD10000" />
+    <corners android:radius="6dp" />
+</shape>

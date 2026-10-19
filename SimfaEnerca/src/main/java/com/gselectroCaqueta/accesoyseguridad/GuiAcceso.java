@@ -82,6 +82,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import com.gselectroCaqueta.sync.ColaEnvioSqlite;
+import com.gselectroCaqueta.sync.ConfigSync;
+import com.gselectroCaqueta.sync.SincronizacionService;
 
 public class GuiAcceso extends AppCompatActivity {
 
@@ -214,6 +217,7 @@ public class GuiAcceso extends AppCompatActivity {
     Context ctx;
     String pathsd = "";
     Thread myThread;
+    TextView txtVersion;
 
     String msg_val = "";
     @Override
@@ -222,27 +226,6 @@ public class GuiAcceso extends AppCompatActivity {
         setContentView(R.layout.activity_gui_acceso);
         ctx = this;
 
-
-        Runnable myRunnableThread = new Reloj();
-        myThread = new Thread(myRunnableThread);
-        myThread.start();
-
-        String externalpath = ctx.getExternalFilesDir(null).getParent();
-        String hardcoding = "/Android/data/";//Ax: todo: cambiar este hardcoding
-
-        if (externalpath.contains(hardcoding)) {
-            externalpath = externalpath.substring(0, externalpath.indexOf(hardcoding));
-        }
-
-
-        VariablesGlobales.directorioactual = externalpath;
-
-        ObtenerDirectorioBackup();
-
-        verificarArchivosAmayuscula();
-
-        logfile = new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/LOGEVENTOS.LOG");
-        logPrint = new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/PRINTER.LOG");
 
         btnIngresar = (Button) findViewById(R.id.btnIngresar);
         btnSalir = (ImageButton) findViewById(R.id.btnSalir);
@@ -254,6 +237,7 @@ public class GuiAcceso extends AppCompatActivity {
         btnBateria = (ImageButton) findViewById(R.id.btnBateria);
         btnInfo = (ImageButton) findViewById(R.id.btnInfo);
 
+        txtVersion= (TextView) findViewById(R.id.txtVerion);
         btnSalir.setEnabled(false);
         btnIngresar.setEnabled(false);
         btnIngresar.setBackgroundTintList(ColorStateList.valueOf(Color.GRAY));
@@ -289,6 +273,32 @@ public class GuiAcceso extends AppCompatActivity {
         }
         txtCodInterno.setText(telephoneSerialNumber);
 
+
+        Runnable myRunnableThread = new Reloj();
+        myThread = new Thread(myRunnableThread);
+        myThread.start();
+
+        String externalpath = ctx.getExternalFilesDir(null).getParent();
+        String hardcoding = "/Android/data/";//Ax: todo: cambiar este hardcoding
+
+        if (externalpath.contains(hardcoding)) {
+            externalpath = externalpath.substring(0, externalpath.indexOf(hardcoding));
+        }
+
+
+        VariablesGlobales.directorioactual = externalpath;
+
+        ObtenerDirectorioBackup();
+
+        verificarArchivosAmayuscula();
+
+        String codeversion = "0.0.1";
+
+        VariablesGlobales.versionApp = "Ver" + codeversion + "-261013"; //Vrs para envio al modulo de liquidacion
+        VariablesGlobales.vrsDerechos = "Octubre 13 2026." + codeversion; //Vrs para mostrar desde el login
+        logfile = new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/LOGEVENTOS.LOG");
+        logPrint = new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/PRINTER.LOG");
+        txtVersion.setText("Versión " + codeversion);
         try {
             PackageInfo pckginfo = getApplicationContext().getPackageManager().getPackageInfo(getApplicationContext().getPackageName(), 0);
             currentVersionCode = Double.parseDouble(pckginfo.versionName);
@@ -303,6 +313,7 @@ public class GuiAcceso extends AppCompatActivity {
         testSD();
         File dir;
         variables.obtenerRutaMemoriaExterna(externalpath);
+
         if (new File(VariablesGlobales.removableStoragePath).isDirectory()) {
             Log.e("error3", "*********si lo es");
         } else {
@@ -386,7 +397,9 @@ public class GuiAcceso extends AppCompatActivity {
                             "\\Cic@@@@@@\\DatosSoporte\\AFOROS.TXT \r\n" +
                             "\\Cic@@@@@@\\DatosSoporte\\IDNOVEDADES.TXT \r\n" +
                             "\\Cic@@@@@@\\DatosSoporte\\FORMATO_CORTA.CPCL \r\n" +
-                            "\\Cic@@@@@@\\DatosSoporte\\FORMATO_LARGA.CPCL";
+                            "\\Cic@@@@@@\\DatosSoporte\\FORMATO_LARGA.CPCL \r\n" +
+                            "\\Cic@@@@@@\\DatosSoporte\\NOTIFICACION_DESVIACION.CPCL \r\n" +
+                            "\\Cic@@@@@@\\DatosSoporte\\NOTIFICACION_VISITA.CPCL";
 
                     utils.WriteLine(file, ruta);
                 }
@@ -679,7 +692,7 @@ public class GuiAcceso extends AppCompatActivity {
         File directorio2 = new File(VariablesGlobales.directorioactual + "/DATOSDEENTRADA");
         String[] lista2 = directorio2.list();
 
-        String[] files = {"LOGEVENTOS.LOG", "PRINTER.LOG", "NOMBRE", "ACUERDOS.TXT", "CATEGORIASINF.TXT", "CAUSAS.TXT", "CENSO.TXT", "ESTADOS.TXT", "NOTIFICACIONES.TXT", "OBSERVA.TXT", "ADMINIST.TXT", "ADMINISTADORDEPDA.TXT", "ENVIOSGPRS.SDA", "LECTURAADMINISTRADA.TXT", "ACTIVID.TXT", "CAUSA_NL.TXT", "CLASE_SE.TXT", "CLIENTE.TXT", "CONVENIO.TXT", "DES_CONC.TXT", "DES_TARI.TXT", "EST_CLIE.TXT", "FECHAACONFIGURAR.TXT", "FESTIVOS.TXT", "GENERAL.TXT", "LECTOR.TXT", "MEDIDOR.TXT", "MUNICIP.TXT", "RANGOS.TXT", "REGISTRO.TXT", "TARIFAS.TXT", "FORMATO_CORTA.CPCL", "FORMATO_LARGA.CPCL"};//Son los archivos ubicados en el path};//Son los archivos ubicados en el path
+        String[] files = {"LOGEVENTOS.LOG", "PRINTER.LOG", "NOMBRE", "ACUERDOS.TXT", "CATEGORIASINF.TXT", "CAUSAS.TXT", "CENSO.TXT", "ESTADOS.TXT", "NOTIFICACIONES.TXT", "OBSERVA.TXT", "ADMINIST.TXT", "ADMINISTADORDEPDA.TXT", "ENVIOSGPRS.SDA", "LECTURAADMINISTRADA.TXT", "ACTIVID.TXT", "CAUSA_NL.TXT", "CLASE_SE.TXT", "CLIENTE.TXT", "CONVENIO.TXT", "DES_CONC.TXT", "DES_TARI.TXT", "EST_CLIE.TXT", "FECHAACONFIGURAR.TXT", "FESTIVOS.TXT", "GENERAL.TXT", "LECTOR.TXT", "MEDIDOR.TXT", "MUNICIP.TXT", "RANGOS.TXT", "REGISTRO.TXT", "TARIFAS.TXT", "FORMATO_CORTA.CPCL", "FORMATO_LARGA.CPCL", "NOTIFICACION_DESVIACION.CPCL", "NOTIFICACION_VISITA.CPCL"};//Son los archivos ubicados en el path};//Son los archivos ubicados en el path
 
         todoMayuscula(lista2, files, directorio2);
 
@@ -1045,6 +1058,7 @@ public class GuiAcceso extends AppCompatActivity {
     private void Desasociar() {
 
         try { //Ax: esta parte trata de cerrar cualquier conexion, pero puede que no exista tal conexion
+            com.gselectroCaqueta.impresion.ColaImpresion.esperarVacia(3000); // no cortar una factura en curso
             VariablesGlobales.btPrintService.stop();
         } catch (Exception ex) {
         }
@@ -1069,6 +1083,7 @@ public class GuiAcceso extends AppCompatActivity {
         if (!VariablesGlobales.prueba_impresora()) { //Prueba de impresora envia un caracter al la impresora y devuelve falso si falla
 
             try { //Ax: esta parte trata de cerrar cualquier conexion, pero puede que no exista tal conexion
+                com.gselectroCaqueta.impresion.ColaImpresion.esperarVacia(3000); // no cortar una factura en curso
                 VariablesGlobales.btPrintService.stop();
                 //setConnectState(btPrintFile.STATE_DISCONNECTED);
             } catch (Exception ex) {
@@ -1463,7 +1478,7 @@ public class GuiAcceso extends AppCompatActivity {
         builder.setTitle(titulo);
         builder.setMessage(mensaje);
 
-        builder.setIcon(R.drawable.ic_launcher1);
+        builder.setIcon(R.drawable.ic_simfa_logo);
 
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
@@ -1504,6 +1519,21 @@ public class GuiAcceso extends AppCompatActivity {
             e.printStackTrace();
         }
         return true;
+    }
+
+    /**
+     * API v1: la clave queda solo en memoria para que SincronizacionService obtenga o renueve el token sin
+     * volver a pedirla; si había pendientes de otra sesión, se despachan ya.
+     */
+    private void recordarSesionSync() {
+        try {
+            ConfigSync.recordarSesion(this, txtCodigo.getText().toString(), txtClave.getText().toString());
+            if (ColaEnvioSqlite.de(this).proximoIntento() >= 0) {
+                SincronizacionService.vaciarCola(this);
+            }
+        } catch (Exception e) {
+            Log.e("GuiAcceso", "recordarSesionSync: " + e);
+        }
     }
 
     private void procesoVerificacionClave() {
@@ -1568,6 +1598,7 @@ public class GuiAcceso extends AppCompatActivity {
     private void ingresoPrincipal() {
 
         variables.setGlobaloperario(txtCodigo.getText().toString());
+        recordarSesionSync();
         NombreOperador = txtNombreUsuario.getText().toString();
         Bundle bundle = new Bundle();
         bundle.putString("codigoUsuario", txtCodigo.getText().toString());
@@ -1605,6 +1636,7 @@ public class GuiAcceso extends AppCompatActivity {
         if (remote.length() == 0)
             return;
         if (VariablesGlobales.btPrintService.getState() == btPrintFile.STATE_CONNECTED) {
+            com.gselectroCaqueta.impresion.ColaImpresion.esperarVacia(3000); // no cortar una factura en curso
             VariablesGlobales.btPrintService.stop();
             //setConnectState(btPrintFile.STATE_DISCONNECTED);
             return;
@@ -1653,6 +1685,7 @@ public class GuiAcceso extends AppCompatActivity {
         }
         // Stop the Bluetooth chat services
         if (VariablesGlobales.btPrintService != null){
+            com.gselectroCaqueta.impresion.ColaImpresion.esperarVacia(3000); // no cortar una factura en curso
             VariablesGlobales.btPrintService.stop();
         }
     }
@@ -1886,7 +1919,7 @@ public class GuiAcceso extends AppCompatActivity {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(titulo);
         builder.setMessage(mensaje);
-        builder.setIcon(R.drawable.ic_launcher1);
+        builder.setIcon(R.drawable.ic_simfa_logo);
         builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {

@@ -1,0 +1,47 @@
+# Reglas de R8 para el release (minifyEnabled true).
+# Criterio: conservar TODO el código propio y lo que se usa por reflexión; R8 solo poda las bibliotecas.
+
+# --- código de la app (actividades, Realm, tablas planas, reflexión de SOAP) ---
+-keep class com.gselectroCaqueta.** { *; }
+-keep class com.gsutil.** { *; }
+
+# --- ksoap2 / kxml2 (SOAP: serialización por reflexión) ---
+-keep class org.ksoap2.** { *; }
+-keep class org.kxml2.** { *; }
+-keep class org.xmlpull.** { *; }
+-dontwarn org.ksoap2.**
+-dontwarn org.kxml2.**
+-dontwarn org.xmlpull.**
+
+# --- jars locales ---
+-keep class net.lingala.zip4j.** { *; }
+-keep class com.scandecode.** { *; }
+-keep class com.google.zxing.** { *; }
+-keep class com.journeyapps.barcodescanner.** { *; }
+-dontwarn net.lingala.zip4j.**
+-dontwarn com.scandecode.**
+
+# --- commons-io 1.3.2 y otras referencias a clases que no existen en Android ---
+-keep class org.apache.commons.io.** { *; }
+-dontwarn org.apache.commons.io.**
+-dontwarn java.awt.**
+-dontwarn javax.**
+-dontwarn org.apache.http.**
+-dontwarn android.net.http.**
+
+# --- okhttp / okio (traen sus reglas; por si acaso) ---
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
+
+# --- Guava (CameraX): anotaciones de compilación ---
+-dontwarn com.google.common.**
+-dontwarn com.google.errorprone.annotations.**
+-dontwarn com.google.j2objc.annotations.**
+-dontwarn org.checkerframework.**
+-dontwarn afu.org.checkerframework.**
+
+# Trazas legibles en LOGEVENTOS/Logcat
+-keepattributes SourceFile,LineNumberTable,*Annotation*,Signature,InnerClasses,EnclosingMethod

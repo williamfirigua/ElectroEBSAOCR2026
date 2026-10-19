@@ -58,10 +58,38 @@ public final class Plantilla {
         this.parametros = parametros;
     }
 
-    public static Plantilla cargar(File archivo) throws IOException {
-        try (InputStream in = new FileInputStream(archivo)) {
-            return cargar(archivo.getName(), in);
+    /** Plantilla ya parseada + la marca del archivo con la que se leyó. */
+    private static final class EntradaCache {
+        final long modificado;
+        final long tamano;
+        final Plantilla plantilla;
+
+        EntradaCache(long modificado, long tamano, Plantilla plantilla) {
+            this.modificado = modificado;
+            this.tamano = tamano;
+            this.plantilla = plantilla;
         }
+    }
+
+    private static final Map<String, EntradaCache> CACHE = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * Carga la plantilla una sola vez por sesión. Se vuelve a leer solo si el archivo cambió
+     * (fecha o tamaño), así una plantilla nueva copiada al equipo se toma sin reiniciar la app.
+     * La instancia es inmutable, por eso se puede compartir entre facturas e hilos.
+     */
+    public static Plantilla cargar(File archivo) throws IOException {
+        String llave = archivo.getAbsolutePath();
+        long modificado = archivo.lastModified();
+        long tamano = archivo.length();
+        EntradaCache e = CACHE.get(llave);
+        if (e != null && e.modificado == modificado && e.tamano == tamano) return e.plantilla;
+        Plantilla p;
+        try (InputStream in = new FileInputStream(archivo)) {
+            p = cargar(archivo.getName(), in);
+        }
+        CACHE.put(llave, new EntradaCache(modificado, tamano, p));
+        return p;
     }
 
     /** La plantilla se lee en UTF-8 (así la guarda el diseñador); la salida se escribe en CP1252. */
@@ -119,9 +147,23 @@ public final class Plantilla {
      * sustituir porque una coordenada puede venir de una clave ({@code {barra.1.y0}}).
      */
     public Resultado renderizar(Map<String, String> contexto, AjustesImpresora ajustes) {
+        return renderizar(contexto, ajustes, parametros.vacias(), false);
+    }
+
+    /**
+     * Mapa para el diseñador: cada texto de la plantilla se imprime como su etiqueta ({@code [11]},
+     * {@code [detalle.3]}) en su posición; coordenadas, barras y códigos se resuelven con el contexto.
+     * Ninguna línea se omite, así el archivo sale en el mismo orden y con las mismas líneas que la
+     * plantilla (sin los comentarios {@code ;@}).
+     */
+    public Resultado renderizarMapa(Map<String, String> contexto, AjustesImpresora ajustes) {
+        return renderizar(contexto, ajustes, Parametros.Vacias.ETIQUETA, true);
+    }
+
+    private Resultado renderizar(Map<String, String> contexto, AjustesImpresora ajustes,
+                                 Parametros.Vacias vacias, boolean todoEtiqueta) {
         StringBuilder salida = new StringBuilder(lineas.size() * 48);
         Set<String> faltantes = new LinkedHashSet<>();
-        boolean omitir = parametros.omitirVacias();
         String faltante = parametros.faltante();
         AjustesImpresora aj = ajustes == null ? AjustesImpresora.ninguno() : ajustes;
 
@@ -131,32 +173,119 @@ public final class Plantilla {
                 salida.append(aj.aplicar(linea)).append("\r\n");
                 continue;
             }
+            boolean texto = esComandoDeTexto(linea);
+            int inicioTexto = texto ? inicioDelTexto(linea) : Integer.MAX_VALUE;
             StringBuffer sb = new StringBuffer(linea.length() + 32);
             boolean algunDato = false;
             do {
                 String clave = m.group(1);
+                boolean enTexto = m.start() >= inicioTexto;
                 String valor = contexto.get(clave);
                 String formateado;
-                if (valor == null) {
+                if (enTexto && todoEtiqueta) {
+                    formateado = etiqueta(clave, formatos(m.group(2)));
+                } else if (valor == null) {
                     faltantes.add(clave);
                     formateado = faltante;
                 } else {
                     formateado = Formatos.aplicar(valor, formatos(m.group(2)));
+                    if (enTexto && vacias == Parametros.Vacias.ETIQUETA && formateado.trim().isEmpty()) {
+                        formateado = etiqueta(clave, formatos(m.group(2)));
+                    }
                 }
                 if (!formateado.trim().isEmpty()) algunDato = true;
                 m.appendReplacement(sb, Matcher.quoteReplacement(formateado));
             } while (m.find());
             m.appendTail(sb);
 
-            if (omitir && !algunDato && esComandoConDato(linea)) continue;
-            salida.append(aj.aplicar(sb.toString())).append("\r\n");
+            if (!algunDato && esComandoConDato(linea)) {
+                // Un B (código de barras) sin dato siempre se omite: la impresora se queda esperando.
+                if (vacias == Parametros.Vacias.OMITIR || !texto) continue;
+            }
+            salida.append(aj.aplicar(alinear(sb.toString()))).append("\r\n");
         }
         return new Resultado(salida.toString(), faltantes);
     }
 
+    /** Etiqueta visible de una clave en el mapa del diseñador: [11], [detalle.3]. */
+    static String etiqueta(String clave) {
+        return "[" + clave + "]";
+    }
+
+    /**
+     * Etiqueta rellenada al ancho de la plantilla ({@code izq:N}/{@code der:N}) para que ocupe lo mismo
+     * que el dato. Nunca se recorta: si la etiqueta es más larga que el campo, se ve completa.
+     */
+    static String etiqueta(String clave, List<String> formatos) {
+        String e = etiqueta(clave);
+        for (String f : formatos) {
+            int dos = f.indexOf(':');
+            if (dos < 0) continue;
+            String nombre = f.substring(0, dos);
+            int ancho;
+            try { ancho = Integer.parseInt(f.substring(dos + 1).trim()); } catch (NumberFormatException ex) { continue; }
+            StringBuilder relleno = new StringBuilder();
+            for (int i = e.length(); i < ancho; i++) relleno.append(' ');
+            if ("izq".equals(nombre)) e = e + relleno;
+            else if ("der".equals(nombre)) e = relleno + e;
+        }
+        return e;
+    }
+
+    private static boolean esComandoDeTexto(String linea) {
+        return tokensAntesDelTexto(linea) > 0;
+    }
+
+    /**
+     * Cuántos tokens van antes del texto: {@code T f s x y texto} → 5;
+     * {@code SCALE-TEXT fuente ancho alto x y texto} → 6. 0 si no es un comando de texto.
+     */
+    private static int tokensAntesDelTexto(String linea) {
+        if (linea.startsWith("T ") || linea.startsWith("VT ") || linea.startsWith("TR ") || linea.startsWith("TEXT ")
+                || linea.startsWith("T90 ") || linea.startsWith("T180 ") || linea.startsWith("T270 ")) return 5;
+        if (linea.startsWith("SCALE-TEXT") || linea.startsWith("VSCALE-TEXT") || linea.startsWith("SCALE-TO-FIT")) return 6;
+        return 0;
+    }
+
+    /** Índice donde empieza el texto (después de las coordenadas). */
+    private static int inicioDelTexto(String linea) {
+        int antes = tokensAntesDelTexto(linea);
+        int tokens = 0, i = 0, n = linea.length();
+        while (i < n && tokens < antes) {
+            while (i < n && linea.charAt(i) == ' ') i++;
+            while (i < n && linea.charAt(i) != ' ') i++;
+            tokens++;
+        }
+        if (i < n && linea.charAt(i) == ' ') i++;   // un solo separador: los espacios del dato se respetan
+        return i;
+    }
+
     private static boolean esComandoConDato(String linea) {
-        return linea.startsWith("T ") || linea.startsWith("B ") || linea.startsWith("VT ")
-                || linea.startsWith("TR ") || linea.startsWith("TEXT ");
+        return tokensAntesDelTexto(linea) > 0 || linea.startsWith("B ") || linea.startsWith("VB ");
+    }
+
+    /**
+     * {@code SCALE-TEXT-DER fuente ancho alto xDerecho y texto}: la x es el borde DERECHO del texto.
+     * {@code SCALE-TEXT-CEN …}: la x es el CENTRO. Se convierten a {@code SCALE-TEXT} midiendo el texto
+     * con {@link FuenteMetricas} (DIN no es monoespaciada, así los valores quedan alineados en columna).
+     * No son comandos CPCL: la impresora nunca los recibe.
+     */
+    static String alinear(String linea) {
+        boolean der = linea.startsWith("SCALE-TEXT-DER ");
+        boolean cen = linea.startsWith("SCALE-TEXT-CEN ");
+        if (!der && !cen) return linea;
+        String[] t = linea.split(" ", 7);
+        if (t.length < 6) return linea;
+        String texto = t.length == 7 ? t[6] : "";
+        try {
+            double anchoPt = Double.parseDouble(t[2]);
+            int x = Integer.parseInt(t[4]);
+            int w = FuenteMetricas.ancho(t[1], anchoPt, texto);
+            int nx = Math.max(0, der ? x - w : x - w / 2);
+            return "SCALE-TEXT " + t[1] + " " + t[2] + " " + t[3] + " " + nx + " " + t[5] + " " + texto;
+        } catch (NumberFormatException e) {
+            return "SCALE-TEXT" + linea.substring(14);
+        }
     }
 
     private static List<String> formatos(String grupo) {

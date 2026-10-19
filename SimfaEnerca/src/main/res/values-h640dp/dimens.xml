@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="tecla_alto">56dp</dimen>
+    <dimen name="lista_causas_alto">300dp</dimen>
+</resources>

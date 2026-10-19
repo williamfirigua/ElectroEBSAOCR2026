@@ -63,10 +63,36 @@ public final class Parametros {
     public int mensajeAncho()       { return entero("mensaje.ancho", 60); }
     /** Máximo de líneas del mensaje. */
     public int mensajeLineas()      { return entero("mensaje.lineas", 4); }
+    /** Si se declara (p. ej. DINBOLD.TTF), el mensaje se parte por ancho real en puntos y no por caracteres. */
+    public String mensajeFuente()   { return texto("mensaje.fuente", ""); }
+    /** Ancho en pt de SCALE-TEXT con que se imprime el mensaje (el primer número del comando). */
+    public double mensajePuntos()   { return Double.parseDouble(texto("mensaje.puntos", "8")); }
+    /** Ancho máximo de cada línea del mensaje en puntos de impresora (8 = 1 mm). */
+    public int mensajeAnchoPx()     { return entero("mensaje.ancho_px", 470); }
+    /** Igual que el mensaje, para las observaciones de aseo (As_73). */
+    public int aseoObsAnchoPx()     { return entero("aseo.obs.ancho_px", 700); }
+    /** Códigos de concepto de aseo por renglón del desglose; lo que no esté en ninguno va a "otros". */
+    public String aseoCodigos(String renglon, String porDefecto) { return texto("aseo." + renglon, porDefecto); }
+    /** Textos de la regla de desviación (notificación). */
+    public String desvTexto(String regla, String porDefecto) { return texto("desviacion." + regla, porDefecto); }
+
+    /**
+     * Códigos de analítica (COMENTARIO2) para los que se entrega la carta de esta plantilla:
+     * {@code ;@SET carta.analitica=002,003}. {@code =ninguno} desactiva la carta sin borrar la plantilla.
+     */
+    public java.util.Set<String> cartaAnalitica(String porDefecto) {
+        java.util.Set<String> codigos = new java.util.LinkedHashSet<>();
+        for (String c : texto("carta.analitica", porDefecto).split("[,;\\s]+")) {
+            if (!c.trim().isEmpty()) codigos.add(c.trim());
+        }
+        return codigos;
+    }
     /** Ancho de la descripción en las filas de conceptos. */
     public int conceptoAnchoDesc()  { return entero("concepto.ancho_desc", 26); }
     /** Ancho del valor en las filas de conceptos (alineado a la derecha). */
     public int conceptoAnchoValor() { return entero("concepto.ancho_valor", 12); }
+    /** Filas de descripción/valor que la plantilla tiene para el bloque (detalle, cartera, externos, aseo); 1 como mínimo. */
+    public int conceptoFilas(String bloque, int porDefecto) { return Math.max(1, entero("concepto.filas." + bloque, porDefecto)); }
     /** Quién decide el bloque de un concepto: {@code cobro} (NROCONVENIOS de CO_COBRO.SDA, por defecto) o {@code catalogo} (DATO1 de DES_CONC.TXT). */
     public BloquesConceptos.Fuente conceptoBloqueFuente() { return BloquesConceptos.Fuente.de(texto("concepto.bloque", "cobro")); }
     /** Orden dentro del bloque: {@code catalogo} (DATO2 de DES_CONC.TXT, por defecto) o {@code archivo} (como vienen en CO_COBRO.SDA). */
@@ -79,8 +105,30 @@ public final class Parametros {
     public boolean eanFnc1()        { return bandera("ean.fnc1", true); }
     /** URL del código QR. */
     public String qrUrl()           { return texto("qr.url", "https://www.ebsa.com.co/sitio/pagina/pagos/"); }
-    /** Si es 1, las líneas T cuyo texto queda vacío no se envían a la impresora. */
+    /** Si es 1, las líneas T cuyo texto queda vacío no se envían a la impresora. Ver {@link #vacias()}. */
     public boolean omitirVacias()   { return bandera("omitir_vacias", true); }
+
+    /** Qué hacer con un T cuyo dato llega vacío. */
+    public enum Vacias {
+        /** No se envía la línea (producción). */
+        OMITIR,
+        /** Se envía la línea con el texto vacío: el .LOG conserva todas las líneas de la plantilla, en orden. */
+        DEJAR,
+        /** Se envía con la etiqueta de la clave, p. ej. [mensaje.2]: el diseñador ve dónde cae cada campo. */
+        ETIQUETA
+    }
+
+    /**
+     * {@code ;@SET vacias=omitir|dejar|etiqueta}. Si no está, manda {@code omitir_vacias}
+     * (1 = omitir, 0 = dejar), para que una plantilla vieja siga igual. Un B sin dato se omite siempre.
+     */
+    public Vacias vacias() {
+        String v = texto("vacias", "");
+        if ("etiqueta".equalsIgnoreCase(v)) return Vacias.ETIQUETA;
+        if ("dejar".equalsIgnoreCase(v)) return Vacias.DEJAR;
+        if ("omitir".equalsIgnoreCase(v)) return Vacias.OMITIR;
+        return omitirVacias() ? Vacias.OMITIR : Vacias.DEJAR;
+    }
     /** Texto que se imprime cuando una clave no existe en el contexto: visible en papel durante las pruebas. */
     public String faltante()        { return texto("faltante", "???"); }
 }

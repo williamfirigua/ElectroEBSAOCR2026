@@ -150,6 +150,39 @@
 
     </TableRow>
 
+    <!-- Envío por API REST: acciones sobre la cola (ocultas en modo SOAP). -->
+    <LinearLayout
+        android:id="@+id/filaAccionesRest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/btnEnviarAhora"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Enviar ahora"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnReintentarRechazados"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Reintentar rechazados"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btnSubirRespaldo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Subir respaldo"
+            android:textSize="12sp" />
+    </LinearLayout>
+
     <Button
         android:id="@+id/btnCerrarNe2"
         android:layout_width="wrap_content"

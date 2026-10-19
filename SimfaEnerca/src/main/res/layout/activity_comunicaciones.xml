@@ -20,7 +20,7 @@
             android:id="@+id/btnLogos"
             android:layout_width="90dp"
             android:layout_height="60dp"
-            android:background="@color/zxing_transparent"
+            android:background="@android:color/transparent"
             android:contentDescription="@string/info"
             android:scaleType="centerCrop"
             android:src="@drawable/gss_logo40x40" />

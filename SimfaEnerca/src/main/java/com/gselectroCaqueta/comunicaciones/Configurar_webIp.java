@@ -20,6 +20,8 @@ import android.widget.Toast;
 
 import com.gselectroCaqueta.accesoyseguridad.R;
 import com.gselectroCaqueta.accesoyseguridad.VariablesGlobales;
+import com.gselectroCaqueta.sync.ApiMovil;
+import com.gselectroCaqueta.sync.ConfigSync;
 import com.gsutil.AsyncResponse;
 import com.gsutil.Utils;
 import com.gsutil.WSSoap;
@@ -103,6 +105,18 @@ public class Configurar_webIp extends AppCompatActivity implements AsyncResponse
         txtDescServWeb = (EditText) findViewById(R.id.txtDescServWeb);
         edtxPuertoAPI = (EditText) findViewById(R.id.edtxPuertoAPI);
         iconWebSoff = (ImageView) findViewById(R.id.iconwebserviceoff);
+
+        // Modo de envío de la terminal: API v1 (cola JSON) o SOAP como antes. Se guarda al marcar.
+        CheckBox chkEnvioRest = (CheckBox) findViewById(R.id.chkEnvioRest);
+        final ConfigSync configSync = new ConfigSync(this);
+        chkEnvioRest.setChecked(configSync.modoRest());
+        chkEnvioRest.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                configSync.modoRest(isChecked);
+                mensajeT(isChecked ? "Envío por API REST activado" : "Envío por SOAP activado", 1500);
+            }
+        });
 
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -505,6 +519,19 @@ public class Configurar_webIp extends AppCompatActivity implements AsyncResponse
 
     private class AsyncCallWS extends AsyncTask<String, Integer, Void> {
         public String respuesta;
+        String respuestaApi = "";
+
+        /** GET /api/v1/ping con la misma URL que arma MenuDeLiquidacion (cadenaURLapi). */
+        private String probarApi() {
+            try {
+                String base = URL.substring(0, URL.lastIndexOf(":") + 1) + puertoAPI + "/api/";
+                ApiMovil.Respuesta r = new ApiMovil(base).ping();
+                if (r.ok()) return "API v1 OK (" + base + "v1/)";
+                return "API v1 sin respuesta válida (" + (r.codigo == ApiMovil.SIN_RED ? r.error : "HTTP " + r.codigo) + ")";
+            } catch (Exception e) {
+                return "API v1 error: " + e.getMessage();
+            }
+        }
         ProgressDialog pDialog;
         int x = 0;
 
@@ -514,6 +541,7 @@ public class Configurar_webIp extends AppCompatActivity implements AsyncResponse
 
             WSSoap wsoap = new WSSoap(URL, paginaWs);
             respuesta = wsoap.verificarWs("VALIDAR_CONEXION");
+            respuestaApi = probarApi();
 
             return null;
         }
@@ -528,13 +556,13 @@ public class Configurar_webIp extends AppCompatActivity implements AsyncResponse
                 iconWebSoff.setVisibility(View.INVISIBLE);
                 iconWebSon.setVisibility(View.VISIBLE);
                 pruebawsok = true;
-                lblTransmite.setText("Conexion con Webservice OK");
+                lblTransmite.setText("Conexion con Webservice OK\n" + respuestaApi);
 
             } catch (NumberFormatException e) {
                 iconWebSon.setVisibility(View.INVISIBLE);
                 iconWebSoff.setVisibility(View.VISIBLE);
                 pruebawsok = false;
-                lblTransmite.setText("Error de conexion con Webservice\n" + respuesta);
+                lblTransmite.setText("Error de conexion con Webservice\n" + respuesta + "\n" + respuestaApi);
             }
 
             btnPruebaWs.setEnabled(true);

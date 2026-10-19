@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Texto de los chips de criterio: blanco sobre el azul del chip elegido, oscuro en los demas. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="#FFFFFFFF" android:state_checked="true" />
+    <item android:color="#FF333333" />
+</selector>

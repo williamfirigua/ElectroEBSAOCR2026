@@ -1,301 +1,419 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Resumen de la ruta. Arriba lo fijo (encabezado, avance, filtros, buscador); la lista de registradores ocupa
+  el resto y se recicla (no se dibujan las 9.000 filas). El desglose completo está en el botón de gráfica.
+  Abajo: continuar la liquidación (abre en el primer cliente pendiente) o liquidar el registro seleccionado.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#F5F6FA">
+    android:background="#FFF5F6FA"
+    android:orientation="vertical">
 
-    <!-- SCROLL PRINCIPAL -->
-    <ScrollView
-        android:id="@+id/scroll"
+    <!-- Encabezado -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/ocrePop"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp">
+
+        <ImageButton
+            android:id="@+id/btnVolver"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Volver"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_nav_back"
+            android:tint="#FFFFFFFF" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Resumen de la ruta"
+                android:textColor="#FFFFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtNombreRuta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Cargando…"
+                android:textColor="#FFFFFFFF"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnDetalle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Resumen detallado"
+            android:enabled="false"
+            android:padding="10dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_nav_bar_chart"
+            android:tint="#FFFFFFFF" />
+    </LinearLayout>
+
+    <!-- Aviso: fecha descuadrada, ruta terminada, error de lectura -->
+    <TextView
+        android:id="@+id/txtAviso"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFF3E0"
+        android:paddingStart="12dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="8dp"
+        android:textColor="#FFBF360C"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <!-- Indicadores (clientes) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="6dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="6dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_card"
+            android:elevation="2dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
+
+            <TextView
+                android:id="@+id/txtTotal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="—"
+                android:textColor="#FF263238"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Clientes"
+                android:textColor="#FF607D8B"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_card"
+            android:elevation="2dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
+
+            <TextView
+                android:id="@+id/txtLeidos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="—"
+                android:textColor="#FF2E7D32"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Leídos"
+                android:textColor="#FF607D8B"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_card"
+            android:elevation="2dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
+
+            <TextView
+                android:id="@+id/txtPendientes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="—"
+                android:textColor="#FF1565C0"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pendientes"
+                android:textColor="#FF607D8B"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="3dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_card"
+            android:elevation="2dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
+
+            <TextView
+                android:id="@+id/txtAnomalias"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="—"
+                android:textColor="#FFEF6C00"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Anomalías"
+                android:textColor="#FF607D8B"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Avance -->
+    <ProgressBar
+        android:id="@+id/barAvance"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="12dp"
+        android:max="100"
+        android:progress="0" />
+
+    <TextView
+        android:id="@+id/txtAvance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="12dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="12dp"
+        android:textColor="#FF455A64"
+        android:textSize="13sp" />
+
+    <!-- Filtros (cuentan registradores) -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:scrollbars="none">
+
+        <RadioGroup
+            android:id="@+id/GrupoOpciones"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/OptTodas"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_chip"
+                android:button="@null"
+                android:checked="true"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:text="Todas"
+                android:textColor="@color/texto_chip"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <RadioButton
+                android:id="@+id/OptProcesadas"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_chip"
+                android:button="@null"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:text="Procesadas"
+                android:textColor="@color/texto_chip"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <RadioButton
+                android:id="@+id/OptNoprocesada"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_chip"
+                android:button="@null"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:text="Pendientes"
+                android:textColor="@color/texto_chip"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <RadioButton
+                android:id="@+id/OptAnomalias"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_chip"
+                android:button="@null"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:text="Anomalías"
+                android:textColor="@color/texto_chip"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </RadioGroup>
+    </HorizontalScrollView>
+
+    <!-- Solo con Anomalías: limitar a una causa -->
+    <Spinner
+        android:id="@+id/spCausa"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:visibility="gone" />
+
+    <EditText
+        android:id="@+id/txtBuscar"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/bg_input"
+        android:hint="Buscar cuenta o medidor"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        android:maxLines="1"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/txtConteoLista"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="12dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="12dp"
+        android:textColor="#FF607D8B"
+        android:textSize="12sp" />
+
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <LinearLayout
+        <ListView
+            android:id="@+id/listaRegistros"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:choiceMode="singleChoice"
+            android:clipToPadding="false"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="6dp"
+            android:fastScrollEnabled="true"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="8dp" />
+
+        <TextView
+            android:id="@+id/txtVacio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="12dp">
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="24dp"
+            android:textColor="#FF78909C"
+            android:textSize="15sp"
+            android:visibility="gone" />
 
-            <!-- HEADER -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_card2"
-                android:padding="12dp"
-                android:orientation="vertical">
+        <ProgressBar
+            android:id="@+id/progresoCarga"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center" />
+    </FrameLayout>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="📊 ESTADO DE OPERACIÓN"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="#333333"/>
-
-                <TextView
-                    android:id="@+id/txtNombreRuta"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Ruta: ---"
-                    android:textSize="18sp"
-                    android:layout_marginTop="4dp"/>
-
-                <TextView
-                    android:id="@+id/txtFecha"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Fecha: ---"
-                    android:textSize="14sp"/>
-            </LinearLayout>
-
-            <!-- ESTADO -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="6dp"
-                android:background="@drawable/bg_card2"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="140dp"
-                    android:layout_height="wrap_content"
-                    android:text="🎯 ESTADO DE ENVÍO"
-                    android:textColor="#555"
-                    android:textSize="12sp"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:id="@+id/txtEstado"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="SIN CONEXIÓN"
-                    android:textColor="#D32F2F"
-                    android:textSize="14sp"
-                    android:textStyle="bold"/>
-            </LinearLayout>
-
-            <!-- INDICADORES -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="6dp">
-
-                <!-- CARD -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="70dp"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:background="@drawable/bg_card"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="📊 TOTAL"
-                        android:gravity="center"/>
-
-                    <TextView
-                        android:id="@+id/txtTotal"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:gravity="center"/>
-                </LinearLayout>
-
-                <!-- CARD -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="70dp"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:background="@drawable/bg_card"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/idLeidos"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="✅ LEÍDOS" />
-
-                    <TextView
-                        android:id="@+id/txtLeidos"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:gravity="center"/>
-                </LinearLayout>
-
-                <!-- CARD -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="70dp"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:background="@drawable/bg_card"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="⏳ X Leer" />
-
-                    <TextView
-                        android:id="@+id/txtPendientes"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:gravity="center"/>
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- FILTROS -->
-            <RadioGroup
-                android:id="@+id/GrupoOpciones"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginTop="6dp">
-
-                <RadioButton
-                    android:id="@+id/OptTodas"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:text="Todas"/>
-
-                <RadioButton
-                    android:id="@+id/OptProcesadas"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:text="Procesadas"
-                    android:layout_marginLeft="20dp"/>
-
-                <RadioButton
-                    android:id="@+id/OptNoprocesada"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:text="No procesadas"
-                    android:layout_marginLeft="20dp"/>
-            </RadioGroup>
-
-            <!-- TABLA -->
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:contentDescription="TablaRegistros"
-                android:layout_marginTop="6dp">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="@drawable/bg_card">
-
-                    <TableLayout
-                        android:id="@+id/cabecera"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="#E3F2FD"
-                        android:padding="6dp"/>
-
-                    <TableLayout
-                        android:id="@+id/tablaResumen"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:padding="4dp"/>
-                </LinearLayout>
-            </HorizontalScrollView>
-
-            <!-- RESUMEN GENERAL -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="📈 RESUMEN GENERAL"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:layout_marginTop="10dp"/>
-
-            <ListView
-                android:id="@+id/list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:dividerHeight="1dp"
-                android:nestedScrollingEnabled="false"
-                android:background="@drawable/bg_card"
-                android:padding="6dp"/>
-
-        </LinearLayout>
-    </ScrollView>
-
-    <!-- BOTONES -->
+    <!-- Acciones -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:background="#FFFFFFFF"
+        android:elevation="6dp"
         android:orientation="horizontal"
-        android:padding="6dp">
+        android:padding="8dp">
 
-        <ImageButton
-            android:id="@+id/btnAtras1"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="6dp"
-            android:contentDescription="Atras"
-            android:background="@drawable/bg_cycle2"
-            android:src="@android:drawable/ic_media_previous" />
+        <Button
+            android:id="@+id/btnLiquidarSeleccion"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_boton_secundario"
+            android:enabled="false"
+            android:text="Ir a la seleccionada"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold" />
 
-        <ImageButton
-            android:id="@+id/btnPrimero1"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="6dp"
-            android:contentDescription="Primero"
-            android:background="@drawable/bg_cycle2"
-            android:src="@android:drawable/ic_media_rew" />
-
-        <ImageButton
-            android:id="@+id/btnUltimo1"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="6dp"
-            android:contentDescription="Ultimo"
-            android:background="@drawable/bg_cycle2"
-            android:src="@android:drawable/ic_media_ff" />
-
-        <ImageButton
-            android:id="@+id/btnAdelante1"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="6dp"
-            android:contentDescription="Adelante"
-            android:background="@drawable/bg_cycle2"
-            android:src="@android:drawable/ic_media_next" />
-
-        <ImageButton
+        <Button
             android:id="@+id/btnCerrar"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="6dp"
-            android:contentDescription="Salir"
-            android:background="@drawable/bg_cycle2"
-            android:src="@android:drawable/ic_menu_rotate" />
-
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_boton_primario"
+            android:enabled="false"
+            android:text="Continuar ▶"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
 </LinearLayout>

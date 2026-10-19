@@ -14,7 +14,10 @@ import java.util.Map;
 import static com.gselectroCaqueta.tablas.UtilPlanos.LATIN1;
 
 /// <summary>
-/// ENVIOSGPRS.SDA / CopiaRespaldoLecturas.sda - registro fijo de 580 bytes, solo se AGREGAN lineas.
+/// ENVIOSGPRS.SDA / CopiaRespaldoLecturas.sda - registro fijo de 583 bytes, solo se AGREGAN lineas.
+/// - 2026-10: MARCALEIDO (version de la app) pasa de 12 a 15 posiciones para llevar la version completa
+///   ("Ver0.0.1-261013"). Los archivos con el formato anterior (580) se convierten solos al abrirlos
+///   por primera vez (ver migrarFormatoAnterior); el servidor acepta los dos formatos.
 /// - Agregar es atomico entre TODAS las instancias (candado de clase): la posicion se calcula con el
 ///   tamano real del archivo en el momento de escribir, asi dos flujos nunca escriben la misma linea.
 /// - Si el archivo termina con una linea incompleta (corte de energia, app cerrada), la siguiente
@@ -25,7 +28,13 @@ import static com.gselectroCaqueta.tablas.UtilPlanos.LATIN1;
 public class EnvioGPS {
 
     private static final String TAG = "ENVIOGPRS";
-    static final int LONGITUD_REGISTRO = 569 + 11; // 580: incluye VALORFACTURADOASEO
+    static final int LONGITUD_REGISTRO = 583; // 581 de datos + CRLF (580 antes de ampliar MARCALEIDO)
+    static final int ANCHO_MARCALEIDO = 15;
+    /** Formato anterior: 578 de datos; MARCALEIDO de 12 en 528, se insertan 3 espacios en 540. */
+    private static final int LARGO_DATOS_ANTERIOR = 578;
+    private static final int FIN_MARCALEIDO_ANTERIOR = 540;
+    /** Archivos ya revisados en este proceso: la conversion corre una sola vez, antes de cualquier apertura. */
+    private static final java.util.Set<String> REVISADOS = new java.util.HashSet<>();
     /** Candado comun a todas las instancias: el liquidador y el hilo de envio usan objetos distintos sobre el mismo archivo. */
     private static final Object CANDADO_ARCHIVO = new Object();
 
@@ -631,6 +640,9 @@ public class EnvioGPS {
         if (nombreArchivo == null || nombreArchivo.length() == 0) return false;
         synchronized (CANDADO_ARCHIVO) {
             cerrarSilencioso();
+            if (REVISADOS.add(nombreArchivo)) {
+                migrarFormatoAnterior(new java.io.File(nombreArchivo));
+            }
             try {
                 rFile = new RandomAccessFile(nombreArchivo, "rw");
                 archivo_EnvioGPS = nombreArchivo;
@@ -644,6 +656,55 @@ public class EnvioGPS {
                 Log.e(TAG, "al abrir1 " + e.getMessage());
                 return false;
             }
+        }
+    }
+
+    /**
+     * Convierte un archivo con lineas de 580 (MARCALEIDO de 12) al formato de 583: inserta 3 espacios al
+     * final de MARCALEIDO en cada linea vieja. Las lineas ya nuevas quedan igual (un archivo puede tener
+     * de las dos si se agrego despues de actualizar la app). Escribe a un temporal y lo cambia por el
+     * original solo si todo salio bien; ante cualquier error deja el archivo como estaba y lo registra.
+     * Se llama una vez por archivo y proceso, dentro del candado y antes de abrirlo, asi que ningun otro
+     * objeto lo tiene abierto en ese momento.
+     */
+    static void migrarFormatoAnterior(java.io.File f) {
+        if (!f.exists() || f.length() == 0) return;
+        try {
+            byte[] todo = java.nio.file.Files.readAllBytes(f.toPath());
+            if (todo.length % LONGITUD_REGISTRO == 0 && todo.length >= LONGITUD_REGISTRO
+                    && todo[LONGITUD_REGISTRO - 2] == '\r' && todo[LONGITUD_REGISTRO - 1] == '\n'
+                    && todo[todo.length - 2] == '\r' && todo[todo.length - 1] == '\n') {
+                boolean viejo = false;
+                for (int i = LARGO_DATOS_ANTERIOR; i + 1 < todo.length; i += LONGITUD_REGISTRO) {
+                    if (todo[i] == '\r' && todo[i + 1] == '\n') { viejo = true; break; }
+                }
+                if (!viejo) return; // ya esta en el formato nuevo
+            }
+            java.io.ByteArrayOutputStream salida = new java.io.ByteArrayOutputStream(todo.length + todo.length / 100 + 16);
+            int convertidas = 0, desde = 0;
+            while (desde < todo.length) {
+                int fin = desde;
+                while (fin + 1 < todo.length && !(todo[fin] == '\r' && todo[fin + 1] == '\n')) fin++;
+                boolean conSalto = fin + 1 < todo.length;
+                int largo = (conSalto ? fin : todo.length) - desde;
+                if (conSalto && largo == LARGO_DATOS_ANTERIOR) {
+                    salida.write(todo, desde, FIN_MARCALEIDO_ANTERIOR);
+                    salida.write(new byte[]{' ', ' ', ' '});
+                    salida.write(todo, desde + FIN_MARCALEIDO_ANTERIOR, largo - FIN_MARCALEIDO_ANTERIOR);
+                    convertidas++;
+                } else {
+                    salida.write(todo, desde, largo); // nueva, o final incompleto (se reemplaza al agregar)
+                }
+                if (conSalto) salida.write(new byte[]{'\r', '\n'});
+                desde = conSalto ? fin + 2 : todo.length;
+            }
+            if (convertidas == 0) return;
+            java.io.File tmp = new java.io.File(f.getPath() + ".migrando");
+            java.nio.file.Files.write(tmp.toPath(), salida.toByteArray());
+            java.nio.file.Files.move(tmp.toPath(), f.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            UtilPlanos.evento(TAG, "Formato ENVIOGPRS actualizado a " + LONGITUD_REGISTRO + ": " + f.getName() + ", " + convertidas + " lineas");
+        } catch (Exception e) {
+            UtilPlanos.evento(TAG, "No se pudo actualizar el formato de " + f.getName() + ": " + e.getMessage());
         }
     }
 
@@ -765,6 +826,22 @@ public class EnvioGPS {
         return String.format(formato, valor == null ? "" : valor);
     }
 
+    /**
+     * Texto informativo de ancho fijo: rellena y, si viene mas largo, lo CORTA y deja constancia en
+     * LOGEVENTOS. Solo para campos descriptivos (version, marca, descripciones, coordenadas en texto):
+     * antes un valor largo (p.ej. la version "Ver0.0.1-261013", 15 caracteres en MARCALEIDO de 12) dejaba
+     * la linea en 583 y escribir_EnvioGPS la rechazaba ("CADENA DAÑADA"): la lectura NO quedaba en
+     * ENVIOGPRS y no se enviaba. Los campos numericos y de control siguen con fmt (si se pasan, se rechaza).
+     */
+    private static String txt(String campo, int ancho, String valor) {
+        String v = valor == null ? "" : valor;
+        if (v.length() > ancho) {
+            UtilPlanos.evento(TAG, "ENVIOGPRS campo " + campo + " recortado a " + ancho + ": '" + v + "'");
+            v = v.substring(0, ancho);
+        }
+        return String.format("%-" + ancho + "s", v);
+    }
+
     public void rellenar_EnvioGPS() {
         EnvioGPS_ciclo = fmt("%-3s", EnvioGPS_ciclo);
         EnvioGPS_mununicipio = fmt("%-3s", EnvioGPS_mununicipio);
@@ -780,20 +857,20 @@ public class EnvioGPS {
         EnvioGPS_idcontador = fmt("%-3s", EnvioGPS_idcontador);
         EnvioGPS_lecturatomada = fmt("%-10s", EnvioGPS_lecturatomada);
         EnvioGPS_causadenolectura = fmt("%-2s", EnvioGPS_causadenolectura);
-        EnvioGPS_descanomalia = fmt("%-30s", EnvioGPS_descanomalia);
+        EnvioGPS_descanomalia = txt("descanomalia", 30, EnvioGPS_descanomalia);
         EnvioGPS_comentario = fmt("%-2s", EnvioGPS_comentario);
-        EnvioGPS_desccomentario = fmt("%-30s", EnvioGPS_desccomentario);
+        EnvioGPS_desccomentario = txt("desccomentario", 30, EnvioGPS_desccomentario);
         EnvioGPS_fechayhoralectura = fmt("%-19s", EnvioGPS_fechayhoralectura);
         EnvioGPS_CodLector = fmt("%-10s", EnvioGPS_CodLector);
         EnvioGPS_primermedidor = fmt("%-5s", EnvioGPS_primermedidor);
         EnvioGPS_HoraImpresion = fmt("%-8s", EnvioGPS_HoraImpresion);
-        EnvioGPS_NombreArchivo = fmt("%-12s", EnvioGPS_NombreArchivo);
-        EnvioGPS_Longitud = fmt("%-20s", EnvioGPS_Longitud);
-        EnvioGPS_Latitud = fmt("%-20s", EnvioGPS_Latitud);
+        EnvioGPS_NombreArchivo = txt("NombreArchivo", 12, EnvioGPS_NombreArchivo);
+        EnvioGPS_Longitud = txt("Longitud", 20, EnvioGPS_Longitud);
+        EnvioGPS_Latitud = txt("Latitud", 20, EnvioGPS_Latitud);
         EnvioGPS_NroSatelites = fmt("%-3s", EnvioGPS_NroSatelites);
-        EnvioGPS_Distancia = fmt("%-15s", EnvioGPS_Distancia);
-        EnvioGPS_FechaHoraSatelite = fmt("%-30s", EnvioGPS_FechaHoraSatelite);
-        EnvioGPS_AltitudSatelite = fmt("%-20s", EnvioGPS_AltitudSatelite);
+        EnvioGPS_Distancia = txt("Distancia", 15, EnvioGPS_Distancia);
+        EnvioGPS_FechaHoraSatelite = txt("FechaHoraSatelite", 30, EnvioGPS_FechaHoraSatelite);
+        EnvioGPS_AltitudSatelite = txt("AltitudSatelite", 20, EnvioGPS_AltitudSatelite);
         EnvioGPS_Terminal = fmt("%-15s", EnvioGPS_Terminal);
         EnvioGPS_IndicadorNovedad = fmt("%-1s", EnvioGPS_IndicadorNovedad);
         EnvioGPS_Indcodbarras = fmt("%-1s", EnvioGPS_Indcodbarras);
@@ -820,9 +897,9 @@ public class EnvioGPS {
         EnvioGPS_CodNovedad = fmt("%-4s", EnvioGPS_CodNovedad);
         EnvioGPS_LecturaAnterior = fmt("%-10s", EnvioGPS_LecturaAnterior);
         EnvioGPS_EstadoEnvio = fmt("%-1s", EnvioGPS_EstadoEnvio);
-        EnvioGPS_MARCACONTADOR = fmt("%-12s", EnvioGPS_MARCACONTADOR);
+        EnvioGPS_MARCACONTADOR = txt("MARCACONTADOR", 12, EnvioGPS_MARCACONTADOR);
         EnvioGPS_ULTIMOMEDIDORLEIDO = fmt("%-16s", EnvioGPS_ULTIMOMEDIDORLEIDO);
-        EnvioGPS_MARCALEIDO = fmt("%-12s", EnvioGPS_MARCALEIDO);
+        EnvioGPS_MARCALEIDO = txt("MARCALEIDO", ANCHO_MARCALEIDO, EnvioGPS_MARCALEIDO);
         EnvioGPS_OBSERVACION1 = fmt("%-3s", EnvioGPS_OBSERVACION1);
         EnvioGPS_CLASESERVICIO = fmt("%-3s", EnvioGPS_CLASESERVICIO);
         EnvioGPS_NMEDIDORES = fmt("%-1s", EnvioGPS_NMEDIDORES);
@@ -897,20 +974,20 @@ public class EnvioGPS {
             EnvioGPS_EstadoEnvio = new String(b, 496, 1, LATIN1);
             EnvioGPS_MARCACONTADOR = new String(b, 498, 12, LATIN1);
             EnvioGPS_ULTIMOMEDIDORLEIDO = new String(b, 511, 16, LATIN1);
-            EnvioGPS_MARCALEIDO = new String(b, 528, 12, LATIN1);
-            EnvioGPS_OBSERVACION1 = new String(b, 541, 3, LATIN1);
-            EnvioGPS_CLASESERVICIO = new String(b, 545, 3, LATIN1);
-            EnvioGPS_NMEDIDORES = new String(b, 549, 1, LATIN1);
-            EnvioGPS_NREGISTRADORES = new String(b, 551, 2, LATIN1);   // CORREGIDO: antes se guardaba en CLASESERVICIO
-            EnvioGPS_IDREGISTRO = new String(b, 554, 10, LATIN1);
-            EnvioGPS_NROCONTADORDB = new String(b, 565, 1, LATIN1);
-            EnvioGPS_ValorFacturadoAseo = new String(b, 567, 10, LATIN1);
-            EnvioGPS_CRNL = new String(b, 578, 2, LATIN1);
+            EnvioGPS_MARCALEIDO = new String(b, 528, ANCHO_MARCALEIDO, LATIN1);
+            EnvioGPS_OBSERVACION1 = new String(b, 544, 3, LATIN1);
+            EnvioGPS_CLASESERVICIO = new String(b, 548, 3, LATIN1);
+            EnvioGPS_NMEDIDORES = new String(b, 552, 1, LATIN1);
+            EnvioGPS_NREGISTRADORES = new String(b, 554, 2, LATIN1);   // CORREGIDO: antes se guardaba en CLASESERVICIO
+            EnvioGPS_IDREGISTRO = new String(b, 557, 10, LATIN1);
+            EnvioGPS_NROCONTADORDB = new String(b, 568, 1, LATIN1);
+            EnvioGPS_ValorFacturadoAseo = new String(b, 570, 10, LATIN1);
+            EnvioGPS_CRNL = new String(b, 581, 2, LATIN1);
             ultimo_EnvioGPS = registro;
         }
     }
 
-    /** Para ConsultaNoEnviados: solo cuenta y numero de contador (lee 51 bytes, no 580). */
+    /** Para ConsultaNoEnviados: solo cuenta y numero de contador (lee 51 bytes, no el registro completo). */
     public void lectura_EnvioGPS_Tipo2(int registro) {
         synchronized (CANDADO_ARCHIVO) {
             encontro_EnvioGPS = 0;
