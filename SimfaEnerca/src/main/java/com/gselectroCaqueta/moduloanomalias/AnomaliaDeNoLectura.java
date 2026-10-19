@@ -208,7 +208,7 @@ public class AnomaliaDeNoLectura {
         int t = getTotal_AnomaliaDeNoLectura();
         int b = 0;
         lectura_AnomaliaDeNoLectura(1);
-        String uno = rellenarCeros(codigo.trim(),3);
+        String uno = codigo.trim();//rellenarCeros(codigo.trim(),3);
         String otro = anomaliaDeNoLectura_CODIGO.trim();
         if (otro.equals(uno)) {
             posicion_AnomaliaDeNoLectura(i + 1, LONGITUD_REGISTRO);

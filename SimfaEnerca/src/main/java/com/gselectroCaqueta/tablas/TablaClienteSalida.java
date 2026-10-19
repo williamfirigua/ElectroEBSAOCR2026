@@ -321,7 +321,7 @@ public class TablaClienteSalida {
 
     private void bloqueo(int posicion, String motivo) {
         UtilPlanos.evento(TAG, "[BLOQUEADO CLIENTE] cuenta " + (tablaClienteSalida_CUENTA == null ? "" : tablaClienteSalida_CUENTA.trim())
-                + " intento escribir en posicion " + posicion + " -> " + motivo);
+                + " intento escribir en posicion " + posicion + " -> " + motivo+"\r\n");
     }
 
     public synchronized void rellenar_TablaClienteSalida() {

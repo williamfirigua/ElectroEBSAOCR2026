@@ -217,7 +217,7 @@ public class TablaCobrosRealizados { //Ax ya es: S_COBRO
     private void bloqueo(int posicion, String motivo) {
         UtilPlanos.evento(TAG, "[BLOQUEADO COBRO] cuenta " + (tablaCobrosRealizados_Nrocuentacliente == null ? "" : tablaCobrosRealizados_Nrocuentacliente.trim())
                 + " concepto " + (tablaCobrosRealizados_Conceptodecobro == null ? "" : tablaCobrosRealizados_Conceptodecobro.trim())
-                + " intento escribir en posicion " + posicion + " -> " + motivo);
+                + " intento escribir en posicion " + posicion + " -> " + motivo+"\r\n");
     }
 
     public synchronized void rellenar_TablaCobrosRealizados() {

@@ -217,7 +217,7 @@ public class TablaContadorSalida {
     private void bloqueo(int posicion, String motivo) {
         UtilPlanos.evento(TAG, "[BLOQUEADO MEDIDOR] cuenta " + (tablaContadorSalida_Cuenta == null ? "" : tablaContadorSalida_Cuenta.trim())
                 + " medidor " + (tablaContadorSalida_NUMero == null ? "" : tablaContadorSalida_NUMero.trim())
-                + " intento escribir en posicion " + posicion + " -> " + motivo);
+                + " intento escribir en posicion " + posicion + " -> " + motivo+"\r\n");
     }
 
     public synchronized void rellenar_TablaContadorSalida() {
