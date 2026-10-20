@@ -5789,6 +5789,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             tablaTarifa.buscarbinario_TablaTarifas(idMaximo);
 
             double subsidioRaw;
+            //nuevo antes de ir a constatar en las tarifas
             if (tablaTarifa.encontro_TablaTarifas > 0) {
                 double diferencia = parsearDecimal(tablaTarifa.gettablaTarifas_VLORKWH().trim())
                         - parsearDecimal(tablaTarifa.gettablaTarifas_VLORRKWH().trim());
@@ -5801,6 +5802,20 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     subsidioRaw = parsearDecimal(infoClienteEntrada.gettablaEntradaClientes_MDDOR2SBSDIOCNTRBCION())
                             * consumo * valorReferenciaPorKwh / 100;
 
+            }
+
+            if (consumoParaTabla > 0 && subsidioRaw == 0 && consumoSubsistencia>0) {
+                if (Tipo.equals("A"))
+                {
+                    subsidioRaw = parsearDecimal(infoClienteEntrada.gettablaEntradaClientes_MDDOR1SBSDIOCNTRBCION())
+                            * consumoParaTabla * valorReferenciaPorKwh / 100;
+                }
+                else
+
+                {
+                    subsidioRaw = parsearDecimal(infoClienteEntrada.gettablaEntradaClientes_MDDOR2SBSDIOCNTRBCION())
+                            * consumoParaTabla * valorReferenciaPorKwh / 100;
+                }
             }
 
             resultado[0] = valorConsumoRaw;
