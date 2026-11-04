@@ -98,6 +98,16 @@ public class ApiMovil {
         return json("POST", "auth/login", Json.escribir(b), false, LEER_MS);
     }
 
+    /** Licencia de la terminal (sin token: se pide antes del login). datos = LicenciaTerminal.datosEquipo + operador. */
+    public Respuesta activarLicencia(Map<String, Object> datos) {
+        return json("POST", "licencia/activar", Json.escribir(datos), false, 20_000);
+    }
+
+    /** Revisión periódica de la licencia; devuelve la licencia firmada de nuevo o el motivo del retiro. */
+    public Respuesta estadoLicencia(Map<String, Object> datos) {
+        return json("POST", "licencia/estado", Json.escribir(datos), false, 15_000);
+    }
+
     /** @param itemsJson ítems ya serializados (como se guardaron en la cola) */
     public Respuesta enviarLiquidaciones(Iterable<String> itemsJson) {
         StringBuilder sb = new StringBuilder("{\"items\":[");

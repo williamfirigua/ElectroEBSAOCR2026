@@ -145,9 +145,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:background="@drawable/bg_input"
-                    android:hint="Usuario"
-                    android:inputType="number"
-                    android:maxLength="11"
+                    android:hint="Código o usuario"
+                    android:inputType="textNoSuggestions"
+                    android:maxLength="30"
                     android:textStyle="bold">
 
                     <requestFocus />

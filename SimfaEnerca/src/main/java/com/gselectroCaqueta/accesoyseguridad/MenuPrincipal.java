@@ -155,6 +155,8 @@ public class MenuPrincipal extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Licencia vencida o retirada desde la web: bloqueo inmediato (vuelve a la pantalla de licencia).
+        if (!com.gselectroCaqueta.moduloLicencia.LicenciaTerminal.exigir(this)) return;
         enPrimerPlano = true;
         refrescar();
         // Si el servicio ya está enviando (p. ej. lo arrancó el ingreso), mostrarlo y seguir los conteos.

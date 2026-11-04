@@ -55,6 +55,7 @@ import android.widget.Toast;
 
 import com.gselectroCaqueta.comunicaciones.Comunicaciones;
 import com.gselectroCaqueta.moduloLicencia.ActLicencia;
+import com.gselectroCaqueta.moduloLicencia.LicenciaTerminal;
 import com.gselectroCaqueta.modulobluetooth.DeviceListActivity;
 import com.gselectroCaqueta.modulobluetooth.btPrintFile;
 import com.gselectroCaqueta.modulobluetooth.msgTypes;
@@ -257,9 +258,12 @@ public class GuiAcceso extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
 
-        if (getIntent().getStringExtra("valida") != null) { // kim validacion de licencia
+        // Licencia nueva (bloque B): ActLicencia la revisa y pasa aquí con el cod_movil. Se revisa otra vez la
+        // guardada (firma, equipo, vencimiento) para que nadie entre con solo poner el extra.
+        LicenciaTerminal.Revision licenciaActual = new LicenciaTerminal(this).revisar();
+        if (getIntent().getStringExtra("valida") != null && licenciaActual.vigente()) {
 
-            telephoneSerialNumber = bundle.getString("PhoneImei");
+            telephoneSerialNumber = licenciaActual.licencia.codMovil;
 
         } else {
             Bundle bundlex = new Bundle();
@@ -437,6 +441,20 @@ public class GuiAcceso extends AppCompatActivity {
 
                 if (actionId == 5 || actionId == 6) { //555
                     aforadorClaveCorrecto = 0;
+
+                    // Ingreso por código o por usuario EBSA (pperez): el usuario se traduce al código con la
+                    // lista que bajó con la licencia. El resto del ingreso sigue trabajando con el código.
+                    String digitado = txtCodigo.getText().toString().trim();
+                    if (digitado.length() > 0 && !digitado.matches("\\d+")) {
+                        String cod = new LicenciaTerminal(GuiAcceso.this).codigoDeUsuario(digitado);
+                        if (cod == null) {
+                            mensajes("Usuario no reconocido: " + digitado + "\nDigite el código o sincronice la licencia.", 1500);
+                            txtNombreUsuario.setText("No existe el Usuario");
+                            txtCodigo.setText("");
+                            return true;
+                        }
+                        txtCodigo.setText(cod);
+                    }
 
                     String codigo = txtCodigo.getText().toString().trim();
 

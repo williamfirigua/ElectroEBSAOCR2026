@@ -21,6 +21,7 @@ import com.gselectroCaqueta.accesoyseguridad.AlmacenEstado;
 import com.gselectroCaqueta.accesoyseguridad.BandejaMensajes;
 import com.gselectroCaqueta.accesoyseguridad.CodigoSupervisor;
 import com.gselectroCaqueta.accesoyseguridad.VariablesGlobales;
+import com.gselectroCaqueta.moduloLicencia.LicenciaTerminal;
 import com.gsutil.Utils;
 
 import java.io.File;
@@ -60,6 +61,8 @@ public class SincronizacionService extends Service {
     private static final long MINIMA_ESPERA_MS = 5_000L;
     private static final long DESPERTAR_MS = 3_000L; // agrupa varios avisos seguidos en un solo ciclo
     private static final long DIA_MS = 24 * 3600_000L;
+    /** La licencia se revisa con el servidor cada 6 horas (y enseguida si el login la rechaza). */
+    private static final long CADA_LICENCIA_MS = 6 * 3600_000L;
     /** Enviados se conservan para diagnóstico; tracking pendiente sin despachar en 3 días se descarta. */
     private static final long RETENCION_ENVIADOS_MS = 15 * DIA_MS;
     private static final long RETENCION_TRACKING_PENDIENTE_MS = 3 * DIA_MS;
@@ -208,6 +211,7 @@ public class SincronizacionService extends Service {
             MotorSincronizacion.Resumen r = m.ejecutar(ahora);
             if (r.estado != MotorSincronizacion.Estado.NADA_PENDIENTE) log("ciclo " + r);
             recibir(m, System.currentTimeMillis(), r);
+            revisarLicencia(base, System.currentTimeMillis(), r);
             siguiente(r, System.currentTimeMillis());
         } catch (Throwable t) {
             // Nada de lo que pase aquí puede tumbar la app (el servicio vive en el mismo proceso).
@@ -277,6 +281,29 @@ public class SincronizacionService extends Service {
             m.recibir(new ReceptorApp(), ahora);
         } catch (Throwable t) {
             log("bandeja: " + t);
+        }
+    }
+
+    /**
+     * Licencia con el servidor: renueva la fecha general, activa en línea una provisional y, si la web la
+     * desvinculó o bloqueó, la borra (la próxima pantalla de entrada vuelve a la de licencia).
+     */
+    private void revisarLicencia(String base, long ahora, MotorSincronizacion.Resumen r) {
+        if (r != null && r.estado == MotorSincronizacion.Estado.SIN_RED) return;
+        try {
+            LicenciaTerminal lic = new LicenciaTerminal(this);
+            boolean rechazoLogin = r != null && r.estado == MotorSincronizacion.Estado.REQUIERE_LOGIN && r.detalle != null
+                    && (r.detalle.startsWith("licencia_") || r.detalle.startsWith("equipo_"));
+            if (!rechazoLogin && !lic.tocaRevisar(ahora, CADA_LICENCIA_MS)) return;
+            LicenciaTerminal.Respuesta res = lic.revisarEnServidor(base.replaceAll("v1/?$", ""));
+            if (res.ok && res.licencia != null && !res.licencia.codMovil.equals(config.serialTerminal())) {
+                // Una provisional que se activó en línea recibe aquí su cod_movil definitivo.
+                config.configurar("", res.licencia.codMovil, "");
+            }
+            if (res.retirada) log("licencia retirada por el servidor: " + res.mensaje);
+            else if (!res.ok && !res.sinRed) log("licencia: " + res.error + " " + res.mensaje);
+        } catch (Throwable t) {
+            log("licencia: " + t);
         }
     }
 

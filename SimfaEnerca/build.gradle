@@ -13,6 +13,12 @@ android {
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a'
         }
+        // Secreto de la activación sin señal (el mismo LICENCIA_SECRETO_OFFLINE del .env de la web). Vive en
+        // local.properties (fuera de git): licencia.secretoOffline=...
+        def props = new Properties()
+        def lp = rootProject.file('local.properties')
+        if (lp.exists()) lp.withInputStream { props.load(it) }
+        buildConfigField 'String', 'LICENCIA_SECRETO_OFFLINE', '"' + props.getProperty('licencia.secretoOffline', '') + '"'
         compileOptions {
             sourceCompatibility JavaVersion.VERSION_1_8
             targetCompatibility JavaVersion.VERSION_1_8
