@@ -62,17 +62,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
-                android:text="Con señal"
-                android:textColor="@color/orangehuila"
-                android:textStyle="bold" />
+                android:text="Digite su código o su usuario. Si el celular no tiene señal, pida el código temporal."
+                android:textSize="13sp" />
 
             <EditText
                 android:id="@+id/txtOperadorLicencia"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="8dp"
                 android:background="@drawable/bg_input"
-                android:hint="Código o usuario del técnico"
+                android:hint="Código, usuario o código temporal"
                 android:imeOptions="actionDone"
                 android:inputType="textNoSuggestions"
                 android:maxLength="30"
@@ -84,39 +83,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Activar" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="Sin señal"
-                android:textColor="@color/orangehuila"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/txtSolicitudLicencia"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:textSize="14sp" />
-
-            <EditText
-                android:id="@+id/txtRespuestaLicencia"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="6dp"
-                android:background="@drawable/bg_input"
-                android:hint="Código de respuesta (8 dígitos)"
-                android:inputType="number"
-                android:maxLength="8"
-                android:singleLine="true" />
-
-            <Button
-                android:id="@+id/btnSinSenalLicencia"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Activar sin señal (provisional 3 días)" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

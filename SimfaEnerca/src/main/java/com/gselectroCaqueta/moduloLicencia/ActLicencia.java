@@ -40,8 +40,8 @@ import com.gselectroCaqueta.comunicaciones.CrudComunicaciones;
  * Entrada de la app: permisos, licencia y paso a GuiAcceso.
  *
  * Con licencia vigente pasa directo (y si hay señal la revisa con el servidor: renueva la fecha general o la
- * retira si se desvinculó o bloqueó desde la web). Sin licencia pide el código o el usuario del técnico y se
- * activa en línea; sin señal muestra el código de solicitud para que la oficina dicte la respuesta.
+ * retira si se desvinculó o bloqueó desde la web). Sin licencia pide, en un solo campo, el código o el usuario
+ * del técnico (activación en línea) o el código temporal que entrega Global (sin señal, provisional 3 días).
  * Reemplaza el Config.txt con el serial (se borra cuando la licencia nueva queda activa).
  */
 public class ActLicencia extends AppCompatActivity {
@@ -55,11 +55,8 @@ public class ActLicencia extends AppCompatActivity {
 
     private TextView txtMensaje;
     private TextView txtEquipo;
-    private TextView txtSolicitud;
     private EditText txtOperador;
-    private EditText txtRespuesta;
     private Button btnActivar;
-    private Button btnSinSenal;
     private LinearLayout panelActivar;
     private ProgressBar progreso;
 
@@ -76,20 +73,16 @@ public class ActLicencia extends AppCompatActivity {
 
         txtMensaje = findViewById(R.id.txtMensajeLicencia);
         txtEquipo = findViewById(R.id.txtEquipoLicencia);
-        txtSolicitud = findViewById(R.id.txtSolicitudLicencia);
         txtOperador = findViewById(R.id.txtOperadorLicencia);
-        txtRespuesta = findViewById(R.id.txtRespuestaLicencia);
         btnActivar = findViewById(R.id.btnActivarLicencia);
-        btnSinSenal = findViewById(R.id.btnSinSenalLicencia);
         panelActivar = findViewById(R.id.panelActivar);
         progreso = findViewById(R.id.prgLicencia);
 
         txtEquipo.setText(Build.MANUFACTURER + " " + Build.MODEL + " · Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")");
-        btnActivar.setOnClickListener(v -> activarEnLinea());
-        btnSinSenal.setOnClickListener(v -> activarSinSenal());
+        btnActivar.setOnClickListener(v -> activar());
         txtOperador.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                activarEnLinea();
+                activar();
                 return true;
             }
             return false;
@@ -138,20 +131,29 @@ public class ActLicencia extends AppCompatActivity {
         }
     }
 
-    private void activarEnLinea() {
-        String op = txtOperador.getText().toString().trim();
-        if (op.isEmpty()) {
-            txtOperador.setError("Digite el código o el usuario");
+    /** Un solo campo: código temporal (sin señal) o código / usuario del técnico (en línea). */
+    private void activar() {
+        String digitado = txtOperador.getText().toString().trim();
+        if (digitado.isEmpty()) {
+            txtOperador.setError("Digite su código, su usuario o el código temporal");
+            return;
+        }
+        if (licencia.esCodigoTemporal(digitado)) {
+            if (licencia.activarTemporal() == null) {
+                alerta("No se pudo activar", "No se pudo guardar la licencia temporal.");
+                return;
+            }
+            continuarCon(licencia.revisar());
             return;
         }
         if (!hayRed()) {
-            alerta("Sin señal", "El equipo no tiene conexión. Use la activación sin señal: dicte el código de solicitud a la oficina.");
+            alerta("Sin señal", "El celular no tiene conexión. Conéctese a una red o digite el código temporal que le entregan.");
             return;
         }
         ocupado(true, "Activando...");
         final String base = LicenciaTerminal.baseApi(this);
         new Thread(() -> {
-            LicenciaTerminal.Respuesta r = licencia.activarEnLinea(base, op);
+            LicenciaTerminal.Respuesta r = licencia.activarEnLinea(base, digitado);
             ui.post(() -> {
                 ocupado(false, null);
                 if (r.ok) {
@@ -162,29 +164,6 @@ public class ActLicencia extends AppCompatActivity {
                 }
             });
         }, "licencia-activar").start();
-    }
-
-    private void activarSinSenal() {
-        String op = txtOperador.getText().toString().trim();
-        String resp = txtRespuesta.getText().toString().trim();
-        if (op.isEmpty()) {
-            txtOperador.setError("Digite el código del técnico");
-            return;
-        }
-        if (!resp.matches("\\d{8}")) {
-            txtRespuesta.setError("Son 8 dígitos");
-            return;
-        }
-        if (licencia.codigoDeUsuario(op) == null) {
-            txtOperador.setError("Sin señal digite el código numérico");
-            return;
-        }
-        LicenciaTerminal.Licencia l = licencia.activarSinSenal(op, resp);
-        if (l == null) {
-            alerta("Código incorrecto", "La respuesta no corresponde a esta solicitud y a este técnico. Verifique con la oficina.");
-            return;
-        }
-        continuarCon(licencia.revisar());
     }
 
     private void entrar(LicenciaTerminal.Licencia l) {
@@ -199,8 +178,6 @@ public class ActLicencia extends AppCompatActivity {
 
     private void mostrarFormulario(String mensaje) {
         txtMensaje.setText(mensaje == null || mensaje.isEmpty() ? "El equipo no tiene licencia." : mensaje);
-        txtSolicitud.setText("Código de solicitud: " + licencia.codigoSolicitud()
-                + "\nDíctelo a la oficina junto con el código del técnico.");
         panelActivar.setVisibility(View.VISIBLE);
     }
 
@@ -208,7 +185,6 @@ public class ActLicencia extends AppCompatActivity {
         revisando = si;
         progreso.setVisibility(si ? View.VISIBLE : View.GONE);
         btnActivar.setEnabled(!si);
-        btnSinSenal.setEnabled(!si);
         if (mensaje != null) txtMensaje.setText(mensaje);
     }
 

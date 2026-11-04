@@ -1616,6 +1616,7 @@ public class GuiAcceso extends AppCompatActivity {
     private void ingresoPrincipal() {
 
         variables.setGlobaloperario(txtCodigo.getText().toString());
+        new LicenciaTerminal(this).recordarOperador(txtCodigo.getText().toString());
         recordarSesionSync();
         NombreOperador = txtNombreUsuario.getText().toString();
         Bundle bundle = new Bundle();

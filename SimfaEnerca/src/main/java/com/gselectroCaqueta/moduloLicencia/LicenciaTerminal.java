@@ -54,9 +54,9 @@ import javax.crypto.spec.SecretKeySpec;
  *   ANDROID_ID, ya en SHA-256), marca, modelo, Android y la firma del APK a /api/v1/licencia/activar y el
  *   servidor devuelve la licencia firmada con ECDSA P-256: "EBSA1.base64url(json).base64url(firma DER)".
  *   Aquí se verifica con la clave pública embebida; nadie puede fabricar una sin la clave privada del servidor.
- * - Sin señal: la app muestra un código de solicitud de 8 dígitos, la oficina lo digita en la web y dicta la
- *   respuesta (HMAC con el secreto compartido). Sale una licencia PROVISIONAL de máximo 3 días, guardada con
- *   HMAC; con la primera señal la app se activa en línea.
+ * - Sin señal: el técnico digita, en el mismo campo, el código temporal del día que entrega Global
+ *   (XXXXX-XXXXX-XXXXX-XXXXX, HMAC con el secreto compartido). Sale una licencia PROVISIONAL de máximo 3 días,
+ *   guardada con HMAC; con la primera señal la app se activa en línea con el técnico que inició sesión.
  * - Se guarda en almacenamiento privado y en Documents/EBSA/licencia.lic: si se desinstala la app la copia de
  *   Documents la recupera; si el equipo se restablece, el técnico vuelve a digitar su código y el servidor lo
  *   reconoce por sus identificadores.
@@ -85,6 +85,7 @@ public final class LicenciaTerminal {
     private static final String K_USUARIOS = "usuarios";
     private static final String K_RETIRO = "retiro";
     private static final String K_REVISADA_EN = "revisada_en";
+    private static final String K_OPERADOR = "ultimo_operador";
     private static final String ARCHIVO = "licencia.lic";
 
     /** Resultado de revisar la licencia guardada. */
@@ -343,7 +344,11 @@ public final class LicenciaTerminal {
         Licencia l = decodificar(leerGuardada());
         if (l == null) return new Respuesta(false, false, false, "sin_licencia", "El equipo no tiene licencia.", null);
         if (l.provisional) {
-            Respuesta r = activarEnLinea(baseApi, l.operador);
+            // El código temporal no trae técnico: se activa con el último que inició sesión en este celular.
+            String op = prefs.getString(K_OPERADOR, "");
+            if (op.isEmpty()) op = l.operador;
+            if (op.isEmpty()) return new Respuesta(false, false, false, "sin_operador", "Inicie sesión para terminar de activar.", l);
+            Respuesta r = activarEnLinea(baseApi, op);
             // Una provisional que el servidor rechaza (modelo, tope, vencidas) se mantiene hasta que venza:
             // así se acordó (máximo 3 días). Solo se borra si el equipo está bloqueado.
             return r;
@@ -405,39 +410,61 @@ public final class LicenciaTerminal {
 
     // ------------------------------------------------------------------ sin señal
 
-    /** 8 dígitos que salen de los identificadores del equipo (los dicta el técnico a la oficina). */
-    public String codigoSolicitud() {
-        byte[] h = sha256(("EBSA-SOL|" + idWidevine() + "|" + idAndroid()).getBytes(UTF8));
-        return truncar(h);
-    }
+    private static final String ALFABETO = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-    /** Respuesta que calcula la web (CodigoOffline::respuesta) para esta solicitud, operador y fecha. */
-    static String respuestaEsperada(String solicitud, String codOperador, Date fecha) {
+    /**
+     * Código temporal del día, formato XXXXX-XXXXX-XXXXX-XXXXX (igual que CodigoTemporal::delDia en la web):
+     * HMAC-SHA256(secreto, "EBSA-TMP|yyyyMMdd"), primeros 100 bits de 5 en 5 sobre ALFABETO.
+     */
+    static String codigoTemporal(Date fecha) {
         String secreto = BuildConfig.LICENCIA_SECRETO_OFFLINE;
         if (secreto == null || secreto.isEmpty()) return null;
         String dia = new SimpleDateFormat("yyyyMMdd", Locale.US).format(fecha);
-        return truncar(hmac(secreto.getBytes(UTF8), ("EBSA-LIC|" + solicitud + "|" + codOperador + "|" + dia).getBytes(UTF8)));
+        byte[] h = hmac(secreto.getBytes(UTF8), ("EBSA-TMP|" + dia).getBytes(UTF8));
+        StringBuilder r = new StringBuilder();
+        int buffer = 0, bits = 0, i = 0;
+        while (r.length() < 20) {
+            if (bits < 5) {
+                buffer = ((buffer << 8) | (h[i++] & 0xff)) & 0xffff;
+                bits += 8;
+            }
+            bits -= 5;
+            r.append(ALFABETO.charAt((buffer >> bits) & 31));
+        }
+        return r.substring(0, 5) + "-" + r.substring(5, 10) + "-" + r.substring(10, 15) + "-" + r.substring(15, 20);
+    }
+
+    /** Sin guiones ni espacios y en mayúscula (el técnico lo puede digitar como sea). */
+    static String normalizarCodigo(String s) {
+        return s == null ? "" : s.toUpperCase(Locale.US).replaceAll("[^A-Z0-9]", "");
+    }
+
+    /** ¿Lo digitado es el código temporal de hoy o el de ayer? */
+    public boolean esCodigoTemporal(String digitado) {
+        String d = normalizarCodigo(digitado);
+        if (d.length() != 20) return false;
+        Calendar c = Calendar.getInstance();
+        for (int i = 0; i < 2; i++) {
+            String esperado = codigoTemporal(c.getTime());
+            if (esperado != null && MessageDigest.isEqual(normalizarCodigo(esperado).getBytes(UTF8), d.getBytes(UTF8))) return true;
+            c.add(Calendar.DAY_OF_MONTH, -1);
+        }
+        return false;
+    }
+
+    /** Técnico que inició sesión (lo usa la provisional para activarse en línea con la primera señal). */
+    public void recordarOperador(String codOperador) {
+        if (codOperador != null && codOperador.trim().matches("\\d+")) {
+            prefs.edit().putString(K_OPERADOR, codOperador.trim()).apply();
+        }
     }
 
     /**
-     * Valida la respuesta dictada (vale la de hoy y la de ayer) y guarda una licencia provisional.
+     * Con el código temporal ya validado (esCodigoTemporal) guarda una licencia provisional de 3 días.
      *
-     * @param codOperador código numérico (o usuario si la terminal ya conoce la lista de usuarios)
-     * @return la licencia provisional, o null si la respuesta no corresponde
+     * @return la licencia provisional, o null si no se pudo guardar
      */
-    public Licencia activarSinSenal(String codOperador, String respuesta) {
-        String cod = codigoDeUsuario(codOperador);
-        if (cod == null) return null;
-        String sol = codigoSolicitud();
-        Calendar c = Calendar.getInstance();
-        boolean ok = false;
-        for (int i = 0; i < 2 && !ok; i++) {
-            String esperada = respuestaEsperada(sol, cod, c.getTime());
-            ok = esperada != null && esperada.equals(respuesta.trim());
-            c.add(Calendar.DAY_OF_MONTH, -1);
-        }
-        if (!ok) return null;
-
+    public Licencia activarTemporal() {
         Licencia anterior = decodificar(leerGuardada());
         try {
             JSONObject o = new JSONObject();
@@ -446,7 +473,7 @@ public final class LicenciaTerminal {
             String codMovil = anterior != null && !anterior.codMovil.isEmpty() ? anterior.codMovil : serialLegado();
             if (codMovil == null) codMovil = codMovilCandidato();
             o.put("cod_movil", codMovil);
-            o.put("operador", cod);
+            o.put("operador", anterior != null ? anterior.operador : "");
             o.put("usuario", "");
             o.put("nombre", "");
             o.put("tipo", "");
@@ -654,13 +681,6 @@ public final class LicenciaTerminal {
     }
 
     // ------------------------------------------------------------------ utilidades
-
-    /** Truncado dinámico RFC 4226, módulo 10^8 (igual que CodigoOffline.php). */
-    private static String truncar(byte[] h) {
-        int o = h[h.length - 1] & 0x0f;
-        int n = ((h[o] & 0x7f) << 24) | ((h[o + 1] & 0xff) << 16) | ((h[o + 2] & 0xff) << 8) | (h[o + 3] & 0xff);
-        return String.format(Locale.US, "%08d", n % 100000000);
-    }
 
     private static byte[] hmac(byte[] clave, byte[] datos) {
         try {
