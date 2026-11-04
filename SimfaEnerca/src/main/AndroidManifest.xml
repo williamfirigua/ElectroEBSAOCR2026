@@ -67,6 +67,7 @@ Esto hacia que NavigationHelper cayera siempre al fallcack in app.
         </intent>
     </queries>
     <application
+        android:name="com.gselectroCaqueta.accesoyseguridad.EbsaApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
