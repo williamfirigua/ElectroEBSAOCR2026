@@ -150,6 +150,35 @@ public class MenuPrincipal extends AppCompatActivity {
         seleccionUrl();
         CargarArchivoCarga();
         cargarImagenUsuario(aforador);
+        avisarRutasPendientes();
+    }
+
+    /**
+     * Bloque C: si la terminal no tiene ruta cargada y el técnico tiene rutas asignadas sin cargar, se le avisa
+     * (en segundo plano; sin señal no dice nada).
+     */
+    private void avisarRutasPendientes() {
+        if (!com.gselectroCaqueta.sync.ConfigSync.modoRest(this)) return;
+        if (new java.io.File(VariablesGlobales.directorioactual + "/DATOSDEENTRADA/NOMBRE").exists()) return;
+        new Thread(() -> {
+            try {
+                com.gselectroCaqueta.sync.DescargaRuta.Lista l = new com.gselectroCaqueta.sync.DescargaRuta(MenuPrincipal.this).rutas();
+                if (!l.ok || !"api".equals(l.modo)) return;
+                int pendientes = 0;
+                for (com.gselectroCaqueta.sync.DescargaRuta.Ruta r : l.rutas) if (r.estado < 2) pendientes++;
+                if (pendientes == 0) return;
+                final int n = pendientes;
+                runOnUiThread(() -> {
+                    if (isFinishing()) return;
+                    new androidx.appcompat.app.AlertDialog.Builder(MenuPrincipal.this)
+                            .setTitle("Rutas por cargar")
+                            .setMessage("Tiene " + n + (n == 1 ? " ruta asignada" : " rutas asignadas") + " para cargar.\nVaya a Comunicaciones > Descargar mi ruta.")
+                            .setPositiveButton("Aceptar", null)
+                            .show();
+                });
+            } catch (Throwable ignored) {
+            }
+        }, "aviso-rutas").start();
     }
 
     @Override

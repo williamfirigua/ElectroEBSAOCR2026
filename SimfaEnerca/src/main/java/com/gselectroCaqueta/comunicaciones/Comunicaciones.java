@@ -26,6 +26,9 @@ import android.widget.Toast;
 
 import com.gselectroCaqueta.accesoyseguridad.R;
 import com.gselectroCaqueta.accesoyseguridad.VariablesGlobales;
+import com.gselectroCaqueta.sync.ApiMovil;
+import com.gselectroCaqueta.sync.ConfigSync;
+import com.gselectroCaqueta.sync.DescargaRuta;
 import com.gselectroCaqueta.tablas.TablaClienteSalida;
 import com.gselectroCaqueta.tablas.TablaRegistroSalida;
 import com.gsutil.AsyncResponse;
@@ -190,6 +193,14 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
             public void onClick(View v) {
                 ValidarVersion();
                 //TraerRuta();
+            }
+        });
+
+        // Bloque C: la ruta asignada al técnico por la API (sin digitar el ciclo, descarga reanudable).
+        // Traer Ruta + Recibir Datos quedan como carga antigua (SOAP), de respaldo.
+        findViewById(R.id.btnMiRuta).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                miRuta();
             }
         });
 
@@ -657,6 +668,141 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
         }
     }
 
+    // ------------------------------------------------------------------ ruta por API (bloque C)
+
+    private boolean descargandoRuta;
+
+    /** Lista las rutas del técnico (GET /rutas) y deja escoger una. */
+    private void miRuta() {
+        if (descargandoRuta || banderaWsOcupado) return;
+        if (ExisteNombre()) return;
+        if (!ConfigSync.modoRest(this)) {
+            alerta("Carga de ruta", "Esta terminal está configurada para enviar por SOAP (Configurar Web/IP).\n"
+                    + "Use la carga antigua: digite el ciclo, Traer Ruta y Recibir Datos.");
+            return;
+        }
+        descargandoRuta = true;
+        final ProgressDialog espera = ProgressDialog.show(this, "Mi ruta", "Consultando sus rutas...", true, false);
+        new Thread(() -> {
+            final DescargaRuta.Lista lista = new DescargaRuta(Comunicaciones.this).rutas();
+            runOnUiThread(() -> {
+                cerrar(espera);
+                descargandoRuta = false;
+                if (!lista.ok) {
+                    alerta("No se pudo consultar", lista.mensaje + "\n\nPuede usar la carga antigua (SOAP): digite el ciclo, Traer Ruta y Recibir Datos.");
+                    return;
+                }
+                if ("soap".equals(lista.modo)) {
+                    alerta("Carga antigua activada", "La oficina activó la carga por SOAP.\nDigite el ciclo, Traer Ruta y Recibir Datos.");
+                    return;
+                }
+                if (lista.rutas.isEmpty()) {
+                    alerta("Mi ruta", "No tiene rutas asignadas para cargar.\nSi la oficina ya se la asignó, debe volver a Generar el ciclo.");
+                    return;
+                }
+                escogerRuta(lista.rutas);
+            });
+        }, "mi-ruta").start();
+    }
+
+    private void escogerRuta(final List<DescargaRuta.Ruta> rutas) {
+        String[] textos = new String[rutas.size()];
+        for (int i = 0; i < rutas.size(); i++) textos[i] = rutas.get(i).descripcion();
+        new AlertDialog.Builder(this)
+                .setTitle("Escoja la ruta a cargar")
+                .setItems(textos, (d, i) -> confirmarRuta(rutas.get(i)))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void confirmarRuta(final DescargaRuta.Ruta r) {
+        String msg = "Ruta " + r.ruta + " del ciclo " + r.carpeta + (r.registros != null ? " (" + r.registros + " registros)" : "") + ".";
+        if (r.estado >= 2) msg += "\n\nEsta ruta ya se cargó antes. ¿Cargarla de nuevo en este celular?";
+        new AlertDialog.Builder(this)
+                .setTitle("Cargar ruta")
+                .setMessage(msg)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton("Descargar", (d, w) -> descargarRuta(r))
+                .show();
+    }
+
+    private void descargarRuta(final DescargaRuta.Ruta r) {
+        if (ExisteNombre()) return;
+        descargandoRuta = true;
+        final String sufijo = r.municipio + r.seccion + r.division;
+        final File destino = new File(VariablesGlobales.directorioactual + "/DATOSDEENTRADA/C" + sufijo + ".ZIP");
+        final ProgressDialog barra = new ProgressDialog(this);
+        barra.setTitle("Descargando ruta " + r.ruta);
+        barra.setMessage("Si se cae la señal, lo descargado se conserva.");
+        barra.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        barra.setProgressNumberFormat("%1d / %2d KB");
+        barra.setCancelable(false);
+        barra.show();
+        getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        new Thread(() -> {
+            DescargaRuta.Resultado res = new DescargaRuta(Comunicaciones.this).descargar(r, destino, (bytes, total) ->
+                    runOnUiThread(() -> {
+                        if (total > 0) barra.setMax((int) (total / 1024));
+                        barra.setProgress((int) (bytes / 1024));
+                    }));
+            String zip = null, mov = null;
+            if (res.ok) {
+                // Igual que la carga por SOAP: descomprimir en DATOSDEENTRADA y pasar los .SDA a DATOSDESALIDA.
+                zip = util.DescomprimeZip(res.zip.getAbsolutePath(), "", (int) res.bytes, true);
+                if (zip.contains("Descomprime ✓")) {
+                    mov = util.MoverArchivosPorTipo(VariablesGlobales.directorioactual + "/DATOSDEENTRADA/",
+                            VariablesGlobales.directorioactual + "/DATOSDESALIDA/", ".SDA");
+                }
+                util.Log(logfile, "[Comunicaciones] Ruta por API " + r.codCycle + " " + r.ruta + ": " + res.bytes + " bytes; " + zip + "; " + mov);
+            } else {
+                util.Log(logfile, "[Comunicaciones] Ruta por API " + r.codCycle + " " + r.ruta + " sin terminar: " + res.mensaje);
+            }
+            final String zipMsg2 = zip, movMsg2 = mov;
+            runOnUiThread(() -> {
+                cerrar(barra);
+                try {
+                    getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                } catch (RuntimeException ignored) {
+                }
+                descargandoRuta = false;
+                if (!res.ok) {
+                    alerta("Descarga sin terminar", res.mensaje);
+                    return;
+                }
+                if (movMsg2 == null || !movMsg2.equals("Mover ✓")) {
+                    alerta("No se pudo cargar", (zipMsg2 != null ? zipMsg2 : "") + "\n" + (movMsg2 != null ? movMsg2 : ""));
+                    return;
+                }
+                txtCiclo.setText(r.carpeta);
+                txtMunicipio.setText(r.municipio);
+                txtSeccion.setText(r.seccion);
+                txtDivision.setText(r.division);
+                Ciclo = r.carpeta;
+                Municipio = r.municipio;
+                Seccion = r.seccion;
+                Division = r.division;
+                lblTxtArchivo.setText("C" + sufijo);
+                crearArchivoNombre();
+                DescargaRuta.eventoCargada(Comunicaciones.this, r.codCycle, r.carpeta, r.ruta, "api", res.bytes);
+                txtInfo.setText("Ruta " + r.ruta + " cargada ✓");
+                alerta("Ruta cargada", "La ruta " + r.ruta + " quedó lista en el celular.");
+            });
+        }, "descarga-ruta").start();
+    }
+
+    private void cerrar(ProgressDialog d) {
+        try {
+            if (d != null && d.isShowing() && !isFinishing()) d.dismiss();
+        } catch (RuntimeException ignored) {
+        }
+    }
+
+    private void alerta(String titulo, String mensaje) {
+        if (isFinishing()) return;
+        new AlertDialog.Builder(this).setTitle(titulo).setMessage(mensaje).setPositiveButton("Aceptar", null).show();
+    }
+
     public void RecibirDatos() { //Ax: Se ejecuta totalmente despues de la comprobacion alertdialod en RecibirDatosRun
 
         if (banderaWsOcupado) return;
@@ -877,6 +1023,7 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
             File file = new File(RutaAGrabar + NombreZip);
             if (file.exists()) file.delete();
 
+            DescargaRuta.eventoFinalizada(Comunicaciones.this, Ciclo, "C" + Municipio + Seccion + Division);
 
         } catch (Exception ex) {
             txtInfo.setText("Error al enviar archivos al servidor, intente de nuevo");
@@ -1925,6 +2072,7 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
                             if (movarch.equals("Mover ✓")) {
 
                                 crearArchivoNombre();
+                                DescargaRuta.eventoCargada(Comunicaciones.this, null, Ciclo, "C" + Municipio + Seccion + Division, "soap", tamanoArchivo);
                                 tamanoArchivo = 0;
                                 tipodecarga = "cargaf";
                                 banderaMet2llamo = "";//Ax evito que vuelva a bajar datos

@@ -60,6 +60,23 @@
         android:scrollbarDefaultDelayBeforeFade="420"
         android:scrollbarFadeDuration="250">
 
+        <Button
+            android:id="@+id/btnMiRuta"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_boton_redondeado"
+            android:backgroundTint="@color/greenPop"
+            android:gravity="center"
+            android:text="Descargar mi ruta" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginLeft="5dp"
+            android:text="Carga antigua (SOAP): digite el ciclo, Traer Ruta y Recibir Datos."
+            android:textSize="12sp" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="48dp"

@@ -168,6 +168,90 @@ public class ApiMovil {
         return json("POST", "codigos/validar", Json.escribir(b), true, 15_000);
     }
 
+    /** Rutas asignadas al técnico de la sesión (bloque C): {modo: api|soap, rutas: [...]} */
+    public Respuesta rutas() {
+        return json("GET", "rutas", null, true, LEER_MS);
+    }
+
+    /** Avance de una descarga (bytes ya en el archivo, total). Se llama desde el hilo de la descarga. */
+    public interface Progreso {
+        void avance(long bytes, long total);
+    }
+
+    /** Resultado de pedir un tramo del paquete de la ruta. */
+    public static final class Tramo {
+        public final int codigo;       // 200, 206, 416, 401, 403, 409, SIN_RED, TRANSFERENCIA_FALLIDA
+        public final String sha256;    // X-Paquete-Sha256
+        public final long total;       // X-Paquete-Bytes
+        public final String error;
+
+        Tramo(int codigo, String sha256, long total, String error) {
+            this.codigo = codigo;
+            this.sha256 = sha256;
+            this.total = total;
+            this.error = error;
+        }
+    }
+
+    /**
+     * Baja el paquete de la ruta agregándolo al final de {@code parte} desde el byte {@code desde} (Range). Si se
+     * corta, lo bajado queda en el archivo y la siguiente llamada sigue desde ahí. Si el servidor responde 200 a
+     * un Range (no lo soporta o el paquete cambió), el archivo se reescribe desde cero.
+     */
+    public Tramo bajarPaquete(String cycle, String ruta, File parte, long desde, Progreso progreso) {
+        HttpURLConnection c = null;
+        try {
+            c = abrir("GET", "rutas/" + cycle + "/" + ruta + "/paquete", true, 60_000);
+            c.setRequestProperty("Accept", "application/zip, application/json");
+            if (desde > 0) c.setRequestProperty("Range", "bytes=" + desde + "-");
+            if (!conectar(c)) return new Tramo(SIN_RED, null, 0, "sin conexión con " + base);
+            int codigo = c.getResponseCode();
+            String sha = c.getHeaderField("X-Paquete-Sha256");
+            long total = parseLargo(c.getHeaderField("X-Paquete-Bytes"));
+            if (codigo != 200 && codigo != 206) {
+                InputStream err = c.getErrorStream();
+                String texto = err == null ? "" : leerTodo(err);
+                String detalle = null;
+                try {
+                    detalle = Json.texto(Json.objeto(texto), "detalle");
+                } catch (RuntimeException ignored) {
+                }
+                return new Tramo(codigo, sha, total, detalle != null ? detalle : ("HTTP " + codigo));
+            }
+            boolean agregar = codigo == 206 && desde > 0;
+            long llevo = agregar ? desde : 0;
+            try (InputStream in = c.getInputStream();
+                 OutputStream o = new java.io.FileOutputStream(parte, agregar)) {
+                byte[] buf = new byte[32 * 1024];
+                int n;
+                long ultimo = 0;
+                while ((n = in.read(buf)) > 0) {
+                    o.write(buf, 0, n);
+                    llevo += n;
+                    long ahora = System.currentTimeMillis();
+                    if (progreso != null && ahora - ultimo > 300) {
+                        progreso.avance(llevo, total);
+                        ultimo = ahora;
+                    }
+                }
+            }
+            if (progreso != null) progreso.avance(llevo, total);
+            return new Tramo(codigo, sha, total, null);
+        } catch (IOException e) {
+            return new Tramo(TRANSFERENCIA_FALLIDA, null, 0, e.getClass().getSimpleName() + ": " + e.getMessage());
+        } finally {
+            if (c != null) c.disconnect();
+        }
+    }
+
+    private static long parseLargo(String v) {
+        try {
+            return v == null ? 0 : Long.parseLong(v.trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
     /**
      * Un archivo (foto o LBL) con sus campos; calcula el SHA-256 que exige el servidor.
      *
