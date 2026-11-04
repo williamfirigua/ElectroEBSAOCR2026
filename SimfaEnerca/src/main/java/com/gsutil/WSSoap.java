@@ -303,9 +303,17 @@ public class WSSoap implements Runnable { //Ax: usa las librerias KSOAP2
     }
 
     //Ax: Hace peticion al WS y Trae el archivo por partes y numero de parte.
+    /** Diagnostico de la ultima descarga (ObtenerArchivo): pedazos pedidos, ultimo recibido bien y error si lo hubo. */
+    public long pedazosTotales = 0;
+    public long ultimoPedazoOk = 0;
+    public String errorPedazo = null;
+
     public String ObtenerArchivo(String metodo, String archivoPorRecibir, String rutaAGrabar, int trama, int tamano) throws Exception {
 
         WS_METHOD_NAME = metodo;
+        pedazosTotales = 0;
+        ultimoPedazoOk = 0;
+        errorPedazo = null;
         int i;
         long veces = 1, trozos = 0;
         File file;
@@ -371,7 +379,7 @@ public class WSSoap implements Runnable { //Ax: usa las librerias KSOAP2
                 HttpTransportSE httpTransport = new HttpTransportSE(WS_URL_PAGE);
 
                 try {
-                    httpTransport.debug = true;
+                    httpTransport.debug = false; // con true guardaba copia de cada pedazo en memoria
                     httpTransport.call((WS_NAMESPACE + WS_METHOD_NAME), envelope);// Ax: Enviando la petición al web service
 
                     SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
@@ -380,14 +388,23 @@ public class WSSoap implements Runnable { //Ax: usa las librerias KSOAP2
                     x = Base64.decode(response.toString().getBytes("ISO-8859-1"), Base64.DEFAULT);//Ax: convierte la cadena en Base64 codificacion ISO
 
                     fileOutpStrm.write(x, 0, x.length);//ok
+                    ultimoPedazoOk = i + 1;
 
                 } catch (Exception e) {
-                    result = "Error: " + e.getMessage();
-                    Log.e("error", "1");
-                    fileOutpStrm.close();
+                    // Antes seguia pidiendo los demas pedazos con el archivo ya cerrado y el error real se perdia.
+                    errorPedazo = "Error en el pedazo " + (i + 1) + " de " + veces + " (trama " + trama + " KB): " + e.getMessage();
+                    Log.e("error", errorPedazo);
+                    break;
                 }
             }
-            if (fileOutpStrm != null) {
+            pedazosTotales = veces;
+            if (errorPedazo != null) {
+                try {
+                    fileOutpStrm.close();
+                } catch (IOException ignored) {
+                }
+                result = errorPedazo;
+            } else if (fileOutpStrm != null) {
                 fileOutpStrm.flush();
                 fileOutpStrm.close();//getFD().sync();
 

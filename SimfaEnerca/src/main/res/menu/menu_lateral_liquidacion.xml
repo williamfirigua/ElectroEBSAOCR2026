@@ -6,12 +6,15 @@
     <item android:title="Lectura">
         <menu>
             <item android:id="@+id/nav_anomalia" android:icon="@drawable/ic_nav_warning" android:title="Capturar Anomalía" />
-            <item android:id="@+id/nav_novedad" android:icon="@drawable/ic_nav_note_add" android:title="Capturar Novedad Lect" />
             <item android:id="@+id/nav_foto" android:icon="@drawable/ic_nav_camera" android:title="Tomar Foto" />
+            <item android:id="@+id/nav_ocr" android:icon="@drawable/ic_nav_camera" android:title="Habilitar OCR en esta cuenta" />
             <item android:id="@+id/nav_anterior_predio" android:icon="@drawable/ic_nav_history" android:title="Anterior Predio" />
             <item android:id="@+id/nav_digitos" android:icon="@drawable/ic_nav_edit" android:title="Modificar Nro Dígitos" />
             <item android:id="@+id/nav_buscar" android:icon="@drawable/ic_nav_search" android:title="Buscar Cliente" />
             <item android:id="@+id/nav_mapa" android:icon="@drawable/ic_nav_map" android:title="Mapa" />
+            <item android:id="@+id/nav_contenedor" android:icon="@drawable/ic_nav_list" android:title="Iniciar / Cerrar Contenedor" />
+            <item android:id="@+id/nav_nota_retenida" android:icon="@drawable/ic_nav_note_add" android:title="Generar Nota Fact. Retenida" />
+            <item android:id="@+id/nav_novedad_medidor" android:icon="@drawable/ic_nav_warning" android:title="Novedad: Medidor Encontrado" />
         </menu>
     </item>
 
@@ -33,6 +36,13 @@
             <item android:id="@+id/nav_enviar_fotos" android:icon="@drawable/ic_nav_upload" android:title="Enviar Fotos" />
             <item android:id="@+id/nav_envio_registros" android:icon="@drawable/ic_nav_list" android:title="Envío Registros" />
             <item android:id="@+id/nav_wifi" android:icon="@drawable/ic_nav_wifi" android:title="Activar Wifi" />
+        </menu>
+    </item>
+
+    <item android:title="Mensajería">
+        <menu>
+            <item android:id="@+id/nav_mensajes" android:icon="@drawable/ic_nav_note_add" android:title="Mensajes de la Oficina" />
+            <item android:id="@+id/nav_mensaje_oficina" android:icon="@drawable/ic_nav_send" android:title="Escribir a la Oficina" />
         </menu>
     </item>
 

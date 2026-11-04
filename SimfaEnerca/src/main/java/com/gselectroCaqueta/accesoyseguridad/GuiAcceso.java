@@ -1478,7 +1478,7 @@ public class GuiAcceso extends AppCompatActivity {
         builder.setTitle(titulo);
         builder.setMessage(mensaje);
 
-        builder.setIcon(R.drawable.ic_simfa_logo);
+        builder.setIcon(R.drawable.gss_logo40x40);
 
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
@@ -1919,7 +1919,7 @@ public class GuiAcceso extends AppCompatActivity {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(titulo);
         builder.setMessage(mensaje);
-        builder.setIcon(R.drawable.ic_simfa_logo);
+        builder.setIcon(R.drawable.gss_logo40x40);
         builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {

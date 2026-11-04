@@ -84,7 +84,7 @@
                 android:layout_gravity="left"
                 android:layout_weight="1"
                 android:background="@drawable/bg_input"
-                android:inputType="number"
+                android:inputType="text"
                 android:maxLength="4"
                 android:minHeight="48dp"
                 android:padding="8dp"

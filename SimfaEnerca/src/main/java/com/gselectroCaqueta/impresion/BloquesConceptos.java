@@ -22,7 +22,8 @@ import java.util.Map;
  *   <li>por catálogo: {@code DES_CONC.TXT} DATO1 ({@link DatosFactura.Concepto#bloqueCatalogo}).</li>
  * </ul>
  * {@link Fuente} dice cuál manda cuando difieren. El mapa por código es el último respaldo y solo
- * aplica a conceptos que no traen bloque por ninguna de las dos vías.
+ * aplica a conceptos que no traen bloque por ninguna de las dos vías. Excepción: el ajuste decena
+ * (607/608) va siempre en el detalle, aunque el cobro lo traiga en el grupo 3.
  * <p>
  * Dentro de cada bloque los conceptos van por {@link DatosFactura.Concepto#orden} (DATO2 del catálogo:
  * energía, reactiva, subsidio, contribución… y "Ajuste decena" al final, como la factura oficial); los
@@ -88,6 +89,10 @@ public final class BloquesConceptos {
 
         @Override
         public Bloque clasificar(DatosFactura.Concepto c) {
+            // Ajuste decena (607 resta / 608 suma): siempre en DETALLE DE LA FACTURA, como la factura de EBSA y
+            // como dice el catalogo (DATO1 = 1). El plano CO_COBRO lo trae en el grupo 3 por compatibilidad con
+            // el orden de lineas del VB; ese grupo no decide el bloque impreso.
+            if (c.codigo == 607 || c.codigo == 608) return Bloque.PERIODO;
             int primero = fuente == Fuente.COBRO ? c.bloque : c.bloqueCatalogo;
             int segundo = fuente == Fuente.COBRO ? c.bloqueCatalogo : c.bloque;
             Bloque b = Bloque.porNumero(primero);

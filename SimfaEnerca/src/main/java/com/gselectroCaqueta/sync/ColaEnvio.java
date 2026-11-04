@@ -13,6 +13,8 @@ public interface ColaEnvio {
     String TRACKING = "tracking";
     String LBL = "lbl";
     String FOTO = "foto";
+    /** Eventos de campo (EventoMovil): desbloqueo de foto, búsquedas, contenedores... */
+    String EVENTO = "evento";
 
     int PENDIENTE = 0;
     int ENVIADO = 1;

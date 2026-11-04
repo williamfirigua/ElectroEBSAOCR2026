@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Linterna encendida: cuerpo y haz en ambar. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFF9A825"
+        android:pathData="M6,2h12v4H6zM7,7h10l-2,4v11H9V11zM12,13.5a1.5,1.5 0,1 0,0.01 0z" />
+    <path
+        android:strokeColor="#FFF9A825"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:pathData="M2.5,4.5l2,1M21.5,4.5l-2,1M2.5,9l2,-0.5M21.5,9l-2,-0.5" />
+</vector>

@@ -66,6 +66,8 @@ public final class DialogoBusqueda {
         final String primerRegistro;
         final String cliente;
         final String medidorBusq;
+        /** Solo los digitos del medidor, con sus ceros: para buscar por los ultimos digitos. */
+        final String medidorDigitos;
         final String cuentaBusq;
         final String nombreBusq;
         final String direccionBusq;
@@ -78,6 +80,7 @@ public final class DialogoBusqueda {
             this.primerRegistro = primerRegistro.trim();
             this.cliente = cliente.trim();
             this.medidorBusq = sinCeros(this.medidor);
+            this.medidorDigitos = this.medidor.replaceAll("\\D", "");
             this.cuentaBusq = sinCeros(this.cuenta);
             this.nombreBusq = normalizar(this.nombre);
             this.direccionBusq = normalizar(this.direccion);
@@ -193,8 +196,17 @@ public final class DialogoBusqueda {
     }
 
     /**
-     * Números: medidor o cuenta (exacto primero, luego contiene). Texto: nombre o dirección; todas las
-     * palabras digitadas deben aparecer ("CL 5 23" encuentra "CALLE 5 # 23-10" si contiene "CL", "5" y "23").
+     * Números: los técnicos digitan los ÚLTIMOS 3 o 4 dígitos del medidor, así que el orden es
+     * <ol>
+     *   <li>medidor exacto, cuenta exacta;</li>
+     *   <li>medidor que TERMINA en lo digitado (con sus ceros: "0101" no trae "...1101");</li>
+     *   <li>cuenta que termina en lo digitado;</li>
+     *   <li>medidor o cuenta que lo contiene en otra posición.</li>
+     * </ol>
+     * Se recorre toda la ruta (unos miles de entradas en memoria: milisegundos) para que un medidor que termina en
+     * lo digitado no quede por fuera porque antes aparecieron muchos que solo lo contienen.
+     * Texto: nombre o dirección; todas las palabras digitadas deben aparecer ("CL 5 23" encuentra
+     * "CALLE 5 # 23-10" si contiene "CL", "5" y "23").
      */
     static List<Resultado> filtrar(List<Entrada> todas, String consulta) {
         String q = normalizar(consulta);
@@ -203,13 +215,23 @@ public final class DialogoBusqueda {
         if (q.length() < MIN_CARACTERES) return exactos;
         if (soloDigitos(q)) {
             String n = sinCeros(q);
+            List<Resultado> finMedidor = new ArrayList<>();
+            List<Resultado> finCuenta = new ArrayList<>();
             for (Entrada e : todas) {
                 if (e.medidorBusq.equals(n)) exactos.add(new Resultado(e, TIPO_POR_MEDIDOR, "Medidor"));
                 else if (e.cuentaBusq.equals(n)) exactos.add(new Resultado(e, TIPO_POR_CLIENTE, "Cuenta"));
-                else if (e.medidorBusq.contains(n)) otros.add(new Resultado(e, TIPO_POR_MEDIDOR, "Medidor"));
-                else if (e.cuentaBusq.contains(n)) otros.add(new Resultado(e, TIPO_POR_CLIENTE, "Cuenta"));
-                if (exactos.size() + otros.size() >= MAX_RESULTADOS * 2) break;
+                else if (e.medidorDigitos.endsWith(q)) {
+                    if (finMedidor.size() < MAX_RESULTADOS) finMedidor.add(new Resultado(e, TIPO_POR_MEDIDOR, "Medidor (final)"));
+                } else if (e.cuenta.endsWith(q)) {
+                    if (finCuenta.size() < MAX_RESULTADOS) finCuenta.add(new Resultado(e, TIPO_POR_CLIENTE, "Cuenta (final)"));
+                } else if (otros.size() < MAX_RESULTADOS && e.medidorBusq.contains(n)) {
+                    otros.add(new Resultado(e, TIPO_POR_MEDIDOR, "Medidor"));
+                } else if (otros.size() < MAX_RESULTADOS && e.cuentaBusq.contains(n)) {
+                    otros.add(new Resultado(e, TIPO_POR_CLIENTE, "Cuenta"));
+                }
             }
+            exactos.addAll(finMedidor);
+            exactos.addAll(finCuenta);
         } else {
             String[] palabras = q.split(" ");
             for (Entrada e : todas) {

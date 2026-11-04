@@ -39,15 +39,36 @@
                 android:layout_marginEnd="4dp"
                 android:contentDescription="@string/red_inactiva" />
 
-            <ImageView
-                android:id="@+id/imagenChat"
+            <FrameLayout
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:layout_marginEnd="4dp"
-                android:clickable="true"
-                android:contentDescription="Mensajes"
-                android:focusable="true"
-                android:scaleType="fitCenter" />
+                android:layout_marginEnd="4dp">
+
+                <ImageView
+                    android:id="@+id/imagenChat"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clickable="true"
+                    android:contentDescription="Mensajes"
+                    android:focusable="true"
+                    android:scaleType="fitCenter" />
+
+                <!-- Mensajes de la oficina sin leer (BandejaMensajes) -->
+                <TextView
+                    android:id="@+id/txtMensajesNoLeidos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="16dp"
+                    android:layout_gravity="top|end"
+                    android:background="@drawable/bg_badge_mensajes"
+                    android:gravity="center"
+                    android:minWidth="16dp"
+                    android:paddingStart="3dp"
+                    android:paddingEnd="3dp"
+                    android:textColor="#FFFFFF"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+            </FrameLayout>
 
             <ImageView
                 android:id="@+id/imagenLiquid_3"
@@ -310,7 +331,32 @@
                 android:padding="2dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/camara" />
+            <ImageButton
+                android:id="@+id/btnLinterna"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Encender linterna"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_linterna_off" />
         </LinearLayout>
+
+        <!-- Contenedor en curso: visible solo entre "Iniciar contenedor" y "Cerrar". -->
+        <TextView
+            android:id="@+id/txtContenedor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/bg_contenedor"
+            android:gravity="center"
+            android:textColor="#FF5D4037"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
 
         <!-- Lectura -->
         <LinearLayout

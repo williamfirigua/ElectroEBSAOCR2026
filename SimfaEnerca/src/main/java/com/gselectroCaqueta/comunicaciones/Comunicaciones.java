@@ -74,7 +74,7 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
     String Division = "0";
     String paginaWs = "";
 
-    int trama = 50; //Ax: Por defecto
+    int trama = 100; // KB por llamada al SOAP (antes 50: ~40 llamadas para una ruta de 2 MB; con 100, ~20). 200 lo rechazo el servidor
     int puerto = 85; //Ax: Por defecto
     int tamanoArchivo = 0; //Ax: tamano obtenido de lo que hay que bajar o tambien de lo que se va a enviar(descarga)
 
@@ -1687,6 +1687,31 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
         public Context contexto;
         ProgressDialog pDialog;
         int x = 0;
+        /** Resultado de descomprimir y mover la ruta: se hace en segundo plano (antes en el hilo de la pantalla). */
+        String zipMsg = null, movMsg = null;
+
+        /** La pantalla sigue viva: si Android la cerro durante la descarga, no se muestran ni se cierran dialogos. */
+        private boolean pantallaViva() {
+            return !isFinishing() && !isDestroyed();
+        }
+
+        /**
+         * Cierra el aviso "cargando" sin tumbar la app. Antes un dismiss() sobre una pantalla que Android ya habia
+         * cerrado (pantalla apagada, giro, salir de la app) lanzaba "not attached to window manager": la app se caia
+         * con el zip ya descargado y sin descomprimir.
+         */
+        private void cerrarCargando() {
+            try {
+                if (pDialog != null && pDialog.isShowing() && pantallaViva()) pDialog.dismiss();
+            } catch (RuntimeException ignored) {
+                // la ventana ya no existe: no hay nada que cerrar
+            }
+            pDialog = null;
+            try {
+                getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            } catch (RuntimeException ignored) {
+            }
+        }
 
         @Override
         protected Void doInBackground(String... params) {
@@ -1752,8 +1777,21 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
                         break;
 
                     case "ENVIAR_DEL_SERVIDOR_AL_PDA":
+                        long inicioDescarga = System.currentTimeMillis();
+                        util.Log(logfile, "[Comunicaciones] Descarga " + ArchivoAEnviarRecibir + ": " + tamanoArchivo + " bytes, trama " + trama + " KB");
                         respuesta = wsoap.ObtenerArchivo(metodo, ArchivoAEnviarRecibir, RutaAGrabar, trama, tamanoArchivo);
+                        util.Log(logfile, "[Comunicaciones] Descarga " + (respuesta != null && respuesta.length() == 1 ? "OK" : "FALLO")
+                                + " en " + ((System.currentTimeMillis() - inicioDescarga) / 1000.0) + " s: pedazos " + wsoap.ultimoPedazoOk + "/" + wsoap.pedazosTotales
+                                + " de " + trama + " KB" + (wsoap.errorPedazo != null ? " | " + wsoap.errorPedazo : ""));
                         Log.e("INFO","ENVIAR_DEL_SERVIDOR_AL_PDA | metodo:" + metodo + " | ArchivoAEnviarRecibir:" + ArchivoAEnviarRecibir + " | RutaAGrabar:" + RutaAGrabar + " | trama:" + trama + "tamanoArchivo" + tamanoArchivo);
+                        // Descomprimir (24 MB de planos) y mover los .SDA tambien aqui, fuera del hilo de la pantalla:
+                        // antes se hacia en onPostExecute y la pantalla quedaba congelada con el aviso puesto.
+                        if (respuesta != null && respuesta.length() == 1) {
+                            zipMsg = util.DescomprimeZip(RutaAGrabar, "", tamanoArchivo, true);
+                            if (zipMsg.contains("Descomprime ✓")) {
+                                movMsg = util.MoverArchivosPorTipo(VariablesGlobales.directorioactual + "/DATOSDEENTRADA/", VariablesGlobales.directorioactual + "/DATOSDESALIDA/", ".SDA");
+                            }
+                        }
                         break;
                     case "ValidarVersionSIMFACT":
                         respuesta = traerArchivo();
@@ -1778,7 +1816,7 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
-            pDialog.dismiss();
+            cerrarCargando();
             banderaWsOcupado = false;
             String msg = "";
             boolean bul = true;
@@ -1810,7 +1848,7 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
                         String[] resp = respuesta.split(";");
 
                         if (resp.length < 2) setNombreArgs(respuesta);
-                        else AlertDialogEscoger(resp); //Ax:mostrar opcion
+                        else if (pantallaViva()) AlertDialogEscoger(resp); //Ax:mostrar opcion
 
                         txtCiclo.setEnabled(false);
                         txtMunicipio.setEnabled(false);
@@ -1871,7 +1909,8 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
                     if (respuesta.length() == 1) {//"1" bajados sin borrado "2" bajado y borrado
                         msg = "Datos cargados ✓;   " + "; ";
 
-                        String zipMsg = util.DescomprimeZip(RutaAGrabar, "", tamanoArchivo, true); //Ax: descomprimir archivos
+                        // Ya descomprimido y movido en doInBackground.
+                        String zipMsg = this.zipMsg == null ? "Error al descomprimir" : this.zipMsg;
 
                         msg += zipMsg + "; ";
 
@@ -1879,7 +1918,7 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
 
                             //Axx: aqui iba el cambio de hora y fecha, se salta este paso (pendiente todo)
 
-                            String movarch = util.MoverArchivosPorTipo(VariablesGlobales.directorioactual + "/DATOSDEENTRADA/", VariablesGlobales.directorioactual + "/DATOSDESALIDA/", ".SDA");//Ax: Mover Archivos Por extension
+                            String movarch = movMsg == null ? "Error al mover" : movMsg;
 
                             msg += movarch + "; ";
 
@@ -2020,11 +2059,19 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
 
         @Override
         protected void onPreExecute() {
+            if (!pantallaViva()) return; // la tarea sigue; solo no hay aviso que mostrar
             pDialog = new ProgressDialog(Comunicaciones.this);
             pDialog.setMessage("cargando...");
             pDialog.setCancelable(false);
             pDialog.setCanceledOnTouchOutside(false);
-            pDialog.show();
+            try {
+                pDialog.show();
+                // Pantalla encendida mientras dura la transferencia: si se apaga, Android puede cerrar la pantalla
+                // a mitad de la descarga.
+                getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            } catch (RuntimeException e) {
+                pDialog = null;
+            }
         }
 
         @Override

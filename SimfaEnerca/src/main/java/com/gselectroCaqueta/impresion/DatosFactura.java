@@ -60,6 +60,8 @@ public final class DatosFactura {
     // ---- tarifa de energía para la tabla de liquidación
     public double valorKwh;                    // MDDOR1VLORKWH (50)
     public double porcentajeSubsidio;          // MDDOR1SBSDIOCNTRBCION (49), negativo = subsidio
+    public double valorKwhReactiva;            // MDDOR2VLORKWH
+    public double porcentajeReactiva;          // MDDOR2SBSDIOCNTRBCION (contribucion sobre la reactiva)
     public int kwhSubsistencia;                // LS_CONS_SUBS de la desviación, por mes
 
     // ---- información de interés
@@ -68,8 +70,13 @@ public final class DatosFactura {
 
     // ---- costos unitarios (89..96)
     public String costoG = "", costoT = "", costoPR = "", costoD = "", costoR = "", costoCV = "", costoCF = "", costoCU = "";
-    /** "Costo diario" de la factura oficial. null = EBSA no ha definido la fuente ni la fórmula (se imprime "???"). */
+    /** "Costo diario" si la fuente lo trae; null = se calcula (total del detalle / días del periodo, ver ContextoFactura). */
     public String costoDiario;
+
+    /** "Total Consumo" de la activa tal como sale impreso: consumo del periodo + prefacturado (si viene). */
+    public long totalConsumoActiva() {
+        return activa.consumo + (activa.prefacturado == null ? 0 : activa.prefacturado);
+    }
 
     // ---- indicadores de calidad (una entrada por MES_n con dato)
     public final List<Calidad> calidad = new ArrayList<>();

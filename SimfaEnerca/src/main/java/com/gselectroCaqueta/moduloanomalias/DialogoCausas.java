@@ -87,6 +87,8 @@ public final class DialogoCausas {
                     tabla.lectura_AnomaliaDeNoLectura(i);
                     String codigo = tabla.getanomaliaDeNoLectura_CODIGO();
                     if (codigo == null || codigo.trim().isEmpty()) continue;
+                    // La causa 0 es "sin causa" (lectura normal): no es una anomalia que el lector pueda elegir.
+                    if (AnomaliaDeNoLectura.normalizarCodigo(codigo).equals("0")) continue;
                     lista.add(new Causa(codigo.toUpperCase(Locale.ROOT), tabla.getanomaliaDeNoLectura_DESCRIPCION()));
                 }
             } finally {

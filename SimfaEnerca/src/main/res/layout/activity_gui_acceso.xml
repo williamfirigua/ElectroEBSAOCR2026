@@ -33,11 +33,6 @@
             android:textSize="18sp"
             android:textStyle="bold" />
 
-        <ImageView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:contentDescription="SIM-FA"
-            android:src="@drawable/ic_simfa_logo" />
     </LinearLayout>
 
     <TableLayout

@@ -17,10 +17,16 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
+import com.gselectroCaqueta.accesoyseguridad.AlmacenEstado;
+import com.gselectroCaqueta.accesoyseguridad.BandejaMensajes;
+import com.gselectroCaqueta.accesoyseguridad.CodigoSupervisor;
 import com.gselectroCaqueta.accesoyseguridad.VariablesGlobales;
 import com.gsutil.Utils;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Despacha la cola (ebsa_sync.db) a /api/v1 en segundo plano: liquidaciones, tracking, LBL y fotos, en ese
@@ -49,6 +55,8 @@ public class SincronizacionService extends Service {
     private static final String ACCION_VACIAR = "com.gselectroCaqueta.sync.VACIAR";
 
     private static final long LATIDO_MS = 15 * 60_000L;
+    /** Con la liquidacion abierta, la bandeja de mensajes se consulta cada 3 minutos (una peticion GET corta). */
+    private static final long RECEPCION_MS = 3 * 60_000L;
     private static final long MINIMA_ESPERA_MS = 5_000L;
     private static final long DESPERTAR_MS = 3_000L; // agrupa varios avisos seguidos en un solo ciclo
     private static final long DIA_MS = 24 * 3600_000L;
@@ -67,6 +75,7 @@ public class SincronizacionService extends Service {
     private volatile boolean salirCuandoVacio;
     private ConnectivityManager.NetworkCallback red;
     private long ultimaPurga;
+    private long ultimaRecepcion;
     private final Utils utils = new Utils();
     private File logfile;
 
@@ -198,6 +207,7 @@ public class SincronizacionService extends Service {
 
             MotorSincronizacion.Resumen r = m.ejecutar(ahora);
             if (r.estado != MotorSincronizacion.Estado.NADA_PENDIENTE) log("ciclo " + r);
+            recibir(m, System.currentTimeMillis(), r);
             siguiente(r, System.currentTimeMillis());
         } catch (Throwable t) {
             // Nada de lo que pase aquí puede tumbar la app (el servicio vive en el mismo proceso).
@@ -214,7 +224,7 @@ public class SincronizacionService extends Service {
                 log("cola vacía: servicio detenido");
                 stopSelf();
             } else {
-                programar(LATIDO_MS);
+                programar(RECEPCION_MS); // liquidacion abierta: el proximo latido revisa la bandeja
             }
             return;
         }
@@ -250,6 +260,53 @@ public class SincronizacionService extends Service {
             log("cambio de operador: " + n + " puntos de tracking del técnico anterior descartados");
         }
         config.borrar();
+        // La bandeja y las claves de codigos eran del tecnico anterior.
+        new BandejaMensajes(getFilesDir()).vaciar();
+        new CodigoSupervisor(AlmacenEstado.de(this, "codigos_supervisor")).olvidarClaves();
+    }
+
+    /**
+     * Bandeja de mensajes y claves de codigos de supervisor: solo con la liquidacion abierta, cada RECEPCION_MS,
+     * y no si el ciclo acaba de quedar sin red o sin sesion (no tiene sentido insistir en el mismo latido).
+     */
+    private void recibir(MotorSincronizacion m, long ahora, MotorSincronizacion.Resumen r) {
+        if (salirCuandoVacio || ahora - ultimaRecepcion < RECEPCION_MS) return;
+        if (r != null && (r.estado == MotorSincronizacion.Estado.SIN_RED || r.estado == MotorSincronizacion.Estado.REQUIERE_LOGIN)) return;
+        ultimaRecepcion = ahora;
+        try {
+            m.recibir(new ReceptorApp(), ahora);
+        } catch (Throwable t) {
+            log("bandeja: " + t);
+        }
+    }
+
+    private final class ReceptorApp implements MotorSincronizacion.Receptor {
+        private final BandejaMensajes bandeja = new BandejaMensajes(getFilesDir());
+        private final CodigoSupervisor codigos = new CodigoSupervisor(AlmacenEstado.de(SincronizacionService.this, "codigos_supervisor"));
+
+        @Override
+        public long ultimoMensaje() {
+            return bandeja.ultimoId();
+        }
+
+        @Override
+        public void mensajes(List<Map<String, Object>> nuevos) {
+            bandeja.agregar(nuevos);
+        }
+
+        @Override
+        public long clavesDescargadasEn() {
+            return codigos.descargadasEn();
+        }
+
+        @Override
+        public void claves(List<Map<String, Object>> claves, long ahoraMs) {
+            List<CodigoSupervisor.Clave> lista = new ArrayList<>();
+            for (Map<String, Object> c : claves) {
+                lista.add(new CodigoSupervisor.Clave(Json.texto(c, "supervisor"), Json.texto(c, "nombre"), String.valueOf(Json.texto(c, "clave"))));
+            }
+            codigos.guardarClaves(lista, ahoraMs);
+        }
     }
 
     private MotorSincronizacion motor(String base) {

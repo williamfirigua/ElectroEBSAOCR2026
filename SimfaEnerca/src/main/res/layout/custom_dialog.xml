@@ -33,7 +33,7 @@
                         android:layout_height="51dp"
                         android:layout_marginTop="5dp"
                         android:layout_marginLeft="12dp"
-                        android:src="@drawable/ic_simfa_logo"
+                        android:src="@drawable/gss_logo40x40"
                         tools:ignore="ContentDescription"/>
 
                     <TextView

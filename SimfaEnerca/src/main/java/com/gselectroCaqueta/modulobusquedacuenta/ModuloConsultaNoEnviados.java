@@ -368,7 +368,7 @@ public class ModuloConsultaNoEnviados extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 int n = 0;
-                for (String t : new String[]{ColaEnvio.LIQUIDACION, ColaEnvio.LBL, ColaEnvio.FOTO, ColaEnvio.TRACKING}) {
+                for (String t : new String[]{ColaEnvio.LIQUIDACION, ColaEnvio.EVENTO, ColaEnvio.LBL, ColaEnvio.FOTO, ColaEnvio.TRACKING}) {
                     n += cola.reintentarErrores(t);
                 }
                 if (n > 0) SincronizacionService.solicitar(ModuloConsultaNoEnviados.this);

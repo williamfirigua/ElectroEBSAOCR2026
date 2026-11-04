@@ -71,6 +71,7 @@ public class MotorSincronizacion {
 
     static final int LOTE_LIQUIDACIONES = 50;
     static final int LOTE_TRACKING = 200;
+    static final int LOTE_EVENTOS = 100;
     static final int ARCHIVOS_POR_CICLO = 30;
     private static final long ESPERA_BASE_MS = 30_000;
     private static final long ESPERA_MAX_MS = 30 * 60_000;
@@ -101,10 +102,89 @@ public class MotorSincronizacion {
         }
         r.estado = Estado.COMPLETO;
         if (!liquidaciones(r, ahoraMs)) return r;
+        // Después de las lecturas: un evento puede referirse a la lectura que se acaba de enviar.
+        if (!eventos(r, ahoraMs)) return r;
         if (!tracking(r, ahoraMs)) return r;
         if (!archivos(r, ColaEnvio.LBL, ahoraMs)) return r;
         archivos(r, ColaEnvio.FOTO, ahoraMs);
         return r;
+    }
+
+    /** Donde se guarda lo que baja del servidor (bandeja y claves de codigos). Lo implementa la app. */
+    public interface Receptor {
+        /** Id del ultimo mensaje que ya tiene la terminal (0 = ninguno). */
+        long ultimoMensaje();
+
+        /** Mensajes nuevos, en orden de id. Cada uno: id, remitente, nombre, asunto, texto, enviado, leido. */
+        void mensajes(List<Map<String, Object>> nuevos);
+
+        /** Hora (ms) de la ultima descarga de claves; 0 = nunca. */
+        long clavesDescargadasEn();
+
+        /** Claves del tecnico: supervisor, nombre, clave (hex). */
+        void claves(List<Map<String, Object>> claves, long ahoraMs);
+    }
+
+    /** Las claves cambian solo si se crea o cambia un supervisor: basta revisarlas cada 6 horas. */
+    static final long CADA_CLAVES_MS = 6 * 60 * 60_000L;
+
+    /**
+     * Baja lo que la oficina tiene para el tecnico: mensajes nuevos y, cada 6 horas, las claves de los codigos de
+     * supervisor. No envia nada (lo que el tecnico escribe o lee va como evento por la cola). Sin red o sin sesion
+     * no hace nada: se intenta en el proximo latido.
+     *
+     * @return mensajes nuevos recibidos (-1 si no se pudo consultar)
+     */
+    public int recibir(Receptor receptor, long ahoraMs) {
+        Resumen r = new Resumen();
+        if (!asegurarToken(r)) return -1;
+        int nuevos = 0;
+        long desde = receptor.ultimoMensaje();
+        for (int vuelta = 0; vuelta < 5; vuelta++) { // hasta 250 mensajes por latido
+            ApiMovil.Respuesta resp = api.mensajes(desde);
+            if (resp.codigo == 401) {
+                sesionPerdida(r, resp);
+                return -1;
+            }
+            if (resp.codigo == 404) return 0; // servidor sin el endpoint todavia
+            if (!resp.ok()) return -1;
+            List<Map<String, Object>> lote = new ArrayList<>();
+            for (Object o : Json.lista(resp.cuerpo, "mensajes")) {
+                if (o instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> m = (Map<String, Object>) o;
+                    lote.add(m);
+                }
+            }
+            if (lote.isEmpty()) break;
+            receptor.mensajes(lote);
+            nuevos += lote.size();
+            long ultimo = desde;
+            for (Map<String, Object> m : lote) {
+                try {
+                    ultimo = Math.max(ultimo, Long.parseLong(Json.texto(m, "id")));
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            if (ultimo <= desde) break;
+            desde = ultimo;
+        }
+        if (ahoraMs - receptor.clavesDescargadasEn() >= CADA_CLAVES_MS) {
+            ApiMovil.Respuesta resp = api.clavesCodigo();
+            if (resp.ok()) {
+                List<Map<String, Object>> claves = new ArrayList<>();
+                for (Object o : Json.lista(resp.cuerpo, "claves")) {
+                    if (o instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> m = (Map<String, Object>) o;
+                        claves.add(m);
+                    }
+                }
+                receptor.claves(claves, ahoraMs);
+            }
+        }
+        if (nuevos > 0) log("mensajes nuevos: " + nuevos);
+        return nuevos;
     }
 
     /**
@@ -130,7 +210,7 @@ public class MotorSincronizacion {
     }
 
     private boolean hayPendientes(long ahoraMs) {
-        for (String t : new String[]{ColaEnvio.LIQUIDACION, ColaEnvio.TRACKING, ColaEnvio.LBL, ColaEnvio.FOTO}) {
+        for (String t : new String[]{ColaEnvio.LIQUIDACION, ColaEnvio.EVENTO, ColaEnvio.TRACKING, ColaEnvio.LBL, ColaEnvio.FOTO}) {
             if (!cola.pendientes(t, 1, ahoraMs).isEmpty()) return true;
         }
         return false;
@@ -246,6 +326,61 @@ public class MotorSincronizacion {
             cola.marcarEnviados(enviados, ahoraMs);
             r.suma(r.enviados, ColaEnvio.LIQUIDACION, enviados.size());
             // Sin resultado (no debería pasar): se reintenta luego.
+            if (!porUid.isEmpty()) reprogramar(new ArrayList<>(porUid.values()), ahoraMs, "sin_resultado");
+        }
+    }
+
+    // ------------------------------------------------------------------ eventos
+
+    /** Igual que las liquidaciones: un resultado por evento (aceptado | duplicado | rechazado). */
+    private boolean eventos(Resumen r, long ahoraMs) {
+        while (true) {
+            List<ColaEnvio.Elemento> lote = cola.pendientes(ColaEnvio.EVENTO, LOTE_EVENTOS, ahoraMs);
+            if (lote.isEmpty()) return true;
+
+            List<String> eventos = new ArrayList<>(lote.size());
+            Map<String, ColaEnvio.Elemento> porUid = new HashMap<>();
+            for (ColaEnvio.Elemento e : lote) {
+                eventos.add(e.datos);
+                porUid.put(e.uid, e);
+            }
+            ApiMovil.Respuesta resp = api.enviarEventos(eventos);
+
+            if (resp.codigo == 401) return sesionPerdida(r, resp);
+            if (resp.codigo == 404) {
+                // Servidor sin el endpoint todavía: quedan en la cola y se reintentan, sin frenar lo demás.
+                reprogramar(lote, ahoraMs, "eventos_no_disponible");
+                log("eventos: el servidor no tiene /eventos/lote; se reintenta luego");
+                return true;
+            }
+            if (resp.codigo == 422) {
+                for (ColaEnvio.Elemento e : lote) cola.marcarError(e.id, "lote_invalido: " + resp.campo("detalle"), ahoraMs);
+                r.suma(r.errores, ColaEnvio.EVENTO, lote.size());
+                continue;
+            }
+            if (!resp.ok()) {
+                reprogramar(lote, ahoraMs, resp.toString());
+                return sinServicio(r, resp);
+            }
+
+            List<Long> enviados = new ArrayList<>();
+            for (Object o : Json.lista(resp.cuerpo, "resultados")) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> res = (Map<String, Object>) o;
+                ColaEnvio.Elemento e = porUid.remove(Json.texto(res, "client_uid"));
+                if (e == null) continue;
+                String estado = Json.texto(res, "estado");
+                if ("aceptado".equals(estado) || "duplicado".equals(estado)) {
+                    enviados.add(e.id);
+                } else {
+                    String motivo = Json.texto(res, "motivo") + ": " + Json.texto(res, "detalle");
+                    cola.marcarError(e.id, motivo, ahoraMs);
+                    log("evento " + e.uid + " rechazado por el servidor: " + motivo);
+                    r.suma(r.errores, ColaEnvio.EVENTO, 1);
+                }
+            }
+            cola.marcarEnviados(enviados, ahoraMs);
+            r.suma(r.enviados, ColaEnvio.EVENTO, enviados.size());
             if (!porUid.isEmpty()) reprogramar(new ArrayList<>(porUid.values()), ahoraMs, "sin_resultado");
         }
     }

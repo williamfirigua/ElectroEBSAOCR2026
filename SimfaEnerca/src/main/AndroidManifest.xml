@@ -145,6 +145,7 @@ Esto hacia que NavigationHelper cayera siempre al fallcack in app.
         <activity
             android:name="com.gselectroCaqueta.comunicaciones.Comunicaciones"
             android:label="@string/title_activity_comunicaciones"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".GuiAcceso">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

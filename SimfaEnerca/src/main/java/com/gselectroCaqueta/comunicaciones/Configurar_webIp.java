@@ -58,7 +58,7 @@ public class Configurar_webIp extends AppCompatActivity implements AsyncResponse
     ImageView iconWebSoff;
     ImageView iconWebSon;
     TextView lblTransmite;
-    String trama = "10"; //Ax: Por defecto
+    String trama = "200"; //Ax: Por defecto
     String puerto = "85";
     private String nivelOperador;
     private Boolean pruebawsok;

@@ -568,18 +568,18 @@ public class ActLicencia extends AppCompatActivity implements View.OnClickListen
             if (bdcini == null) {
                 BDComunicaciones bdc = new BDComunicaciones();
                 bdc.setId(1);
-                bdc.setURL("192.168.1.254:836");
+                bdc.setURL("162.215.135.191:3630");
                 bdc.setPaginaWs("/demoenergia.asmx");   // tu SOAP, no usado aquí
                 bdc.setEstado("A");
-                bdc.setRutaAdministrador("D:/DEMOENRUTADOR_PEREIRA");
-                bdc.setPuertoApi(914);
+                bdc.setRutaAdministrador("D:/ENRUTADOR_EBSA");
+                bdc.setPuertoApi(3629);
                 crudComuni.setCofigUrl(bdc);
 
                 bdc.setId(2);
                 bdc.setURL("186.117.240.195:836");
                 bdc.setPaginaWs("/demoenergia.asmx");
                 bdc.setEstado("I");
-                bdc.setRutaAdministrador("D:/DEMOENRUTADOR_PEREIRA");
+                bdc.setRutaAdministrador("D:/ENRUTADOR_EBSA");
                 bdc.setPuertoApi(914);
                 crudComuni.setCofigUrl(bdc);
             }
@@ -643,7 +643,7 @@ public class ActLicencia extends AppCompatActivity implements View.OnClickListen
         Vibrator v = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         v.vibrate(500);
         AlertDialog.Builder alertConfCreado = new AlertDialog.Builder(this);
-        alertConfCreado.setIcon(R.drawable.ic_simfa_logo);
+        alertConfCreado.setIcon(R.drawable.gss_logo40x40);
         alertConfCreado
                 .setMessage(mensaje)
                 .setTitle("Alerta")

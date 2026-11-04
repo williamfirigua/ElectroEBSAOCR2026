@@ -48,7 +48,7 @@ public class ModuloReimpresion extends AppCompatActivity {
     String RutaAGrabar = "";
     String metodo = "";
     int tamanoArchivo = 0;
-    int trama = 50;
+    int trama = 100; // KB por llamada al SOAP, igual que Comunicaciones
     Utils util = new Utils();
     public File logfile;
 

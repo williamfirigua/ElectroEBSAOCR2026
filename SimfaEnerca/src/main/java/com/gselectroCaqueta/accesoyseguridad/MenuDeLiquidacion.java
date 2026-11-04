@@ -46,6 +46,11 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.FileProvider;
 import androidx.appcompat.app.AppCompatActivity;
@@ -64,6 +69,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
@@ -83,6 +89,7 @@ import com.gselectroCaqueta.moduloMapas.NavigationHelper;
 import com.gselectroCaqueta.moduloanomalias.AlertaCuentaD;
 import com.gselectroCaqueta.moduloanomalias.AnomaliaDeNoLectura;
 import com.gselectroCaqueta.moduloanomalias.DialogoCausas;
+import com.gselectroCaqueta.moduloanomalias.DialogoInforme;
 import com.gselectroCaqueta.modulobluetooth.DeviceListActivity;
 import com.gselectroCaqueta.modulobluetooth.btPrintFile;
 import com.gselectroCaqueta.modulobluetooth.msgTypes;
@@ -94,11 +101,14 @@ import com.gselectroCaqueta.modulocaptnovedlect.ModuloCaptNovLect;
 import com.gselectroCaqueta.modulocaptnovedlect.ModuloConfigFormatoImpresion;
 import com.gselectroCaqueta.moduloscannerhardware.ModuloEscanerHardware;
 import com.gselectroCaqueta.moduloscannerhardware.ModuloScannerKT40Q;
+import com.gselectroCaqueta.sync.ApiMovil;
 import com.gselectroCaqueta.sync.ArchivoParaEnvio;
 import com.gselectroCaqueta.sync.ColaEnvio;
 import com.gselectroCaqueta.sync.ColaEnvioSqlite;
 import com.gselectroCaqueta.sync.ColectorLiquidacion;
 import com.gselectroCaqueta.sync.ConfigSync;
+import com.gselectroCaqueta.sync.EventoMovil;
+import com.gselectroCaqueta.sync.ItemLiquidacion;
 import com.gselectroCaqueta.sync.LectorCoCobro;
 import com.gselectroCaqueta.sync.SincronizacionService;
 import com.gselectroCaqueta.tablas.EnvioGPS;
@@ -123,6 +133,7 @@ import com.gselectroCaqueta.impresion.AdaptadorMovil;
 import com.gselectroCaqueta.impresion.AjustesImpresora;
 import com.gselectroCaqueta.impresion.ColaImpresion;
 import com.gselectroCaqueta.impresion.DatosFactura;
+import com.gselectroCaqueta.impresion.NotaRetencion;
 import com.gselectroCaqueta.impresion.RenderFactura;
 import com.gsutil.AsyncResponse;
 import com.gsutil.DatosWS;
@@ -185,6 +196,32 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     // true  → la siguiente foto es del medidor: se lanzará CamaraLecturaActivity
     // false → foto normal (causal, informe, supervisor) sin OCR
     boolean esFotoMedidor = false;
+    /**
+     * EBSA: el OCR queda apagado; la camara toma foto normal. Desde el menu ("Habilitar OCR en esta cuenta") se enciende
+     * solo para la cuenta en pantalla: al pasar a otra cuenta se apaga solo.
+     */
+    private String cuentaConOcr = "";
+
+    /**
+     * Hay un dialogo propio esperando respuesta (informe de desviacion o consumo impreso). Mientras tanto quien llamo a
+     * procesarLectura ya cerro los archivos de facturacion: al responder hay que reabrirlos antes de seguir, y cerrarlos
+     * al terminar solo si no quedo otro dialogo pendiente. Sin esto las escrituras quedaban bloqueadas ("archivo
+     * cerrado" en LOGEVENTOS): la factura salia y se enviaba, pero CLIENTE.SDA quedaba en L y CO_COBRO sin liquidar.
+     */
+    private boolean dialogoEnCurso = false;
+
+    private void cerrarArchivosSiNoHayPendiente() {
+        if (!dialogoEnCurso && !ventanaConsumo) cerrarArchivosFacturacion();
+    }
+
+    /** Verificacion del consumo impreso en consumo alto: lo que salio en "Total Consumo" de la ultima factura. */
+    private static final int INTENTOS_CONSUMO_IMPRESO = 3;
+    private long consumoImpreso = -1;
+    private String cuentaConsumoImpreso = "";
+    /** Cuenta ya verificada (o que agoto los intentos) para no volver a pedirlo en la misma toma. */
+    private String cuentaConsumoVerificada = "";
+    /** Cuenta que agoto los intentos sin coincidir: el envio lleva el sufijo VCONS en descanomalia. */
+    private String cuentaConsumoNoVerificado = "";
     boolean yaTomoFotoOcr = false;   // ← AGREGAR
     String  lecturaOcrCapturada  = ""; // lectura que devolvió el OCR para comparar
     boolean fotoOcrObligatoria   = false; // MODIFICACIONES==1: foto OCR obligatoria
@@ -197,7 +234,22 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     private int estadoUbicacion = UBI_NO_VALIDADO;
     private float  distanciaActualPredioMetros = -1f;
     private int intentosLecturaFueraRango = 0;  // contador de intentos fuera de rango
-    private static final float RADIO_PERMITIDO_METROS = 100f;
+    /** Radio por defecto si GENERAL.TXT no trae la distancia de la ruta. */
+    private static final float RADIO_POR_DEFECTO_METROS = 100f;
+
+    /**
+     * Distancia maxima al predio para tomar la lectura: la de la ruta (enrutador, "Distancia"), que el servidor
+     * escribe en GENERAL.TXT (posiciones 105-107) y GuiAcceso deja en VariablesGlobales.distanciagps. Antes era 100 fijo.
+     * Valores menores a 2 m no son distancias (los ciclos viejos traian 1 como bandera): se usa el defecto.
+     */
+    private float radioPermitidoMetros() {
+        try {
+            float r = Float.parseFloat(VariablesGlobales.getDistanciagps().trim());
+            return r >= 2f ? r : RADIO_POR_DEFECTO_METROS;
+        } catch (RuntimeException e) {
+            return RADIO_POR_DEFECTO_METROS;
+        }
+    }
     private static final int MAX_INTENTOS_FUERA_RANGO = 3;
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -695,6 +747,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         btnAnomalia = (ImageButton) findViewById(R.id.btnAnomalia);
         btnTomarFoto = (ImageButton) findViewById(R.id.btnTomarFoto);
         btnBuscar = (ImageButton) findViewById(R.id.btnBuscar);
+        prepararLinterna();
+        prepararChipContenedor();
 
         // txtInformeEscrito = (TextView) findViewById(R.id.txtInformeEscrito);
         // lblLectura = (TextView) findViewById(R.id.lblLectura);
@@ -712,6 +766,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         txtMedidorCuenta.setFocusable(false);
 
         imagenChat = (ImageView) findViewById(R.id.imagenChat);
+        txtMensajesNoLeidos = (TextView) findViewById(R.id.txtMensajesNoLeidos);
         imagenLiquid_1 = (ImageView) findViewById(R.id.imagenLiquid_1);
         imagenLiquid_2 = (ImageView) findViewById(R.id.imagenLiquid_2);
         imagenLiquid_3 = (ImageView) findViewById(R.id.imagenLiquid_3);
@@ -1006,6 +1061,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             public void onClick(View arg0) {
                 if (infoClienteEntrada.gettablaEntradaClientes_Actividad().trim().equals("99")) {
                     MensajeriaCliente();
+                } else {
+                    abrirBandeja();
                 }
             }
         });
@@ -1137,6 +1194,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         // 1 s / 0 m como siempre: la distancia al predio y la validacion de rango dependen de recibir la
         // posicion aunque el lector este quieto. Se libera en onDestroy (antes nunca se liberaba).
         locationmanager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, gpsListener);
+        iniciarUbicacionFusionada();
 
         if (!locationmanager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             mensajeT("GPS No esta activo", msgLargo);
@@ -1220,7 +1278,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         if (itemId == R.id.nav_anomalia) return 1;
         if (itemId == R.id.nav_reimprimir) return 2;
         if (itemId == R.id.nav_anterior_predio) return 3;
-        if (itemId == R.id.nav_novedad) return 4;
+        // nav_novedad (opcion 4, novedades de Caqueta) se quito del menu: EBSA no usa novedades.
         if (itemId == R.id.nav_digitos) return 5;
         if (itemId == R.id.nav_buscar) return 6;
         if (itemId == R.id.nav_habilitar_impresora) return 7;
@@ -1238,6 +1296,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         if (itemId == R.id.nav_mapa) return 19;
         if (itemId == R.id.nav_envio_registros) return 20;
         if (itemId == R.id.nav_volver) return 21;
+        if (itemId == R.id.nav_ocr) return 22;
+        if (itemId == R.id.nav_contenedor) return 23;
+        if (itemId == R.id.nav_nota_retenida) return 24;
+        if (itemId == R.id.nav_novedad_medidor) return 25;
+        if (itemId == R.id.nav_mensajes) return 26;
+        if (itemId == R.id.nav_mensaje_oficina) return 27;
         return 0;
     }
 
@@ -1245,8 +1309,70 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     private LocationManager gpsManager;
     private LocationListener gpsListener;
 
+    /**
+     * Ubicacion fusionada de Google (la misma del seguimiento): satelites + wifi + red celular. Dentro de una casa o
+     * bajo techo, donde el GPS solo no consigue posicion, sigue dando punto; sin internet funciona con los satelites.
+     * El GPS satelital sigue registrado aparte: su hora es la que usa el control de reloj (ControlEntornoTerminal).
+     */
+    private FusedLocationProviderClient ubicacionFusionada;
+    private LocationCallback callbackUbicacion;
+    /** Posicion mas vieja que esto no se usa ni se envia: es la de otra cuenta. */
+    private static final long EDAD_MAXIMA_POSICION_MS = 2L * 60L * 1000L;
+    /** elapsedRealtime de la ultima posicion recibida (GPS o fusionada); 0 = ninguna en esta sesion. */
+    private long ultimaPosicionRecibidaMs = 0L;
+
+    private void iniciarUbicacionFusionada() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        try {
+            ubicacionFusionada = LocationServices.getFusedLocationProviderClient(this);
+            LocationRequest solicitud = LocationRequest.create()
+                    .setInterval(2000)
+                    .setFastestInterval(1000)
+                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            callbackUbicacion = new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult resultado) {
+                    if (resultado == null) return;
+                    Location loc = resultado.getLastLocation();
+                    if (loc == null) return;
+                    try {
+                        muestraPosicionActual(loc);
+                    } catch (Exception e) {
+                        // Una posicion que no se pueda procesar no debe tumbar la liquidacion.
+                        utils.Log(logfile, "[MenuDeLiquidacion]ubicacion fusionada -> " + e);
+                    }
+                }
+            };
+            ubicacionFusionada.requestLocationUpdates(solicitud, callbackUbicacion, android.os.Looper.getMainLooper());
+        } catch (Exception e) {
+            // Sin servicios de Google: queda solo el GPS satelital, como antes.
+            utils.Log(logfile, "[MenuDeLiquidacion]iniciarUbicacionFusionada() " + e.getMessage());
+            ubicacionFusionada = null;
+        }
+    }
+
+    /** Hay una posicion de los ultimos 2 minutos. */
+    private boolean posicionVigente() {
+        return ultimaPosicionRecibidaMs > 0
+                && android.os.SystemClock.elapsedRealtime() - ultimaPosicionRecibidaMs <= EDAD_MAXIMA_POSICION_MS;
+    }
+
     @Override
     protected void onDestroy() {
+        if (linterna != null) {
+            linterna.liberar();
+            linterna = null;
+        }
+        if (ubicacionFusionada != null && callbackUbicacion != null) {
+            try {
+                ubicacionFusionada.removeLocationUpdates(callbackUbicacion);
+            } catch (Exception e) {
+                utils.Log(logfile, "[MenuDeLiquidacion]onDestroy() ubicacion -> " + e.getMessage());
+            }
+            callbackUbicacion = null;
+        }
         if (gpsManager != null && gpsListener != null) {
             try {
                 gpsManager.removeUpdates(gpsListener);
@@ -1284,6 +1410,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             drawerLayout.closeDrawer(androidx.core.view.GravityCompat.END);
             return;
         }
+        if (bloqueadoPorFotoPendiente()) return;
         // Log.e("error", "hace el back 1");
         try {
             if (myThread.isAlive()) {
@@ -1306,6 +1433,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 .setPositiveButton("OK", (dialog, which) -> {
                     dialog.dismiss();
                 })
+                .setNeutralButton("BANDEJA", (dialog, which) -> abrirBandeja())
                 .show();
 
         return true;
@@ -2500,7 +2628,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 builder.setTitle("Mensaje de Reimpresion");
                 builder.setMessage("Cliente ya se encuentra facturado.\nDesea Reimprimir la Factura?");
 
-                builder.setIcon(R.drawable.ic_simfa_logo);
+                builder.setIcon(R.drawable.gss_logo40x40);
 
                 builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
 
@@ -2732,6 +2860,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         if (generarArchivoTextoImpresion() > 0) {
             ProcesoEnviaAImpresion(imprimirFactura);
+            // Al reimprimir sale tambien la carta/acta si la cuenta la lleva (antes solo salia en la primera impresion).
+            if (indicadorManual == 0 && debeEntregarCarta()) {
+                yaimprimioRetiene = false;
+                imprimirLabelRetencion();
+            }
         }
 
         // IDENTIFICAR SI LA CUENTA ESTA EN UN ESTADO DE LECTURA // Y SE PUEDE IMPRIR Y PROCESAR PARA ENVIAR
@@ -2884,6 +3017,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
     /** Plantilla de carta que corresponde a la analitica de la lectura actual; null si ninguna instalada la pide. */
+    /** La cuenta en pantalla lleva carta/acta por la analitica (la misma regla al liquidar y al reimprimir). */
+    private boolean debeEntregarCarta() {
+        return infoRegistroSalida.gettablaRegistroSalida_COMENTARIO2().equals("003")
+                || infoClienteSalida.gettablaClienteSalida_IMPRESORA().trim().equals("CONS. ALTO DV3")
+                || plantillaCartaAnalitica() != null;
+    }
+
     private String plantillaCartaAnalitica() {
         try {
             return new RenderFactura(new File(VariablesGlobales.directorioactual + "/DATOSDEENTRADA"),
@@ -2947,6 +3087,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         + " Cont.ATI - " + (EsImpresora521 == 1 ? "ZQ-521" : "RW-420");
 
                 DatosFactura datos = adaptador.leer(descripcionTipoLectura(), version);
+                consumoImpreso = datos.totalConsumoActiva();
+                cuentaConsumoImpreso = datos.cuenta;
                 if (!datos.avisos.isEmpty()) {
                     utils.Log(logfile, "[MenuDeLiquidacion]generarFacturaConPlantilla(); cuenta " + datos.cuenta
                             + " avisos de lectura: " + datos.avisos);
@@ -2974,6 +3116,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                             + " con aseo impresa con FORMATO_CORTA porque FORMATO_LARGA.CPCL no esta instalada");
                 }
                 registrarEnIndiceLbl(salida.archivo.getName());
+                barrasImpresas = MuestraFactura.barrasDelCpcl(salida.cpcl);
+                cuentaBarrasImpresas = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
                 escribeResumenTiempo("Factura con plantilla " + salida.plantilla + " " + ajustes + "|" + VariablesGlobales.registroactual);
                 return 1;
             } finally {
@@ -5472,11 +5616,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         } catch (IOException ex) {
             // Log.e("error", "error automatico " + ex.getMessage());
             utils.Log(logfile, "[MenuDeLiquidacion]IncluirDatosEnModoAutomatico(); " + ex.getMessage());
+            MODO = ""; // tambien si la liquidacion automatica falla
             return "ERROR| Error -> " + ex.getMessage();
         }
         //mensajeT("Proceso Automatico concluido! ", msgLargo);
         salirse = false;//evita el dowork
         indicadorManual = 0;//evita envios
+        MODO = ""; // terminada la liquidacion automatica se vuelve al modo normal (si no, no vuelve a pedir foto)
         procesandoenvioenHilos_CPCAN = 0;
         procesandoenvioenHilos = 0;
         conexionGPRSActiva = 0;
@@ -5631,11 +5777,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             Log.e("ERROR", "[MenuDeLiquidacion]IncluirDatosEnModoAutomatico(); " + ex.getMessage());
             // Log.e("error", "error automatico " + ex.getMessage());
             utils.Log(logfile, "[MenuDeLiquidacion]IncluirDatosEnModoAutomatico(); " + ex.getMessage());
+            MODO = ""; // tambien si la liquidacion automatica falla
             return "ERROR|Error -> " + ex.getMessage();
         }
         //mensajeT("Proceso Automatico concluido! ", msgLargo);
         salirse = false;//evita el dowork
         indicadorManual = 0;//evita envios
+        MODO = ""; // terminada la liquidacion automatica se vuelve al modo normal (si no, no vuelve a pedir foto)
         procesandoenvioenHilos_CPCAN = 0;
         procesandoenvioenHilos = 0;
         conexionGPRSActiva = 0;
@@ -5779,11 +5927,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             Log.e("ERROR", "[MenuDeLiquidacion]IncluirDatosEnModoAutomatico(); " + ex.getMessage());
             // Log.e("error", "error automatico " + ex.getMessage());
             utils.Log(logfile, "[MenuDeLiquidacion]IncluirDatosEnModoAutomatico(); " + ex.getMessage());
+            MODO = ""; // tambien si la liquidacion automatica falla
             return "ERROR|Error -> " + ex.getMessage();
         }
         //mensajeT("Proceso Automatico concluido! ", msgLargo);
         salirse = false;//evita el dowork
         indicadorManual = 0;//evita envios
+        MODO = ""; // terminada la liquidacion automatica se vuelve al modo normal (si no, no vuelve a pedir foto)
         procesandoenvioenHilos_CPCAN = 0;
         procesandoenvioenHilos = 0;
         conexionGPRSActiva = 0;
@@ -6021,7 +6171,6 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             tablaTarifa.buscarbinario_TablaTarifas(idMaximo);
 
             double subsidioRaw;
-            //nuevo antes de ir a constatar en las tarifas
             if (tablaTarifa.encontro_TablaTarifas > 0) {
                 double diferencia = parsearDecimal(tablaTarifa.gettablaTarifas_VLORKWH().trim())
                         - parsearDecimal(tablaTarifa.gettablaTarifas_VLORRKWH().trim());
@@ -6034,20 +6183,6 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     subsidioRaw = parsearDecimal(infoClienteEntrada.gettablaEntradaClientes_MDDOR2SBSDIOCNTRBCION())
                             * consumo * valorReferenciaPorKwh / 100;
 
-            }
-
-            if (consumoParaTabla > 0 && subsidioRaw == 0 && consumoSubsistencia>0) {
-                if (Tipo.equals("A"))
-                {
-                    subsidioRaw = parsearDecimal(infoClienteEntrada.gettablaEntradaClientes_MDDOR1SBSDIOCNTRBCION())
-                            * consumoParaTabla * valorReferenciaPorKwh / 100;
-                }
-                else
-
-                {
-                    subsidioRaw = parsearDecimal(infoClienteEntrada.gettablaEntradaClientes_MDDOR2SBSDIOCNTRBCION())
-                            * consumoParaTabla * valorReferenciaPorKwh / 100;
-                }
             }
 
             resultado[0] = valorConsumoRaw;
@@ -6723,13 +6858,14 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         valorconcepto = Double.parseDouble(infoClienteSalida.gettablaClienteSalida_CONTRIBUCIONENERGIA().trim().replace("-",""));
                         if (Double.parseDouble(infoClienteSalida.gettablaClienteSalida_CONTRIBUCIONENERGIA().trim())>0 ) {
                              actividad[0] = 'C';
+                            valor21 += valorconcepto;
                         }
                          else {
                             actividad[0] = 'D';
+                            valor21 -= valorconcepto;
                         }
                     }
 
-                    valor21 += valorconcepto;
                     break;
 
                 case 509:
@@ -6885,6 +7021,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                             if (pesosajuste >= 5) {
                                 valorconcepto = (double) 10 - pesosajuste;
                                 infoCobrosLiquidados.settablaCobrosRealizados_Conceptodecobro("608  ");
+                                infoCobrosLiquidados.settablaCobrosRealizados_Indicadoractividad("C");
                                 actividad[0] = 'C';
                             } else {
                                 valorconcepto = pesosajuste;
@@ -6899,12 +7036,14 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     break;
 
                 case 613:
-                    if (parsearDecimal(infoClienteSalida.gettablaClienteSalida_CONTRIBUCIONENERGIA().trim())>=0)
-                        valorconcepto =calcularSubsidioEmpleado(variables.pesosenergia);
-                    else
+                    if (parsearDecimal(infoClienteSalida.gettablaClienteSalida_CONTRIBUCIONENERGIA().trim())>=0) {
+                        valorconcepto = calcularSubsidioEmpleado(variables.pesosenergia);
+                    }else {
                         valorconcepto = calcularSubsidioEmpleado(variables.pesosenergia + parseStringToDouble(infoClienteSalida.gettablaClienteSalida_CONTRIBUCIONENERGIA().trim()));
+                    }
 
-                        valorconcepto = variables.ejecutarAjusteUnidades(valorconcepto);
+                    valorconcepto = variables.ejecutarAjusteUnidades(valorconcepto);
+                    valor21 = valor21 - valorconcepto;
                     break;
 
                 case 710:
@@ -7671,6 +7810,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         }else {
             imagenChat.setImageResource(R.drawable.chat_msg_no);
         }
+        actualizarBadgeMensajes();
 
         temp = infoClienteEntrada.gettablaEntradaClientes_Ruta().trim();
         arma_cuentasGps[3] = temp;
@@ -8230,6 +8370,16 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
     public void opcionMenu(int item) { //tools
 
+        // Con foto pendiente no se sale de la cuenta: anterior predio, buscar, utilidades, envios con consulta,
+        // liquidacion automatica, mapa (navegar al siguiente) y volver.
+        switch (item) {
+            case 3: case 6: case 12: case 15: case 16: case 19: case 21:
+                if (bloqueadoPorFotoPendiente()) return;
+                break;
+            default:
+                break;
+        }
+
         txtElectura.setText("");
 
         switch (item) {
@@ -8434,7 +8584,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 builder2.setTitle("ALERTA EVALUAR ENVIOS");
                 builder2.setMessage("DESEA EVALUAR SI TODAS SUS LECTURAS FUERON ENVIADAS? ");
 
-                builder2.setIcon(R.drawable.ic_simfa_logo);
+                builder2.setIcon(R.drawable.gss_logo40x40);
 
                 builder2.setPositiveButton("Si", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -8521,7 +8671,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 //                builder3.setTitle("ALERTA ENVIO REGISTROS");
 //                builder3.setMessage("DESEA REALIZAR EL ENVIO DE LOS REGISTROS? ");
 //
-//                builder3.setIcon(R.drawable.ic_simfa_logo);
+//                builder3.setIcon(R.drawable.gss_logo40x40);
 //
 //                builder3.setPositiveButton("Si", new DialogInterface.OnClickListener() {
 //                    public void onClick(DialogInterface dialog, int which) {
@@ -8546,7 +8696,54 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 // Log.e("error", "hace el back 2");
                 finish();
                 break;
+            case 22: // Habilitar / deshabilitar OCR solo para la cuenta en pantalla
+                code.setLength(0);
+                alternarOcrCuentaActual();
+                break;
+            case 23: // Iniciar / cerrar contenedor (banco de medidores)
+                code.setLength(0);
+                alternarContenedor();
+                break;
+            case 24: // Nota de factura retenida (soporte de no entrega)
+                code.setLength(0);
+                generarNotaRetenida();
+                break;
+            case 25: // Novedad: medidor encontrado (con foto y posicion)
+                code.setLength(0);
+                registrarNovedadMedidor();
+                break;
+            case 26: // Bandeja de mensajes de la oficina (lo mismo que tocar el icono de chat)
+                code.setLength(0);
+                abrirBandeja();
+                break;
+            case 27: // Mensaje del tecnico a su supervisor
+                code.setLength(0);
+                escribirAOficina();
+                break;
         }
+    }
+
+    private boolean ocrHabilitadoEnCuentaActual() {
+        String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta() == null ? "" : infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
+        return !cuenta.isEmpty() && cuenta.equals(cuentaConOcr);
+    }
+
+    /** Enciende el OCR para la cuenta en pantalla y abre la camara de lectura; si ya estaba encendido, lo apaga. */
+    private void alternarOcrCuentaActual() {
+        String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta() == null ? "" : infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
+        if (cuenta.isEmpty()) {
+            mensajeT("No hay cuenta en pantalla", msgCorto);
+            return;
+        }
+        if (cuenta.equals(cuentaConOcr)) {
+            cuentaConOcr = "";
+            mensajeT("OCR deshabilitado: la camara toma foto normal", msgCorto);
+            return;
+        }
+        cuentaConOcr = cuenta;
+        escribeResumenTiempo(cuenta + ";OCR habilitado por el tecnico");
+        mensajeT("OCR habilitado para la cuenta " + cuenta, msgCorto);
+        capturaImagenFotografica();
     }
 
     public void cambiodigitos() {
@@ -8886,7 +9083,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 //                builder2.setTitle("ALERTA EVALUAR ENVIOS");
 //                builder2.setMessage("DESEA EVALUAR SI TODAS SUS LECTURAS FUERON ENVIADAS? ");
 //
-//                builder2.setIcon(R.drawable.ic_simfa_logo);
+//                builder2.setIcon(R.drawable.gss_logo40x40);
 //
 //                builder2.setPositiveButton("Si", new DialogInterface.OnClickListener() {
 //                    public void onClick(DialogInterface dialog, int which) {
@@ -9578,13 +9775,14 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         alterno = VariablesGlobales.registroactual;
         VariablesGlobales.registroactual = variables.ultimoregistro;
         leerInformacionUsuario(1);
+        marcarLlegada(SecuenciaCampo.LLEGADA_ULTIMO_LEIDO);
         visualizarInformacionCliente(0);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Alerta de Liquidacion Carga Instalada");
         builder.setMessage("Desea Reprocesar el Cliente?");
 
-        builder.setIcon(R.drawable.ic_simfa_logo);
+        builder.setIcon(R.drawable.gss_logo40x40);
 
         builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
@@ -9935,7 +10133,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 builder.setMessage("Ya termino de realizar\n la Facturacion? " + VariablesGlobales.totalprediosleidos + " == "
                         + infoClienteEntrada.getTotal_TablaEntradaClientes());
 
-                builder.setIcon(R.drawable.ic_simfa_logo);
+                builder.setIcon(R.drawable.gss_logo40x40);
 
                 builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -9989,6 +10187,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
     private void capturarAnomaliaTerreno() {
 
+        if (!entornoPermiteLiquidar()) {
+            return;
+        }
         AnomaliaDeNoLectura anomaliaDeNoLectura = new AnomaliaDeNoLectura();
         anomaliaDeNoLectura.setArchivo_AnomaliaDeNoLectura(VariablesGlobales.directorioactual + "/DATOSDEENTRADA/CAUSA_NL.TXT");
 
@@ -10077,6 +10278,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     private void aplicarCausaElegida(String snumero) {
         medidorCero = false;
         causal = snumero == null ? "" : snumero;
+        // La causa 0 es "sin causa": no se acepta aunque se digite (DialogoCausas tampoco la lista).
+        if (AnomaliaDeNoLectura.normalizarCodigo(causal).equals("0")) {
+            mensajeT("La causa 0 no es una anomalia de no lectura", msgCorto);
+            causal = "";
+            return;
+        }
         if (anomaliaDeLectura.abrir_AnomaliaDeNoLectura(anomaliaDeLectura.getArchivo_AnomaliaDeNoLectura())) {
             anomaliaDeLectura.buscarbinario_AnomaliaDeNoLectura(causal);
             anomaliaDeLectura.Cerrar_AnomaliaDeNoLectura();
@@ -10098,7 +10305,40 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     + anomaliaDeLectura.getanomaliaDeNoLectura_DESCRIPCION().trim(), "ProcesarAnomalias");
             return;
         }
-        ProcesarAnomalias();
+        pedirInformeYProcesar();
+    }
+
+    /** Informe escrito de la causal (EBSA): lo pone ingresarAnomaliaNoLectura en REGISTRO.SDA. Solo modo manual. */
+    private String informeCausalPendiente = null;
+
+    /**
+     * EBSA: toda causal lleva informe escrito, obligatorio y antes de la foto. Se pide aqui, despues de elegir
+     * (y confirmar, en las causas 9 y 15) y antes de procesar, porque la foto la dispara procesarLectura.
+     * Cancelar el informe cancela la causal.
+     */
+    private void pedirInformeYProcesar() {
+        final String causaElegida = causal;
+        String titulo = causaElegida.trim() + " - " + anomaliaDeLectura.getanomaliaDeNoLectura_DESCRIPCION().trim();
+        DialogoInforme.mostrar(this, titulo, new DialogoInforme.Callback() {
+            @Override
+            public void alAceptar(String informe) {
+                causal = causaElegida;
+                informeCausalPendiente = informe;
+                escribeResumenTiempo("Informe causal " + causaElegida.trim() + ": " + informe + "|" + VariablesGlobales.registroactual);
+                try {
+                    ProcesarAnomalias();
+                } finally {
+                    informeCausalPendiente = null;
+                }
+            }
+
+            @Override
+            public void alCancelar() {
+                causal = "";
+                informeCausalPendiente = null;
+                mensajeT("Causal cancelada: el informe es obligatorio", msgMedio);
+            }
+        });
     }
 
     public void ProcesarAnomalias() {
@@ -10115,7 +10355,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         builder.setTitle(titulo);
         builder.setMessage(mensaje);
-        builder.setIcon(R.drawable.ic_simfa_logo);
+        builder.setIcon(R.drawable.gss_logo40x40);
 
         builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
 
@@ -10125,7 +10365,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                 switch (NombreMetodo) { //Esto es para reusar este metodo 'MostrarAlertDialog' con mas llamados en 'NombreMetodo'
                     case "ProcesarAnomalias":
-                        ProcesarAnomalias();
+                        pedirInformeYProcesar(); // EBSA: informe obligatorio antes de procesar la causal
                         break;
 
                     case "ProcesarCuentaDirecta": // [SI] liquidar medida: lo mismo que hacia el retorno de AlertaCuentaD
@@ -10487,6 +10727,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         infoRegistroSalida.lectura_TablaRegistroSalida(VariablesGlobales.registroactual);
         infoRegistroSalida.settablaRegistroSalida_causadenolectura(anomaliaDeLectura.getanomaliaDeNoLectura_CODIGO());
         infoRegistroSalida.settablaRegistroSalida_lecturatomada("0000000000");
+        if (indicadorManual == 0 && informeCausalPendiente != null) {
+            // Informe de la causal (DialogoInforme ya lo dejo en 30 caracteres como maximo).
+            infoRegistroSalida.settablaRegistroSalida_informe(informeCausalPendiente);
+        }
         variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";ingresarAnomaliaNoLectura;" + getPhoneDate() + "-" + getPhoneHour();
         escribeResumenTiempo(variableResumenLiquidacion + " " + "ingresarAnomaliaNoLectura: Posicion Actual|" + VariablesGlobales.registroactual);
         infoRegistroSalida.escribir_TablaRegistroSalida(VariablesGlobales.registroactual);
@@ -10682,6 +10926,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         try {
             VariablesGlobales.datodebusqueda = "";
             VariablesGlobales.tipodebusqueda = 0;
+            secuencia().iniciarBusqueda(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim(), variables.clienteactual,
+                    System.currentTimeMillis());
 
             //Ax: abre intent ModuloBusquedaCuenta y cuando vuelve se identifica con el ID (BUSQUEDA_REQUEST_CODE)
             Intent intent = new Intent(MenuDeLiquidacion.this, ModuloBusquedaCuenta.class);
@@ -10728,6 +10974,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 leerInformacionUsuario(3);
             }
 
+            registrarResultadoBusqueda(true, false);
             visualizarInformacionCliente(0);
             //imagenNoExistePredio.setVisibility(ImageView.INVISIBLE);
             cerrarArchivosFacturacion();
@@ -10743,6 +10990,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             variables.impresora = "   ";
 
             //  txtInformeEscrito.setText("No existe: " + medidor);
+            registrarResultadoBusqueda(false, false);
             mensajeT("No existe: " + medidor, msgMedio);
             //imagenNoExistePredio.setVisibility(ImageView.VISIBLE);
             cerrarArchivosFacturacion();
@@ -10816,7 +11064,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         VariablesGlobales.registroactual = infoRegistroEntrada.getTotal_TablaRegistroDeEntrada() + 1;
 
-        if (retrocedeRegistro() == 0) {
+        llegadaForzada = SecuenciaCampo.LLEGADA_ULTIMO;
+        int ok = retrocedeRegistro();
+        llegadaForzada = null;
+        if (ok == 0) {
             VariablesGlobales.registroactual = tmpreg;
             if (indicadorManual == 0) {
                 txtElectura.setEnabled(true);
@@ -10835,7 +11086,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         VariablesGlobales.registroactual = 0;
 
-        if (avanzarRegistro() == 0) {
+        llegadaForzada = SecuenciaCampo.LLEGADA_PRIMERO;
+        int ok = avanzarRegistro();
+        llegadaForzada = null;
+        if (ok == 0) {
             VariablesGlobales.registroactual = tmpreg;
             if (indicadorManual == 0) {
                 txtElectura.setEnabled(true);
@@ -10882,7 +11136,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             builder.setMessage("Ya termino de realizar\n la Facturacion? " + VariablesGlobales.totalprediosleidos + " == "
                     + infoClienteEntrada.getTotal_TablaEntradaClientes());
 
-            builder.setIcon(R.drawable.ic_simfa_logo);
+            builder.setIcon(R.drawable.gss_logo40x40);
 
             builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
 
@@ -11132,6 +11386,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
     private int procesarLectura(int indlectura, int primero, String lecturaact, String causaact) {
 
+        if (!entornoPermiteLiquidar()) {
+            return 0;
+        }
         try {
             int DebeTomarFotografia = 0;
             yaEnvioFotografiaActual = false;
@@ -11398,8 +11655,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             } else {
                 // proceso nuevo de novedades fotos para entrega
                 // validar nuevo para las anomalias q piden lectura
+                // EBSA: foto en todo lo que no sea consumo normal (LEIDO 3) ni consumo bajo (LEIDO 1).
                 if (!infoRegistroSalida.gettablaRegistroSalida_CAUSADENOLECTURA().trim().equals("") ||
-                        !infoRegistroSalida.gettablaRegistroSalida_LEIDO().equals("3") ||
+                        !(infoRegistroSalida.gettablaRegistroSalida_LEIDO().equals("3") || infoRegistroSalida.gettablaRegistroSalida_LEIDO().equals("1")) ||
 
                         !infoRegistroSalida.gettablaRegistroSalida_COMENTARIO1().trim().equals("") ||
                         infoRegistroEntrada.gettablaRegistroDeEntrada_Tipomedida().trim().equals("X")
@@ -11441,8 +11699,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                                         && !terminal.trim().equals("358767141019390") && !terminal.trim().equals("868995078034487")
                                         && !terminal.trim().equals("868995078034628")
                                 ) {
-                                    adicionarNovedad(2, fuePromediado);
-                                    Log.e("error", "requiere novedad 1");
+                                    // EBSA no usa novedades: el modulo de Caqueta (ModuloCaptNovLect) ya no se abre.
+                                    // adicionarNovedad(2, fuePromediado);
+                                    Log.e("error", "requiere novedad 1 (no aplica EBSA)");
                                 }
                             }
                             //se comenta   requierenovedad = 1;
@@ -11472,37 +11731,14 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             }
 
 
-            if (DebeTomarFotografia == 1) {
-                yaTomoFotoOcr = true;
-                Log.e("INFO","4 - SETEA EL VALOR DE yaTomoFotoOcr: " + yaTomoFotoOcr);
-                if (!terminal.trim().equals("354379550180590") && !terminal.trim().equals("351007491579959") && !terminal.trim().equals("351007492166830")
-                        && !terminal.trim().equals("358767141019390") && !terminal.trim().equals("868995078034487")
-                        && !terminal.trim().equals("868995078034628")
-                ) {
-
-                    ejecutarProcesoDeFoto(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + "_" + infoClienteEntrada.gettablaEntradaClientes_mes().trim(), 1, tipoFotoDigital, 1, "", 1);
-                }
+            // EBSA: una desviacion (lectura que no es consumo normal ni bajo, sin causal) lleva informe obligatorio
+            // antes de la foto, como la causal. Se pide aqui, antes de liquidar y de armar el envio (procesarLectura3),
+            // para que el informe salga en REGISTRO.SDA y en lo que se manda al servidor.
+            if (requiereInformeDesviacion()) {
+                pedirInformeDesviacion(DebeTomarFotografia, lecturaact);
+                return 0;
             }
-            variableTomarDatosLectura = true;
-
-            //nuevo
-            variables.totalregistrosleidos++;
-
-            variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";PROCESAR LECTURA-1.6 ;" + getPhoneDate() + "-" + getPhoneHour() +
-                    "-" + lecturaact;
-            escribeResumenTiempo(variableResumenLiquidacion + " " + " Entra a tomoLectura()");
-            tomoLectura();
-            escribeResumenTiempo(variableResumenLiquidacion + " " + " Fin de tomoLectura()");
-            //descomentar ULTIMOMEDIDORLEIDO = infoRegistroEntrada.gettablaRegistroDeEntrada_nrocontador();
-            // ultimaMARCALEIDO = infoRegistroEntrada.gettablaRegistroDeEntrada_MARCA();
-
-
-            variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";PROCESAR LECTURA-1.7 ;" + getPhoneDate() + "-" + getPhoneHour() +
-                    "-" + lecturaact;
-            escribeResumenTiempo(variableResumenLiquidacion + " " + " Entra a limpiarMedidores()");
-            limpiarMedidores();
-            escribeResumenTiempo(variableResumenLiquidacion + " " + " Fin de limpiarMedidores()");
-            procesarLectura2();
+            continuarProcesarLectura(DebeTomarFotografia, lecturaact);
 
         } catch (NumberFormatException ex) {
             variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";ERROR PROCESAR LECTURA-1.8 ;" + getPhoneDate() + "-" + getPhoneHour() +
@@ -11531,6 +11767,103 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         return (0);
     }
 
+    /**
+     * Resto de procesarLectura despues de decidir la foto: foto, tomoLectura, limpiar y procesarLectura2. Se separa
+     * para poder pedir antes el informe de la desviacion (dialogo asincrono) y seguir cuando el tecnico lo acepta.
+     */
+    private void continuarProcesarLectura(int DebeTomarFotografia, String lecturaact) {
+        try {
+            if (DebeTomarFotografia == 1) {
+                yaTomoFotoOcr = true;
+                Log.e("INFO","4 - SETEA EL VALOR DE yaTomoFotoOcr: " + yaTomoFotoOcr);
+                // Sin excepcion por IMEI: todas las terminales toman la foto (antes 6 IMEI de prueba se la saltaban).
+                exigirFotoCuentaActual("lectura con foto obligatoria");
+                ejecutarProcesoDeFoto(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + "_" + infoClienteEntrada.gettablaEntradaClientes_mes().trim(), 1, tipoFotoDigital, 1, "", 1);
+            }
+            variableTomarDatosLectura = true;
+
+            //nuevo
+            variables.totalregistrosleidos++;
+
+            variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";PROCESAR LECTURA-1.6 ;" + getPhoneDate() + "-" + getPhoneHour() +
+                    "-" + lecturaact;
+            escribeResumenTiempo(variableResumenLiquidacion + " " + " Entra a tomoLectura()");
+            tomoLectura();
+            escribeResumenTiempo(variableResumenLiquidacion + " " + " Fin de tomoLectura()");
+            //descomentar ULTIMOMEDIDORLEIDO = infoRegistroEntrada.gettablaRegistroDeEntrada_nrocontador();
+            // ultimaMARCALEIDO = infoRegistroEntrada.gettablaRegistroDeEntrada_MARCA();
+
+
+            variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";PROCESAR LECTURA-1.7 ;" + getPhoneDate() + "-" + getPhoneHour() +
+                    "-" + lecturaact;
+            escribeResumenTiempo(variableResumenLiquidacion + " " + " Entra a limpiarMedidores()");
+            limpiarMedidores();
+            escribeResumenTiempo(variableResumenLiquidacion + " " + " Fin de limpiarMedidores()");
+            procesarLectura2();
+        } catch (Exception e) {
+            variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";ERROR PROCESAR LECTURA-1.10 ;" + getPhoneDate() + "-" + getPhoneHour() +
+                    "-" + lecturaact;
+            escribeResumenTiempo(variableResumenLiquidacion);
+            Log.e("error", "Procesar Lectura (continuacion) " + e.getMessage());
+            utils.Log(logfile, "[MenuDeLiquidacion]continuarProcesarLectura() " + e.getMessage());
+            mensajeT("Error al Procesar Lectura con anomalias.", msgLargo);
+            noactforesult = true;
+
+            limpiarMedidores();
+            txtElectura.setText("");
+        }
+    }
+
+    /**
+     * Desviacion en toma manual: hay lectura con critica distinta de normal (3) y bajo (1), sin causal del tecnico.
+     * La causal 18 automatica (consumo alto o negativa/giro cobrados por promedio) cuenta como desviacion: lleva informe.
+     */
+    private boolean requiereInformeDesviacion() {
+        if (indicadorManual != 0 || !MODO.equals("")) return false;
+        if (!infoRegistroSalida.gettablaRegistroSalida_CAUSADENOLECTURA().trim().equals("") && !causal18Automatica()) return false;
+        String leido = infoRegistroSalida.gettablaRegistroSalida_LEIDO().trim();
+        return !leido.isEmpty() && !leido.equals("3") && !leido.equals("1");
+    }
+
+    private static String descripcionDesviacion(String leido) {
+        switch (leido.trim()) {
+            case "2": return "CONSUMO IGUAL / CERO";
+            case "7": return "CONSUMO ALTO";
+            case "8": return "LECTURA NEGATIVA / GIRO";
+            default:  return "DESVIACION " + leido.trim();
+        }
+    }
+
+    /**
+     * Informe de la desviacion: obligatorio. Cancelar no deja seguir (la lectura ya quedo grabada): vuelve a pedirlo.
+     * Al aceptar se graba en el registro actual y sigue el proceso normal (foto, liquidacion, impresion, envio).
+     */
+    private void pedirInformeDesviacion(final int debeTomarFotografia, final String lecturaact) {
+        final int registro = VariablesGlobales.registroactual;
+        final String leido = infoRegistroSalida.gettablaRegistroSalida_LEIDO().trim();
+        String etiqueta = descripcionDesviacion(leido) + " - lectura " + lecturaact.trim();
+        dialogoEnCurso = true;
+        DialogoInforme.mostrar(this, "Informe de la desviacion", etiqueta, new DialogoInforme.Callback() {
+            @Override
+            public void alAceptar(String informe) {
+                dialogoEnCurso = false;
+                abrirArchivosDeFacturacion();
+                infoRegistroSalida.settablaRegistroSalida_informe(informe);
+                infoRegistroSalida.escribir_TablaRegistroSalida(registro);
+                escribeResumenTiempo("Informe desviacion " + leido + ": " + informe + "|" + registro);
+                continuarProcesarLectura(debeTomarFotografia, lecturaact);
+                cerrarArchivosSiNoHayPendiente();
+            }
+
+            @Override
+            public void alCancelar() {
+                dialogoEnCurso = false;
+                mensajeT("El informe es obligatorio en las desviaciones", msgMedio);
+                pedirInformeDesviacion(debeTomarFotografia, lecturaact);
+            }
+        });
+    }
+
     private int procesarLectura2() {
 
         try {
@@ -11545,7 +11878,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         && !terminal.trim().equals("358767141019390") && !terminal.trim().equals("868995078034487")
                         && !terminal.trim().equals("868995078034628")
                 ) {
-                    adicionarNovedad(2, fuePromediado);
+                    // EBSA no usa novedades: el modulo de Caqueta (ModuloCaptNovLect) ya no se abre.
+                    // adicionarNovedad(2, fuePromediado);
                 }
                 escribeResumenTiempo(variableResumenLiquidacion + " " + " Fin de adicionarNovedad()");
             }
@@ -11730,8 +12064,87 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         return (0);
     }
 
+    /**
+     * Solo las cuentas a las que la analitica les puso la causal 18 automatica (consumo alto cobrado por promedio, 003):
+     * toma manual, factura impresa de esta cuenta y aun sin verificar. Decision de EBSA del 20-oct.
+     */
+    private boolean requiereVerificarConsumoImpreso() {
+        if (indicadorManual != 0 || !MODO.equals("")) return false;
+        String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
+        if (cuenta.isEmpty() || cuenta.equals(cuentaConsumoVerificada) || !cuenta.equals(cuentaConsumoImpreso) || consumoImpreso < 0) return false;
+        if (!infoClienteSalida.gettablaClienteSalida_INDFACTURACION().trim().equals("F")) return false;
+        return causal18Automatica();
+    }
+
+    /** Causal 18 que pone ejecutarSumatoriaConsumoACobrar con la analitica 003; no la que elige el tecnico. */
+    private boolean causal18Automatica() {
+        if (!AnomaliaDeNoLectura.normalizarCodigo(infoRegistroSalida.gettablaRegistroSalida_CAUSADENOLECTURA()).equals("18")) return false;
+        return infoRegistroSalida.gettablaRegistroSalida_COMENTARIO2().trim().equals("003")
+                || infoClienteSalida.gettablaClienteSalida_IMPRESORA().trim().equals("CONS. ALTO DV3");
+    }
+
+    /**
+     * Pide el "Total Consumo" impreso. Si coincide sigue; si no, hasta {@link #INTENTOS_CONSUMO_IMPRESO} intentos y luego
+     * sigue con la lectura marcada para revision (VCONS en descanomalia + LOGEVENTOS). No se puede cerrar sin responder.
+     */
+    private void pedirConsumoImpreso(final int intento) {
+        final String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
+        final EditText campo = new EditText(this);
+        campo.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        campo.setHint("kWh");
+        campo.setFilters(new InputFilter[]{new InputFilter.LengthFilter(9)});
+        int margen = (int) (20 * getResources().getDisplayMetrics().density);
+        LinearLayout contenedor = new LinearLayout(this);
+        contenedor.setPadding(margen, 0, margen, 0);
+        contenedor.addView(campo, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        dialogoEnCurso = true;
+        new AlertDialog.Builder(this)
+                .setTitle("Verificar consumo alto")
+                .setMessage("Digite el TOTAL CONSUMO que salio impreso en la factura."
+                        + (intento > 1 ? "\nIntento " + intento + " de " + INTENTOS_CONSUMO_IMPRESO : ""))
+                .setView(contenedor)
+                .setCancelable(false)
+                .setPositiveButton("Verificar", (d, w) -> {
+                    dialogoEnCurso = false;
+                    long digitado;
+                    try {
+                        digitado = Long.parseLong(campo.getText().toString().trim());
+                    } catch (NumberFormatException e) {
+                        digitado = Long.MIN_VALUE;
+                    }
+                    if (digitado == consumoImpreso) {
+                        cuentaConsumoVerificada = cuenta;
+                        escribeResumenTiempo(cuenta + ";Consumo impreso verificado " + consumoImpreso + " intento " + intento);
+                        abrirArchivosDeFacturacion();
+                        procesarLectura3();
+                        cerrarArchivosSiNoHayPendiente();
+                    } else if (intento < INTENTOS_CONSUMO_IMPRESO) {
+                        mensajeT("El consumo no coincide con la factura. Revise e intente de nuevo", msgMedio);
+                        pedirConsumoImpreso(intento + 1);
+                    } else {
+                        cuentaConsumoVerificada = cuenta;
+                        cuentaConsumoNoVerificado = cuenta;
+                        utils.Log(logfile, "[MenuDeLiquidacion] Consumo impreso NO verificado cuenta " + cuenta
+                                + " impreso " + consumoImpreso + " ultimo digitado " + campo.getText().toString().trim());
+                        escribeResumenTiempo(cuenta + ";Consumo impreso NO verificado (" + INTENTOS_CONSUMO_IMPRESO + " intentos)");
+                        mensajeT("No coincidio en " + INTENTOS_CONSUMO_IMPRESO + " intentos: la lectura queda marcada para revision", msgLargo);
+                        abrirArchivosDeFacturacion();
+                        procesarLectura3();
+                        cerrarArchivosSiNoHayPendiente();
+                    }
+                })
+                .show();
+    }
+
     private int procesarLectura3() {
 
+        // EBSA: en consumo alto con factura impresa, el tecnico digita el "Total Consumo" que salio en la factura antes
+        // de seguir. Se hace aqui, antes de armar el envio, para que una verificacion fallida salga marcada (VCONS).
+        if (requiereVerificarConsumoImpreso()) {
+            pedirConsumoImpreso(1);
+            return 0;
+        }
         try {
 
             variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";PROCESAR LECTURA-3 ;" + getPhoneDate() + "-" + getPhoneHour();
@@ -11752,6 +12165,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         escribeResumenTiempo(variableResumenLiquidacion + " " + " Fin de startBarCodeReader()");
                     }
                 }
+                // Muestra de control (~5 %): foto de la factura o su codigo de barras antes de pasar al siguiente.
+                exigirMuestraFactura();
             }
 
             //Proceso de foto y anomalia que viene desde  procesoDeLiquidacionEImpresion
@@ -11767,7 +12182,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                             && !terminal.trim().equals("358767141019390") && !terminal.trim().equals("868995078034487")
                             && !terminal.trim().equals("868995078034628")
                     ) {
-                        adicionarNovedad(2, 0);
+                        // EBSA no usa novedades: el modulo de Caqueta (ModuloCaptNovLect) ya no se abre.
+                        // adicionarNovedad(2, 0);
                         escribeResumenTiempo(variableResumenLiquidacion + " " + " Fin de adicionarNovedad()");
                     }
                     cod_cuentaUlt_foto = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
@@ -11781,12 +12197,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";PROCESAR LECTURA-3 ;" + getPhoneDate() + "-" + getPhoneHour();
                         escribeResumenTiempo(variableResumenLiquidacion + " " + " Entra a ejecutarProcesoDeFoto()");
 
-                        if (!terminal.trim().equals("354379550180590") && !terminal.trim().equals("351007491579959") && !terminal.trim().equals("351007492166830")
-                                && !terminal.trim().equals("358767141019390") && !terminal.trim().equals("868995078034487")
-                                && !terminal.trim().equals("868995078034628")
-                        ) {
-                            ejecutarProcesoDeFoto(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + "_" + infoClienteEntrada.gettablaEntradaClientes_mes().trim(), 1, tipoFotoDigital, 0, "", 1);
-                        }
+                        // Sin excepcion por IMEI: todas las terminales toman la foto.
+                        exigirFotoCuentaActual("anomalia con foto");
+                        ejecutarProcesoDeFoto(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + "_" + infoClienteEntrada.gettablaEntradaClientes_mes().trim(), 1, tipoFotoDigital, 0, "", 1);
 
                         escribeResumenTiempo(variableResumenLiquidacion + " " + " Fin de ejecutarProcesoDeFoto()");
                     }
@@ -11932,7 +12345,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
             limpiarMedidores();
 
-            ULTIMOMEDIDORLEIDO = infoRegistroEntrada.gettablaRegistroDeEntrada_nrocontador();
+            // Paso del recorrido (secuencia) y "ultimo medidor leido" persistente para la proxima cuenta.
+            registrarSecuenciaLectura();
+            ULTIMOMEDIDORLEIDO = secuencia().ultimoMedidor();
             ultimaMARCALEIDO = infoRegistroEntrada.gettablaRegistroDeEntrada_MARCA();
 
             variables.impresora = "   ";
@@ -11979,9 +12394,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             }
 
 
-            if ((infoRegistroSalida.gettablaRegistroSalida_COMENTARIO2().equals("003")
-                    || infoClienteSalida.gettablaClienteSalida_IMPRESORA().trim().equals("CONS. ALTO DV3")
-                    || plantillaCartaAnalitica() != null) && indicadorManual == 0) {
+            if (debeEntregarCarta() && indicadorManual == 0) {
                 entrega_carta = 1;
                 variableResumenLiquidacion = "Entra a entregar carta por" + infoRegistroSalida.gettablaRegistroSalida_COMENTARIO2() + "||" + infoClienteSalida.gettablaClienteSalida_IMPRESORA().trim();
                 escribeResumenTiempo(variableResumenLiquidacion);
@@ -12108,6 +12521,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
     private int retrocedeRegistro() {
+        int conFotoPendiente = navegacionConFotoPendiente(FotoObligatoria.AVANCE_ATRAS);
+        if (conFotoPendiente >= 0) return conFotoPendiente;
         int tmpreg = VariablesGlobales.registroactual - 1;
         code.setLength(0);
         yaimprimioRetiene = false;
@@ -12129,6 +12544,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 VariablesGlobales.registroactual = tmpreg;
                 leerInformacionUsuario(1);
                 txtElectura.setEnabled(true);
+                marcarLlegada(SecuenciaCampo.LLEGADA_ANTERIOR);
                 return 1;
             }
             tmpreg--;
@@ -12139,6 +12555,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
     private int avanzarRegistro() {
+        int conFotoPendiente = navegacionConFotoPendiente(FotoObligatoria.AVANCE_ADELANTE);
+        if (conFotoPendiente >= 0) return conFotoPendiente;
         int tmpreg = VariablesGlobales.registroactual + 1;
         code.setLength(0);
         ContadorFoto = 0;
@@ -12163,6 +12581,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 if (indicadorManual == 0) {
                     txtElectura.setEnabled(true);
                 }
+                marcarLlegada(SecuenciaCampo.LLEGADA_SIGUIENTE);
                 return (1);
             }
             ++tmpreg;
@@ -12311,6 +12730,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             // Fotos y LBL rechazados se reintentan una vez por apertura (pudo ser un ajuste del servidor ya corregido).
             cola.reintentarErrores(ColaEnvio.FOTO);
             cola.reintentarErrores(ColaEnvio.LBL);
+            cola.reintentarErrores(ColaEnvio.EVENTO);
             if (cfg.modoRest() || cola.proximoIntento() >= 0) {
                 SincronizacionService.solicitar(this);
             }
@@ -12412,6 +12832,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 String sufijo = sufijUbicacion.isEmpty() ? sufijOcr
                         : sufijOcr.isEmpty()       ? sufijUbicacion
                         : sufijUbicacion + " " + sufijOcr;
+                if (cuentaConsumoNoVerificado.equals(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim())) {
+                    sufijo = sufijo.isEmpty() ? "VCONS" : sufijo + " VCONS";
+                }
 
                 if (!sufijo.isEmpty()) {
                     String descActual = misenvios.getEnvioGPS_DESCANOMALIA().trim();
@@ -12495,9 +12918,14 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 if (!coordenadaLatitud.equals("") && !coordenadaLongitud.equals("")) {
                     misenvios.setEnvioGPS_Latitud(coordenadaLatitud.replace(",", "."));// txtX.Text;
                     misenvios.setEnvioGPS_Longitud(coordenadaLongitud.replace(",", "."));// txtY.Text;
-                } else {
+                } else if (posicionVigente()) {
                     misenvios.setEnvioGPS_Latitud(VariablesGlobales.coorTempLatitud.replace(",", "."));// txtX.Text;
                     misenvios.setEnvioGPS_Longitud(VariablesGlobales.coorTempLongitud.replace(",", "."));// txtY.Text;
+                } else {
+                    // Sin posicion de los ultimos 2 minutos: antes se mandaba la ultima conocida (varias cuentas quedaban
+                    // con el mismo punto). Ahora va sin coordenadas, igual que cuando no hay GPS.
+                    misenvios.setEnvioGPS_Latitud("0.0");
+                    misenvios.setEnvioGPS_Longitud("0.0");
                 }
                 coordenadaLongitud = "";
                 coordenadaLatitud = "";
@@ -12625,7 +13053,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 //NUEVOS DATOS PARA ENVIAR AL SERVIDOR
                 //NUEVOS DATOS EN LA COLECCION
                 misenvios.setEnvioGPS_MARCACONTADOR(infoRegistroSalida.gettablaRegistroSalida_MARCA());
-                misenvios.setEnvioGPS_ULTIMOMEDIDORLEIDO(ULTIMOMEDIDORLEIDO.trim());
+                // Medidor de la cuenta leida antes que esta; persistente (antes se perdia al cerrar la app).
+                misenvios.setEnvioGPS_ULTIMOMEDIDORLEIDO(secuencia().ultimoMedidor());
 
                 misenvios.setEnvioGPS_OBSERVACION1(infoRegistroSalida.gettablaRegistroSalida_COMENTARIO2().trim());
                 misenvios.setEnvioGPS_CLASESERVICIO(infoClienteEntrada.gettablaEntradaClientes_claseagrupacion().trim());
@@ -12722,8 +13151,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
      * Máximo 6 chars para dejar espacio a la descripción original.
      */
     private String obtenerSufijoUbicacion() {
-        // Si no es obligatorio no se registra nada
-        if (!VariablesGlobales.distanciagps.trim().equals("1")) return "";
+        // Antes solo se registraba si GENERAL.TXT traia "1" en el campo de distancia (bandera vieja). Ese campo ahora
+        // lleva los metros de la ruta, asi que la trazabilidad de ubicacion queda siempre activa.
         if (estadoUbicacion == UBI_SIN_GPS) {
             return "SNGPS";
         } else if (estadoUbicacion == UBI_SIN_COORDENADAS) {
@@ -12940,10 +13369,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
     private void ejecutarProcesoDeFoto(String nombre, int guardainforme, int D2Digital, int directorio, String tipoProceso, int veces) {
         llamoatomarfoto = 1;
+        apagarLinterna(); // la camara toma el flash
 
         // Determinar si esta foto corresponde a la lectura del medidor
         // tipoProceso == "" indica foto de medidor; "S" es foto de supervisor/novedad
-        esFotoMedidor = (tipoProceso != null && tipoProceso.trim().equals("") && !yaTomoFotoOcr);
+        esFotoMedidor = ocrHabilitadoEnCuentaActual()
+                && (tipoProceso != null && tipoProceso.trim().equals("") && !yaTomoFotoOcr);
 
         // Foto OCR obligatoria si MODIFICACIONES == "1"
         fotoOcrObligatoria = infoRegistroSalida.gettablaRegistroSalida_MODIFICACIONES().trim().equals("1");
@@ -13130,6 +13561,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     Log.e("INFO", "esFotoMedidor=true | lanzando CamaraLecturaActivity");
                     Intent intentOcr = new Intent(this, CamaraLecturaActivity.class);
                     intentOcr.putExtra(CamaraLecturaActivity.EXTRA_NOMBRE_IMAGEN, nombredelaImagen.trim());
+                    camaraAbierta = true;
                     startActivityForResult(intentOcr, CAMARA_LECTURA_REQUEST_CODE);
                     // nombrefoto se actualizará en onActivityResult cuando vuelva
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -13312,9 +13744,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
             CodigoIntent = TAKE_PICTURE;
+            camaraAbierta = true;
             activityResultLauncher.launch(takePictureIntent);
         } else {
             Toast.makeText(this, "No se pudo crear el archivo para la imagen", Toast.LENGTH_SHORT).show();
+            alVolverDeCamara(false);
         }
     }
 
@@ -13344,9 +13778,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                                 exitoImagen = 1;
                                 //AvanzarLecturas();
                                 ejecutarProcesoDeFotoII(vecesImagen);//Ax: idealmente se tomo la foto
+                                alVolverDeCamara(fotoConContenido(imageUri));
 
                             } else {//Ax: No se tomo foto
                                 Log.e("error", "resul foto nook " + vecesImagen);
+                                fotoConContenido(imageUri); // borra la entrada vacia que dejo la camara
+                                alVolverDeCamara(false);
                                 vecesImagen = 0;
                                 //if (vecesImagen > 0) {
                                 //    mensajeT("No se tomo foto, pruebe de nuevo", msgMedio);
@@ -13751,6 +14188,1171 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         }
     }
 
+    // ======================================================================== foto obligatoria (EBSA)
+    //
+    // EBSA no factura sin registro fotografico. Cuando el sistema exige la foto, queda pendiente
+    // (FotoObligatoria, en disco) y no se cambia de cliente por ningun camino hasta tomarla o hasta que
+    // un supervisor lo autorice con su codigo y clave de LECTOR.TXT. La autorizacion queda en
+    // RESUMENTIEMPO.SDA y viaja al servidor como evento foto_desbloqueo.
+
+    private FotoObligatoria fotoObligatoria;
+    /** La camara se abrio y no ha vuelto: lo que intente avanzar en ese lapso es el flujo de la lectura. */
+    private boolean camaraAbierta = false;
+    private AlertDialog dialogoFotoPendiente;
+    private int intentosClaveSupervisor = 0;
+    /** Ultima posicion recibida (cualquier proveedor), para ubicar los eventos. */
+    private Location ultimaPosicionEvento;
+    private Linterna linterna;
+    private ImageButton btnLinterna;
+
+    private FotoObligatoria fotoObligatoria() {
+        if (fotoObligatoria == null) fotoObligatoria = FotoObligatoria.de(this);
+        return fotoObligatoria;
+    }
+
+    // Muestra de control de la factura impresa (MuestraFactura): misma compuerta, otro almacen. extra = "tipo|esperado".
+    private FotoObligatoria muestraFactura;
+    /** Digitos del codigo de barras del cupon de la ultima factura impresa, y su cuenta. */
+    private String barrasImpresas = "", cuentaBarrasImpresas = "";
+    /** El lector de barras se abrio para la muestra (no para el rural). */
+    private boolean validandoMuestra = false;
+    private int intentosBarrasMuestra = 0;
+    private String ultimoCodigoMuestra = "";
+    private static final int INTENTOS_BARRAS_MUESTRA = 3;
+
+    private FotoObligatoria muestraFactura() {
+        if (muestraFactura == null) muestraFactura = FotoObligatoria.de(this, "muestra_factura");
+        return muestraFactura;
+    }
+
+    /** La exigencia que bloquea ahora: la foto del medidor primero, despues la muestra de la factura. null = nada. */
+    private FotoObligatoria exigenciaActiva() {
+        if (fotoObligatoria().hayPendiente()) return fotoObligatoria();
+        if (muestraFactura().hayPendiente()) return muestraFactura();
+        return null;
+    }
+
+    private static String tipoMuestra(FotoObligatoria.Pendiente p) {
+        int i = p.extra.indexOf('|');
+        return i < 0 ? p.extra : p.extra.substring(0, i);
+    }
+
+    private static String esperadoMuestra(FotoObligatoria.Pendiente p) {
+        int i = p.extra.indexOf('|');
+        return i < 0 ? "" : p.extra.substring(i + 1);
+    }
+
+    /** Cumple la exigencia; si queda otra, el avance pasa a ella y se pide; si no, se ejecuta. */
+    private void liberarExigencia(FotoObligatoria g) {
+        int avance = g.cumplir();
+        FotoObligatoria siguiente = exigenciaActiva();
+        if (siguiente != null) {
+            siguiente.diferirAvance(avance);
+            new Handler(android.os.Looper.getMainLooper()).post(this::mostrarDialogoFotoPendiente);
+        } else {
+            ejecutarAvanceDiferido(avance);
+        }
+    }
+
+    /**
+     * Tras imprimir la factura de la cuenta en pantalla: si cae en la muestra (~5 %), queda exigida la foto de la
+     * factura o la lectura de su codigo de barras. Una cuenta ya validada en el periodo no se vuelve a pedir.
+     */
+    private void exigirMuestraFactura() {
+        try {
+            if (indicadorManual != 0) return;
+            String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
+            if (!cuenta.equals(cuentaBarrasImpresas)) return; // esta cuenta no imprimio factura con plantilla
+            String anno = infoClienteEntrada.gettablaEntradaClientes_anio().trim();
+            String mes = infoClienteEntrada.gettablaEntradaClientes_mes().trim();
+            String tipo = MuestraFactura.tipo(infoClienteEntrada.gettablaEntradaClientes_Ruta(), anno, mes, cuenta);
+            if (tipo == null) return;
+            if (MuestraFactura.BARRAS.equals(tipo) && barrasImpresas.isEmpty()) tipo = MuestraFactura.FOTO; // plantilla sin cupon
+            AlmacenEstado hechas = AlmacenEstado.de(this, "muestra_factura_hechas");
+            String clave = anno + mes + "." + cuenta;
+            String hecha = hechas.leer(clave);
+            if (hecha != null && !hecha.trim().isEmpty()) return;
+            hechas.guardar(clave, tipo);
+            muestraFactura().exigir(cuenta, codCuentaActual(), anno, mes, cuenta + "_" + mes, VariablesGlobales.registroactual,
+                    "muestra " + tipo, System.currentTimeMillis(), tipo + "|" + barrasImpresas);
+            intentosBarrasMuestra = 0;
+            ultimoCodigoMuestra = "";
+            escribeResumenTiempo(cuenta + ";MUESTRA FACTURA;" + getPhoneDate() + "-" + getPhoneHour() + ";tipo=" + tipo);
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]exigirMuestraFactura() " + e.getMessage());
+        }
+    }
+
+    private void registrarValidacionFactura(FotoObligatoria.Pendiente p, boolean ok, String dato, String supervisor) {
+        java.util.Map<String, Object> datos = new java.util.LinkedHashMap<>();
+        datos.put("tipo", tipoMuestra(p));
+        datos.put("ok", ok);
+        datos.put("dato", dato);
+        datos.put("esperado", esperadoMuestra(p));
+        datos.put("intentos", intentosBarrasMuestra);
+        if (supervisor != null) {
+            datos.put("supervisor_codigo", supervisor);
+            datos.put("metodo", codigoAutorizacion.isEmpty() ? "clave" : "codigo");
+            if (!codigoAutorizacion.isEmpty()) datos.put("codigo", codigoAutorizacion);
+            codigoAutorizacion = "";
+        }
+        registrarEvento(EventoMovil.VALIDACION_FACTURA, p.codCuenta, p.anno, p.mes, datos);
+    }
+
+    /** Resultado del lector de barras abierto por la muestra. */
+    private void verificarBarrasMuestra(String leido) {
+        FotoObligatoria.Pendiente p = muestraFactura().pendiente();
+        if (p == null || !MuestraFactura.BARRAS.equals(tipoMuestra(p))) return;
+        ultimoCodigoMuestra = MuestraFactura.soloDigitos(leido);
+        intentosBarrasMuestra++;
+        if (MuestraFactura.coincide(leido, esperadoMuestra(p))) {
+            escribeResumenTiempo(p.cuenta + ";MUESTRA FACTURA BARRAS OK;" + getPhoneDate() + "-" + getPhoneHour() + ";intentos=" + intentosBarrasMuestra);
+            registrarValidacionFactura(p, true, ultimoCodigoMuestra, null);
+            mensajeT("Codigo de la factura verificado", msgCorto);
+            liberarExigencia(muestraFactura());
+            return;
+        }
+        escribeResumenTiempo(p.cuenta + ";MUESTRA FACTURA BARRAS NO COINCIDE;" + getPhoneDate() + "-" + getPhoneHour()
+                + ";leido=" + ultimoCodigoMuestra + ";intento=" + intentosBarrasMuestra);
+        mensajeT(intentosBarrasMuestra < INTENTOS_BARRAS_MUESTRA
+                ? "El codigo no corresponde a la factura de la cuenta " + p.cuenta + ". Escanee el cupon de esa factura."
+                : "El codigo no coincide despues de " + INTENTOS_BARRAS_MUESTRA + " intentos: se requiere la clave del supervisor.", msgLargo);
+        mostrarDialogoFotoPendiente();
+    }
+
+    /**
+     * cod_cuenta del servidor (regis_lecturas), igual al que arma el envio de la lectura. La cuenta del
+     * cliente ya viene completa (ENVIOGPRS la parte en 7 + digito de 3; aqui no hay que volver a pegarle
+     * el digito, eso duplicaba los ultimos 3). Sin ceros a la izquierda, como ColectorLiquidacion.
+     */
+    private String codCuentaActual() {
+        String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
+        int i = 0;
+        while (i < cuenta.length() - 1 && cuenta.charAt(i) == '0') i++;
+        return cuenta.substring(i);
+    }
+
+    /** Deja pendiente la foto que el sistema exige para la cuenta en pantalla. */
+    private void exigirFotoCuentaActual(String motivo) {
+        if (indicadorManual != 0) return; // liquidacion automatica: no hay tecnico frente a la camara
+        String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
+        String mes = infoClienteEntrada.gettablaEntradaClientes_mes().trim();
+        fotoObligatoria().exigir(cuenta, codCuentaActual(), infoClienteEntrada.gettablaEntradaClientes_anio().trim(), mes,
+                cuenta + "_" + mes, VariablesGlobales.registroactual, motivo, System.currentTimeMillis());
+        escribeResumenTiempo(cuenta + ";FOTO OBLIGATORIA;" + getPhoneDate() + "-" + getPhoneHour() + ";" + motivo);
+    }
+
+    /**
+     * Navegacion con foto pendiente. -1 = no hay pendiente (navegar normal). Si la hay, el paso pedido se guarda y se
+     * hace al cumplir la foto (con la camara abierta quien avanza es el flujo de la lectura: impresion y paso al
+     * siguiente siguen en segundo plano). Si la pantalla no esta en la cuenta de la foto (la app se abrio de nuevo),
+     * la navegacion lleva a esa cuenta y devuelve 1; si ya esta en ella devuelve 0 (no se movio).
+     */
+    private int navegacionConFotoPendiente(int direccion) {
+        FotoObligatoria g = exigenciaActiva();
+        if (g == null) return -1;
+        FotoObligatoria.Pendiente p = g.pendiente();
+        g.diferirAvance(direccion);
+        int resultado = 0;
+        if (p.registro > 0 && VariablesGlobales.registroactual != p.registro) {
+            VariablesGlobales.registroactual = p.registro;
+            leerInformacionUsuario(1);
+            if (indicadorManual == 0) txtElectura.setEnabled(true);
+            resultado = 1;
+        }
+        if (!camaraAbierta) {
+            escribeResumenTiempo(p.cuenta + ";FOTO PENDIENTE;" + getPhoneDate() + "-" + getPhoneHour() + ";intento de cambiar de cliente");
+            new Handler(android.os.Looper.getMainLooper()).post(this::mostrarDialogoFotoPendiente);
+        }
+        return resultado;
+    }
+
+    /** Para las opciones del menu que llevan a otro cliente o sacan de la liquidacion. */
+    private boolean bloqueadoPorFotoPendiente() {
+        if (exigenciaActiva() == null) return false;
+        mostrarDialogoFotoPendiente();
+        return true;
+    }
+
+    /** Vuelve la camara. valida = la foto tiene contenido. */
+    private void alVolverDeCamara(boolean valida) {
+        camaraAbierta = false;
+        if (nameForIntent != null && nameForIntent.endsWith(NovedadMedidor.SUFIJO_FOTO + ".jpg") && novedadPendiente() != null) {
+            alVolverFotoNovedad(valida);
+            return;
+        }
+        FotoObligatoria g = exigenciaActiva();
+        if (g == null) return;
+        FotoObligatoria.Pendiente p = g.pendiente();
+        if (g == muestraFactura()) {
+            // Solo la foto de la factura (nombre ..._nF.jpg) cumple la muestra; la del medidor no.
+            boolean esFactura = nameForIntent != null && nameForIntent.endsWith(MuestraFactura.SUFIJO_FOTO + ".jpg");
+            if (valida && esFactura && MuestraFactura.FOTO.equals(tipoMuestra(p))) {
+                escribeResumenTiempo(p.cuenta + ";MUESTRA FACTURA FOTO TOMADA;" + getPhoneDate() + "-" + getPhoneHour());
+                registrarValidacionFactura(p, true, nameForIntent, null);
+                liberarExigencia(g);
+            } else {
+                mostrarDialogoFotoPendiente();
+            }
+            return;
+        }
+        if (valida) {
+            escribeResumenTiempo(p.cuenta + ";FOTO OBLIGATORIA TOMADA;" + getPhoneDate() + "-" + getPhoneHour());
+            liberarExigencia(g);
+        } else {
+            escribeResumenTiempo(p.cuenta + ";FOTO OBLIGATORIA NO TOMADA;" + getPhoneDate() + "-" + getPhoneHour());
+            mostrarDialogoFotoPendiente();
+        }
+    }
+
+    /** true si la foto que devolvio la camara (MediaStore) tiene bytes; si quedo vacia se borra la entrada. */
+    private boolean fotoConContenido(Uri uri) {
+        if (uri == null) return false;
+        long tam;
+        try (android.content.res.AssetFileDescriptor fd = getContentResolver().openAssetFileDescriptor(uri, "r")) {
+            if (fd == null) return false;
+            tam = fd.getLength(); // UNKNOWN_LENGTH (-1) si el proveedor no lo sabe: el archivo existe, se acepta
+        } catch (Exception e) {
+            return false; // no se puede abrir: no hay foto
+        }
+        if (tam == 0) {
+            try {
+                getContentResolver().delete(uri, null, null);
+            } catch (Exception ignorado) {
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private void ejecutarAvanceDiferido(final int avance) {
+        if (avance == FotoObligatoria.AVANCE_NINGUNO) return;
+        runOnUiThread(() -> {
+            try {
+                abrirArchivosDeFacturacion();
+                if (avance == FotoObligatoria.AVANCE_ADELANTE) {
+                    if (avanzarRegistro() == 0) retrocedeRegistro();
+                } else {
+                    if (retrocedeRegistro() == 0) avanzarRegistro();
+                }
+                variables.numdigitos = 0;
+                if (indicadorManual == 0) {
+                    if (VariablesGlobales.totalprediosleidos == infoClienteEntrada.getTotal_TablaEntradaClientes()) {
+                        mensajeT("AAA. Proceso de Lecturas concluido ", msgLargo);
+                        visualizarInformacionCliente(3);
+                    } else {
+                        visualizarInformacionCliente(0);
+                    }
+                }
+            } catch (Exception e) {
+                utils.Log(logfile, "[MenuDeLiquidacion]ejecutarAvanceDiferido() " + e.getMessage());
+            } finally {
+                cerrarArchivosSiNoHayPendiente();
+            }
+        });
+    }
+
+    /** Al volver a la liquidacion (o al abrirla despues de un cierre) con una foto pendiente: a esa cuenta y a pedirla. */
+    private void reanudarFotoPendiente() {
+        if (!camaraAbierta && novedadPendiente() != null) {
+            dialogoFotoNovedad(novedadPendiente());
+            return;
+        }
+        if (camaraAbierta || exigenciaActiva() == null) return;
+        mostrarDialogoFotoPendiente();
+    }
+
+    private void mostrarDialogoFotoPendiente() {
+        if (isFinishing()) return;
+        FotoObligatoria g = exigenciaActiva();
+        if (g == null) return;
+        final FotoObligatoria.Pendiente p = g.pendiente();
+        if (dialogoFotoPendiente != null && dialogoFotoPendiente.isShowing()) return;
+        AlertDialog.Builder b = new AlertDialog.Builder(this);
+        if (g == muestraFactura()) {
+            boolean barras = MuestraFactura.BARRAS.equals(tipoMuestra(p));
+            b.setTitle("Control de la factura impresa");
+            b.setMessage("La cuenta " + p.cuenta + " salio en la muestra de control.\n\n"
+                    + (barras ? "Escanee el codigo de barras del cupon de la factura que acaba de imprimir."
+                              : "Tome una foto de la factura que acaba de imprimir, completa y legible.") + "\n\n"
+                    + "No puede pasar a otro cliente sin hacerlo. Si no es posible, el supervisor debe autorizar con su codigo y clave.");
+            b.setCancelable(false);
+            b.setPositiveButton(barras ? "ESCANEAR" : "TOMAR FOTO", (d, w) -> relanzarFotoPendiente());
+            b.setNeutralButton("CLAVE SUPERVISOR", (d, w) -> pedirClaveSupervisor());
+            dialogoFotoPendiente = b.create();
+            dialogoFotoPendiente.show();
+            return;
+        }
+        b.setTitle("Foto obligatoria");
+        b.setMessage("La cuenta " + p.cuenta + " requiere registro fotografico"
+                + (p.motivo.isEmpty() ? "" : " (" + p.motivo + ")") + ".\n\n"
+                + "No puede pasar a otro cliente sin tomarla.\n"
+                + "Si la camara no funciona, avise al supervisor: debe autorizar con su codigo y clave.");
+        b.setCancelable(false);
+        b.setPositiveButton("TOMAR FOTO", (d, w) -> relanzarFotoPendiente());
+        b.setNeutralButton("CLAVE SUPERVISOR", (d, w) -> pedirClaveSupervisor());
+        dialogoFotoPendiente = b.create();
+        dialogoFotoPendiente.show();
+    }
+
+    private void relanzarFotoPendiente() {
+        FotoObligatoria g = exigenciaActiva();
+        if (g == null) return;
+        FotoObligatoria.Pendiente p = g.pendiente();
+        try {
+            abrirArchivosDeFacturacion();
+            if (!infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim().equals(p.cuenta) && p.registro > 0) {
+                // La app se cerro con la foto pendiente o el registro cambio: se vuelve a la cuenta de la foto.
+                VariablesGlobales.registroactual = p.registro;
+                leerInformacionUsuario(1);
+                visualizarInformacionCliente(0);
+            }
+            if (g == muestraFactura()) {
+                if (MuestraFactura.BARRAS.equals(tipoMuestra(p))) {
+                    validandoMuestra = true;
+                    startBarCodeReader(false, "");
+                } else {
+                    ejecutarProcesoDeFoto(p.nombre, 1, tipoFotoDigital, 1, MuestraFactura.SUFIJO_FOTO, 1);
+                }
+                return;
+            }
+            cod_cuentaUlt_foto = p.cuenta;
+            mesUlt_foto = p.mes;
+            yaTomoFotoOcr = true; // foto de registro, no la de OCR
+            ejecutarProcesoDeFoto(p.nombre, 1, tipoFotoDigital, 1, "", 1);
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]relanzarFotoPendiente() " + e.getMessage());
+            mostrarDialogoFotoPendiente();
+        } finally {
+            cerrarArchivosSiNoHayPendiente();
+        }
+    }
+
+    private void pedirClaveSupervisor() {
+        final FotoObligatoria g = exigenciaActiva();
+        if (g == null) return;
+        final FotoObligatoria.Pendiente p = g.pendiente();
+
+        LinearLayout caja = new LinearLayout(this);
+        caja.setOrientation(LinearLayout.VERTICAL);
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        caja.setPadding(pad, pad / 2, pad, 0);
+        final EditText txtCodigo = new EditText(this);
+        txtCodigo.setHint("Codigo del supervisor");
+        txtCodigo.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        final EditText txtClave = new EditText(this);
+        txtClave.setHint("Clave");
+        txtClave.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        caja.addView(txtCodigo);
+        caja.addView(txtClave);
+        final EditText txtCodigoUnico = new EditText(this);
+        txtCodigoUnico.setHint("o codigo de un solo uso (6 digitos)");
+        txtCodigoUnico.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        txtCodigoUnico.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(6)});
+        caja.addView(txtCodigoUnico);
+
+        final AlertDialog dlg = new AlertDialog.Builder(this)
+                .setTitle("Autorizacion del supervisor")
+                .setMessage("Cuenta " + p.cuenta + (g == muestraFactura() ? " sin control de la factura." : " sin foto.")
+                        + " La autorizacion queda registrada con su codigo.")
+                .setView(caja)
+                .setCancelable(false)
+                .setPositiveButton("AUTORIZAR", null)
+                .setNegativeButton("VOLVER", (d, w) -> mostrarDialogoFotoPendiente())
+                .create();
+        dlg.setOnShowListener(d -> dlg.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String unico = txtCodigoUnico.getText().toString().trim();
+            if (!unico.isEmpty()) {
+                validarCodigoUnico(g, p, unico, dlg, txtCodigoUnico);
+                return;
+            }
+            String codigo = txtCodigo.getText().toString().trim();
+            ClaveSupervisor.Supervisor s = ClaveSupervisor.validar(
+                    new File(VariablesGlobales.directorioactual + "/DATOSDEENTRADA/LECTOR.TXT"), codigo, txtClave.getText().toString());
+            if (s == null) {
+                intentosClaveSupervisor++;
+                escribeResumenTiempo(p.cuenta + ";CLAVE SUPERVISOR INCORRECTA;" + getPhoneDate() + "-" + getPhoneHour()
+                        + ";codigo=" + codigo + ";intento=" + intentosClaveSupervisor);
+                txtClave.setText("");
+                txtClave.setError("Codigo o clave de supervisor incorrectos");
+                return;
+            }
+            dlg.dismiss();
+            if (g == muestraFactura()) {
+                autorizarSinMuestra(p, s);
+            } else {
+                autorizarSinFoto(p, s);
+            }
+        }));
+        dlg.show();
+    }
+
+    private void autorizarSinFoto(FotoObligatoria.Pendiente p, ClaveSupervisor.Supervisor s) {
+        long ahora = System.currentTimeMillis();
+        long segundos = p.desdeMs > 0 ? Math.max(0, (ahora - p.desdeMs) / 1000) : 0;
+        escribeResumenTiempo(p.cuenta + ";FOTO DESBLOQUEADA POR SUPERVISOR;" + getPhoneDate() + "-" + getPhoneHour()
+                + ";supervisor=" + s.codigo + " " + s.nombre + ";motivo=" + p.motivo + ";pendiente_seg=" + segundos
+                + ";intentos_fallidos=" + intentosClaveSupervisor);
+
+        java.util.Map<String, Object> datos = new java.util.LinkedHashMap<>();
+        datos.put("supervisor_codigo", s.codigo);
+        datos.put("supervisor_nombre", s.nombre);
+        datos.put("motivo", p.motivo);
+        datos.put("foto", p.nombre);
+        datos.put("pendiente_segundos", segundos);
+        datos.put("intentos_fallidos", intentosClaveSupervisor);
+        datos.put("metodo", codigoAutorizacion.isEmpty() ? "clave" : "codigo");
+        if (!codigoAutorizacion.isEmpty()) datos.put("codigo", codigoAutorizacion);
+        codigoAutorizacion = "";
+        registrarEvento(EventoMovil.FOTO_DESBLOQUEO, p.codCuenta, p.anno, p.mes, datos);
+
+        intentosClaveSupervisor = 0;
+        mensajeT("Autorizado por " + s.nombre + ". Quedo registrado.", msgLargo);
+        liberarExigencia(fotoObligatoria());
+    }
+
+    private void autorizarSinMuestra(FotoObligatoria.Pendiente p, ClaveSupervisor.Supervisor s) {
+        escribeResumenTiempo(p.cuenta + ";MUESTRA FACTURA AUTORIZADA POR SUPERVISOR;" + getPhoneDate() + "-" + getPhoneHour()
+                + ";supervisor=" + s.codigo + " " + s.nombre + ";tipo=" + tipoMuestra(p) + ";leido=" + ultimoCodigoMuestra
+                + ";intentos=" + intentosBarrasMuestra);
+        registrarValidacionFactura(p, false, ultimoCodigoMuestra, s.codigo);
+        intentosClaveSupervisor = 0;
+        mensajeT("Autorizado por " + s.nombre + ". Quedo registrado.", msgLargo);
+        liberarExigencia(muestraFactura());
+    }
+
+    /** Evento de campo a la cola de envio (solo API v1; en el modo anterior queda en RESUMENTIEMPO). */
+    private void registrarEvento(String tipo, String codCuenta, String anno, String mes, java.util.Map<String, Object> datos) {
+        registrarEvento(EventoMovil.nuevoUid(), tipo, codCuenta, anno, mes, datos);
+    }
+
+    /** Con uid propio cuando otro dato lo referencia (la busqueda desde la secuencia, el contenedor desde sus cuentas). */
+    private void registrarEvento(String uid, String tipo, String codCuenta, String anno, String mes, java.util.Map<String, Object> datos) {
+        try {
+            if (!ConfigSync.modoRest(this)) return;
+            Location pos = posicionVigente() ? ultimaPosicionEvento : null;
+            ColaEnvioSqlite.de(this).encolar(ColaEnvio.EVENTO, uid, EventoMovil.armar(uid, tipo, codCuenta, anno, mes,
+                    System.currentTimeMillis(), pos == null ? null : pos.getLatitude(), pos == null ? null : pos.getLongitude(), datos), null);
+            SincronizacionService.solicitar(this);
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]registrarEvento(" + tipo + ") " + e.getMessage());
+        }
+    }
+
+    // ======================================================================== mensajeria y codigos de supervisor
+    //
+    // Bandeja: el servicio de sincronizacion baja los mensajes de la oficina (BandejaMensajes); el icono de chat
+    // muestra cuantos hay sin leer. Al abrir la bandeja se marcan leidos (evento mensaje_leido) y desde ahi el
+    // tecnico escribe a su supervisor (evento mensaje_tecnico). Codigos: el supervisor genera en la web un codigo
+    // de 6 digitos para el tecnico y la cuenta; se valida aqui sin senal (CodigoSupervisor) o, si este equipo aun
+    // no tiene las claves, contra el servidor.
+
+    private TextView txtMensajesNoLeidos;
+    private BandejaMensajes bandejaMensajes;
+    private CodigoSupervisor codigosSupervisor;
+    /** Codigo de un solo uso con que se autorizo (va en el evento); "" = clave de LECTOR.TXT. */
+    private String codigoAutorizacion = "";
+
+    private BandejaMensajes bandeja() {
+        if (bandejaMensajes == null) bandejaMensajes = new BandejaMensajes(getFilesDir());
+        return bandejaMensajes;
+    }
+
+    private CodigoSupervisor codigosSupervisor() {
+        if (codigosSupervisor == null) codigosSupervisor = new CodigoSupervisor(AlmacenEstado.de(this, "codigos_supervisor"));
+        return codigosSupervisor;
+    }
+
+    private void actualizarBadgeMensajes() {
+        if (txtMensajesNoLeidos == null || imagenChat == null) return;
+        int n = bandeja().noLeidos();
+        txtMensajesNoLeidos.setVisibility(n > 0 ? View.VISIBLE : View.GONE);
+        txtMensajesNoLeidos.setText(n > 99 ? "99+" : String.valueOf(n));
+        if (n > 0) imagenChat.setImageResource(R.drawable.chat_msg_si);
+    }
+
+    private void abrirBandeja() {
+        java.util.List<BandejaMensajes.Mensaje> lista = bandeja().todos();
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        LinearLayout caja = new LinearLayout(this);
+        caja.setOrientation(LinearLayout.VERTICAL);
+        caja.setPadding(pad, pad / 2, pad, pad / 2);
+        if (lista.isEmpty()) {
+            TextView vacio = new TextView(this);
+            vacio.setText(ConfigSync.modoRest(this) ? "No hay mensajes de la oficina." : "La bandeja requiere el envio por API (v1).");
+            caja.addView(vacio);
+        }
+        for (BandejaMensajes.Mensaje m : lista) {
+            TextView t = new TextView(this);
+            String cabecera = (m.leido ? "" : "NUEVO  ") + (m.asunto.isEmpty() ? "(sin asunto)" : m.asunto);
+            t.setText(cabecera + "\n" + m.nombre + " · " + m.enviado + "\n" + m.texto);
+            t.setPadding(0, pad / 2, 0, pad / 2);
+            if (!m.leido) t.setTypeface(null, android.graphics.Typeface.BOLD);
+            caja.addView(t);
+        }
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(caja);
+        new AlertDialog.Builder(this)
+                .setTitle("Mensajes de la oficina")
+                .setView(scroll)
+                .setPositiveButton("CERRAR", null)
+                .setNeutralButton("ESCRIBIR A LA OFICINA", (d, w) -> escribirAOficina())
+                .show();
+
+        java.util.List<Long> leidos = bandeja().marcarLeidos();
+        if (!leidos.isEmpty()) {
+            java.util.Map<String, Object> datos = new java.util.LinkedHashMap<>();
+            datos.put("ids", leidos);
+            registrarEvento(EventoMovil.MENSAJE_LEIDO, "", infoClienteEntrada.gettablaEntradaClientes_anio().trim(),
+                    infoClienteEntrada.gettablaEntradaClientes_mes().trim(), datos);
+            escribeResumenTiempo(";MENSAJES LEIDOS;" + getPhoneDate() + "-" + getPhoneHour() + ";" + leidos);
+        }
+        actualizarBadgeMensajes();
+    }
+
+    private void escribirAOficina() {
+        if (!ConfigSync.modoRest(this)) {
+            mensajeT("Los mensajes a la oficina requieren el envio por API (v1).", msgLargo);
+            return;
+        }
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        LinearLayout caja = new LinearLayout(this);
+        caja.setOrientation(LinearLayout.VERTICAL);
+        caja.setPadding(pad, pad / 2, pad, 0);
+        final String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
+        TextView info = new TextView(this);
+        info.setText("Llega a su supervisor. Cuenta en pantalla: " + cuenta);
+        caja.addView(info);
+        final EditText txtAsunto = campoNovedad(caja, "Asunto (opcional)", android.text.InputType.TYPE_CLASS_TEXT
+                | android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES, 120);
+        final EditText txtTexto = campoNovedad(caja, "Mensaje", android.text.InputType.TYPE_CLASS_TEXT
+                | android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE | android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES, 1000);
+        txtTexto.setMinLines(3);
+        final AlertDialog dlg = new AlertDialog.Builder(this)
+                .setTitle("Mensaje a la oficina")
+                .setView(caja)
+                .setPositiveButton("ENVIAR", null)
+                .setNegativeButton("CANCELAR", null)
+                .create();
+        dlg.setOnShowListener(d -> dlg.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String texto = txtTexto.getText().toString().trim();
+            if (texto.isEmpty()) {
+                txtTexto.setError("Escriba el mensaje");
+                return;
+            }
+            java.util.Map<String, Object> datos = new java.util.LinkedHashMap<>();
+            datos.put("asunto", txtAsunto.getText().toString().trim());
+            datos.put("texto", texto);
+            registrarEvento(EventoMovil.MENSAJE_TECNICO, codCuentaActual(), infoClienteEntrada.gettablaEntradaClientes_anio().trim(),
+                    infoClienteEntrada.gettablaEntradaClientes_mes().trim(), datos);
+            escribeResumenTiempo(cuenta + ";MENSAJE A LA OFICINA;" + getPhoneDate() + "-" + getPhoneHour());
+            dlg.dismiss();
+            mensajeT("Mensaje enviado. Llega a la oficina en la proxima sincronizacion.", msgMedio);
+        }));
+        dlg.show();
+    }
+
+    /**
+     * Codigo de un solo uso digitado en la autorizacion del supervisor: primero sin senal con las claves del equipo;
+     * si el equipo nunca las bajo, contra el servidor (en segundo plano, con el dialogo abierto).
+     */
+    private void validarCodigoUnico(final FotoObligatoria g, final FotoObligatoria.Pendiente p, final String codigo,
+                                    final AlertDialog dlg, final EditText campo) {
+        CodigoSupervisor.Clave k = codigosSupervisor().validar(codigo, p.codCuenta, System.currentTimeMillis());
+        if (k != null) {
+            aplicarCodigoUnico(g, p, codigo, k.supervisor, k.nombre, dlg);
+            return;
+        }
+        if (codigosSupervisor().hayClaves() || !ConfigSync.modoRest(this)) {
+            codigoUnicoRechazado(p, codigo, campo, codigosSupervisor().yaUsado(codigo, p.codCuenta)
+                    ? "Ese codigo ya se uso en este equipo" : "Codigo incorrecto o vencido");
+            return;
+        }
+        campo.setEnabled(false);
+        mensajeT("Validando el codigo con el servidor...", msgCorto);
+        final ConfigSync config = new ConfigSync(this);
+        new Thread(() -> {
+            ApiMovil api = new ApiMovil(config.baseApi());
+            api.token(config.leer());
+            ApiMovil.Respuesta r = config.baseApi().isEmpty() || config.leer() == null
+                    ? new ApiMovil.Respuesta(ApiMovil.SIN_RED, null, "sin sesion") : api.validarCodigo(codigo, p.codCuenta);
+            runOnUiThread(() -> {
+                campo.setEnabled(true);
+                if (r.ok() && r.campo("supervisor") != null) {
+                    aplicarCodigoUnico(g, p, codigo, r.campo("supervisor"), r.campo("nombre") == null ? "" : r.campo("nombre"), dlg);
+                } else if (r.codigo == 422 || r.codigo == 429) {
+                    codigoUnicoRechazado(p, codigo, campo, r.codigo == 429 ? "Demasiados intentos: espere unos minutos"
+                            : "Codigo incorrecto o vencido");
+                } else {
+                    codigoUnicoRechazado(p, codigo, campo, "Sin senal y sin claves en el equipo: use la clave del supervisor");
+                }
+            });
+        }).start();
+    }
+
+    private void aplicarCodigoUnico(FotoObligatoria g, FotoObligatoria.Pendiente p, String codigo, String supervisor, String nombre,
+                                    AlertDialog dlg) {
+        codigosSupervisor().marcarUsado(codigo, p.codCuenta);
+        codigoAutorizacion = codigo;
+        escribeResumenTiempo(p.cuenta + ";CODIGO DE SUPERVISOR;" + getPhoneDate() + "-" + getPhoneHour() + ";supervisor=" + supervisor);
+        dlg.dismiss();
+        ClaveSupervisor.Supervisor s = new ClaveSupervisor.Supervisor(supervisor, nombre);
+        if (g == muestraFactura()) {
+            autorizarSinMuestra(p, s);
+        } else {
+            autorizarSinFoto(p, s);
+        }
+    }
+
+    private void codigoUnicoRechazado(FotoObligatoria.Pendiente p, String codigo, EditText campo, String motivo) {
+        intentosClaveSupervisor++;
+        escribeResumenTiempo(p.cuenta + ";CODIGO DE SUPERVISOR RECHAZADO;" + getPhoneDate() + "-" + getPhoneHour()
+                + ";motivo=" + motivo + ";intento=" + intentosClaveSupervisor);
+        campo.setText("");
+        campo.setError(motivo);
+    }
+
+    // ======================================================================== novedad: medidor encontrado
+    //
+    // Medidor que el tecnico encuentra y no corresponde a la cuenta o no esta en la ruta: marca, numero, lectura y
+    // observacion, con foto (sufijo N) y posicion obligatorias. Viaja como evento novedad_medidor y queda en
+    // DATOSDESALIDA/NOVEDADESMEDIDOR.SDA.
+
+    private AlmacenEstado almacenNovedad() {
+        return AlmacenEstado.de(this, "novedad_medidor");
+    }
+
+    private NovedadMedidor novedadPendiente() {
+        return NovedadMedidor.leer(almacenNovedad());
+    }
+
+    private void registrarNovedadMedidor() {
+        NovedadMedidor previa = novedadPendiente();
+        if (previa != null) {
+            dialogoFotoNovedad(previa);
+            return;
+        }
+        if (!posicionVigente() || ultimaPosicionEvento == null) {
+            mensajeT("Sin posicion GPS vigente: espere la senal (cielo abierto) antes de registrar la novedad.", msgLargo);
+            return;
+        }
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        LinearLayout caja = new LinearLayout(this);
+        caja.setOrientation(LinearLayout.VERTICAL);
+        caja.setPadding(pad, pad / 2, pad, 0);
+        final String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
+        TextView info = new TextView(this);
+        info.setText("Medidor encontrado cerca de la cuenta " + cuenta + ". Despues de guardar se toma la foto del medidor.");
+        caja.addView(info);
+        final EditText txtNumero = campoNovedad(caja, "Numero del medidor", android.text.InputType.TYPE_CLASS_TEXT
+                | android.text.InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS, NovedadMedidor.MAX_NUMERO);
+        final EditText txtMarca = campoNovedad(caja, "Marca", android.text.InputType.TYPE_CLASS_TEXT
+                | android.text.InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS, NovedadMedidor.MAX_MARCA);
+        final EditText txtLectura = campoNovedad(caja, "Lectura", android.text.InputType.TYPE_CLASS_NUMBER, NovedadMedidor.MAX_LECTURA);
+        final EditText txtObs = campoNovedad(caja, "Observacion (opcional)", android.text.InputType.TYPE_CLASS_TEXT
+                | android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE, NovedadMedidor.MAX_OBSERVACION);
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(caja);
+
+        final AlertDialog dlg = new AlertDialog.Builder(this)
+                .setTitle("Novedad: medidor encontrado")
+                .setView(scroll)
+                .setCancelable(false)
+                .setPositiveButton("GUARDAR Y TOMAR FOTO", null)
+                .setNegativeButton("CANCELAR", null)
+                .create();
+        dlg.setOnShowListener(d -> dlg.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            NovedadMedidor n = new NovedadMedidor();
+            n.numero = txtNumero.getText().toString();
+            n.marca = txtMarca.getText().toString();
+            n.lectura = txtLectura.getText().toString();
+            n.observacion = txtObs.getText().toString();
+            n.cuentaReferencia = cuenta;
+            n.codCuentaReferencia = codCuentaActual();
+            n.anno = infoClienteEntrada.gettablaEntradaClientes_anio().trim();
+            n.mes = infoClienteEntrada.gettablaEntradaClientes_mes().trim();
+            Location pos = posicionVigente() ? ultimaPosicionEvento : null;
+            if (pos != null) {
+                n.lat = pos.getLatitude();
+                n.lng = pos.getLongitude();
+                n.precision = pos.hasAccuracy() ? (double) pos.getAccuracy() : null;
+                n.proveedor = pos.getProvider() == null ? "" : pos.getProvider();
+                n.posicionEdadSeg = Math.max(0, (android.os.SystemClock.elapsedRealtime() - ultimaPosicionRecibidaMs) / 1000);
+            }
+            n.creadaMs = System.currentTimeMillis();
+            String error = n.validar();
+            if (error != null) {
+                mensajeT(error, msgMedio);
+                return;
+            }
+            n.guardar(almacenNovedad());
+            escribeResumenTiempo(cuenta + ";NOVEDAD MEDIDOR;" + getPhoneDate() + "-" + getPhoneHour() + ";numero=" + n.numero.trim()
+                    + ";lectura=" + n.lectura.trim());
+            dlg.dismiss();
+            tomarFotoNovedad(n);
+        }));
+        dlg.show();
+    }
+
+    private EditText campoNovedad(LinearLayout caja, String hint, int tipo, int max) {
+        EditText e = new EditText(this);
+        e.setHint(hint);
+        e.setInputType(tipo);
+        e.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(max)});
+        caja.addView(e);
+        return e;
+    }
+
+    private void tomarFotoNovedad(NovedadMedidor n) {
+        try {
+            ejecutarProcesoDeFoto(n.cuentaReferencia + "_" + n.mes, 1, tipoFotoDigital, 1, NovedadMedidor.SUFIJO_FOTO, 1);
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]tomarFotoNovedad() " + e.getMessage());
+            dialogoFotoNovedad(n);
+        }
+    }
+
+    private void alVolverFotoNovedad(boolean valida) {
+        NovedadMedidor n = novedadPendiente();
+        if (n == null) return;
+        if (!valida) {
+            dialogoFotoNovedad(n);
+            return;
+        }
+        String foto = nameForIntent;
+        try {
+            utils.EscribirLinea(new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/NOVEDADESMEDIDOR.SDA"),
+                    n.lineaSda(foto, getPhoneDate() + " " + getPhoneHour()));
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]alVolverFotoNovedad() " + e.getMessage());
+        }
+        registrarEvento(EventoMovil.NOVEDAD_MEDIDOR, n.codCuentaReferencia, n.anno, n.mes, n.datos(foto));
+        escribeResumenTiempo(n.cuentaReferencia + ";NOVEDAD MEDIDOR CON FOTO;" + getPhoneDate() + "-" + getPhoneHour() + ";foto=" + foto);
+        NovedadMedidor.borrar(almacenNovedad());
+        mensajeT("Novedad del medidor " + n.numero.trim() + " registrada", msgMedio);
+    }
+
+    private void dialogoFotoNovedad(final NovedadMedidor n) {
+        if (isFinishing()) return;
+        new AlertDialog.Builder(this)
+                .setTitle("Novedad sin foto")
+                .setMessage("La novedad del medidor " + n.numero.trim() + " requiere la foto del medidor.")
+                .setCancelable(false)
+                .setPositiveButton("TOMAR FOTO", (d, w) -> tomarFotoNovedad(n))
+                .setNegativeButton("DESCARTAR NOVEDAD", (d, w) -> {
+                    escribeResumenTiempo(n.cuentaReferencia + ";NOVEDAD MEDIDOR DESCARTADA;" + getPhoneDate() + "-" + getPhoneHour()
+                            + ";numero=" + n.numero.trim());
+                    NovedadMedidor.borrar(almacenNovedad());
+                })
+                .show();
+    }
+
+    // ======================================================================== linterna
+
+    private void prepararLinterna() {
+        btnLinterna = (ImageButton) findViewById(R.id.btnLinterna);
+        if (btnLinterna == null) return;
+        linterna = new Linterna(this, encendida -> runOnUiThread(() -> pintarLinterna(encendida)));
+        if (!linterna.disponible()) {
+            btnLinterna.setVisibility(View.GONE);
+            return;
+        }
+        pintarLinterna(false);
+        btnLinterna.setOnClickListener(v -> {
+            if (!linterna.alternar()) mensajeT("No se pudo cambiar la linterna (camara en uso)", msgCorto);
+        });
+    }
+
+    private void pintarLinterna(boolean encendida) {
+        if (btnLinterna == null) return;
+        btnLinterna.setImageResource(encendida ? R.drawable.ic_linterna_on : R.drawable.ic_linterna_off);
+        btnLinterna.setContentDescription(encendida ? "Apagar linterna" : "Encender linterna");
+    }
+
+    private void apagarLinterna() {
+        if (linterna != null) linterna.apagar();
+    }
+
+    // ======================================================================== recorrido: secuencia, busquedas, contenedores
+    //
+    // Materia prima del reordenamiento de rutas (SecuenciaCampo): como llego la pantalla a cada cuenta, de que cuenta
+    // venia el tecnico, cuanto salto en el orden de la ruta, que busco y que medidores estan en un mismo contenedor.
+    // Todo queda en RESUMENTIEMPO.SDA y viaja como evento (secuencia, busqueda, contenedor).
+
+    private SecuenciaCampo secuencia;
+    /** Primero / ultimo: la llegada que debe quedar cuando avanzar/retroceder la ejecuten por ellos. */
+    private String llegadaForzada = null;
+    private TextView txtContenedor;
+
+    private SecuenciaCampo secuencia() {
+        if (secuencia == null) secuencia = new SecuenciaCampo(AlmacenEstado.de(this, "secuencia_campo"));
+        return secuencia;
+    }
+
+    private void marcarLlegada(String porDefecto) {
+        String tipo = llegadaForzada != null ? llegadaForzada : porDefecto;
+        llegadaForzada = null;
+        try {
+            secuencia().llegada(tipo, infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim(), System.currentTimeMillis());
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]marcarLlegada() " + e.getMessage());
+        }
+    }
+
+    private static String criterioBusqueda(int tipo) {
+        switch (tipo) {
+            case 1: return "medidor";
+            case 2:
+            case 6: return "cuenta";
+            case 4: return "direccion";
+            case 5: return "nombre";
+            default: return "otro_" + tipo;
+        }
+    }
+
+    /** Fin de una busqueda que abrio el tecnico (las internas de la app no cuentan). */
+    private void registrarResultadoBusqueda(boolean encontrada, boolean cancelada) {
+        try {
+            if (!secuencia().busquedaEnCurso()) return;
+            String uid = EventoMovil.nuevoUid();
+            String cuenta = encontrada ? infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() : "";
+            java.util.Map<String, Object> datos = secuencia().terminarBusqueda(uid,
+                    cancelada ? "cancelada" : criterioBusqueda(VariablesGlobales.tipodebusqueda),
+                    cancelada ? "" : VariablesGlobales.datodebusqueda, encontrada, cuenta,
+                    encontrada ? variables.clienteactual : -1, System.currentTimeMillis());
+            escribeResumenTiempo((encontrada ? cuenta : String.valueOf(datos.get("desde_cuenta"))) + ";BUSQUEDA;" + getPhoneDate() + "-" + getPhoneHour()
+                    + ";desde=" + datos.get("desde_cuenta") + ";criterio=" + datos.get("criterio")
+                    + ";encontrada=" + encontrada + ";salto=" + datos.get("salto") + ";seg=" + datos.get("segundos"));
+            // Cuenta en pantalla: la encontrada, o la de partida si no encontro (sirve para ubicar el ciclo).
+            registrarEvento(uid, EventoMovil.BUSQUEDA, codCuentaActual(),
+                    infoClienteEntrada.gettablaEntradaClientes_anio().trim(), infoClienteEntrada.gettablaEntradaClientes_mes().trim(), datos);
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]registrarResultadoBusqueda() " + e.getMessage());
+        }
+    }
+
+    /** La cuenta en pantalla quedo leida (o con causal): un paso del recorrido. */
+    private void registrarSecuenciaLectura() {
+        try {
+            if (indicadorManual != 0) return; // liquidacion automatica: no es recorrido en terreno
+            Location pos = posicionVigente() ? ultimaPosicionEvento : null;
+            String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
+            SecuenciaCampo.Punto p = new SecuenciaCampo.Punto(cuenta, codCuentaActual(), variables.clienteactual,
+                    infoClienteEntrada.gettablaEntradaClientes_Ruta(), infoRegistroEntrada.gettablaRegistroDeEntrada_nrocontador(),
+                    System.currentTimeMillis(),
+                    pos == null ? null : pos.getLatitude(), pos == null ? null : pos.getLongitude(),
+                    pos != null && pos.hasAltitude() ? pos.getAltitude() : null);
+            boolean causal = !infoRegistroSalida.gettablaRegistroSalida_CAUSADENOLECTURA().trim().isEmpty();
+            java.util.Map<String, Object> datos = secuencia().registrarLectura(p, causal);
+            if (datos != null) {
+                escribeResumenTiempo(cuenta + ";SECUENCIA;" + getPhoneDate() + "-" + getPhoneHour()
+                        + ";anterior=" + datos.get("cuenta_anterior") + ";salto=" + datos.get("salto")
+                        + ";seg=" + datos.get("segundos_desde_anterior") + ";llegada=" + datos.get("llegada")
+                        + (datos.containsKey("contenedor_id") ? ";contenedor=" + datos.get("contenedor_id") : ""));
+                registrarEvento(EventoMovil.SECUENCIA, p.codCuenta, infoClienteEntrada.gettablaEntradaClientes_anio().trim(),
+                        infoClienteEntrada.gettablaEntradaClientes_mes().trim(), datos);
+            }
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]registrarSecuenciaLectura() " + e.getMessage());
+        } finally {
+            actualizarChipContenedor();
+        }
+    }
+
+    // ---------------------------------------------------------------- contenedores
+
+    private void prepararChipContenedor() {
+        txtContenedor = (TextView) findViewById(R.id.txtContenedor);
+        if (txtContenedor != null) txtContenedor.setOnClickListener(v -> alternarContenedor());
+        actualizarChipContenedor();
+    }
+
+    private void actualizarChipContenedor() {
+        if (txtContenedor == null) return;
+        runOnUiThread(() -> {
+            if (secuencia().contenedorActivo()) {
+                int n = secuencia().cuentasContenedor().size();
+                txtContenedor.setText("CONTENEDOR EN CURSO · " + n + " medidor(es) · tocar para cerrar");
+                txtContenedor.setVisibility(View.VISIBLE);
+            } else {
+                txtContenedor.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    /** Menu: Iniciar / Cerrar contenedor. Todo lo leido en medio queda como un mismo banco de medidores. */
+    private void alternarContenedor() {
+        if (!secuencia().contenedorActivo()) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Iniciar contenedor")
+                    .setMessage("Las cuentas que lea desde ahora quedaran agrupadas en un mismo contenedor (banco de medidores) "
+                            + "hasta que lo cierre.")
+                    .setPositiveButton("INICIAR", (d, w) -> {
+                        Location pos = posicionVigente() ? ultimaPosicionEvento : null;
+                        String id = EventoMovil.nuevoUid();
+                        secuencia().iniciarContenedor(id, System.currentTimeMillis(),
+                                pos == null ? null : pos.getLatitude(), pos == null ? null : pos.getLongitude());
+                        escribeResumenTiempo(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";CONTENEDOR INICIO;"
+                                + getPhoneDate() + "-" + getPhoneHour() + ";id=" + id);
+                        actualizarChipContenedor();
+                    })
+                    .setNegativeButton("CANCELAR", null)
+                    .show();
+            return;
+        }
+        final int n = secuencia().cuentasContenedor().size();
+        if (n < SecuenciaCampo.MIN_CUENTAS_CONTENEDOR) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Cerrar contenedor")
+                    .setMessage("El contenedor tiene " + n + " medidor(es) leido(s). Un contenedor necesita al menos "
+                            + SecuenciaCampo.MIN_CUENTAS_CONTENEDOR + ". ¿Descartarlo?")
+                    .setPositiveButton("DESCARTAR", (d, w) -> cerrarContenedor(false))
+                    .setNegativeButton("SEGUIR LEYENDO", null)
+                    .show();
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("Cerrar contenedor")
+                .setMessage("Se agrupan " + n + " medidores en el contenedor.")
+                .setPositiveButton("CERRAR", (d, w) -> cerrarContenedor(true))
+                .setNegativeButton("SEGUIR LEYENDO", null)
+                .show();
+    }
+
+    private void cerrarContenedor(boolean registrar) {
+        try {
+            java.util.Map<String, Object> datos = secuencia().cerrarContenedor(System.currentTimeMillis());
+            if (datos == null) return;
+            escribeResumenTiempo(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";CONTENEDOR "
+                    + (registrar ? "CIERRE" : "DESCARTADO") + ";" + getPhoneDate() + "-" + getPhoneHour()
+                    + ";id=" + datos.get("contenedor_id") + ";cuentas=" + datos.get("cuentas"));
+            if (registrar) {
+                java.util.List<?> cuentas = (java.util.List<?>) datos.get("cuentas");
+                registrarEvento(String.valueOf(datos.get("contenedor_id")), EventoMovil.CONTENEDOR,
+                        cuentas == null || cuentas.isEmpty() ? "" : String.valueOf(cuentas.get(0)),
+                        infoClienteEntrada.gettablaEntradaClientes_anio().trim(), infoClienteEntrada.gettablaEntradaClientes_mes().trim(), datos);
+                mensajeT("Contenedor cerrado: " + datos.get("n") + " medidores", msgMedio);
+            }
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]cerrarContenedor() " + e.getMessage());
+        } finally {
+            actualizarChipContenedor();
+        }
+    }
+
+    // ======================================================================== nota de factura retenida
+    //
+    // El tecnico recoge la factura (por ejemplo, metio la lectura en la cuenta que no era) y entrega el "Soporte de no
+    // entrega de factura al usuario", que antes llenaba a mano en el talonario. Queda en RETENIDAS.SDA, en RESUMENTIEMPO,
+    // como evento factura_retenida (la cuenta sale del calculo del reordenamiento) y se imprime con NOTA_RETENCION.CPCL.
+
+    private AlmacenEstado estadoNotas;
+
+    private AlmacenEstado estadoNotas() {
+        if (estadoNotas == null) estadoNotas = AlmacenEstado.de(this, "nota_retencion");
+        return estadoNotas;
+    }
+
+    private void generarNotaRetenida() {
+        try {
+            abrirArchivosDeFacturacion();
+            final String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
+            final String lecturaSistema = infoRegistroSalida.gettablaRegistroSalida_LECTURATOMADA().trim();
+            if (lecturaSistema.isEmpty() || lecturaSistema.replace("0", "").isEmpty()) {
+                mensajeT("La cuenta " + cuenta + " no tiene lectura tomada: no hay factura que retener.", msgLargo);
+                return;
+            }
+            final String codCuenta = codCuentaActual();
+            String previa = estadoNotas().leer("cuenta." + codCuenta);
+            if (previa != null && !previa.isEmpty()) {
+                final String[] p = previa.split("\\|", 2);
+                new AlertDialog.Builder(this)
+                        .setTitle("Factura retenida")
+                        .setMessage("La cuenta " + cuenta + " ya tiene la nota No. " + p[0] + ".")
+                        .setPositiveButton("REIMPRIMIR", (d, w) -> reimprimirNota(p.length > 1 ? p[1] : ""))
+                        .setNeutralButton("NOTA NUEVA", (d, w) -> mostrarFormularioNota(cuenta, codCuenta, lecturaSistema))
+                        .setNegativeButton("CANCELAR", null)
+                        .show();
+                return;
+            }
+            mostrarFormularioNota(cuenta, codCuenta, lecturaSistema);
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]generarNotaRetenida() " + e.getMessage());
+            mensajeT("No se pudo abrir la nota de factura retenida", msgMedio);
+        } finally {
+            cerrarArchivosSiNoHayPendiente();
+        }
+    }
+
+    private void mostrarFormularioNota(final String cuenta, final String codCuenta, final String lecturaSistema) {
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        LinearLayout caja = new LinearLayout(this);
+        caja.setOrientation(LinearLayout.VERTICAL);
+        caja.setPadding(pad, pad / 2, pad, 0);
+
+        TextView info = new TextView(this);
+        info.setText("Cuenta " + cuenta + " · lectura en la terminal " + lecturaSistema + "\nMotivo:");
+        caja.addView(info);
+
+        final android.widget.RadioGroup motivos = new android.widget.RadioGroup(this);
+        for (int i = 0; i < NotaRetencion.MOTIVOS.length; i++) {
+            android.widget.RadioButton rb = new android.widget.RadioButton(this);
+            rb.setId(1000 + i);
+            rb.setText(NotaRetencion.MOTIVOS[i][1]);
+            motivos.addView(rb);
+        }
+        caja.addView(motivos);
+
+        final EditText txtOtros = new EditText(this);
+        txtOtros.setHint("Motivo (Otros), p. ej. Error lectura");
+        txtOtros.setEnabled(false);
+        txtOtros.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(40)});
+        caja.addView(txtOtros);
+        motivos.setOnCheckedChangeListener((g, id) -> {
+            boolean otros = id == 1000 + NotaRetencion.MOTIVOS.length - 1;
+            txtOtros.setEnabled(otros);
+            if (otros) txtOtros.requestFocus();
+        });
+
+        final EditText txtLectura = new EditText(this);
+        txtLectura.setHint("Lectura actual del medidor");
+        txtLectura.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        caja.addView(txtLectura);
+
+        final EditText txtTelefono = new EditText(this);
+        txtTelefono.setHint("Telefono de contacto (opcional)");
+        txtTelefono.setInputType(android.text.InputType.TYPE_CLASS_PHONE);
+        caja.addView(txtTelefono);
+
+        final EditText txtFecha = new EditText(this);
+        txtFecha.setHint("Factura corregida despues del dia (opcional)");
+        txtFecha.setFocusable(false);
+        txtFecha.setOnClickListener(v -> {
+            java.util.Calendar c = java.util.Calendar.getInstance();
+            new android.app.DatePickerDialog(this, (dp, y, m, d) -> txtFecha.setText(
+                    String.format(java.util.Locale.ROOT, "%02d/%02d/%04d", d, m + 1, y)),
+                    c.get(java.util.Calendar.YEAR), c.get(java.util.Calendar.MONTH), c.get(java.util.Calendar.DAY_OF_MONTH)).show();
+        });
+        caja.addView(txtFecha);
+
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(caja);
+
+        final AlertDialog dlg = new AlertDialog.Builder(this)
+                .setTitle("Nota de factura retenida")
+                .setView(scroll)
+                .setCancelable(false)
+                .setPositiveButton("IMPRIMIR NOTA", null)
+                .setNegativeButton("CANCELAR", null)
+                .create();
+        dlg.setOnShowListener(d -> dlg.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            NotaRetencion nota = new NotaRetencion();
+            int sel = motivos.getCheckedRadioButtonId() - 1000;
+            nota.motivo = sel >= 0 && sel < NotaRetencion.MOTIVOS.length ? NotaRetencion.MOTIVOS[sel][0] : "";
+            nota.otros = txtOtros.getText().toString();
+            nota.lectura = txtLectura.getText().toString();
+            nota.telefono = txtTelefono.getText().toString();
+            nota.fechaEntrega = txtFecha.getText().toString();
+            String error = nota.validar(System.currentTimeMillis());
+            if (error != null) {
+                mensajeT(error, msgMedio);
+                return;
+            }
+            dlg.dismiss();
+            registrarNotaRetenida(nota, cuenta, codCuenta, lecturaSistema);
+        }));
+        dlg.show();
+    }
+
+    private void registrarNotaRetenida(NotaRetencion nota, String cuenta, String codCuenta, String lecturaSistema) {
+        try {
+            abrirArchivosDeFacturacion();
+            String lectorCodigo = lector == null ? "" : lector.trim();
+            int seq = 1;
+            try {
+                seq = Integer.parseInt(String.valueOf(estadoNotas().leer("seq." + lectorCodigo))) + 1;
+            } catch (NumberFormatException ignorado) {
+            }
+            estadoNotas().guardar("seq." + lectorCodigo, String.valueOf(seq));
+
+            nota.consecutivo = (lectorCodigo.isEmpty() ? "" : lectorCodigo + "-") + String.format(java.util.Locale.ROOT, "%05d", seq);
+            nota.cuenta = cuenta;
+            nota.codCuenta = codCuenta;
+            nota.nombre = infoClienteEntrada.gettablaEntradaClientes_Nombre().trim();
+            nota.direccion = infoClienteEntrada.gettablaEntradaClientes_Direccion().trim();
+            nota.medidor = infoRegistroEntrada.gettablaRegistroDeEntrada_nrocontador().trim();
+            nota.fechaMs = System.currentTimeMillis();
+            nota.lecturaSistema = lecturaSistema;
+            nota.lectorCodigo = lectorCodigo;
+            nota.lectorNombre = VariablesGlobales.getNombreLectorPDA() == null ? "" : VariablesGlobales.getNombreLectorPDA().trim();
+
+            // Respaldo en la terminal, aunque no haya red ni impresora.
+            java.io.File sda = new java.io.File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/RETENIDAS.SDA");
+            try (java.io.Writer w = new java.io.OutputStreamWriter(new java.io.FileOutputStream(sda, true), java.nio.charset.StandardCharsets.ISO_8859_1)) {
+                w.write(nota.lineaSda() + "\r\n");
+            }
+            escribeResumenTiempo(cuenta + ";FACTURA RETENIDA;" + getPhoneDate() + "-" + getPhoneHour() + ";nota=" + nota.consecutivo
+                    + ";motivo=" + nota.motivo + ";lectura_nota=" + nota.lectura + ";lectura_sistema=" + lecturaSistema);
+            registrarEvento(EventoMovil.FACTURA_RETENIDA, codCuenta, infoClienteEntrada.gettablaEntradaClientes_anio().trim(),
+                    infoClienteEntrada.gettablaEntradaClientes_mes().trim(), nota.datosEvento());
+
+            java.io.File lbl = escribirNota(nota);
+            estadoNotas().guardar("cuenta." + codCuenta, nota.consecutivo + "|" + (lbl == null ? "" : lbl.getAbsolutePath()));
+            boolean impresa = lbl != null && imprimirNota(lbl);
+            mensajeT("Nota No. " + nota.consecutivo + " registrada" + (impresa ? "." : ". No se pudo imprimir: use de nuevo la opcion para reimprimirla."), msgLargo);
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]registrarNotaRetenida() " + e.getMessage());
+            mensajeT("Error al registrar la nota de factura retenida", msgMedio);
+        } finally {
+            cerrarArchivosSiNoHayPendiente();
+        }
+    }
+
+    /** CPCL de la nota en LBLS/<cuenta>_NOTA_<consecutivo>.LOG (no viaja como LBL de factura). */
+    private java.io.File escribirNota(NotaRetencion nota) {
+        try {
+            com.gselectroCaqueta.impresion.Plantilla.Resultado r = nota.renderizar(
+                    new java.io.File(VariablesGlobales.directorioactual + "/DATOSDEENTRADA"),
+                    AjustesImpresora.leer(new java.io.File(VariablesGlobales.directorioactual + "/" + AjustesImpresora.ARCHIVO)));
+            if (!r.faltantes().isEmpty()) {
+                utils.Log(logfile, "[MenuDeLiquidacion]escribirNota(); claves sin dato: " + r.faltantes());
+            }
+            java.io.File dir = new java.io.File(VariablesGlobales.directorioactual + "/LBLS");
+            if (!dir.isDirectory()) dir.mkdirs();
+            java.io.File f = new java.io.File(dir, nota.cuenta + "_NOTA_" + nota.consecutivo.replace('-', '_') + ".LOG");
+            try (java.io.OutputStream out = new java.io.FileOutputStream(f)) {
+                out.write(r.cpcl().getBytes(java.nio.charset.StandardCharsets.ISO_8859_1));
+            }
+            return f;
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]escribirNota() " + e.getMessage());
+            return null;
+        }
+    }
+
+    private boolean imprimirNota(java.io.File lbl) {
+        try {
+            if (VariablesGlobales.habilitadaimpresora == 0) {
+                mensajeT("La impresora esta deshabilitada", msgMedio);
+                return false;
+            }
+            return enviarArchivoCpcl(lbl);
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]imprimirNota() " + e.getMessage());
+            return false;
+        }
+    }
+
+    private void reimprimirNota(String ruta) {
+        java.io.File f = new java.io.File(ruta == null ? "" : ruta);
+        if (!f.isFile()) {
+            mensajeT("No se encontro el archivo de la nota para reimprimir", msgMedio);
+            return;
+        }
+        escribeResumenTiempo(f.getName() + ";REIMPRESION NOTA RETENIDA;" + getPhoneDate() + "-" + getPhoneHour());
+        imprimirNota(f);
+    }
+
     private void resetValidacionUbicacion() {
         estadoUbicacion = UBI_NO_VALIDADO;
         distanciaActualPredioMetros = -1f;
@@ -13769,7 +15371,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             return;
         }*/
 
-        if (encenderEstadoActualGPS == 0) {
+        if (encenderEstadoActualGPS == 0 || !posicionVigente()) {
+            // Sin GPS, o la ultima posicion tiene mas de 2 minutos (seria la de otra cuenta): no se valida con ella.
             estadoUbicacion = UBI_SIN_GPS;
             return;
         }
@@ -13808,13 +15411,66 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         //distancia = (int) variables.evaluarDistanciaAlPredio(parseStringToDouble(VariablesGlobales.coorTempLongitud), parseStringToDouble(VariablesGlobales.coorTempLatitud), parseStringToDouble(infoClienteEntrada.getTablaEntradaClientes_cordenaday().trim()), parseStringToDouble(infoClienteEntrada.getTablaEntradaClientes_cordenadax().trim()));
 
-        if (distanciaActualPredioMetros <= RADIO_PERMITIDO_METROS) {
+        if (distanciaActualPredioMetros <= radioPermitidoMetros()) {
             estadoUbicacion = UBI_DENTRO_RANGO;
         } else {
             estadoUbicacion = UBI_FUERA_RANGO;
         }
     }
+    /** Ultima posicion del proveedor GPS en esta sesion: la usa ControlEntornoTerminal para comparar el reloj. */
+    private Location ultimaPosicionGps;
+    /** Aviso de bloqueo abierto: evita apilar dialogos si el tecnico insiste. */
+    private AlertDialog dialogoBloqueoEntorno;
+
+    /**
+     * EBSA: modo avion, ubicacion apagada o reloj manipulado bloquean la toma (lectura o causal). Solo en modo
+     * manual: la liquidacion automatica por archivo no pasa por aqui. Ubicacion encendida sin señal no bloquea.
+     */
+    private boolean entornoPermiteLiquidar() {
+        if (indicadorManual != 0) {
+            return true;
+        }
+        ControlEntornoTerminal.Bloqueo bloqueo =
+                ControlEntornoTerminal.evaluar(this, ultimaPosicionGps, VariablesGlobales.fechaproceso);
+        if (bloqueo == null) {
+            return true;
+        }
+        String cuenta = "";
+        try {
+            cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
+        } catch (Exception ignored) {
+        }
+        utils.Log(logfile, "[MenuDeLiquidacion] Bloqueo de toma " + bloqueo.codigo + " cuenta " + cuenta
+                + " | " + bloqueo.mensaje);
+        escribeResumenTiempo(cuenta + ";BLOQUEO " + bloqueo.codigo + ";" + getPhoneDate() + "-" + getPhoneHour());
+        mostrarBloqueoEntorno(bloqueo);
+        return false;
+    }
+
+    private void mostrarBloqueoEntorno(ControlEntornoTerminal.Bloqueo bloqueo) {
+        if (isFinishing() || (dialogoBloqueoEntorno != null && dialogoBloqueoEntorno.isShowing())) {
+            return;
+        }
+        dialogoBloqueoEntorno = new AlertDialog.Builder(this)
+                .setTitle(bloqueo.titulo)
+                .setMessage(bloqueo.mensaje)
+                .setIcon(R.drawable.gss_logo40x40)
+                .setCancelable(false)
+                .setPositiveButton("Ir a ajustes", (d, w) -> {
+                    try {
+                        startActivity(new Intent(bloqueo.accionAjustes));
+                    } catch (Exception e) {
+                        startActivity(new Intent(Settings.ACTION_SETTINGS));
+                    }
+                })
+                .setNegativeButton("Cerrar", (d, w) -> d.dismiss())
+                .show();
+    }
+
     private boolean puedeContinuarConTomaLectura() {
+        if (!entornoPermiteLiquidar()) {
+            return false;
+        }
         if (estadoUbicacion == UBI_DENTRO_RANGO
                 || estadoUbicacion == UBI_SIN_COORDENADAS
                 || estadoUbicacion == UBI_SIN_GPS) {
@@ -13825,7 +15481,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 return true;
             } else {
                 int intentosRestantes = MAX_INTENTOS_FUERA_RANGO - intentosLecturaFueraRango;
-                mensajeT("Debe estar a menos de " + (int) RADIO_PERMITIDO_METROS
+                mensajeT("Debe estar a menos de " + (int) radioPermitidoMetros()
                         + " metros del predio.\n"
                         + "Distancia actual: " + (int) distanciaActualPredioMetros + " metros.\n"
                         + "Intentos restantes: " + intentosRestantes, msgMedio);
@@ -15003,6 +16659,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == DialogoInforme.REQUEST_VOZ) { // dictado del informe de la causal
+            DialogoInforme.alResultadoVoz(resultCode, data);
+            return;
+        }
         if (requestCode == TAKE_PICTURE) {//Respuesta Tomar fotos en liq.
 
             if (resultCode == RESULT_OK) {
@@ -15053,7 +16713,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 String barcode = null;
                 barcode = scanResult.getContents();
 
-                if (barcode != null) {
+                if (validandoMuestra) {
+                    validandoMuestra = false;
+                    if (barcode != null) verificarBarrasMuestra(barcode);
+                    else mostrarDialogoFotoPendiente();
+                } else if (barcode != null) {
                     mensajeT("Codigo leido: " + barcode, msgCorto);
 
                     if (verificaBarras) {//Fue llamado desde XXX   para verificar barras impresas en Rural.
@@ -15067,10 +16731,19 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 }
             } else {
                 mensajeT("No se obtuvo ningun codigo...", msgCorto);
+                if (validandoMuestra) {
+                    validandoMuestra = false;
+                    mostrarDialogoFotoPendiente();
+                }
             }
         } else if (requestCode == SCANNER_TECHDATA_REQUEST_CODE) {//Respuesta scaner techdata
 
-            if (resultCode == RESULT_OK && data != null) {
+            String barcodeMuestra = resultCode == RESULT_OK && data != null ? data.getStringExtra("barcode") : null;
+            if (validandoMuestra) {
+                validandoMuestra = false;
+                if (barcodeMuestra != null && !barcodeMuestra.trim().isEmpty()) verificarBarrasMuestra(barcodeMuestra);
+                else mostrarDialogoFotoPendiente();
+            } else if (resultCode == RESULT_OK && data != null) {
 
                 String barcode = data.getStringExtra("barcode");
 
@@ -15144,6 +16817,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             }
         } else if (requestCode == BUSQUEDA_REQUEST_CODE) {
 
+            if (resultCode != RESULT_OK || data == null) {
+                registrarResultadoBusqueda(false, true); // salio de la busqueda sin escoger
+            }
             if (resultCode == RESULT_OK && data != null) {
                 try {
                     VariablesGlobales.datodebusqueda = data.getStringExtra("idcliente");
@@ -15324,6 +17000,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     }
                     vecesImagen = 0;
                     ejecutarProcesoDeFotoII(vecesImagen);
+                    alVolverDeCamara(fotoPath != null && new File(fotoPath.trim()).length() > 0);
 
                     if (lecturaOcr != null && !lecturaOcr.trim().isEmpty()) {
                         lecturaOcrCapturada = lecturaOcr.trim(); // guardar para comparar después
@@ -15344,6 +17021,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             } else {
                 esFotoMedidor = false;
                 Log.e("INFO", "CAMARA_LECTURA_REQUEST_CODE | RESULT_CANCELED");
+                alVolverDeCamara(false);
                 // Si es obligatoria NO marcar yaTomoFotoOcr=true → deberá volver a intentar
                 if (!fotoOcrObligatoria) {
                     yaTomoFotoOcr = true;
@@ -15493,7 +17171,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         int distancia = (int) variables.evaluarDistanciaAlPredio(parseStringToDouble(VariablesGlobales.coorTempLongitud),
                 parseStringToDouble(VariablesGlobales.coorTempLatitud), parseStringToDouble(cy), parseStringToDouble(cx));
         txtDistancia.setText(distancia + " - Mts.");
-        if (distancia < parseStringToInteger(VariablesGlobales.getDistanciagps())) {
+        if (distancia <= radioPermitidoMetros()) {
             txtDistancia.setBackgroundColor(Color.GREEN);
             txtDistancia.setTextColor(Color.BLACK);
         } else {
@@ -15511,14 +17189,22 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             txtLatitud.setText("0.0");//antes era "Desconocida"
             velocidadGPS = "0";
         } else {// Si se encuentra, se mostrar� la latitud y longitud
+            ultimaPosicionRecibidaMs = android.os.SystemClock.elapsedRealtime();
+            ultimaPosicionEvento = new Location(loc);
 //            Log.e("error", "toma posicion " + String.valueOf(loc.getLatitude()));
             txtLongitud.setText(String.valueOf(loc.getLatitude()));//Ax: antes txtLatitud
             txtLatitud.setText(String.valueOf(loc.getLongitude()));//Ax: antes txtLongitud
             velocidadGPS = String.valueOf(loc.getSpeed());
-            numeroDeSatelitesGPS = "" + loc.getExtras().getInt("satellites");//Ax: sin probar!
+            // La ubicacion fusionada no trae extras (getExtras() == null): se conserva el dato del ultimo fix GPS.
+            if (loc.getExtras() != null && loc.getExtras().containsKey("satellites")) {
+                numeroDeSatelitesGPS = "" + loc.getExtras().getInt("satellites");
+            }
             altitudReportadaGPS = String.valueOf(loc.getAltitude());
             fechayHoraReportadaGPS = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(loc.getTime());
             leyoCoordenadas = 1;
+            if (LocationManager.GPS_PROVIDER.equals(loc.getProvider())) {
+                ultimaPosicionGps = new Location(loc);
+            }
 
            /* if (txtLatitud.getText().toString().trim().length() > 12) {
                 txtLatitud.setText(txtLatitud.getText().toString().trim().substring(0, 12));
@@ -16125,6 +17811,24 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // Foto exigida y no tomada (se cancelo la camara, se salio de la app o se reinicio el equipo): se vuelve a pedir.
+        reanudarFotoPendiente();
+        // Mensajes que baja el servicio de sincronizacion: el contador del icono se refresca solo.
+        BandejaMensajes.oyente(() -> runOnUiThread(this::actualizarBadgeMensajes));
+        actualizarBadgeMensajes();
+    }
+
+    @Override
+    protected void onPause() {
+        BandejaMensajes.oyente(null);
+        // La linterna no queda encendida fuera de la liquidacion (se apaga tambien al abrir la camara).
+        if (!camaraAbierta) apagarLinterna();
+        super.onPause();
+    }
+
+    @Override
     public void onStop() {
         super.onStop();
     }
@@ -16386,7 +18090,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             builder.setTitle(titulo);
             builder.setMessage(mensaje);
 
-            builder.setIcon(R.drawable.ic_simfa_logo);
+            builder.setIcon(R.drawable.gss_logo40x40);
 
             builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
@@ -16831,6 +18535,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                                 }
                             }*/
                             if (!mss[1].trim().equals("") && mss[2].trim().equals("Problema Grabando Nombre de Foto")) {
+                                if (mss[1].trim().equals(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim())) {
+                                    exigirFotoCuentaActual("foto no grabada, repetir");
+                                }
                                 mensajeOk("DEBE TOMAR FOTO DE NUEVO\n\n" + "Verifique Datos de la Cuenta: " + mss[1], "retomaFoto");
                                 //infoRegistroSalida.buscarSecuencial_TablaRegistroSalida_cuenta(mss[1]);
                                 //buscarCuentaMedidor("", 0);
@@ -16946,10 +18653,19 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         @Override
         public void onProviderDisabled(String provider) {
+            // Antes no se actualizaba: el estado del GPS solo se leia al abrir la pantalla.
+            if (LocationManager.GPS_PROVIDER.equals(provider)) {
+                encenderEstadoActualGPS = 0;
+                ultimaPosicionGps = null;
+            }
         }
 
         @Override
         public void onProviderEnabled(String provider) {
+            if (LocationManager.GPS_PROVIDER.equals(provider)) {
+                encenderEstadoActualGPS = 1;
+                estadoUbicacion = UBI_NO_VALIDADO;
+            }
         }
 
         @Override

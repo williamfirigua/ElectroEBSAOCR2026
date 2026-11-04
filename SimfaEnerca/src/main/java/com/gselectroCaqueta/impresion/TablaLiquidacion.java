@@ -16,6 +16,15 @@ import java.util.List;
  * Para que la tabla nunca contradiga el detalle, la suma de las filas se concilia con el
  * valor realmente cobrado (concepto 21) y con el subsidio/contribución cobrado (17/18):
  * si difieren por redondeo, la diferencia se carga a la fila más antigua.
+ * <p>
+ * Si la cuenta tiene medidor de reactiva se agrega una fila REACTIVA al final (período más
+ * reciente): kWh = reactiva facturada (CONSUMO3, solo el excedente que se cobra), valor
+ * unitario MDDOR2VLORKWH, venta = concepto 31. El subsidio/contribución de la reactiva no
+ * tiene concepto propio: el móvil lo suma en el 17/18 junto con el de la activa. Por eso,
+ * con reactiva con porcentaje (MDDOR2SBSDIOCNTRBCION != 0), las filas de activa calculan su
+ * contribución sin conciliar y la REACTIVA
+ * toma el resto del 17/18: la tabla suma lo cobrado y la reactiva muestra lo que de verdad
+ * se le cargó.
  */
 public final class TablaLiquidacion {
 
@@ -50,6 +59,35 @@ public final class TablaLiquidacion {
         }
     }
 
+    /** Datos de la reactiva facturada; null si la cuenta no tiene medidor de reactiva. */
+    public static final class Reactiva {
+        final int kwh;
+        final double valorKwh;
+        final double porcentaje;
+        final long valorCobrado;
+
+        /**
+         * @param kwh          reactiva facturada (CONSUMO3)
+         * @param valorKwh     MDDOR2VLORKWH
+         * @param porcentaje   MDDOR2SBSDIOCNTRBCION
+         * @param valorCobrado concepto 31 cobrado
+         */
+        public Reactiva(int kwh, double valorKwh, double porcentaje, long valorCobrado) {
+            this.kwh = Math.max(0, kwh);
+            this.valorKwh = valorKwh;
+            this.porcentaje = porcentaje;
+            this.valorCobrado = valorCobrado;
+        }
+    }
+
+    /** Solo activa. */
+    public static List<Fila> construir(int consumo, int meses, int anio, int mes, double valorKwh,
+                                       double porcentaje, int kwhSubsistencia,
+                                       long totalVentaCobrado, long totalSubsidioCobrado) {
+        return construir(consumo, meses, anio, mes, valorKwh, porcentaje, kwhSubsistencia,
+                totalVentaCobrado, totalSubsidioCobrado, null);
+    }
+
     /**
      * @param consumo          kWh liquidados en el período
      * @param meses            1, 2 o 3
@@ -59,16 +97,17 @@ public final class TablaLiquidacion {
      * @param porcentaje       MDDOR1SBSDIOCNTRBCION (negativo = subsidio, positivo = contribución)
      * @param kwhSubsistencia  consumo de subsistencia mensual (LS_CONS_SUBS); 0 si no aplica
      * @param totalVentaCobrado    concepto 21 cobrado, o 0 para no conciliar
-     * @param totalSubsidioCobrado concepto 17/18 cobrado con signo, o 0 para no conciliar
+     * @param totalSubsidioCobrado concepto 17/18 cobrado con signo (activa + reactiva), o 0 para no conciliar
+     * @param reactiva             reactiva facturada, o null si la cuenta no tiene
      */
     public static List<Fila> construir(int consumo, int meses, int anio, int mes, double valorKwh,
                                        double porcentaje, int kwhSubsistencia,
-                                       long totalVentaCobrado, long totalSubsidioCobrado) {
+                                       long totalVentaCobrado, long totalSubsidioCobrado, Reactiva reactiva) {
         int n = Math.max(1, Math.min(3, meses));
         int base = Math.max(0, consumo) / n;
         int resto = Math.max(0, consumo) - base * n;
 
-        List<Fila> filas = new ArrayList<>(n);
+        List<Fila> filas = new ArrayList<>(n + 1);
         long sumaVenta = 0, sumaSubsidio = 0;
         int a = anio, m = mes;
         for (int i = 0; i < n; i++) {
@@ -82,12 +121,27 @@ public final class TablaLiquidacion {
             if (--m == 0) { m = 12; a--; }
         }
 
+        // Con reactiva, el 17/18 también trae la contribución de la reactiva: la activa no se concilia
+        // contra él (le cargaría lo de la reactiva) y el resto va a la fila REACTIVA.
+        // Si la reactiva no tiene porcentaje, no lleva contribución y la activa se concilia como siempre.
+        boolean reactivaConContribucion = reactiva != null && reactiva.porcentaje != 0;
+        boolean conciliarSubsidio = totalSubsidioCobrado != 0 && !reactivaConContribucion;
         if (totalVentaCobrado != 0 && sumaVenta != totalVentaCobrado
-                || totalSubsidioCobrado != 0 && sumaSubsidio != totalSubsidioCobrado) {
+                || conciliarSubsidio && sumaSubsidio != totalSubsidioCobrado) {
             Fila u = filas.get(n - 1);
             long ventaU = totalVentaCobrado != 0 ? u.valorVenta + (totalVentaCobrado - sumaVenta) : u.valorVenta;
-            long subU = totalSubsidioCobrado != 0 ? u.subsidio + (totalSubsidioCobrado - sumaSubsidio) : u.subsidio;
+            long subU = conciliarSubsidio ? u.subsidio + (totalSubsidioCobrado - sumaSubsidio) : u.subsidio;
             filas.set(n - 1, new Fila(u.tipo, u.kwh, u.anio, u.mes, u.valorUnitario, u.kwhSubsidiados, u.porcentaje, ventaU, subU));
+        }
+
+        if (reactiva != null) {
+            long venta = reactiva.valorCobrado != 0 ? reactiva.valorCobrado : Math.round(reactiva.kwh * reactiva.valorKwh);
+            long sub = !reactivaConContribucion ? 0
+                    : totalSubsidioCobrado != 0 ? totalSubsidioCobrado - sumaSubsidio
+                    : Math.round(venta * reactiva.porcentaje / 100.0);
+            int kwhSub = reactiva.porcentaje == 0 ? 0 : reactiva.kwh;
+            filas.add(new Fila("REACTIVA", reactiva.kwh, anio, mes, reactiva.valorKwh, kwhSub,
+                    reactiva.porcentaje, venta, sub));
         }
         return Collections.unmodifiableList(filas);
     }

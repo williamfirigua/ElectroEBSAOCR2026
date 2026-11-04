@@ -123,8 +123,39 @@ public class ApiMovil {
         return json("POST", "tracking/ubicaciones", sb.toString(), true, LEER_MS);
     }
 
+    /** @param eventosJson eventos ya serializados con {@link EventoMovil#armar} */
+    public Respuesta enviarEventos(Iterable<String> eventosJson) {
+        StringBuilder sb = new StringBuilder("{\"eventos\":[");
+        boolean primero = true;
+        for (String e : eventosJson) {
+            if (!primero) sb.append(',');
+            sb.append(e);
+            primero = false;
+        }
+        sb.append("]}");
+        return json("POST", "eventos/lote", sb.toString(), true, LEER_MS);
+    }
+
     public Respuesta configTracking() {
         return json("GET", "tracking/config", null, true, LEER_MS);
+    }
+
+    /** Mensajes de la oficina con id mayor a desde (bandeja del tecnico). */
+    public Respuesta mensajes(long desde) {
+        return json("GET", "mensajes?desde=" + Math.max(0, desde), null, true, LEER_MS);
+    }
+
+    /** Claves derivadas del tecnico para validar codigos de supervisor sin senal. */
+    public Respuesta clavesCodigo() {
+        return json("GET", "codigos/claves", null, true, LEER_MS);
+    }
+
+    /** Validacion en linea de un codigo de supervisor (terminal sin claves descargadas). Respuesta corta. */
+    public Respuesta validarCodigo(String codigo, String codCuenta) {
+        Map<String, Object> b = new LinkedHashMap<>();
+        b.put("codigo", codigo);
+        b.put("cod_cuenta", codCuenta);
+        return json("POST", "codigos/validar", Json.escribir(b), true, 15_000);
     }
 
     /**

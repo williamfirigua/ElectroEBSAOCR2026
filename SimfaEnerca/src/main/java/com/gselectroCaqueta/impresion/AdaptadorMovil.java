@@ -1,9 +1,11 @@
 package com.gselectroCaqueta.impresion;
 
+import com.gselectroCaqueta.accesoyseguridad.VariablesGlobales;
 import com.gselectroCaqueta.tablas.TablaClienteSalida;
 import com.gselectroCaqueta.tablas.TablaCobrosRealizados;
 import com.gselectroCaqueta.tablas.TablaDescripcionConceptos;
 import com.gselectroCaqueta.tablas.TablaEntradaClientes;
+import com.gselectroCaqueta.tablas.TablaListas;
 import com.gselectroCaqueta.tablas.TablaMedidorEntrada;
 import com.gselectroCaqueta.tablas.TablaMensajes;
 import com.gselectroCaqueta.tablas.TablaMunicipios;
@@ -40,6 +42,8 @@ public final class AdaptadorMovil {
     private final TablaMunicipios municipios;
     /** MENSAJES.TXT (lm_lista CDGOMNSJE): mensaje por municipio+tipo. Opcional: null si no está abierta. */
     private final TablaMensajes mensajes;
+    /** LISTA.TXT (lm_lista completa). Por defecto la de DATOSDEENTRADA de la ruta cargada; ver {@link #conListas}. */
+    private TablaListas listas;
 
     public AdaptadorMovil(TablaEntradaClientes cliente, TablaClienteSalida clienteSalida,
                           TablaMedidorEntrada medidor, TablaRegistroDeEntrada registro,
@@ -67,6 +71,25 @@ public final class AdaptadorMovil {
         this.descripciones = descripciones;
         this.municipios = municipios;
         this.mensajes = mensajes;
+    }
+
+    /** Lista a usar en vez de {@code DATOSDEENTRADA/LISTA.TXT} (pruebas, o una ya cargada). */
+    public AdaptadorMovil conListas(TablaListas listas) {
+        this.listas = listas;
+        return this;
+    }
+
+    private TablaListas listas() {
+        if (listas == null) {
+            listas = TablaListas.de(new File(VariablesGlobales.directorioactual + "/DATOSDEENTRADA/" + TablaListas.ARCHIVO));
+        }
+        return listas;
+    }
+
+    /** Descripción del código en el dominio de LISTA.TXT; si no está, el respaldo. */
+    private String deLista(String dominio, String codigo, String respaldo) {
+        String desc = listas().descripcion(dominio, codigo);
+        return desc.isEmpty() ? respaldo : desc;
     }
 
     /**
@@ -152,10 +175,12 @@ public final class AdaptadorMovil {
                     d.consumoActual = m.consumo;
                     d.fechaLecturaAnterior = fechaAnterior;
                     d.fechaLecturaTomada = t(registroSalida.gettablaRegistroSalida_FECHALECTURA());
+                    // Barra PROMEDIO = caída 45, MDDOR1PRMDIO (el promedio de la cuenta, el que imprime EBSA). PRMDIO es el
+                    // promedio del modelo de desviación (plano DSVCCION): solo si la cuenta no trae el suyo.
                     d.promedio = (int) Math.round(Formatos.numero(
-                            Formatos.esVacio(registro.gettablaRegistroDeEntrada_PRMDIO())
-                                    ? registro.gettablaRegistroDeEntrada_Consumopromediocliente()
-                                    : registro.gettablaRegistroDeEntrada_PRMDIO()));
+                            Formatos.esVacio(registro.gettablaRegistroDeEntrada_Consumopromediocliente())
+                                    ? registro.gettablaRegistroDeEntrada_PRMDIO()
+                                    : registro.gettablaRegistroDeEntrada_Consumopromediocliente()));
                     d.kwhSubsistencia = (int) Math.round(Formatos.numero(registro.gettablaRegistroDeEntrada_LS_CONS_SUBS()));
                     leerHistorico(d);
                     activaLeida = true;
@@ -264,7 +289,9 @@ public final class AdaptadorMovil {
     // ------------------------------------------------------------------ bloques de datos
 
     private void leerDatosTecnicos(DatosFactura d) {
-        d.nivelTension = t(cliente.gettablaEntradaClientes_Niveldetension());
+        // Caída 30: EBSA imprime la descripción del nivel (CDGONVELTNSION en LISTA.TXT: 1 → "Secundaria"); sin lista, el código.
+        String nivel = t(cliente.gettablaEntradaClientes_Niveldetension());
+        d.nivelTension = deLista("CDGONVELTNSION", nivel, nivel);
         d.nodo = t(cliente.gettablaEntradaClientes_Nodoconexion());
         d.circuito = t(cliente.gettablaEntradaClientes_Nodocircuito());
         d.iua = t(cliente.gettablaEntradaClientes_nombrecircuito());
@@ -273,7 +300,8 @@ public final class AdaptadorMovil {
         d.claseServicio = t(cliente.gettablaEntradaClientes_Clasedeservicio());
         d.cargaInstalada = t(cliente.gettablaEntradaClientes_cargainstalada());
         d.ruta = t(cliente.gettablaEntradaClientes_Ruta());
-        d.propiedadActivos = "";   // sin fuente en esta versión: imprime "???"
+        // Propiedad de activos: MDLDDCBRO de la cuenta en LISTA.TXT (N → "Redes Aereas EBSA 21"). Sin lista: "???".
+        d.propiedadActivos = deLista("MDLDDCBRO", t(cliente.gettablaEntradaClientes_MDLDDCBRO()), "");
         // Información de interés = MSGE por CDGOMNSJE (caída 18) en MENSAJES.TXT. Informacionadicional (campo 16)
         // ya no se usa aquí: desde el 13-oct la móvil lo muestra como "Mensaje programado" al lector
         // (actividad 99) y no debe salir impreso en la factura.
@@ -330,6 +358,8 @@ public final class AdaptadorMovil {
     private void leerTarifaYCostos(DatosFactura d) {
         d.valorKwh = Formatos.numero(cliente.gettablaEntradaClientes_MDDOR1VLORKWH());
         d.porcentajeSubsidio = Formatos.numero(cliente.gettablaEntradaClientes_MDDOR1SBSDIOCNTRBCION());
+        d.valorKwhReactiva = Formatos.numero(cliente.gettablaEntradaClientes_MDDOR2VLORKWH());
+        d.porcentajeReactiva = Formatos.numero(cliente.gettablaEntradaClientes_MDDOR2SBSDIOCNTRBCION());
         d.costoG = t(cliente.gettablaEntradaClientes_CSTOG());
         d.costoT = t(cliente.gettablaEntradaClientes_CSTOT());
         d.costoPR = t(cliente.gettablaEntradaClientes_CSTOPR());
@@ -340,7 +370,7 @@ public final class AdaptadorMovil {
         d.costoCU = t(cliente.gettablaEntradaClientes_CU());
         d.totalBaseIva = Math.round(Formatos.numero(cliente.gettablaEntradaClientes_TTBSIVA()));
         d.iva = 0;   // sin regla definida por EBSA
-        d.costoDiario = null;   // sin fuente en esta versión: imprime "???"
+        d.costoDiario = null;   // EBSA no lo manda: ContextoFactura lo calcula del detalle de la factura
     }
 
     private void leerCalidad(DatosFactura d) {
@@ -430,9 +460,13 @@ public final class AdaptadorMovil {
         }
     }
 
+    /**
+     * Caídas 6 y 7: las fechas que manda EBSA (FCHAPGO, FCHASSPNSION en CLIENTE.TXT). La de CLIENTE.SDA solo si EBSA no
+     * trae: la liquidación la recalcula con días hábiles (regla de Caquetá) y la factura salía con otra fecha.
+     */
     private void leerFechasPago(DatosFactura d) {
-        d.fechaPagoOportuno = primeroNoVacio(clienteSalida.gettablaClienteSalida_FECHAVENCE(), cliente.gettablaEntradaClientes_fechavence());
-        d.fechaSuspension = primeroNoVacio(clienteSalida.gettablaClienteSalida_FECHACORTE(), cliente.gettablaEntradaClientes_fechacorte());
+        d.fechaPagoOportuno = primeroNoVacio(cliente.gettablaEntradaClientes_fechavence(), clienteSalida.gettablaClienteSalida_FECHAVENCE());
+        d.fechaSuspension = primeroNoVacio(cliente.gettablaEntradaClientes_fechacorte(), clienteSalida.gettablaClienteSalida_FECHACORTE());
     }
 
     /**

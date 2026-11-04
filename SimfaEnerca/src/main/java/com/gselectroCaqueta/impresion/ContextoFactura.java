@@ -3,6 +3,7 @@ package com.gselectroCaqueta.impresion;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -21,9 +22,9 @@ import java.util.Map;
  * lect_ant_reactiva, lect_act_reactiva, factor_reactiva, consumo_reactiva, total_reactiva   ("" si no hay)
  * nivel_tension, circuito_nodo, grupo, estrato, clase_servicio, propiedad_activos, iua, carga, ruta,
  * med_activa, med_reactiva        (las claves sin fuente no se definen: imprimen el marcador "???")
- * liq.1..3.tipo | .kwh | .periodo | .vunit | .kwh_sub | .pct | .venta | .subsidio   y   liq.1..3 (fila compuesta)
+ * liq.1..4.tipo | .kwh | .periodo | .vunit | .kwh_sub | .pct | .venta | .subsidio   y   liq.1..4 (fila compuesta; ACTIVA por mes + REACTIVA)
  * mensaje.1..N
- * costo.g .t .d .cv .pr .r .cf .cu, costo_diario (solo si la fuente lo trae)
+ * costo.g .t .d .cv .pr .r .cf .cu, costo_diario (total del detalle / días del periodo)
  * calidad.1..3 (fila compuesta: Mes Diu Dium Diug Fiu Fium Fiug)
  * foes.consumo .vunit .total .factura
  * financiacion, cuotas_ptes, ultimo_pago, fecha_ultimo_pago
@@ -40,7 +41,7 @@ public final class ContextoFactura {
     public static final int MAX_CARTERA = 7;
     public static final int MAX_EXTERNOS = 5;
     public static final int MAX_ASEO = 6;
-    public static final int MAX_LIQ = 3;
+    public static final int MAX_LIQ = 4;
     public static final int MAX_CALIDAD = 3;
 
     private static final String FECHA_CORTA = "dd/MM/yy";
@@ -288,9 +289,11 @@ public final class ContextoFactura {
     private static void liquidacion(DatosFactura d, Map<String, String> c) {
         long venta = valorConcepto(d, 21);
         long subsidio = valorConcepto(d, 17) + valorConcepto(d, 18) + valorConcepto(d, 517) + valorConcepto(d, 518);
+        TablaLiquidacion.Reactiva reactiva = d.reactiva == null ? null : new TablaLiquidacion.Reactiva(
+                d.reactiva.consumo, d.valorKwhReactiva, d.porcentajeReactiva, valorConcepto(d, 31));
         List<TablaLiquidacion.Fila> filas = TablaLiquidacion.construir(
                 d.consumoActual, d.mesesPeriodo, d.anio, d.mes, d.valorKwh, d.porcentajeSubsidio,
-                d.kwhSubsistencia, venta, subsidio);
+                d.kwhSubsistencia, venta, subsidio, reactiva);
         for (int i = 1; i <= MAX_LIQ; i++) {
             String k = "liq." + i;
             if (i > filas.size()) {
@@ -303,7 +306,8 @@ public final class ContextoFactura {
             c.put(k + ".periodo", f.periodo());
             c.put(k + ".vunit", "$ " + Formatos.decimal(f.valorUnitario, 4));
             c.put(k + ".kwh_sub", String.valueOf(f.kwhSubsidiados));
-            c.put(k + ".pct", f.porcentaje == 0 ? "" : Formatos.decimal(Math.abs(f.porcentaje), 2) + "%");
+            // Como EBSA: con signo y sin '%' (subsidio -51,26; contribución 20,00).
+            c.put(k + ".pct", f.porcentaje == 0 ? "" : Formatos.decimal(f.porcentaje, 2));
             c.put(k + ".venta", Formatos.moneda(f.valorVenta));
             c.put(k + ".subsidio", Formatos.moneda(f.subsidio));
             c.put(k, Formatos.izquierda(f.tipo, 8)
@@ -380,7 +384,16 @@ public final class ContextoFactura {
         c.put("costo.r", dec2(d.costoR));
         c.put("costo.cf", dec2(d.costoCF));
         c.put("costo.cu", "$ " + Formatos.decimal(Formatos.numero(d.costoCU), 4));
-        if (d.costoDiario != null) c.put("costo_diario", Formatos.moneda(Formatos.numero(d.costoDiario)));
+        c.put("costo_diario", Formatos.moneda(d.costoDiario != null ? Math.round(Formatos.numero(d.costoDiario)) : costoDiario(bloques.totalPeriodo, d.mesesPeriodo)));
+    }
+
+    /**
+     * Costo diario: total del DETALLE DE LA FACTURA (bloque 1, ya con subsidio y ajuste decena) entre los días del
+     * periodo: 30 mensual, 60 bimestral, 90 trimestral. Redondeado al peso (33.263 / 30 = 1.108,77 → $1.109).
+     */
+    static long costoDiario(long totalPeriodo, int mesesPeriodo) {
+        int dias = 30 * Math.max(1, Math.min(3, mesesPeriodo));
+        return Math.round((double) totalPeriodo / dias);
     }
 
     /** "324,56"; un cero se imprime "0" como en la factura oficial ("CF: 0"). */
@@ -399,21 +412,29 @@ public final class ContextoFactura {
             DatosFactura.Calidad q = d.calidad.get(i - 1);
             // Por columna, para SCALE-TEXT: calidad.N.mes / .diu / .dium / .diug / .fiu / .fium / .fiug
             c.put("calidad." + i + ".mes", q.mes.trim());
-            c.put("calidad." + i + ".diu", dec(q.diu, 2));
-            c.put("calidad." + i + ".dium", dec(q.dium, 1));
-            c.put("calidad." + i + ".diug", dec(q.diug, 1));
-            c.put("calidad." + i + ".fiu", dec(q.fiu, 1));
-            c.put("calidad." + i + ".fium", dec(q.fium, 1));
-            c.put("calidad." + i + ".fiug", dec(q.fiug, 1));
+            String diu = calidadValor(q.diu), dium = calidadValor(q.dium), diug = calidadValor(q.diug);
+            String fiu = calidadValor(q.fiu), fium = calidadValor(q.fium), fiug = calidadValor(q.fiug);
+            c.put("calidad." + i + ".diu", diu);
+            c.put("calidad." + i + ".dium", dium);
+            c.put("calidad." + i + ".diug", diug);
+            c.put("calidad." + i + ".fiu", fiu);
+            c.put("calidad." + i + ".fium", fium);
+            c.put("calidad." + i + ".fiug", fiug);
             // Orden impreso en la factura oficial: Mes Diu Dium Diug Fiu Fium Fiug
             c.put("calidad." + i, Formatos.izquierda(q.mes.trim(), 4)
-                    + Formatos.derecha(dec(q.diu, 2), 6) + Formatos.derecha(dec(q.dium, 1), 6) + Formatos.derecha(dec(q.diug, 1), 6)
-                    + Formatos.derecha(dec(q.fiu, 1), 6) + Formatos.derecha(dec(q.fium, 1), 6) + Formatos.derecha(dec(q.fiug, 1), 6));
+                    + Formatos.derecha(diu, 6) + Formatos.derecha(dium, 6) + Formatos.derecha(diug, 6)
+                    + Formatos.derecha(fiu, 6) + Formatos.derecha(fium, 6) + Formatos.derecha(fiug, 6));
         }
     }
 
-    private static String dec(String v, int n) {
-        return Formatos.esVacio(v) ? "" : Formatos.decimal(Formatos.numero(v), n);
+    /**
+     * Indicadores de calidad como los imprime EBSA: punto decimal, hasta 2 decimales y al menos 1
+     * (0 → 0.0, 6 → 6.0, 2.17 → 2.17, 2.175 → 2.18). Vacío si no viene.
+     */
+    static String calidadValor(String v) {
+        if (Formatos.esVacio(v)) return "";
+        String s = String.format(Locale.ROOT, "%.2f", Formatos.numero(v));
+        return s.endsWith("0") ? s.substring(0, s.length() - 1) : s;
     }
 
     private static void foesYComercial(DatosFactura d, Map<String, String> c) {
