@@ -12,6 +12,7 @@
             <item android:id="@+id/nav_anterior_predio" android:icon="@drawable/ic_nav_history" android:title="Anterior Predio" />
             <item android:id="@+id/nav_digitos" android:icon="@drawable/ic_nav_edit" android:title="Modificar Nro Dígitos" />
             <item android:id="@+id/nav_buscar" android:icon="@drawable/ic_nav_search" android:title="Buscar Cliente" />
+            <item android:id="@+id/nav_buscar_barras" android:icon="@drawable/ic_nav_barcode" android:title="Buscar por Código de Barras" />
             <item android:id="@+id/nav_mapa" android:icon="@drawable/ic_nav_map" android:title="Mapa" />
             <item android:id="@+id/nav_contenedor" android:icon="@drawable/ic_nav_list" android:title="Iniciar / Cerrar Contenedor" />
             <item android:id="@+id/nav_nota_retenida" android:icon="@drawable/ic_nav_note_add" android:title="Generar Nota Fact. Retenida" />

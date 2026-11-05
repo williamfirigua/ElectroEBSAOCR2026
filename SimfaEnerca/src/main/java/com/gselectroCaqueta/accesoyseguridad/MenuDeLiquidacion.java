@@ -1261,8 +1261,14 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         // "atras" del sistema y con las teclas 3/6/9/OK pegadas al borde.
         drawerLayout.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(androidx.core.view.GravityCompat.END));
+        View btnBarras = findViewById(R.id.btnBarras);
+        if (btnBarras != null) btnBarras.setOnClickListener(v -> iniciarBusquedaPorBarras());
         nav.setNavigationItemSelectedListener(item -> {
             drawerLayout.closeDrawer(androidx.core.view.GravityCompat.END);
+            if (item.getItemId() == R.id.nav_buscar_barras) {
+                drawerLayout.postDelayed(this::iniciarBusquedaPorBarras, 220);
+                return false;
+            }
             if (item.getItemId() == R.id.nav_galeria_fotos) {
                 // Galeria de fotos (bloque D): ver, borrar las no enviadas y anular las enviadas (con supervisor).
                 drawerLayout.postDelayed(() -> startActivity(new Intent(this, GaleriaFotos.class)), 220);
@@ -14394,6 +14400,96 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         return new File(VariablesGlobales.directorioactual + "/DATOSDEENTRADA");
     }
 
+    // ------------------------------------------------------------------ busqueda por codigo de barras (bloque F)
+
+    /** El lector se abrio para buscar la cuenta (boton de barras o menu), no para la muestra ni la rural. */
+    private boolean buscandoPorBarras = false;
+
+    /** Boton de barras de la barra superior y menu lateral: lee un codigo y salta a esa cuenta de la ruta. */
+    private void iniciarBusquedaPorBarras() {
+        if (bloqueadoPorFotoPendiente()) return;
+        code.setLength(0);
+        txtElectura.setText("");
+        verificaBarras = false;
+        buscandoPorBarras = true;
+        startBarCodeReader(true, "");
+    }
+
+    /**
+     * Cupon de la factura (GS1-128: la cuenta va en la referencia 8020) -> cuenta; cualquier otro codigo se
+     * busca como medidor y, si no aparece, como cuenta. Usa el indice de "Buscar Cliente" (en segundo plano).
+     */
+    private void buscarPorCodigoBarras(String leido) {
+        final String texto = leido.trim();
+        final String cuentaCupon = com.gselectroCaqueta.impresion.CodigoBarras.cuentaDesdeCupon(texto);
+        final String dir = dirEntrada().getAbsolutePath();
+        escribeResumenTiempo(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";BUSQUEDA BARRAS;"
+                + getPhoneDate() + "-" + getPhoneHour() + ";leido=" + texto.replace(';', ' ')
+                + (cuentaCupon != null ? ";cuenta=" + cuentaCupon : ""));
+        new Thread(() -> {
+            int[] r = null;
+            String error = null;
+            try {
+                r = ubicarCodigoBarras(com.gselectroCaqueta.tablas.IndiceBusquedaClientes.obtener(dir), cuentaCupon, texto);
+            } catch (Exception e) {
+                error = e.getMessage();
+            }
+            final int[] res = r;
+            final String err = error;
+            runOnUiThread(() -> irAResultadoBarras(res, cuentaCupon, texto, err));
+        }, "BusquedaBarras").start();
+    }
+
+    /** {tipodebusqueda, dato}: {6, cliente} si es una cuenta, {1, primer registro} si es un medidor; null si no esta. */
+    static int[] ubicarCodigoBarras(com.gselectroCaqueta.tablas.IndiceBusquedaClientes ix, String cuentaCupon, String texto) {
+        int n = ix.total();
+        if (cuentaCupon != null) {
+            for (int i = 0; i < n; i++)
+                if (sinCerosIzq(ix.getCuenta(i)).equals(cuentaCupon)) return new int[]{6, ix.getCliente(i)};
+            return null; // un cupon de otra cuenta no se busca como medidor
+        }
+        String med = sinCerosIzq(texto.replace(" ", "")).toUpperCase(java.util.Locale.ROOT);
+        if (med.isEmpty()) return null;
+        for (int i = 0; i < n; i++)
+            if (sinCerosIzq(ix.getMedidor(i).replace(" ", "")).toUpperCase(java.util.Locale.ROOT).equals(med))
+                return new int[]{1, ix.getPrimerRegistro(i)};
+        if (med.matches("\\d{1,10}"))
+            for (int i = 0; i < n; i++)
+                if (sinCerosIzq(ix.getCuenta(i)).equals(med)) return new int[]{6, ix.getCliente(i)};
+        return null;
+    }
+
+    private static String sinCerosIzq(String s) {
+        String x = s == null ? "" : s.trim();
+        int i = 0;
+        while (i < x.length() - 1 && x.charAt(i) == '0') i++;
+        return x.substring(i);
+    }
+
+    private void irAResultadoBarras(int[] res, String cuentaCupon, String texto, String error) {
+        try {
+            if (error != null) {
+                utils.Log(logfile, "[MenuDeLiquidacion]buscarPorCodigoBarras() " + error);
+                mensajeT("No se pudo buscar en la ruta: " + error, msgMedio);
+                return;
+            }
+            if (res == null) {
+                mensajeT(cuentaCupon != null ? "La cuenta " + cuentaCupon + " no esta en esta ruta"
+                        : "No esta en esta ruta: " + texto, msgMedio);
+                return;
+            }
+            if (bloqueadoPorFotoPendiente()) return; // pudo quedar una foto pendiente mientras se leia
+            secuencia().iniciarBusqueda(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim(), variables.clienteactual,
+                    System.currentTimeMillis());
+            VariablesGlobales.tipodebusqueda = res[0];
+            VariablesGlobales.datodebusqueda = String.valueOf(res[1]);
+            buscarCuentaMedidor(VariablesGlobales.datodebusqueda, 0);
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]irAResultadoBarras() " + e.getMessage());
+            mensajeT("Problema en la busqueda por codigo de barras", msgMedio);
+        }
+    }
+
     /** La causal del tecnico (no la 18 automatica) tiene "Obliga fotografia" = No y la ruta no obliga fotos. */
     private boolean causalSinFoto() {
         try {
@@ -16903,7 +16999,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         } else if (requestCode == IntentIntegrator.REQUEST_CODE) {//Respuesta scaner camara
 
             IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-            if (scanResult != null) {
+            if (buscandoPorBarras) {
+                buscandoPorBarras = false;
+                String leido = scanResult != null ? scanResult.getContents() : null;
+                if (leido != null && !leido.trim().isEmpty()) buscarPorCodigoBarras(leido);
+                else mensajeT("No se obtuvo ningun codigo...", msgCorto);
+            } else if (scanResult != null) {
                 Log.e("error", "request");
                 String barcode = null;
                 barcode = scanResult.getContents();
@@ -16934,7 +17035,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         } else if (requestCode == SCANNER_TECHDATA_REQUEST_CODE) {//Respuesta scaner techdata
 
             String barcodeMuestra = resultCode == RESULT_OK && data != null ? data.getStringExtra("barcode") : null;
-            if (validandoMuestra) {
+            if (buscandoPorBarras) {
+                buscandoPorBarras = false;
+                if (barcodeMuestra != null && !barcodeMuestra.trim().isEmpty()) buscarPorCodigoBarras(barcodeMuestra);
+                else mensajeT("No se obtuvo ningun codigo...", msgCorto);
+            } else if (validandoMuestra) {
                 validandoMuestra = false;
                 if (barcodeMuestra != null && !barcodeMuestra.trim().isEmpty()) verificarBarrasMuestra(barcodeMuestra);
                 else mostrarDialogoFotoPendiente();

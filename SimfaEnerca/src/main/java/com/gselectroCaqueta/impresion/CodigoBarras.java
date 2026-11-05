@@ -42,6 +42,33 @@ public final class CodigoBarras {
         return prefijoRef + Formatos.derecha(c, 10).replace(' ', '0');
     }
 
+    /**
+     * Cuenta (sin ceros a la izquierda) del código leído del cupón: 415 + GLN(13) + 8020 + referencia [FNC1]
+     * + 3900 + valor(10). La referencia termina en la cuenta a 10 dígitos (con o sin el prefijo 1000).
+     * Acepta lo que entregan los lectores: con "]C1", con GS o con los AI entre paréntesis.
+     * null si no es un cupón de pago.
+     */
+    public static String cuentaDesdeCupon(String leido) {
+        if (leido == null) return null;
+        String x = leido.trim();
+        if (x.length() >= 3 && x.charAt(0) == ']') x = x.substring(3);
+        StringBuilder b = new StringBuilder(x.length());
+        for (int i = 0; i < x.length(); i++) {
+            char c = x.charAt(i);
+            if (c >= '0' && c <= '9') b.append(c);
+        }
+        String d = b.toString();
+        if (d.length() < 16 + 4 + 1 || !d.startsWith("415") || !d.startsWith("8020", 16)) return null;
+        String ref = d.substring(20);
+        if (ref.length() > 14 && ref.startsWith("3900", ref.length() - 14)) ref = ref.substring(0, ref.length() - 14);
+        if (ref.isEmpty()) return null;
+        String cuenta = ref.length() > 10 ? ref.substring(ref.length() - 10) : ref;
+        int i = 0;
+        while (i < cuenta.length() - 1 && cuenta.charAt(i) == '0') i++;
+        cuenta = cuenta.substring(i);
+        return cuenta.equals("0") ? null : cuenta;
+    }
+
     /** Dígito de control GS1 (GLN, GTIN); útil para validar un GLN configurado en la plantilla. */
     public static boolean digitoControlValido(String codigo) {
         if (codigo == null || !codigo.matches("\\d{8,18}")) return false;
