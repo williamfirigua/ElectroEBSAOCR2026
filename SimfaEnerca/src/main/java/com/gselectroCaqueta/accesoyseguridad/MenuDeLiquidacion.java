@@ -11773,12 +11773,23 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
      */
     private void continuarProcesarLectura(int DebeTomarFotografia, String lecturaact) {
         try {
+            if (DebeTomarFotografia == 1 && causalSinFoto()) {
+                // Bloque D: la causal tiene "Obliga fotografia" = No en la web (CAUSA_NL.TXT).
+                DebeTomarFotografia = 0;
+                escribeResumenTiempo(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";CAUSAL SIN FOTO;" + getPhoneDate() + "-" + getPhoneHour()
+                        + ";causal=" + infoRegistroSalida.gettablaRegistroSalida_CAUSADENOLECTURA().trim());
+            }
             if (DebeTomarFotografia == 1) {
                 yaTomoFotoOcr = true;
                 Log.e("INFO","4 - SETEA EL VALOR DE yaTomoFotoOcr: " + yaTomoFotoOcr);
                 // Sin excepcion por IMEI: todas las terminales toman la foto (antes 6 IMEI de prueba se la saltaban).
-                exigirFotoCuentaActual("lectura con foto obligatoria");
-                ejecutarProcesoDeFoto(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + "_" + infoClienteEntrada.gettablaEntradaClientes_mes().trim(), 1, tipoFotoDigital, 1, "", 1);
+                MetodoFoto metodo = metodoFotoCuentaActual();
+                if (metodo == null) {
+                    exigirFotoCuentaActual("lectura con foto obligatoria");
+                    ejecutarProcesoDeFoto(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + "_" + infoClienteEntrada.gettablaEntradaClientes_mes().trim(), 1, tipoFotoDigital, 1, "", 1);
+                } else {
+                    iniciarMetodoFoto(metodo);
+                }
             }
             variableTomarDatosLectura = true;
 
@@ -12165,6 +12176,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         escribeResumenTiempo(variableResumenLiquidacion + " " + " Fin de startBarCodeReader()");
                     }
                 }
+                // Bloque D: foto de la factura recien impresa si la metodologia de la causal o critica la pide.
+                exigirFacturaMetodo();
                 // Muestra de control (~5 %): foto de la factura o su codigo de barras antes de pasar al siguiente.
                 exigirMuestraFactura();
             }
@@ -12741,11 +12754,16 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
     /** API v1: encola una foto o un LBL ya terminados (el envío lo hace SincronizacionService). */
     private boolean encolarArchivoRest(String tipo, File archivo) {
+        return encolarArchivoRest(tipo, archivo, null);
+    }
+
+    /** etiqueta: paso de la metodologia de foto (fachada, medidor, factura, libre) o null. */
+    private boolean encolarArchivoRest(String tipo, File archivo, String etiqueta) {
         if (!ConfigSync.modoRest(this)) return false;
         try {
             boolean ok = ArchivoParaEnvio.encolar(ColaEnvioSqlite.de(this), tipo, archivo,
                     infoClienteEntrada.gettablaEntradaClientes_anio(), infoClienteEntrada.gettablaEntradaClientes_mes(),
-                    Ciclo, Municipio + Seccion + Division);
+                    Ciclo, Municipio + Seccion + Division, etiqueta);
             if (!ok) utils.Log(logfile, "[MenuDeLiquidacion]encolarArchivoRest(); no encolado " + tipo + " " + archivo);
             SincronizacionService.solicitar(this);
         } catch (Exception e) {
@@ -13711,7 +13729,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         /*metodo = "AvanzarLecturas";
                         TaskHelper.execute(new AsyncCallWS(), metodo);*/
 
-                        if (!encolarArchivoRest(ColaEnvio.FOTO, nombrefotoFile)) EnviarFotos();
+                        if (!encolarArchivoRest(ColaEnvio.FOTO, nombrefotoFile, etiquetasFoto.remove(nombrefotoFile.getName()))) EnviarFotos();
                     }
 //                    String cadenaFoto = String.format("%11s", idFoto) + ";" + String.format("%9s", cuentaFoto) + ";" + String.format("%1$-50s", nombrefoto.substring(nombrefoto.lastIndexOf("/") + 1, nombrefoto.length())) + ";\r\n";
 //                    if (!utils2.leerArchivoFotos(foto, nombrefoto.substring(nombrefoto.lastIndexOf("/") + 1, nombrefoto.length()))) {
@@ -14225,9 +14243,18 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         return muestraFactura;
     }
 
-    /** La exigencia que bloquea ahora: la foto del medidor primero, despues la muestra de la factura. null = nada. */
+    // Bloque D: foto de la factura recien impresa que pide la metodologia (otro almacen; extra = "causal|25").
+    private FotoObligatoria facturaMetodo;
+
+    private FotoObligatoria facturaMetodo() {
+        if (facturaMetodo == null) facturaMetodo = FotoObligatoria.de(this, "foto_factura_metodo");
+        return facturaMetodo;
+    }
+
+    /** La exigencia que bloquea ahora: la foto de la lectura, la factura de la metodologia y la muestra. null = nada. */
     private FotoObligatoria exigenciaActiva() {
         if (fotoObligatoria().hayPendiente()) return fotoObligatoria();
+        if (facturaMetodo().hayPendiente()) return facturaMetodo();
         if (muestraFactura().hayPendiente()) return muestraFactura();
         return null;
     }
@@ -14334,12 +14361,141 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
     /** Deja pendiente la foto que el sistema exige para la cuenta en pantalla. */
     private void exigirFotoCuentaActual(String motivo) {
+        exigirFotoCuentaActual(motivo, "");
+    }
+
+    /** extra: "" (una foto) o el plan de la metodologia "M|causal|25|paso". */
+    private void exigirFotoCuentaActual(String motivo, String extra) {
         if (indicadorManual != 0) return; // liquidacion automatica: no hay tecnico frente a la camara
         String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
         String mes = infoClienteEntrada.gettablaEntradaClientes_mes().trim();
         fotoObligatoria().exigir(cuenta, codCuentaActual(), infoClienteEntrada.gettablaEntradaClientes_anio().trim(), mes,
-                cuenta + "_" + mes, VariablesGlobales.registroactual, motivo, System.currentTimeMillis());
+                cuenta + "_" + mes, VariablesGlobales.registroactual, motivo, System.currentTimeMillis(), extra);
         escribeResumenTiempo(cuenta + ";FOTO OBLIGATORIA;" + getPhoneDate() + "-" + getPhoneHour() + ";" + motivo);
+    }
+
+    // ======================================================================== metodologias de foto (bloque D)
+    //
+    // La oficina define por causal (si obliga fotografia) y por critica que fotos se toman: guiada (fachada y medidor
+    // antes de imprimir, factura despues) o libres (1 a 3). Sin metodologia se pide una foto, como siempre.
+    // El paso en curso va en el extra de la foto pendiente ("M|causal|25|1"), asi sobrevive a un cierre de la app.
+
+    /** Nombre del archivo de la foto -> paso de la metodologia, para mandarlo con la foto. */
+    private final java.util.Map<String, String> etiquetasFoto = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static final String PLAN = "M|";
+
+    private File dirEntrada() {
+        return new File(VariablesGlobales.directorioactual + "/DATOSDEENTRADA");
+    }
+
+    /** La causal del tecnico (no la 18 automatica) tiene "Obliga fotografia" = No y la ruta no obliga fotos. */
+    private boolean causalSinFoto() {
+        try {
+            String causal = infoRegistroSalida.gettablaRegistroSalida_CAUSADENOLECTURA().trim();
+            if (causal.isEmpty() || causal18Automatica()) return false;
+            if (variables.obligafotos.trim().equals("1")) return false;
+            if (infoRegistroEntrada.gettablaRegistroDeEntrada_Tipomedida().trim().equals("X")) return false;
+            return Boolean.FALSE.equals(MetodoFoto.causalObligaFoto(dirEntrada(), causal));
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]causalSinFoto() " + e.getMessage());
+            return false;
+        }
+    }
+
+    /** Metodologia de la causal del tecnico o, si no hay, de la critica (LEIDO). null = una foto. */
+    private MetodoFoto metodoFotoCuentaActual() {
+        try {
+            String causal = infoRegistroSalida.gettablaRegistroSalida_CAUSADENOLECTURA().trim();
+            if (!causal.isEmpty() && !causal18Automatica()) return MetodoFoto.buscar(dirEntrada(), MetodoFoto.CAUSAL, causal);
+            String leido = infoRegistroSalida.gettablaRegistroSalida_LEIDO().trim();
+            return leido.isEmpty() ? null : MetodoFoto.buscar(dirEntrada(), MetodoFoto.CRITICA, leido);
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]metodoFotoCuentaActual() " + e.getMessage());
+            return null;
+        }
+    }
+
+    /** Arranca la metodologia: deja anotada la factura (si la pide) y exige el primer paso con su instruccion. */
+    private void iniciarMetodoFoto(MetodoFoto m) {
+        if (indicadorManual != 0) return;
+        String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
+        AlmacenEstado plan = AlmacenEstado.de(this, "foto_factura_plan");
+        if (m.pasoFactura() != null) {
+            plan.guardar("cuenta", cuenta);
+            plan.guardar("plan", m.clave());
+        } else {
+            plan.borrar("cuenta", "plan");
+        }
+        escribeResumenTiempo(cuenta + ";METODOLOGIA FOTO;" + getPhoneDate() + "-" + getPhoneHour() + ";" + m.clave() + ";" + m.metodo);
+        if (m.pasosAntes().isEmpty()) return; // solo la factura: se pide al imprimir
+        exigirFotoCuentaActual("metodologia " + m.clave(), PLAN + m.clave() + "|0");
+        new Handler(android.os.Looper.getMainLooper()).post(this::mostrarDialogoFotoPendiente);
+    }
+
+    /** Tras imprimir: si la metodologia de esta cuenta pide la factura, queda exigida su foto. */
+    private void exigirFacturaMetodo() {
+        try {
+            if (indicadorManual != 0) return;
+            AlmacenEstado plan = AlmacenEstado.de(this, "foto_factura_plan");
+            String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
+            String c = plan.leer("cuenta");
+            if (c == null || !c.trim().equals(cuenta)) return;
+            String clave = plan.leer("plan");
+            plan.borrar("cuenta", "plan");
+            String mes = infoClienteEntrada.gettablaEntradaClientes_mes().trim();
+            facturaMetodo().exigir(cuenta, codCuentaActual(), infoClienteEntrada.gettablaEntradaClientes_anio().trim(), mes,
+                    cuenta + "_" + mes, VariablesGlobales.registroactual, "factura impresa", System.currentTimeMillis(), clave == null ? "" : clave);
+            escribeResumenTiempo(cuenta + ";FOTO FACTURA METODOLOGIA;" + getPhoneDate() + "-" + getPhoneHour() + ";" + clave);
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]exigirFacturaMetodo() " + e.getMessage());
+        }
+    }
+
+    /** Paso en curso de una exigencia con metodologia. */
+    private static final class PasoEnCurso {
+        final MetodoFoto metodo;
+        final int indice;
+        final MetodoFoto.Paso paso;
+
+        PasoEnCurso(MetodoFoto metodo, int indice, MetodoFoto.Paso paso) {
+            this.metodo = metodo;
+            this.indice = indice;
+            this.paso = paso;
+        }
+    }
+
+    /** null = exigencia sin metodologia (foto de siempre o muestra). */
+    private PasoEnCurso pasoEnCurso(FotoObligatoria g, FotoObligatoria.Pendiente p) {
+        try {
+            if (g == facturaMetodo()) {
+                MetodoFoto m = MetodoFoto.desdeClave(dirEntrada(), p.extra);
+                MetodoFoto.Paso paso = m != null ? m.pasoFactura() : null;
+                return paso != null ? new PasoEnCurso(m, 0, paso) : null;
+            }
+            if (g != fotoObligatoria() || !p.extra.startsWith(PLAN)) return null;
+            String[] c = p.extra.split("\\|", -1); // M|tipo|codigo|indice
+            if (c.length < 4) return null;
+            MetodoFoto m = MetodoFoto.buscar(dirEntrada(), c[1], c[2]);
+            if (m == null) return null;
+            int i = Math.max(0, Integer.parseInt(c[3].trim()));
+            if (m.esLibre()) return i < m.libres ? new PasoEnCurso(m, i, m.pasosAntes().get(0)) : null;
+            return i < m.pasosAntes().size() ? new PasoEnCurso(m, i, m.pasosAntes().get(i)) : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** Despues de una foto valida: si la metodologia tiene otro paso, queda pendiente ese. true = sigue pendiente. */
+    private boolean avanzarPasoMetodo(FotoObligatoria.Pendiente p) {
+        PasoEnCurso e = pasoEnCurso(fotoObligatoria(), p);
+        if (e == null) return false;
+        int sig = e.indice + 1;
+        int total = e.metodo.esLibre() ? e.metodo.libres : e.metodo.pasosAntes().size();
+        if (sig >= total) return false;
+        fotoObligatoria().exigir(p.cuenta, p.codCuenta, p.anno, p.mes, p.nombre, p.registro, p.motivo, System.currentTimeMillis(),
+                PLAN + e.metodo.clave() + "|" + sig);
+        return true;
     }
 
     /**
@@ -14397,7 +14553,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             return;
         }
         if (valida) {
-            escribeResumenTiempo(p.cuenta + ";FOTO OBLIGATORIA TOMADA;" + getPhoneDate() + "-" + getPhoneHour());
+            PasoEnCurso paso = pasoEnCurso(g, p);
+            escribeResumenTiempo(p.cuenta + ";FOTO OBLIGATORIA TOMADA;" + getPhoneDate() + "-" + getPhoneHour()
+                    + (paso != null ? ";paso=" + paso.paso.etiqueta : ""));
+            if (g == fotoObligatoria() && avanzarPasoMetodo(p)) {
+                mostrarDialogoFotoPendiente(); // siguiente paso (o "otra foto" en las libres)
+                return;
+            }
             liberarExigencia(g);
         } else {
             escribeResumenTiempo(p.cuenta + ";FOTO OBLIGATORIA NO TOMADA;" + getPhoneDate() + "-" + getPhoneHour());
@@ -14483,11 +14645,36 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             dialogoFotoPendiente.show();
             return;
         }
-        b.setTitle("Foto obligatoria");
-        b.setMessage("La cuenta " + p.cuenta + " requiere registro fotografico"
-                + (p.motivo.isEmpty() ? "" : " (" + p.motivo + ")") + ".\n\n"
-                + "No puede pasar a otro cliente sin tomarla.\n"
-                + "Si la camara no funciona, avise al supervisor: debe autorizar con su codigo y clave.");
+        final PasoEnCurso enCurso = pasoEnCurso(g, p);
+        if (enCurso != null && enCurso.metodo.esLibre() && enCurso.indice > 0) {
+            // Fotos libres: ya tomo al menos una; puede tomar otra o terminar.
+            b.setTitle("¿Otra foto?");
+            b.setMessage("Cuenta " + p.cuenta + ": lleva " + enCurso.indice + " de " + enCurso.metodo.libres + " fotos.\n\n"
+                    + enCurso.paso.instruccion);
+            b.setCancelable(false);
+            b.setPositiveButton("TOMAR OTRA", (d, w) -> relanzarFotoPendiente());
+            b.setNegativeButton("TERMINAR", (d, w) -> {
+                escribeResumenTiempo(p.cuenta + ";FOTOS LIBRES TERMINADAS;" + getPhoneDate() + "-" + getPhoneHour() + ";fotos=" + enCurso.indice);
+                liberarExigencia(fotoObligatoria());
+            });
+            dialogoFotoPendiente = b.create();
+            dialogoFotoPendiente.show();
+            return;
+        }
+        if (enCurso != null) {
+            int total = g == fotoObligatoria() && !enCurso.metodo.esLibre() ? enCurso.metodo.pasosAntes().size() : 1;
+            b.setTitle(total > 1 ? "Foto " + (enCurso.indice + 1) + " de " + total + ": " + enCurso.paso.titulo
+                    : "Foto: " + enCurso.paso.titulo);
+            b.setMessage("Cuenta " + p.cuenta + ".\n\n" + enCurso.paso.instruccion + "\n\n"
+                    + "No puede pasar a otro cliente sin tomarla.\n"
+                    + "Si la camara no funciona, avise al supervisor: debe autorizar con su codigo y clave.");
+        } else {
+            b.setTitle("Foto obligatoria");
+            b.setMessage("La cuenta " + p.cuenta + " requiere registro fotografico"
+                    + (p.motivo.isEmpty() ? "" : " (" + p.motivo + ")") + ".\n\n"
+                    + "No puede pasar a otro cliente sin tomarla.\n"
+                    + "Si la camara no funciona, avise al supervisor: debe autorizar con su codigo y clave.");
+        }
         b.setCancelable(false);
         b.setPositiveButton("TOMAR FOTO", (d, w) -> relanzarFotoPendiente());
         b.setNeutralButton("CLAVE SUPERVISOR", (d, w) -> pedirClaveSupervisor());
@@ -14519,7 +14706,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             cod_cuentaUlt_foto = p.cuenta;
             mesUlt_foto = p.mes;
             yaTomoFotoOcr = true; // foto de registro, no la de OCR
+            PasoEnCurso enCurso = pasoEnCurso(g, p);
             ejecutarProcesoDeFoto(p.nombre, 1, tipoFotoDigital, 1, "", 1);
+            if (enCurso != null && nameForIntent != null) etiquetasFoto.put(nameForIntent, enCurso.paso.etiqueta);
         } catch (Exception e) {
             utils.Log(logfile, "[MenuDeLiquidacion]relanzarFotoPendiente() " + e.getMessage());
             mostrarDialogoFotoPendiente();
@@ -14608,7 +14797,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         intentosClaveSupervisor = 0;
         mensajeT("Autorizado por " + s.nombre + ". Quedo registrado.", msgLargo);
-        liberarExigencia(fotoObligatoria());
+        FotoObligatoria activa = exigenciaActiva();
+        liberarExigencia(activa != null && activa != muestraFactura() ? activa : fotoObligatoria());
     }
 
     private void autorizarSinMuestra(FotoObligatoria.Pendiente p, ClaveSupervisor.Supervisor s) {

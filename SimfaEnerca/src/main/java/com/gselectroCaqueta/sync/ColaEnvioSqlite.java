@@ -193,6 +193,32 @@ public final class ColaEnvioSqlite extends SQLiteOpenHelper implements ColaEnvio
         return getWritableDatabase().update(T, v, "estado = ? AND proximo > 0", new String[]{String.valueOf(PENDIENTE)});
     }
 
+    /**
+     * Galería de fotos (bloque D): estado de cada archivo de un tipo en la cola, por nombre de archivo
+     * (PENDIENTE, ENVIADO o ERROR). Un archivo que no está ya se envió hace más de 15 días o se mandó por SOAP.
+     */
+    public java.util.Map<String, Integer> estadosPorArchivo(String tipo) {
+        java.util.Map<String, Integer> r = new java.util.HashMap<>();
+        try (Cursor c = getReadableDatabase().rawQuery("SELECT archivo, estado FROM " + T + " WHERE tipo = ? AND archivo IS NOT NULL",
+                new String[]{tipo})) {
+            while (c.moveToNext()) {
+                String a = c.getString(0);
+                int i = Math.max(a.lastIndexOf('/'), a.lastIndexOf('\\'));
+                String nombre = a.substring(i + 1);
+                Integer previo = r.get(nombre);
+                // Si el mismo nombre está varias veces (foto retomada), manda el que falta por enviar.
+                if (previo == null || previo == ENVIADO) r.put(nombre, c.getInt(1));
+            }
+        }
+        return r;
+    }
+
+    /** Galería: quita de la cola un archivo que aún no se envió (la foto se borró). Devuelve cuántos quitó. */
+    public int quitarNoEnviado(String tipo, String nombreArchivo) {
+        return getWritableDatabase().delete(T, "tipo = ? AND estado IN (" + PENDIENTE + "," + ERROR + ") AND (archivo = ? OR archivo LIKE ?)",
+                new String[]{tipo, nombreArchivo, "%/" + nombreArchivo});
+    }
+
     /** Un elemento no enviado con su estado, para mostrarlo en la consulta de no enviados. */
     public static final class NoEnviado {
         public final Elemento elemento;

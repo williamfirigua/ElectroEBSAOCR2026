@@ -21,6 +21,12 @@ public final class ArchivoParaEnvio {
      * @return false si el archivo no existe o el nombre no trae la cuenta
      */
     public static boolean encolar(ColaEnvio cola, String tipo, File archivo, String anno, String mes, String ciclo, String ruta) {
+        return encolar(cola, tipo, archivo, anno, mes, ciclo, ruta, null);
+    }
+
+    /** @param etiqueta paso de la metodología de foto (fachada, medidor, factura, libre); null o vacío = foto común */
+    public static boolean encolar(ColaEnvio cola, String tipo, File archivo, String anno, String mes, String ciclo, String ruta,
+                                  String etiqueta) {
         if (!ColaEnvio.FOTO.equals(tipo) && !ColaEnvio.LBL.equals(tipo)) throw new IllegalArgumentException(tipo);
         if (archivo == null || !archivo.isFile()) return false;
         String nombre = archivo.getName();
@@ -35,6 +41,7 @@ public final class ArchivoParaEnvio {
         d.put("ciclo", t(ciclo));
         d.put("cod_cuenta", cuenta);
         d.put("ruta", t(ruta));
+        if (!t(etiqueta).isEmpty()) d.put("etiqueta", t(etiqueta));
         String uid = tipo + "|" + t(anno) + t(mes) + t(ciclo) + "|" + nombre + "|" + archivo.length() + "|" + archivo.lastModified();
         cola.encolar(tipo, uid, Json.escribir(d), archivo.getAbsolutePath());
         return true;

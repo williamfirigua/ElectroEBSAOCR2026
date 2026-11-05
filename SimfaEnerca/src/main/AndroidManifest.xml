@@ -117,6 +117,10 @@ Esto hacia que NavigationHelper cayera siempre al fallcack in app.
                 android:value="com.gselectroCaqueta.accesoyseguridad.GuiAcceso" />
         </activity>
         <activity
+            android:name=".GaleriaFotos"
+            android:label="Galería de fotos"
+            android:parentActivityName=".MenuPrincipal" />
+        <activity
             android:name=".ResumenEstadistico"
             android:label="@string/title_activity_resumen_estadistico"
             android:parentActivityName=".MenuPrincipal">

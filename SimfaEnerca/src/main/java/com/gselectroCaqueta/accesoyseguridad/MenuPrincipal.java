@@ -146,6 +146,7 @@ public class MenuPrincipal extends AppCompatActivity {
         findViewById(R.id.btnElimnarInfo).setOnClickListener(v -> ejecutarBorradoDeArchivos());
         findViewById(R.id.btnRetornar).setOnClickListener(v -> retornar());
         findViewById(R.id.btnAyuda).setOnClickListener(v -> verEstadoEnvios());
+        findViewById(R.id.btnGaleriaFotos).setOnClickListener(v -> startActivity(new Intent(this, GaleriaFotos.class)));
 
         seleccionUrl();
         CargarArchivoCarga();

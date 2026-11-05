@@ -333,6 +333,55 @@
 
         </LinearLayout>
 
+        <!-- Bloque D: galeria de fotos del celular -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="6dp">
+
+                <FrameLayout
+                    android:layout_width="128dp"
+                    android:layout_height="84dp">
+
+                    <ImageButton
+                        android:id="@+id/btnGaleriaFotos"
+                        android:layout_width="120dp"
+                        android:layout_height="75dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_icon_button_selector"
+                        android:contentDescription="Galería de fotos"
+                        android:elevation="4dp"
+                        android:padding="14dp"
+                        android:scaleType="fitCenter"
+                        android:src="@android:drawable/ic_menu_gallery"
+                        android:tint="#FF455A64" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Fotos"
+                    android:textColor="#FF263238"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardAforador"
                 android:layout_width="match_parent"

@@ -37,6 +37,8 @@ public final class EventoMovil {
     public static final String MENSAJE_TECNICO = "mensaje_tecnico";
     /** Ids de los mensajes de la oficina que el tecnico abrio en la bandeja. */
     public static final String MENSAJE_LEIDO = "mensaje_leido";
+    /** Galería: foto ya enviada que el supervisor autorizó anular. datos: nombre, supervisor, motivo. */
+    public static final String FOTO_ANULADA = "foto_anulada";
 
     private EventoMovil() {
     }
