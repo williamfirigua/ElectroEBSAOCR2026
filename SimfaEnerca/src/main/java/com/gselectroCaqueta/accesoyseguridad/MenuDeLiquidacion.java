@@ -10337,17 +10337,31 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     private void pedirInformeYProcesar() {
         final String causaElegida = causal;
         String titulo = causaElegida.trim() + " - " + anomaliaDeLectura.getanomaliaDeNoLectura_DESCRIPCION().trim();
+
+        // Subcausales: si la causal las tiene, el tecnico escoge una y su descripcion es el informe.
+        java.util.List<String> subcausales = com.gselectroCaqueta.moduloanomalias.DialogoSubcausales.de(dirEntrada(), causaElegida);
+        if (!subcausales.isEmpty()) {
+            com.gselectroCaqueta.moduloanomalias.DialogoSubcausales.mostrar(this, "Subcausal: " + titulo, subcausales,
+                    new com.gselectroCaqueta.moduloanomalias.DialogoSubcausales.Callback() {
+                        @Override
+                        public void alElegir(String descripcion) {
+                            procesarConInforme(causaElegida, descripcion, "Subcausal");
+                        }
+
+                        @Override
+                        public void alCancelar() {
+                            causal = "";
+                            informeCausalPendiente = null;
+                            mensajeT("Causal cancelada: escoja la subcausal", msgMedio);
+                        }
+                    });
+            return;
+        }
+
         DialogoInforme.mostrar(this, titulo, new DialogoInforme.Callback() {
             @Override
             public void alAceptar(String informe) {
-                causal = causaElegida;
-                informeCausalPendiente = informe;
-                escribeResumenTiempo("Informe causal " + causaElegida.trim() + ": " + informe + "|" + VariablesGlobales.registroactual);
-                try {
-                    ProcesarAnomalias();
-                } finally {
-                    informeCausalPendiente = null;
-                }
+                procesarConInforme(causaElegida, informe, "Informe causal");
             }
 
             @Override
@@ -10357,6 +10371,18 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 mensajeT("Causal cancelada: el informe es obligatorio", msgMedio);
             }
         });
+    }
+
+    /** La causal con su informe (escrito o el de la subcausal): ingresarAnomaliaNoLectura lo pone en REGISTRO.SDA. */
+    private void procesarConInforme(String causaElegida, String informe, String origen) {
+        causal = causaElegida;
+        informeCausalPendiente = informe;
+        escribeResumenTiempo(origen + " " + causaElegida.trim() + ": " + informe + "|" + VariablesGlobales.registroactual);
+        try {
+            ProcesarAnomalias();
+        } finally {
+            informeCausalPendiente = null;
+        }
     }
 
     public void ProcesarAnomalias() {
