@@ -30,6 +30,8 @@ import java.util.Map;
  * - Registro con anomalía: tiene causa de no lectura (CAUSADENOLECTURA), con o sin lectura.
  * - Cliente procesado: INDFACTURACION de CLIENTE.SDA F (impresa) o K (liquidada sin imprimir), o L (solo
  *   lectura) / otro sin registradores pendientes. Es lo que la liquidación compara contra el total de CLIENTE.TXT.
+ * - Un cliente puede tener 2 o 3 registradores (activa, reactiva...): los conteos de clientes y de registradores
+ *   NO se mezclan. Anomalías y "hoy" se dan de las dos formas (clientes distintos / registradores).
  * - Crítica: el LEIDO que escribe la liquidación (3 normal, 1 baja, 2 igual a la anterior, 7 alta,
  *   8 negativa / giro, 5 y 4 causa sin lectura).
  */
@@ -87,21 +89,30 @@ public final class ResumenRuta {
         }
     }
 
-    /** Una causa de no lectura con cuántos registros la tienen. */
+    /** Una causa de no lectura: cuántos registradores la tienen y de cuántos clientes distintos. */
     public static final class ConteoCausa {
         public final String codigo;
         public final String descripcion;
+        /** Registradores con la causa. */
         public final int cantidad;
+        /** Clientes distintos con la causa en alguno de sus registradores. */
+        public final int clientes;
 
-        ConteoCausa(String codigo, String descripcion, int cantidad) {
+        ConteoCausa(String codigo, String descripcion, int cantidad, int clientes) {
             this.codigo = codigo;
             this.descripcion = descripcion;
             this.cantidad = cantidad;
+            this.clientes = clientes;
+        }
+
+        /** "12 clientes" o "12 clientes · 15 reg." si hay clientes con la causa en más de un registrador. */
+        public String conteo() {
+            return clientes + (clientes == 1 ? " cliente" : " clientes") + (cantidad != clientes ? " · " + cantidad + " reg." : "");
         }
 
         @Override
         public String toString() {
-            return codigo + (descripcion.isEmpty() ? "" : " - " + descripcion) + " (" + cantidad + ")";
+            return codigo + (descripcion.isEmpty() ? "" : " - " + descripcion) + " (" + conteo() + ")";
         }
     }
 
@@ -130,6 +141,9 @@ public final class ResumenRuta {
     private int clientesProcesados;
     private int clientesIncompletos;
     private boolean[] conRegistroPendiente = new boolean[0];
+
+    private int clientesConCausa;
+    private int clientesHoy;
 
     private int primerRegistroPendiente;
     private int primerClientePendiente;
@@ -242,6 +256,9 @@ public final class ResumenRuta {
         medidor = new String[n];
         conRegistroPendiente = new boolean[indicador.length];
         Map<String, int[]> conteo = new HashMap<>();
+        Map<String, java.util.BitSet> clientesPorCausa = new HashMap<>();
+        java.util.BitSet clientesCausa = new java.util.BitSet();
+        java.util.BitSet deHoy = new java.util.BitSet();
         byte[] rec = new byte[LONGITUD_REGISTRO];
         String minimo = null, maximo = null;
 
@@ -279,6 +296,12 @@ public final class ResumenRuta {
                     int[] k = conteo.get(causa[i]);
                     if (k == null) conteo.put(causa[i], k = new int[1]);
                     k[0]++;
+                    if (cliente[i] > 0) {
+                        clientesCausa.set(cliente[i]);
+                        java.util.BitSet b = clientesPorCausa.get(causa[i]);
+                        if (b == null) clientesPorCausa.put(causa[i], b = new java.util.BitSet());
+                        b.set(cliente[i]);
+                    }
                 }
                 if (!vacio(rec, R_COMENTARIO, R_COMENTARIO_L)) registrosConComentario++;
                 if (!vacio(rec, R_INFORME, R_INFORME_L)) registrosConInforme++;
@@ -286,7 +309,10 @@ public final class ResumenRuta {
                 String fecha = texto(rec, R_FECHA, R_FECHA_L);
                 String hora = texto(rec, R_HORA, R_HORA_L);
                 if (fecha.length() == 8 && soloDigitos(fecha)) {
-                    if (fecha.equals(hoy)) procesadosHoy++;
+                    if (fecha.equals(hoy)) {
+                        procesadosHoy++;
+                        if (cliente[i] > 0) deHoy.set(cliente[i]);
+                    }
                     String momento = fecha + (hora.length() == 6 && soloDigitos(hora) ? hora : "000000");
                     if (minimo == null || momento.compareTo(minimo) < 0) minimo = momento;
                     if (maximo == null || momento.compareTo(maximo) > 0) maximo = momento;
@@ -296,6 +322,8 @@ public final class ResumenRuta {
             throw new IOException("REGISTRO.SDA cortado", e);
         }
 
+        clientesConCausa = clientesCausa.cardinality();
+        clientesHoy = deHoy.cardinality();
         primeraLectura = minimo == null ? "" : minimo;
         ultimaLectura = maximo == null ? "" : maximo;
 
@@ -322,9 +350,11 @@ public final class ResumenRuta {
         List<ConteoCausa> lista = new ArrayList<>(conteo.size());
         for (Map.Entry<String, int[]> e : conteo.entrySet()) {
             String d = descripciones.get(e.getKey());
-            lista.add(new ConteoCausa(e.getKey(), d == null ? "" : d, e.getValue()[0]));
+            java.util.BitSet b = clientesPorCausa.get(e.getKey());
+            lista.add(new ConteoCausa(e.getKey(), d == null ? "" : d, e.getValue()[0], b == null ? 0 : b.cardinality()));
         }
-        Collections.sort(lista, (a, b) -> a.cantidad != b.cantidad ? b.cantidad - a.cantidad : compararCodigo(a.codigo, b.codigo));
+        Collections.sort(lista, (a, b) -> a.clientes != b.clientes ? b.clientes - a.clientes
+                : a.cantidad != b.cantidad ? b.cantidad - a.cantidad : compararCodigo(a.codigo, b.codigo));
         causas = Collections.unmodifiableList(lista);
     }
 
@@ -427,7 +457,12 @@ public final class ResumenRuta {
     /** AAAAMMDDhhmmss o vacío. */
     public String getPrimeraLectura() { return primeraLectura; }
     public String getUltimaLectura() { return ultimaLectura; }
+    /** Registradores procesados hoy. */
     public int getProcesadosHoy() { return procesadosHoy; }
+    /** Clientes distintos con algún registrador procesado hoy. */
+    public int getClientesHoy() { return clientesHoy; }
+    /** Clientes distintos con causa de no lectura en alguno de sus registradores. */
+    public int getClientesConCausa() { return clientesConCausa; }
 
     public String getAnioPeriodo() { return anioPeriodo; }
     public String getMesPeriodo() { return mesPeriodo; }

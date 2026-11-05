@@ -247,10 +247,10 @@ public class MenuPrincipal extends AppCompatActivity {
             panelAvance.setVisibility(View.VISIBLE);
             barAvance.setProgress(s.getAvance());
             txtAvance.setText("Leídos " + s.getClientesProcesados() + " de " + s.getTotalClientes()
-                    + " · Pendientes " + s.getClientesPendientes() + " · Anomalías " + s.getRegistrosConCausa());
+                    + " · Pendientes " + s.getClientesPendientes() + " · Anomalías " + s.getClientesConCausa());
             String ultima = s.getUltimaLectura();
             txtMenuUltima.setText(s.getAvance() + "% de avance"
-                    + (s.getProcesadosHoy() > 0 ? " · " + s.getProcesadosHoy() + " hoy" : "")
+                    + (s.getClientesHoy() > 0 ? " · " + s.getClientesHoy() + " clientes hoy" : "")
                     + (ultima.length() >= 12 ? " · última " + ultima.substring(8, 10) + ":" + ultima.substring(10, 12) : "")
                     + (s.getClientesPendientes() == 0 ? " · ruta terminada" : ""));
         } else {

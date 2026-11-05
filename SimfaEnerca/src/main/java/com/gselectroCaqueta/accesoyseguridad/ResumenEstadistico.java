@@ -250,12 +250,12 @@ public class ResumenEstadistico extends Activity {
         txtTotal.setText(String.valueOf(resumen.getTotalClientes()));
         txtLeidos.setText(String.valueOf(resumen.getClientesProcesados()));
         txtPendientes.setText(String.valueOf(resumen.getClientesPendientes()));
-        txtAnomalias.setText(String.valueOf(resumen.getRegistrosConCausa()));
+        txtAnomalias.setText(String.valueOf(resumen.getClientesConCausa())); // clientes, como las otras tres casillas
         barAvance.setProgress(resumen.getAvance());
 
         StringBuilder b = new StringBuilder();
         b.append(resumen.getAvance()).append("% de los clientes");
-        if (resumen.getProcesadosHoy() > 0) b.append(" · ").append(resumen.getProcesadosHoy()).append(" hoy");
+        if (resumen.getClientesHoy() > 0) b.append(" · ").append(resumen.getClientesHoy()).append(resumen.getClientesHoy() == 1 ? " cliente hoy" : " clientes hoy");
         if (!resumen.getUltimaLectura().isEmpty()) b.append(" · última ").append(hora(resumen.getUltimaLectura()));
         txtAvance.setText(b);
 
@@ -269,7 +269,7 @@ public class ResumenEstadistico extends Activity {
         causasSpinner.clear();
         causasSpinner.addAll(resumen.getCausas());
         List<String> items = new ArrayList<>(causasSpinner.size() + 1);
-        items.add("Todas las causas (" + resumen.getRegistrosConCausa() + ")");
+        items.add("Todas las causas (" + resumen.getClientesConCausa() + " clientes · " + resumen.getRegistrosConCausa() + " reg.)");
         for (ResumenRuta.ConteoCausa c : causasSpinner) items.add(c.toString());
         ArrayAdapter<String> a = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);
         a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -427,6 +427,8 @@ public class ResumenEstadistico extends Activity {
             filaColor(cont, "Con registradores sin leer", String.valueOf(resumen.getClientesIncompletos()), 0xFFEF6C00);
         }
         if (resumen.getClientesOtroEstado() > 0) fila(cont, "Otro estado", resumen.getClientesOtroEstado());
+        fila(cont, "Con anomalía", resumen.getClientesConCausa());
+        nota(cont, "Un cliente puede tener varios registradores (activa, reactiva): por eso los totales de clientes y de registradores son distintos.");
 
         seccion(cont, "Registradores");
         fila(cont, "Total", resumen.getRegistros());
@@ -450,7 +452,7 @@ public class ResumenEstadistico extends Activity {
             nota(cont, "Toque una causa para ver sus registradores.");
             for (final ResumenRuta.ConteoCausa c : resumen.getCausas()) {
                 View v = filaColor(cont, c.codigo + (c.descripcion.isEmpty() ? "" : " · " + c.descripcion),
-                        String.valueOf(c.cantidad), 0xFFE65100);
+                        c.conteo(), 0xFFE65100);
                 v.setBackgroundResource(android.R.drawable.list_selector_background);
                 v.setOnClickListener(x -> {
                     if (dialogo[0] != null) dialogo[0].dismiss();
@@ -462,7 +464,8 @@ public class ResumenEstadistico extends Activity {
         seccion(cont, "Tiempos");
         fila(cont, "Primera lectura", fechaHora(resumen.getPrimeraLectura()));
         fila(cont, "Última lectura", fechaHora(resumen.getUltimaLectura()));
-        fila(cont, "Procesados hoy", resumen.getProcesadosHoy());
+        fila(cont, "Clientes hoy", resumen.getClientesHoy());
+        fila(cont, "Registradores hoy", resumen.getProcesadosHoy());
 
         seccion(cont, "Envíos");
         EstadoEnvios e = resultado == null ? null : resultado.envios;
