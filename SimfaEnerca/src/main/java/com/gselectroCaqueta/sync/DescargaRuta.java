@@ -258,7 +258,12 @@ public final class DescargaRuta {
         }
         if (r.codigo == ApiMovil.SIN_RED) return "Sin conexión con el servidor.";
         String d = r.campo("detalle");
-        return "El servidor no aceptó la sesión" + (d != null ? ": " + d : " (" + r.codigo + ").");
+        String e = r.campo("error");
+        if ("credenciales_invalidas".equals(e)) {
+            return "El servidor no aceptó el código " + config.codOperador() + " con la clave digitada al entrar (401).\n"
+                    + "La clave del técnico en la web no coincide con la del celular.";
+        }
+        return "El servidor no aceptó la sesión" + (d != null ? ": " + d : "") + " (" + r.codigo + (e != null ? " " + e : "") + ").";
     }
 
     private static int entero(String v, int defecto) {
