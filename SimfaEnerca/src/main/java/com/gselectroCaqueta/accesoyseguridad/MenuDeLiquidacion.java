@@ -1263,6 +1263,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(androidx.core.view.GravityCompat.END));
         nav.setNavigationItemSelectedListener(item -> {
             drawerLayout.closeDrawer(androidx.core.view.GravityCompat.END);
+            if (item.getItemId() == R.id.nav_galeria_fotos) {
+                // Galeria de fotos (bloque D): ver, borrar las no enviadas y anular las enviadas (con supervisor).
+                drawerLayout.postDelayed(() -> startActivity(new Intent(this, GaleriaFotos.class)), 220);
+                return false;
+            }
             int opcion = opcionDeMenuLateral(item.getItemId());
             if (opcion > 0) {
                 code.setLength(0);

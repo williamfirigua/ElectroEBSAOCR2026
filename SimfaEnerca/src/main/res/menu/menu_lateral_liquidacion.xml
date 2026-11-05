@@ -7,6 +7,7 @@
         <menu>
             <item android:id="@+id/nav_anomalia" android:icon="@drawable/ic_nav_warning" android:title="Capturar Anomalía" />
             <item android:id="@+id/nav_foto" android:icon="@drawable/ic_nav_camera" android:title="Tomar Foto" />
+            <item android:id="@+id/nav_galeria_fotos" android:icon="@drawable/ic_nav_photo_library" android:title="Galería de Fotos" />
             <item android:id="@+id/nav_ocr" android:icon="@drawable/ic_nav_camera" android:title="Habilitar OCR en esta cuenta" />
             <item android:id="@+id/nav_anterior_predio" android:icon="@drawable/ic_nav_history" android:title="Anterior Predio" />
             <item android:id="@+id/nav_digitos" android:icon="@drawable/ic_nav_edit" android:title="Modificar Nro Dígitos" />
