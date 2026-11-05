@@ -467,6 +467,9 @@ public class ResumenEstadistico extends Activity {
         fila(cont, "Clientes hoy", resumen.getClientesHoy());
         fila(cont, "Registradores hoy", resumen.getProcesadosHoy());
 
+        seccion(cont, "Respaldo");
+        nota(cont, com.gselectroCaqueta.sync.RespaldoSd.estado(this));
+
         seccion(cont, "Envíos");
         EstadoEnvios e = resultado == null ? null : resultado.envios;
         if (e == null) {

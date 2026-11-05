@@ -1245,6 +1245,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         //tryAll();
         apagarWifi();
+        // Respaldo en la tarjeta SD de lo trabajado (.SDA y fotos), cada 10 min en segundo plano.
+        com.gselectroCaqueta.sync.RespaldoSd.iniciar(this);
 //        closeKeyboard();
         // lecturaActual();
     }// end_onCreate
@@ -1372,6 +1374,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
     @Override
     protected void onDestroy() {
+        com.gselectroCaqueta.sync.RespaldoSd.detener(this);
         if (linterna != null) {
             linterna.liberar();
             linterna = null;
@@ -18127,6 +18130,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     @Override
     protected void onPause() {
         BandejaMensajes.oyente(null);
+        com.gselectroCaqueta.sync.RespaldoSd.ahora(this); // sale de la pantalla: copiar lo último a la SD
         // La linterna no queda encendida fuera de la liquidacion (se apaga tambien al abrir la camara).
         if (!camaraAbierta) apagarLinterna();
         super.onPause();
