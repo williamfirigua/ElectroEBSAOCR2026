@@ -688,6 +688,10 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
             runOnUiThread(() -> {
                 cerrar(espera);
                 descargandoRuta = false;
+                if (!lista.ok && lista.necesitaSesion) {
+                    pedirSesion(lista.mensaje);
+                    return;
+                }
                 if (!lista.ok) {
                     alerta("No se pudo consultar", lista.mensaje + "\n\nPuede usar la carga antigua (SOAP): digite el ciclo, Traer Ruta y Recibir Datos.");
                     return;
@@ -697,12 +701,70 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
                     return;
                 }
                 if (lista.rutas.isEmpty()) {
-                    alerta("Mi ruta", "No tiene rutas asignadas para cargar.\nSi la oficina ya se la asignó, debe volver a Generar el ciclo.");
+                    new AlertDialog.Builder(Comunicaciones.this)
+                            .setTitle("Mi ruta")
+                            .setMessage("El técnico " + new ConfigSync(Comunicaciones.this).codOperador() + " no tiene rutas asignadas para cargar.\n"
+                                    + "Si la oficina ya se la asignó, debe volver a Generar el ciclo.")
+                            .setPositiveButton("Aceptar", null)
+                            .setNeutralButton("Otro técnico", (d, w) -> pedirSesion(null))
+                            .show();
                     return;
                 }
                 escogerRuta(lista.rutas);
             });
         }, "mi-ruta").start();
+    }
+
+    /**
+     * Sin ruta cargada el celular no tiene con qué validar al técnico (LECTOR.TXT viene con la ruta): el código y
+     * la clave se validan contra la web al iniciar la sesión de la API.
+     */
+    private void pedirSesion(String motivo) {
+        if (isFinishing()) return;
+        android.widget.LinearLayout caja = new android.widget.LinearLayout(this);
+        caja.setOrientation(android.widget.LinearLayout.VERTICAL);
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        caja.setPadding(pad, pad / 2, pad, 0);
+        final EditText cod = new EditText(this);
+        cod.setHint("Código o usuario");
+        cod.setSingleLine(true);
+        cod.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        final EditText clave = new EditText(this);
+        clave.setHint("Clave");
+        clave.setSingleLine(true);
+        clave.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        caja.addView(cod);
+        caja.addView(clave);
+        final DescargaRuta dr = new DescargaRuta(this);
+        cod.setText(dr.codigoSugerido());
+        if (cod.getText().length() > 0) clave.requestFocus();
+
+        new AlertDialog.Builder(this)
+                .setTitle("Técnico de la ruta")
+                .setMessage(motivo != null ? motivo : "Digite el código y la clave del técnico.")
+                .setView(caja)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton("Entrar", (d, w) -> {
+                    final String c = cod.getText().toString().trim();
+                    final String k = clave.getText().toString().trim();
+                    if (c.isEmpty() || k.isEmpty()) {
+                        pedirSesion("Digite el código y la clave.");
+                        return;
+                    }
+                    final ProgressDialog espera = ProgressDialog.show(this, "Mi ruta", "Validando con el servidor...", true, false);
+                    new Thread(() -> {
+                        final String falla = dr.iniciarSesion(c, k);
+                        runOnUiThread(() -> {
+                            cerrar(espera);
+                            if (falla == null) {
+                                miRuta();
+                            } else {
+                                pedirSesion(falla);
+                            }
+                        });
+                    }, "sesion-ruta").start();
+                })
+                .show();
     }
 
     private void escogerRuta(final List<DescargaRuta.Ruta> rutas) {

@@ -47,6 +47,8 @@ public final class DescargaRuta {
         public final String modo;       // api | soap
         public final List<Ruta> rutas;
         public final String mensaje;
+        /** Falta (o no sirvió) el código y la clave del técnico: la pantalla los pide. */
+        public boolean necesitaSesion;
 
         Lista(boolean ok, String modo, List<Ruta> rutas, String mensaje) {
             this.ok = ok;
@@ -78,10 +80,61 @@ public final class DescargaRuta {
     private final ConfigSync config;
     private final ApiMovil api;
 
+    /** La última falla de sesión fue por código/clave (o porque nunca se digitaron): hay que pedirlos. */
+    private boolean faltaSesion;
+
     public DescargaRuta(Context ctx) {
         this.ctx = ctx.getApplicationContext();
         this.config = new ConfigSync(ctx);
+        completarConfig();
         this.api = new ApiMovil(config.baseApi());
+    }
+
+    /**
+     * Sin ruta cargada el técnico todavía no pasó por la liquidación, que es donde se guardaban la URL, el serial
+     * y la versión para la API: se toman de la licencia y de la configuración de comunicaciones.
+     */
+    private void completarConfig() {
+        try {
+            String base = config.baseApi().isEmpty() ? com.gselectroCaqueta.moduloLicencia.LicenciaTerminal.baseApi(ctx) : "";
+            String serial = "";
+            String version = "";
+            com.gselectroCaqueta.moduloLicencia.LicenciaTerminal lic = new com.gselectroCaqueta.moduloLicencia.LicenciaTerminal(ctx);
+            if (config.serialTerminal().isEmpty()) {
+                com.gselectroCaqueta.moduloLicencia.LicenciaTerminal.Revision rv = lic.revisar();
+                if (rv.vigente()) serial = rv.licencia.codMovil;
+            }
+            if (config.versionApp().isEmpty()) version = lic.versionApp();
+            config.configurar(base, serial, version);
+        } catch (Throwable ignored) {
+        }
+    }
+
+    /** Código del dueño de la licencia de este celular (para sugerirlo al pedir la clave). */
+    public String codigoSugerido() {
+        try {
+            com.gselectroCaqueta.moduloLicencia.LicenciaTerminal.Revision rv = new com.gselectroCaqueta.moduloLicencia.LicenciaTerminal(ctx).revisar();
+            if (rv.vigente() && !rv.licencia.operador.isEmpty()) return rv.licencia.operador;
+        } catch (Throwable ignored) {
+        }
+        return config.codOperador();
+    }
+
+    /**
+     * Inicia la sesión de la API con lo que digitó el técnico (el servidor valida la clave contra la web; sin ruta
+     * cargada el celular no tiene con qué validarla). El usuario EBSA se traduce al código si se conoce.
+     *
+     * @return null si quedó la sesión; si no, el motivo para mostrar
+     */
+    public String iniciarSesion(String codigoOUsuario, String clave) {
+        String cod = codigoOUsuario == null ? "" : codigoOUsuario.trim();
+        try {
+            String traducido = new com.gselectroCaqueta.moduloLicencia.LicenciaTerminal(ctx).codigoDeUsuario(cod);
+            if (traducido != null) cod = traducido;
+        } catch (Throwable ignored) {
+        }
+        ConfigSync.recordarSesion(ctx, cod, clave);
+        return renovarSesion();
     }
 
     // ------------------------------------------------------------------ lista
@@ -89,9 +142,21 @@ public final class DescargaRuta {
     public Lista rutas() {
         if (config.baseApi().isEmpty()) return new Lista(false, "api", new ArrayList<>(), "No hay URL de la API configurada (Configurar Web/IP).");
         String falla = asegurarSesion();
-        if (falla != null) return new Lista(false, "api", new ArrayList<>(), falla);
+        if (falla != null) {
+            Lista l = new Lista(false, "api", new ArrayList<>(), falla);
+            l.necesitaSesion = faltaSesion;
+            return l;
+        }
         ApiMovil.Respuesta r = api.rutas();
-        if (r.codigo == 401 && renovarSesion() == null) r = api.rutas();
+        if (r.codigo == 401) {
+            String f2 = renovarSesion();
+            if (f2 != null) {
+                Lista l = new Lista(false, "api", new ArrayList<>(), f2);
+                l.necesitaSesion = faltaSesion;
+                return l;
+            }
+            r = api.rutas();
+        }
         if (r.codigo == ApiMovil.SIN_RED) return new Lista(false, "api", new ArrayList<>(), "Sin conexión con el servidor.");
         if (!r.ok() || r.cuerpo == null) return new Lista(false, "api", new ArrayList<>(), "El servidor no respondió la lista de rutas (" + r.codigo + ").");
 
@@ -246,10 +311,14 @@ public final class DescargaRuta {
     }
 
     private String renovarSesion() {
+        faltaSesion = false;
         config.borrar();
         api.token(null);
         String clave = config.clave();
-        if (clave == null || clave.isEmpty()) return "Inicie sesión de nuevo para descargar la ruta.";
+        if (clave == null || clave.isEmpty() || config.codOperador().isEmpty()) {
+            faltaSesion = true;
+            return "Digite su código y su clave para descargar la ruta.";
+        }
         ApiMovil.Respuesta r = api.login(config.codOperador(), clave, config.serialTerminal(), config.versionApp());
         if (r.ok() && r.campo("token") != null) {
             config.guardar(r.campo("token"));
@@ -260,8 +329,11 @@ public final class DescargaRuta {
         String d = r.campo("detalle");
         String e = r.campo("error");
         if ("credenciales_invalidas".equals(e)) {
-            return "El servidor no aceptó el código " + config.codOperador() + " con la clave digitada al entrar (401).\n"
-                    + "La clave del técnico en la web no coincide con la del celular.";
+            faltaSesion = true;
+            return "El código " + config.codOperador() + " y la clave no coinciden con los de la web.";
+        }
+        if ("bloqueado_temporalmente".equals(e)) {
+            return "Demasiados intentos con clave errada: espere unos minutos.";
         }
         return "El servidor no aceptó la sesión" + (d != null ? ": " + d : "") + " (" + r.codigo + (e != null ? " " + e : "") + ").";
     }
