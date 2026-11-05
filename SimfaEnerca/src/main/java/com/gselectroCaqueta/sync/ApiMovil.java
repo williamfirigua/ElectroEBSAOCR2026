@@ -244,6 +244,91 @@ public class ApiMovil {
         }
     }
 
+    // ------------------------------------------------------------------ bloque E (lo que quedaba por SOAP)
+
+    /** Enviar Datos de fin de ruta (POST rutas/cierre): el zip D<ruta>.ZIP con los .SDA de DATOSDESALIDA. */
+    public Respuesta cerrarRuta(File zip, String carpeta, String ruta, int leidos, int causas) {
+        try {
+            Map<String, String> c = new LinkedHashMap<>();
+            c.put("carpeta", carpeta == null ? "" : carpeta.trim());
+            c.put("ruta", ruta == null ? "" : ruta.trim());
+            c.put("registros_leidos", String.valueOf(Math.max(0, leidos)));
+            c.put("causas_leidas", String.valueOf(Math.max(0, causas)));
+            c.put("sha256", sha256(zip));
+            Map<String, File> a = new LinkedHashMap<>();
+            a.put("archivo", zip);
+            return multipart("rutas/cierre", c, a, LEER_PLANOS_MS);
+        } catch (IOException e) {
+            return new Respuesta(TRANSFERENCIA_FALLIDA, null, e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
+    }
+
+    /** Lo que el servidor tiene de la ruta: {recibida, tomolectura, registro_bytes, recibido_en}. */
+    public Respuesta estadoRuta(String carpeta, String ruta) {
+        return json("GET", "rutas/estado?carpeta=" + url(carpeta) + "&ruta=" + url(ruta), null, true, LEER_MS);
+    }
+
+    private static String url(String v) {
+        try {
+            return java.net.URLEncoder.encode(v == null ? "" : v.trim(), "UTF-8");
+        } catch (java.io.UnsupportedEncodingException e) {
+            return "";
+        }
+    }
+
+    /**
+     * GET de un archivo del servidor (rutaApi con su query: archivos/lbl?..., app/apk?...) agregándolo a
+     * {@code parte} desde {@code desde} (Range). Cabeceras X-Archivo-Sha256 / X-Archivo-Bytes si el servidor las da.
+     * En un error, Tramo.error trae el "motivo" del JSON (o el "detalle").
+     */
+    public Tramo bajarArchivo(String rutaApi, File parte, long desde, Progreso progreso) {
+        HttpURLConnection c = null;
+        try {
+            c = abrir("GET", rutaApi, true, LEER_ARCHIVO_MS);
+            c.setRequestProperty("Accept", "application/octet-stream, application/json");
+            if (desde > 0) c.setRequestProperty("Range", "bytes=" + desde + "-");
+            if (!conectar(c)) return new Tramo(SIN_RED, null, 0, "sin conexión con " + base);
+            int codigo = c.getResponseCode();
+            String sha = c.getHeaderField("X-Archivo-Sha256");
+            long total = parseLargo(c.getHeaderField("X-Archivo-Bytes"));
+            if (codigo != 200 && codigo != 206) {
+                InputStream err = c.getErrorStream();
+                String texto = err == null ? "" : leerTodo(err);
+                String motivo = null;
+                try {
+                    Map<String, Object> j = Json.objeto(texto);
+                    motivo = Json.texto(j, "motivo");
+                    if (motivo == null) motivo = Json.texto(j, "detalle");
+                } catch (RuntimeException ignored) {
+                }
+                return new Tramo(codigo, sha, total, motivo != null ? motivo : ("HTTP " + codigo));
+            }
+            boolean agregar = codigo == 206 && desde > 0;
+            long llevo = agregar ? desde : 0;
+            try (InputStream in = c.getInputStream();
+                 OutputStream o = new java.io.FileOutputStream(parte, agregar)) {
+                byte[] buf = new byte[32 * 1024];
+                int n;
+                long ultimo = 0;
+                while ((n = in.read(buf)) > 0) {
+                    o.write(buf, 0, n);
+                    llevo += n;
+                    long ahora = System.currentTimeMillis();
+                    if (progreso != null && ahora - ultimo > 300) {
+                        progreso.avance(llevo, total);
+                        ultimo = ahora;
+                    }
+                }
+            }
+            if (progreso != null) progreso.avance(llevo, total);
+            return new Tramo(codigo, sha, total, null);
+        } catch (IOException e) {
+            return new Tramo(TRANSFERENCIA_FALLIDA, null, 0, e.getClass().getSimpleName() + ": " + e.getMessage());
+        } finally {
+            if (c != null) c.disconnect();
+        }
+    }
+
     private static long parseLargo(String v) {
         try {
             return v == null ? 0 : Long.parseLong(v.trim());

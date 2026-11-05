@@ -286,6 +286,13 @@ public class FechayHora extends AppCompatActivity {
                         }
                         break;
                     case "VALIDAR_CONEXION":
+                        if (com.gselectroCaqueta.sync.ConfigSync.modoRest(getApplicationContext())) {
+                            // Bloque E: la terminal habla con la API; se prueba esa conexión (GET ping).
+                            com.gselectroCaqueta.sync.ApiMovil.Respuesta pr = new com.gselectroCaqueta.sync.ApiMovil(
+                                    new com.gselectroCaqueta.sync.ConfigSync(getApplicationContext()).baseApi()).ping();
+                            respuesta_ = pr.ok() ? "1" : "API: " + (pr.codigo == com.gselectroCaqueta.sync.ApiMovil.SIN_RED ? "sin conexión" : "respondió " + pr.codigo);
+                            break;
+                        }
                         WSSoap wsoap = new WSSoap(URL, paginaWs);
                         respuesta_ = wsoap.verificarWs("VALIDAR_CONEXION");
 

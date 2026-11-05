@@ -1,5 +1,11 @@
 package com.gselectroCaqueta.comunicaciones;
 
+import com.gselectroCaqueta.sync.SincronizacionService;
+
+import com.gselectroCaqueta.sync.ColaEnvioSqlite;
+
+import com.gselectroCaqueta.sync.ColaEnvio;
+
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -1006,7 +1012,65 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
         }
     }
 
+    /**
+     * Enviar Datos (fin de ruta). Por la API si la terminal está en modo REST (bloque E); si la API no responde o
+     * el servidor todavía no tiene el servicio, el SOAP de siempre. metodo queda en "EnviarDatosServer" para que
+     * onPostExecute muestre el resultado (antes un error temprano dejaba metodo en otro valor y no se veía nada).
+     */
     public String EnviarDatosServerAsync() {
+        try {
+            if (ConfigSync.modoRest(this)) {
+                String r = enviarDatosApi();
+                if (r != null) return r;
+            }
+            return enviarDatosServerSoap();
+        } finally {
+            metodo = "EnviarDatosServer";
+        }
+    }
+
+    /** Los archivos que viajan en Enviar Datos: los .SDA de DATOSDESALIDA (menos ENVIOGPRS<serial>), TOMOLECTURA y LOGEVENTOS. */
+    private ArrayList archivosEnviarDatos() {
+        ArrayList filestoZip = new ArrayList();
+        File[] files = new File(RutaAGrabar).listFiles();
+        if (files == null) return filestoZip;
+        for (File file : files) {
+            if (!file.isDirectory() && file.getName().toUpperCase().endsWith(".SDA") && !file.getName().toUpperCase().equals("ENVIOGPRS" + serialPDA + ".SDA")
+                    || file.getName().equals("TOMOLECTURA.TXT") || file.getName().equals("LOGEVENTOS.LOG")) {
+                filestoZip.add(file);
+            }
+        }
+        return filestoZip;
+    }
+
+    /** Enviar Datos por la API (POST rutas/cierre). null = no se pudo por la API: seguir con el SOAP. */
+    private String enviarDatosApi() {
+        File zip = new File(RutaAGrabar + NombreZip);
+        try {
+            ArrayList filestoZip = archivosEnviarDatos();
+            if (filestoZip.isEmpty()) return "Error: no hay archivos por enviar en DATOSDESALIDA";
+            String comprimir = util.CreaZip(zip.getPath(), filestoZip);
+            if (!comprimir.contains("✓")) return "Error Comprimiendo \n Archivos por enviar";
+            String ruta = "C" + Municipio + Seccion + Division;
+            DescargaRuta.Operacion op = new DescargaRuta(this).cerrarRuta(zip, Ciclo, ruta, RegistrosLeidos, CausasLeidas);
+            if (op.ok) {
+                zip.delete();
+                util.Log(logfile, "[Comunicaciones]Enviar Datos por API: " + op.campo("estado") + ", " + op.campo("archivos") + " archivos");
+                return "duplicado".equals(op.campo("estado"))
+                        ? "Los datos de la ruta ya estaban en el servidor ✓"
+                        : "Datos de la ruta recibidos en el servidor ✓ (" + op.campo("archivos") + " archivos)";
+            }
+            util.Log(logfile, "[Comunicaciones]Enviar Datos por API: " + op.mensaje + (op.probarSoap ? " -> SOAP" : ""));
+            if (op.probarSoap) return null; // el zip se queda: el SOAP lo vuelve a armar
+            zip.delete();
+            return "Error: " + op.mensaje;
+        } catch (Exception ex) {
+            util.Log(logfile, "[Comunicaciones]enviarDatosApi(): " + ex.getMessage());
+            return null;
+        }
+    }
+
+    private String enviarDatosServerSoap() {
 
         try {
 
@@ -1088,14 +1152,19 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
             DescargaRuta.eventoFinalizada(Comunicaciones.this, Ciclo, "C" + Municipio + Seccion + Division);
 
         } catch (Exception ex) {
-            txtInfo.setText("Error al enviar archivos al servidor, intente de nuevo");
+            // Antes seguía y respondía "Exitoso" aunque hubiera fallado (y tocaba la pantalla desde este hilo).
             util.Log(logfile, "[Comunicaciones]EnviarDatosServerAsync(): " + ex.getMessage());
+            return "Error al enviar archivos al servidor, intente de nuevo";
         }
-        metodo = "EnviarDatosServer";
         return "Proceso subir archivos Exitoso! ✓";
     }
 
     public void EnviarFotosMensaje() {
+
+        if (ConfigSync.modoRest(this)) {
+            enviarFotosApi();
+            return;
+        }
 
         RutaAGrabar = VariablesGlobales.directorioactual + "/DCIM/FOTOGRAFIASL";
 
@@ -1116,6 +1185,28 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
 
         AlertDialogEscoger("Alerta de transmision de datos!", "Comenzara un envio masivo de fotos, esto puede tomar tiempo \nDesea enviar las fotos?", "EnviarFotos");
         return;
+    }
+
+    /**
+     * Modo API (bloque E): fotos y facturas ya salen solas por la cola (POST archivos), una por una. El envío masivo
+     * por SOAP las subía otra vez; aquí solo se pide enviar ya lo pendiente y se muestra cuánto falta.
+     */
+    private void enviarFotosApi() {
+        int fotos = 0, lbls = 0, errores = 0;
+        try {
+            ColaEnvioSqlite cola = ColaEnvioSqlite.de(this);
+            fotos = cola.contar(ColaEnvio.FOTO, ColaEnvio.PENDIENTE);
+            lbls = cola.contar(ColaEnvio.LBL, ColaEnvio.PENDIENTE);
+            errores = cola.contar(ColaEnvio.FOTO, ColaEnvio.ERROR) + cola.contar(ColaEnvio.LBL, ColaEnvio.ERROR);
+        } catch (Exception ex) {
+            util.Log(logfile, "[Comunicaciones]enviarFotosApi(): " + ex.getMessage());
+        }
+        SincronizacionService.solicitar(this);
+        String msg = fotos + lbls == 0
+                ? "No hay fotos ni facturas pendientes: todo está en el servidor."
+                : "Se están enviando " + fotos + " foto(s) y " + lbls + " factura(s) pendientes. Siguen en segundo plano aunque salga de esta pantalla.";
+        if (errores > 0) msg += "\n\n" + errores + " archivo(s) rechazados por el servidor: se revisan en la liquidación, menú Envíos.";
+        alerta("Enviar fotos", msg);
     }
 
     /***
@@ -1544,6 +1635,55 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
 
         if (banderaWsOcupado) return;
 
+        if (ConfigSync.modoRest(this)) {
+            validarEnvioApi();
+            return;
+        }
+        validarEnvioSoap();
+    }
+
+    /** Validar envío por la API: compara REGISTRO.SDA del servidor (lo que llegó con Enviar Datos) con el del celular. */
+    private void validarEnvioApi() {
+        validaEnvio = false;
+        final String carpeta = Ciclo;
+        final String ruta = "C" + Municipio + Seccion + Division;
+        final File local = new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/REGISTRO.SDA");
+        final ProgressDialog espera = ProgressDialog.show(this, "Validar envío", "Consultando el servidor...", true, false);
+        new Thread(() -> {
+            final DescargaRuta.Operacion op = new DescargaRuta(Comunicaciones.this).estadoRuta(carpeta, ruta);
+            runOnUiThread(() -> {
+                cerrar(espera);
+                if (isFinishing()) return;
+                if (!op.ok) {
+                    if (op.probarSoap) {
+                        validaEnvio = true;
+                        validarEnvioSoap();
+                    } else {
+                        alerta("Validar envío", op.mensaje);
+                    }
+                    return;
+                }
+                String bytes = op.campo("registro_bytes");
+                long enServidor = -1;
+                try {
+                    enServidor = bytes == null ? -1 : (long) Double.parseDouble(bytes);
+                } catch (NumberFormatException ignored) {
+                }
+                if (enServidor < 0) {
+                    alerta("Validar envío", "El servidor no tiene los datos de fin de la ruta " + ruta + ". Use Enviar Datos.");
+                    return;
+                }
+                long enCelular = local.isFile() ? local.length() : -1;
+                String cuando = op.campo("recibido_en");
+                alerta("Validar envío", (enCelular == enServidor ? "Los datos de la ruta están completos en el servidor ✓" : "El REGISTRO.SDA del servidor no coincide con el del celular: vuelva a Enviar Datos.")
+                        + "\n\nServidor: " + enServidor + " bytes" + (cuando != null ? " (recibido " + cuando + ")" : "")
+                        + "\nCelular: " + (enCelular < 0 ? "sin REGISTRO.SDA" : enCelular + " bytes"));
+            });
+        }, "validar-envio").start();
+    }
+
+    private void validarEnvioSoap() {
+
         txtInfo.setText("");
         esComprimido = "0";
         NombreZip = "D" + Municipio + Seccion + Division + ".ZIP";
@@ -1822,6 +1962,16 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
         String respuestaWeb = "";
 
         try {
+            if (ConfigSync.modoRest(this)) {
+                // Bloque E: el instalador nuevo por la API (<enrutador>/Android/Simfa<version>.apk).
+                String nombre = new File(ruta).getName().replace(',', '.');
+                DescargaRuta.Operacion op = new DescargaRuta(this).bajar("app/apk?nombre=" + nombre, new File(ruta), null);
+                if (op.ok) return "Descomprime ✓; borrar Zip ✓";
+                if ("no_hay_actualizacion".equals(op.motivo)) return "No hay actualizaciones";
+                if (!op.probarSoap) return op.mensaje;
+                util.Log(logfile, "[Comunicaciones]traerArchivo API: " + op.mensaje + " -> SOAP");
+            }
+
             WSSoap wsoaps = new WSSoap(URL, paginaWs);
 
             try {

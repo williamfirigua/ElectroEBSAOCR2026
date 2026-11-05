@@ -222,8 +222,42 @@ public class ModuloReimpresion extends AppCompatActivity {
         NombreZip = cuenta+"_" + ano + "_" + mes+ ".LOG"; //+ ".ZIP";
         ArchivoAEnviarRecibir = rutaAdministrador.trim() + "Backuplbl"  + "\\" + NombreZip;
         RutaAGrabar = VariablesGlobales.directorioactual + "/LBLS/"  + NombreZip;
+        if (com.gselectroCaqueta.sync.ConfigSync.modoRest(this)) {
+            recibirArchivoApi();
+            return;
+        }
         WsGetTamanoArchivo(NombreZip, ArchivoAEnviarRecibir, RutaAGrabar);
 
+    }
+
+    /** Bloque E: la factura impresa por la API (la que llegó por la cola o la de Backuplbl); si no responde, el SOAP. */
+    private void recibirArchivoApi() {
+        final String ruta = "archivos/lbl?cuenta=" + cuenta + "&anno=" + ano + "&mes=" + mes;
+        final File destino = new File(RutaAGrabar);
+        final ProgressDialog espera = new ProgressDialog(this);
+        espera.setMessage("cargando...");
+        espera.setCancelable(false);
+        espera.show();
+        new Thread(() -> {
+            final com.gselectroCaqueta.sync.DescargaRuta.Operacion op =
+                    new com.gselectroCaqueta.sync.DescargaRuta(ModuloReimpresion.this).bajar(ruta, destino, null);
+            runOnUiThread(() -> {
+                try {
+                    espera.dismiss();
+                } catch (Exception ignored) {
+                }
+                if (isFinishing()) return;
+                if (op.ok) {
+                    mensajes("Datos cargados ✓");
+                } else if ("no_existe".equals(op.motivo)) {
+                    mensajes("El servidor no tiene la factura de la cuenta " + cuenta + " (" + ano + "/" + mes + ")");
+                } else if (op.probarSoap) {
+                    WsGetTamanoArchivo(NombreZip, ArchivoAEnviarRecibir, RutaAGrabar);
+                } else {
+                    mensajes(op.mensaje);
+                }
+            });
+        }, "reimpresion-lbl").start();
     }
 
     public void recibirArchivo2(){

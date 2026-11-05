@@ -298,6 +298,115 @@ public final class DescargaRuta {
         }
     }
 
+    // ------------------------------------------------------------------ bloque E: lo que quedaba por SOAP
+
+    /** Resultado de una operación con el servidor para las pantallas. */
+    public static final class Operacion {
+        public final boolean ok;
+        /** La API no respondió o no tiene el servicio (servidor sin actualizar): seguir con el SOAP de siempre. */
+        public final boolean probarSoap;
+        public final String mensaje;
+        /** Motivo del servidor en un rechazo (no_hay_actualizacion, ciclo_no_existe...), o null. */
+        public final String motivo;
+        public final Map<String, Object> cuerpo;
+
+        Operacion(boolean ok, boolean probarSoap, String mensaje, String motivo, Map<String, Object> cuerpo) {
+            this.ok = ok;
+            this.probarSoap = probarSoap;
+            this.mensaje = mensaje;
+            this.motivo = motivo;
+            this.cuerpo = cuerpo;
+        }
+
+        public String campo(String clave) {
+            Object v = cuerpo == null ? null : cuerpo.get(clave);
+            return v == null ? null : String.valueOf(v);
+        }
+    }
+
+    private interface Llamada {
+        ApiMovil.Respuesta hacer();
+    }
+
+    /** La llamada con sesión (la renueva una vez si el servidor responde 401). */
+    private Operacion conSesion(Llamada llamada) {
+        if (config.baseApi().isEmpty()) return new Operacion(false, true, "No hay URL de la API configurada.", null, null);
+        String falla = asegurarSesion();
+        if (falla != null) return new Operacion(false, true, falla, null, null);
+        ApiMovil.Respuesta r = llamada.hacer();
+        if (r.codigo == 401) {
+            String f2 = renovarSesion();
+            if (f2 != null) return new Operacion(false, true, f2, null, null);
+            r = llamada.hacer();
+        }
+        if (r.ok() && r.cuerpo != null) return new Operacion(true, false, null, null, r.cuerpo);
+        String detalle = r.campo("detalle");
+        String motivo = r.campo("motivo");
+        String msg = r.codigo == ApiMovil.SIN_RED ? "Sin conexión con el servidor."
+                : "El servidor respondió " + r.codigo + (detalle != null ? ": " + detalle : (r.error != null ? ": " + r.error : ""));
+        // 422 = el dato no sirve (el SOAP tampoco lo arreglaría); todo lo demás (red, 404 de un servidor sin
+        // actualizar, 5xx) prueba el SOAP.
+        return new Operacion(false, r.codigo != 422, msg, motivo, r.cuerpo);
+    }
+
+    /** Enviar Datos de fin de ruta por la API. carpeta = la del ciclo (0116), ruta = C + mun + sec + div. */
+    public Operacion cerrarRuta(File zip, String carpeta, String ruta, int leidos, int causas) {
+        return conSesion(() -> api.cerrarRuta(zip, carpeta, ruta, leidos, causas));
+    }
+
+    /** Estado de la ruta en el servidor (Borrar ruta y Validar envío). */
+    public Operacion estadoRuta(String carpeta, String ruta) {
+        return conSesion(() -> api.estadoRuta(carpeta, ruta));
+    }
+
+    /**
+     * Baja un archivo (LBL para reimprimir, APK nuevo) a {@code destino}: por partes con Range si la conexión se
+     * corta, verifica el SHA-256 si el servidor lo da y solo al final reemplaza el destino.
+     */
+    public Operacion bajar(String rutaApi, File destino, ApiMovil.Progreso progreso) {
+        if (config.baseApi().isEmpty()) return new Operacion(false, true, "No hay URL de la API configurada.", null, null);
+        String falla = asegurarSesion();
+        if (falla != null) return new Operacion(false, true, falla, null, null);
+        File dir = destino.getParentFile();
+        if (dir != null && !dir.isDirectory()) dir.mkdirs();
+        File parte = new File(destino.getPath() + ".part");
+        if (parte.exists()) parte.delete();
+        boolean renovada = false;
+        ApiMovil.Tramo t = null;
+        for (int intento = 0; intento < 6; intento++) {
+            long desde = parte.isFile() ? parte.length() : 0;
+            t = api.bajarArchivo(rutaApi, parte, desde, progreso);
+            if (t.codigo == 401 && !renovada) {
+                renovada = true;
+                String f2 = renovarSesion();
+                if (f2 != null) return new Operacion(false, true, f2, null, null);
+                continue;
+            }
+            if (t.codigo == 200 || t.codigo == 206) {
+                if (t.total > 0 && parte.length() < t.total) continue; // se cortó: sigue desde donde quedó
+                try {
+                    if (t.sha256 != null && !t.sha256.trim().isEmpty() && !t.sha256.trim().equalsIgnoreCase(ApiMovil.sha256(parte))) {
+                        parte.delete();
+                        continue;
+                    }
+                } catch (java.io.IOException e) {
+                    parte.delete();
+                    return new Operacion(false, false, "No se pudo verificar el archivo: " + e.getMessage(), null, null);
+                }
+                if (destino.exists()) destino.delete();
+                if (!parte.renameTo(destino)) return new Operacion(false, false, "No se pudo guardar " + destino.getName(), null, null);
+                return new Operacion(true, false, null, null, null);
+            }
+            if (t.codigo == ApiMovil.TRANSFERENCIA_FALLIDA) continue;
+            break;
+        }
+        if (parte.exists()) parte.delete();
+        if (t == null) return new Operacion(false, true, "Sin respuesta del servidor.", null, null);
+        if (t.codigo == ApiMovil.SIN_RED) return new Operacion(false, true, "Sin conexión con el servidor.", null, null);
+        return new Operacion(false, t.codigo != 422, "El servidor respondió " + t.codigo + (t.error != null ? ": " + t.error : ""),
+                t.codigo == 404 || t.codigo == 422 ? t.error : null, null);
+    }
+
     // ------------------------------------------------------------------ sesión
 
     /** null si hay token (o se consiguió); si no, el motivo para mostrar. */

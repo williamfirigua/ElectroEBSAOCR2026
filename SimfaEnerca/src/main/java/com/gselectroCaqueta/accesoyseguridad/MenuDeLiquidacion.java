@@ -9247,6 +9247,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
      * @param cuentas:     true indica si se debe hacer el proceso de creacion de archivos y envio
      */
     public void envioHilos_CertPostal_Censo_Aforos_Novedades(boolean aforos, boolean novedades, boolean certificado, boolean censo, boolean cuentas) {
+        // Bloque E: en modo API no se suben por SOAP. El servidor solo los guardaba como archivo (no los procesa:
+        // aforos nunca se envía y novedades es de Caqueta); CERTIFICADOS, AUDITORIASUPERVISOR y CUENTASGPS.SDA
+        // viajan completos en Enviar Datos (rutas/cierre), y la ubicación de cada lectura ya va en la liquidación.
+        if (ConfigSync.modoRest(this)) return;
 
         Archivos_CPCAN = new String[]{"", "", "", "", ""};
         int cont = 0;
@@ -19378,6 +19382,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
 
     public void envioPosicionamiento() {
+        // Bloque E: en modo API el seguimiento va por tracking/ubicaciones (el POSICIONAMIENTO del SOAP no guarda nada).
+        if (ConfigSync.modoRest(this)) return;
         if (indicadorManual == 0) {
 
             SoapArrays soapA = new SoapArrays();

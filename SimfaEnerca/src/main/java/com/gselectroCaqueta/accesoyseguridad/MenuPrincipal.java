@@ -472,8 +472,22 @@ public class MenuPrincipal extends AppCompatActivity {
         verificandoBorrado = true;
         actualizarTrabajo();
         new Thread(() -> {
-            String respuesta;
-            try {
+            String respuesta = null;
+            boolean resuelto = false;
+            if (com.gselectroCaqueta.sync.ConfigSync.modoRest(MenuPrincipal.this)) {
+                // Bloque E: el servidor dice qué TOMOLECTURA.TXT recibió con Enviar Datos.
+                com.gselectroCaqueta.sync.DescargaRuta.Operacion op =
+                        new com.gselectroCaqueta.sync.DescargaRuta(MenuPrincipal.this).estadoRuta(ciclo, "C" + ruta);
+                if (op.ok) {
+                    String t = op.campo("tomolectura");
+                    respuesta = t != null && !t.trim().isEmpty() && t.trim().equals(tomoLectura.trim()) ? "PUEDE BORRAR" : "0";
+                    resuelto = true;
+                } else if (!op.probarSoap) {
+                    respuesta = op.mensaje;
+                    resuelto = true;
+                }
+            }
+            if (!resuelto) try {
                 respuesta = new WSSoap(url, pagina).ObtenerLongitudArchivo("OBTENER_LONGITUD_ARCHIVO", archivo,
                         Integer.parseInt(esComprimido), ciclo + "-" + tomoLectura + "-B", ruta);
             } catch (Exception ex) {
