@@ -750,7 +750,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         btnTomarFoto = findViewById(R.id.btnTomarFoto);
         btnBuscar = findViewById(R.id.btnBuscar);
         prepararLinterna();
-        configurarBotonAcciones();
+        txtCritica = findViewById(R.id.txtCritica);
+        txtAvisoDesviacion = findViewById(R.id.txtAvisoDesviacion);
+        if (txtAvisoDesviacion != null) txtAvisoDesviacion.setOnClickListener(v -> ocultarAvisoDesviacion());
         prepararChipContenedor();
 
         // txtInformeEscrito = (TextView) findViewById(R.id.txtInformeEscrito);
@@ -782,7 +784,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         btnPrimero = findViewById(R.id.btnPrimero);
         btnUltimo = findViewById(R.id.btnUltimo);
 
-        imagenRed.setImageResource(R.drawable.redinativa); //Ax: colocar el icono de red inactiva
+        pintarRed(R.drawable.redinativa); //Ax: colocar el icono de red inactiva
 
         //------ Teclado Nuevo ------
         Boton0 = (CardView) findViewById(R.id.Boton0);
@@ -1085,7 +1087,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 avanzarRegistro();
                 visualizarInformacionCliente(0);
                 if (infoClienteEntrada.gettablaEntradaClientes_Actividad().trim().equals("99")) {
-                    imagenChat.setImageResource(R.drawable.chat_msg_si);
+                    pintarChat(R.drawable.chat_msg_si);
                 }
                 cerrarArchivosFacturacion();
                 variables.impresora = "   ";
@@ -1102,7 +1104,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 retrocedeRegistro();
                 visualizarInformacionCliente(0);
                 if (infoClienteEntrada.gettablaEntradaClientes_Actividad().trim().equals("99")) {
-                    imagenChat.setImageResource(R.drawable.chat_msg_si);
+                    pintarChat(R.drawable.chat_msg_si);
                 }
                 cerrarArchivosFacturacion();
                 variables.impresora = "   ";
@@ -1218,7 +1220,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
         getInfoCel();
         ObtenerDirectorioBackup();
-        imagenRed.setImageResource(R.drawable.redactiva);
+        pintarRed(R.drawable.redactiva);
         // imagenChat.setImageResource(R.drawable.chat_msg_no);  //COMENTADO CHAT 0991
 
         imagenPrinter.setOnClickListener(new OnClickListener() {
@@ -1787,7 +1789,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             // Log.e("error", " nombreBackup " + nombreBackup);
 
             if (infoClienteEntrada.gettablaEntradaClientes_Actividad().trim().equals("99")) {
-                imagenChat.setImageResource(R.drawable.chat_msg_si);
+                pintarChat(R.drawable.chat_msg_si);
             }
             cerrarArchivosFacturacion();
         } catch (FileNotFoundException e) {
@@ -7829,9 +7831,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         // lblLectura.setText("");
 
         if (infoClienteEntrada.gettablaEntradaClientes_Actividad().trim().equals("99")) {
-            imagenChat.setImageResource(R.drawable.chat_msg_si);
+            pintarChat(R.drawable.chat_msg_si);
         }else {
-            imagenChat.setImageResource(R.drawable.chat_msg_no);
+            pintarChat(R.drawable.chat_msg_no);
         }
         actualizarBadgeMensajes();
 
@@ -8026,13 +8028,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         // imagenLiquid_2.setImageResource(android.R.color.transparent);
 
         if (VariablesGlobales.habilitadaimpresora == 0) {
-            imagenPrinter.setImageResource(R.drawable.impresora_ko);
+            pintarImpresora(R.drawable.impresora_ko);
 
         } else {
             if (EsImpresora521 == 1)
-                imagenPrinter.setImageResource(R.drawable.impresora_ok521);//.impresora_ok);
+                pintarImpresora(R.drawable.impresora_ok521);//.impresora_ok);
             else
-                imagenPrinter.setImageResource(R.drawable.impresora_ok420);//.impresora_ok);
+                pintarImpresora(R.drawable.impresora_ok420);//.impresora_ok);
             //imagenPrinter.setImageResource(R.drawable.impresora_ok);
 
         }
@@ -8049,12 +8051,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
     private TextView txtTituloLectura;
 
-    /** Subtitulo de la barra: registro actual, total y sentido de la ruta (lo que antes era "[=>> n / N]"). */
+    /** Junto a la lectura: registro actual / total y el sentido de la ruta (lo que antes era "[=>> n / N]"). */
     private String textoSentidoRuta(String puntero) {
         String p = puntero == null ? "" : puntero.trim();
-        String sentido = "=>>".equals(p) ? "hacia adelante" : "<<=".equals(p) ? "hacia atrás" : p.toLowerCase(java.util.Locale.ROOT);
-        return "Registro " + VariablesGlobales.registroactual + " de " + infoMedidorEntrada.getTotal_TablaMedidorEntrada()
-                + (sentido.isEmpty() ? "" : " · " + sentido);
+        String sentido = "=>>".equals(p) ? "→ adelante" : "<<=".equals(p) ? "← atrás" : p.toLowerCase(java.util.Locale.ROOT);
+        return VariablesGlobales.registroactual + " / " + infoMedidorEntrada.getTotal_TablaMedidorEntrada()
+                + (sentido.isEmpty() ? "" : "\n" + sentido);
     }
 
     // Campos que van a la tarjeta del cliente y no como fila del detalle.
@@ -8475,16 +8477,16 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     ImpresoraStatusMsg("Impresora habilitada ?");
                     VariablesGlobales.habilitadaimpresora = 1;
                     if (EsImpresora521 == 1)
-                        imagenPrinter.setImageResource(R.drawable.impresora_ok521);//.impresora_ok);
+                        pintarImpresora(R.drawable.impresora_ok521);//.impresora_ok);
                     else
-                        imagenPrinter.setImageResource(R.drawable.impresora_ok420);//.impresora_ok);
+                        pintarImpresora(R.drawable.impresora_ok420);//.impresora_ok);
                     //imagenPrinter.setImageResource(R.drawable.impresora_ok);
 
 
                 } else { //Ax: solo la deshabilito
                     ImpresoraStatusMsg("Impresora Deshabilitada! x");
                     VariablesGlobales.habilitadaimpresora = 0;
-                    imagenPrinter.setImageResource(R.drawable.impresora_ko);
+                    pintarImpresora(R.drawable.impresora_ko);
                 }
 
                 infoRegistroSalida.lectura_TablaRegistroSalida(VariablesGlobales.registroactual);
@@ -11680,7 +11682,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             escribeResumenTiempo(variableResumenLiquidacion + " " + " Fin de escribirTablasSalida()");
             variables.nveces = 0;
 
-            imagenLiquid_3.setImageResource(android.R.color.transparent);
+            marcarCritica(android.R.color.transparent);
 
             if (infoClienteSalida.gettablaClienteSalida_INDFACTURACION().trim().equals("")) {
                 // infoClienteSalida.settablaClienteSalida_INDFACTURACION("L");
@@ -12614,7 +12616,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         variables.lactual = 0;
         variables.consumoactual = 0;
         variables.nveces = 0;
-        imagenLiquid_3.setImageResource(android.R.color.transparent);
+        marcarCritica(android.R.color.transparent);
 
         while (tmpreg > 0) {
             if (validarEstadoRegistro(tmpreg, "L") == 0) {
@@ -12647,7 +12649,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         variables.direcciondelectura = variables.haciaadelante;
         variables.lactual = 0;
         variables.consumoactual = 0;
-        imagenLiquid_3.setImageResource(android.R.color.transparent);
+        marcarCritica(android.R.color.transparent);
         variables.nveces = 0;
         variables.cactual = 0;
         while (tmpreg <= infoRegistroEntrada.getTotal_TablaRegistroDeEntrada()) {
@@ -13440,10 +13442,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         }
 
         if (EsImpresora521 == 1) {
-            imagenPrinter.setImageResource(R.drawable.impresora_ok521);//.impresora_ok);
+            pintarImpresora(R.drawable.impresora_ok521);//.impresora_ok);
             variables.crearArchivoImpresion1(valortexto1, valortexto2, DosBarras);
         } else {
-            imagenPrinter.setImageResource(R.drawable.impresora_ok420);//.impresora_ok);
+            pintarImpresora(R.drawable.impresora_ok420);//.impresora_ok);
             variables.crearArchivoImpresion420(valortexto1, valortexto2, DosBarras);
         }
     }
@@ -14285,7 +14287,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     /** Ultima posicion recibida (cualquier proveedor), para ubicar los eventos. */
     private Location ultimaPosicionEvento;
     private Linterna linterna;
-    private android.widget.Button btnLinterna;
+    private ImageButton btnLinterna;
 
     private FotoObligatoria fotoObligatoria() {
         if (fotoObligatoria == null) fotoObligatoria = FotoObligatoria.de(this);
@@ -15008,7 +15010,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         int n = bandeja().noLeidos();
         txtMensajesNoLeidos.setVisibility(n > 0 ? View.VISIBLE : View.GONE);
         txtMensajesNoLeidos.setText(n > 99 ? "99+" : String.valueOf(n));
-        if (n > 0) imagenChat.setImageResource(R.drawable.chat_msg_si);
+        if (n > 0) pintarChat(R.drawable.chat_msg_si);
     }
 
     private void abrirBandeja() {
@@ -15290,7 +15292,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     // ======================================================================== linterna
 
     private void prepararLinterna() {
-        btnLinterna = (android.widget.Button) findViewById(R.id.btnLinterna);
+        btnLinterna = (ImageButton) findViewById(R.id.btnLinterna);
         if (btnLinterna == null) return;
         linterna = new Linterna(this, encendida -> runOnUiThread(() -> pintarLinterna(encendida)));
         if (!linterna.disponible()) {
@@ -15313,54 +15315,122 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
     private DetectorSacudida sacudida;
 
-    // ======================================================================== acciones de la cuenta
+    // ======================================================================== estado y avisos (lectura v2)
 
-    /** Boton junto a las flechas: toque o sostenido abre Causal, Foto, Buscar y Luz. */
-    private void configurarBotonAcciones() {
-        View b = findViewById(R.id.btnAccionesLectura);
-        if (b == null) return;
-        b.setOnClickListener(v -> mostrarAccionesLectura());
-        b.setOnLongClickListener(v -> {
-            v.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
-            mostrarAccionesLectura();
-            return true;
-        });
+    private TextView txtCritica;
+    private TextView txtAvisoDesviacion;
+    private final Handler avisoHandler = new Handler(android.os.Looper.getMainLooper());
+    private final Runnable ocultarAvisoRunnable = this::ocultarAvisoDesviacion;
+
+    private int colorLec(int id) {
+        return getResources().getColor(id, getTheme());
     }
 
-    private void mostrarAccionesLectura() {
-        View contenido = getLayoutInflater().inflate(R.layout.dialogo_acciones_lectura, null, false);
-        final androidx.appcompat.app.AlertDialog d = new androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("Acciones de la cuenta")
-                .setView(contenido)
-                .setNegativeButton("Cerrar", null)
-                .create();
-        android.widget.Button luz = contenido.findViewById(R.id.accLuz);
-        if (linterna == null || !linterna.disponible() || btnLinterna == null) {
-            luz.setVisibility(View.GONE);
-        } else {
-            luz.setText(linterna.encendida() ? "Apagar luz" : "Prender luz");
+    private void tintar(ImageView v, int colorId) {
+        v.setImageTintList(android.content.res.ColorStateList.valueOf(colorLec(colorId)));
+    }
+
+    /** Antes imagenRed.setImageResource(redactiva / redinativa). */
+    private void pintarRed(int recurso) {
+        if (imagenRed == null) return;
+        boolean activa = recurso == R.drawable.redactiva;
+        imagenRed.setImageResource(R.drawable.ic_nav_wifi);
+        tintar(imagenRed, activa ? R.color.lec_exito : R.color.lec_borde);
+        imagenRed.setContentDescription(activa ? "Red activa" : "Sin red");
+    }
+
+    /** Antes imagenChat.setImageResource(chat_msg_si / chat_msg_no). */
+    private void pintarChat(int recurso) {
+        if (imagenChat == null) return;
+        imagenChat.setImageResource(R.drawable.ic_lec_mensaje);
+        tintar(imagenChat, recurso == R.drawable.chat_msg_si ? R.color.lec_primario : R.color.lec_texto2);
+    }
+
+    /** Antes imagenPrinter.setImageResource(impresora_ok521 / ok420 / ko / transparente). */
+    private void pintarImpresora(int recurso) {
+        if (imagenPrinter == null) return;
+        if (recurso == android.R.color.transparent) {
+            imagenPrinter.setImageDrawable(null);
+            return;
         }
-        // Cada opcion dispara el boton de siempre (oculto): misma logica y mismas validaciones.
-        vincularAccion(d, contenido, R.id.accCausal, btnAnomalia);
-        vincularAccion(d, contenido, R.id.accFoto, btnTomarFoto);
-        vincularAccion(d, contenido, R.id.accBuscar, btnBuscar);
-        vincularAccion(d, contenido, R.id.accLuz, btnLinterna);
-        d.show();
+        boolean ok = recurso == R.drawable.impresora_ok521 || recurso == R.drawable.impresora_ok420;
+        imagenPrinter.setImageResource(R.drawable.ic_nav_print);
+        tintar(imagenPrinter, ok ? R.color.lec_exito : R.color.lec_error);
+        imagenPrinter.setContentDescription(ok ? "Impresora conectada" : "Impresora sin conectar");
     }
 
-    private static void vincularAccion(android.app.Dialog d, View contenido, int id, View destino) {
-        contenido.findViewById(id).setOnClickListener(v -> {
-            d.dismiss();
-            if (destino != null) destino.performClick();
-        });
+    /**
+     * Antes imagenLiquid_3.setImageResource(...): la critica de la lectura. Misma llamada y mismo momento; ahora sale
+     * en texto en la franja de estado y, si es una desviacion, como aviso encima del final del detalle. No cambia la
+     * liquidacion: solo muestra lo que ella ya decidio.
+     */
+    private void marcarCritica(int recurso) {
+        if (imagenLiquid_3 != null) imagenLiquid_3.setImageResource(recurso);
+        final String corto, titulo;
+        final boolean grave;
+        if (recurso == R.drawable.imagen_consumoalto) {
+            corto = "Consumo alto"; titulo = "Consumo alto"; grave = true;
+        } else if (recurso == R.drawable.imagen_negativo) {
+            corto = "Menor a la anterior"; titulo = "Lectura menor a la anterior"; grave = true;
+        } else if (recurso == R.drawable.imagen_consumobajo) {
+            corto = "Consumo bajo"; titulo = "Consumo bajo"; grave = false;
+        } else if (recurso == R.drawable.imagen_lecturasiguales) {
+            corto = "Igual a la anterior"; titulo = "Lectura igual a la anterior"; grave = false;
+        } else {
+            corto = null; titulo = null; grave = false;
+        }
+        if (txtCritica != null) {
+            if (corto == null) {
+                txtCritica.setVisibility(View.GONE);
+            } else {
+                txtCritica.setText(corto);
+                txtCritica.setBackgroundResource(grave ? R.drawable.bg_lec_chip_mal : R.drawable.bg_lec_chip_aviso);
+                txtCritica.setTextColor(grave ? Color.WHITE : colorLec(R.color.lec_aviso_texto));
+                txtCritica.setVisibility(View.VISIBLE);
+            }
+        }
+        if (titulo == null) {
+            ocultarAvisoDesviacion();
+        } else if (indicadorManual == 0) { // en la liquidacion automatica no hay a quien avisar
+            mostrarAvisoDesviacion(titulo, grave);
+        }
+    }
+
+    private void mostrarAvisoDesviacion(String titulo, boolean grave) {
+        if (txtAvisoDesviacion == null) return;
+        int texto = grave ? 0xFF410E0B : colorLec(R.color.lec_aviso_texto);
+        txtAvisoDesviacion.setBackgroundResource(grave ? R.drawable.bg_lec_aviso_grave : R.drawable.bg_lec_aviso);
+        txtAvisoDesviacion.setTextColor(texto);
+        txtAvisoDesviacion.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_lec_alerta, 0, 0, 0);
+        txtAvisoDesviacion.setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(grave ? colorLec(R.color.lec_error) : texto));
+        android.text.SpannableStringBuilder sb = new android.text.SpannableStringBuilder(titulo);
+        sb.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, titulo.length(), 0);
+        sb.setSpan(new android.text.style.RelativeSizeSpan(1.25f), 0, titulo.length(), 0);
+        sb.append("\nVerifique la lectura en el medidor");
+        txtAvisoDesviacion.setText(sb);
+        avisoHandler.removeCallbacks(ocultarAvisoRunnable);
+        if (txtAvisoDesviacion.getVisibility() != View.VISIBLE) {
+            txtAvisoDesviacion.setAlpha(0f);
+            txtAvisoDesviacion.setTranslationY(24f);
+            txtAvisoDesviacion.setVisibility(View.VISIBLE);
+            txtAvisoDesviacion.animate().alpha(1f).translationY(0f).setDuration(180).start();
+        }
+        if (grave) txtAvisoDesviacion.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
+        avisoHandler.postDelayed(ocultarAvisoRunnable, 4500);
+    }
+
+    private void ocultarAvisoDesviacion() {
+        avisoHandler.removeCallbacks(ocultarAvisoRunnable);
+        if (txtAvisoDesviacion == null || txtAvisoDesviacion.getVisibility() != View.VISIBLE) return;
+        txtAvisoDesviacion.animate().alpha(0f).setDuration(150)
+                .withEndAction(() -> txtAvisoDesviacion.setVisibility(View.GONE)).start();
     }
 
     private void pintarLinterna(boolean encendida) {
         if (btnLinterna == null) return;
-        btnLinterna.setBackgroundResource(encendida ? R.drawable.bg_lec_contorno_on : R.drawable.bg_lec_contorno);
+        btnLinterna.setBackgroundResource(encendida ? R.drawable.bg_lec_accion_on : R.drawable.bg_lec_accion);
         int color = getResources().getColor(encendida ? android.R.color.white : R.color.lec_primario, getTheme());
-        btnLinterna.setTextColor(color);
-        btnLinterna.setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(color));
+        btnLinterna.setImageTintList(android.content.res.ColorStateList.valueOf(color));
         btnLinterna.setContentDescription(encendida ? "Apagar linterna" : "Encender linterna");
     }
 
@@ -16297,7 +16367,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     if (indicadorManual == 0 && variables.nveces < 2) {        // el lector confirma una vez
                         variables.lect2 = variables.lactual;
                         mensajeT("LECTURA MENOR A LA ANTERIOR. CONFIRME", msgCorto);
-                        imagenLiquid_3.setImageResource(R.drawable.imagen_negativo);
+                        marcarCritica(R.drawable.imagen_negativo);
                         return 0;
                     }
                    // variables.cactual = promedioMensualSinFactor();             // se multiplica por el factor en la sumatoria
@@ -16328,7 +16398,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                         // nuevo para solo visualizar el mensaje
                         variables.consumoactual = 0;
-                        imagenLiquid_3.setImageResource(android.R.color.transparent);
+                        marcarCritica(android.R.color.transparent);
 
                         predio_temporal = VariablesGlobales.registroactual;
                         variables.lect2 = -1;
@@ -16336,7 +16406,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                         return (1);
                     } else {
-                        imagenLiquid_3.setImageResource(R.drawable.imagen_lecturasiguales);
+                        marcarCritica(R.drawable.imagen_lecturasiguales);
 
                         if (variables.lect2 == -1)
                             variables.lect2 = variables.lactual;
@@ -16374,7 +16444,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         variables.estado = "3";
                         variables.lect2 = -1;
                         variables.lect3 = -1;
-                        imagenLiquid_3.setImageResource(android.R.color.transparent);
+                        marcarCritica(android.R.color.transparent);
 
                         return (1);  // CONSUMO NORMAL
                     }
@@ -16387,11 +16457,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         escribirTablasSalida();
                         variables.lect2 = -1;
                         variables.lect3 = -1;
-                        imagenLiquid_3.setImageResource(android.R.color.transparent);
+                        marcarCritica(android.R.color.transparent);
 
                         return (1);
                     } else {
-                        imagenLiquid_3.setImageResource(R.drawable.imagen_consumobajo);
+                        marcarCritica(R.drawable.imagen_consumobajo);
                     }
                     if (giro_del_registro > 0)
                         variables.lactual -= potencia;
@@ -16415,11 +16485,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 }
 
                 if (estadoCritica == 2) {
-                    imagenLiquid_3.setImageResource(R.drawable.imagen_consumoalto);
+                    marcarCritica(R.drawable.imagen_consumoalto);
 
                     variables.estado = "7";
                 } else if (estadoCritica == 3) {                     // Consumo Bajo lectura menor a la anterior
-                    imagenLiquid_3.setImageResource(R.drawable.imagen_consumobajo);
+                    marcarCritica(R.drawable.imagen_consumobajo);
                 }
 
                 if (variables.lect2 == variables.lactual  && (variables.nveces >= 2)) {
@@ -16427,7 +16497,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         reporteEstadoCritica = "CONSUMO ALTO";
                         Log.e("error", "escribe 11");
                         escribirTablasSalida();
-                        imagenLiquid_3.setImageResource(R.drawable.imagen_consumoalto);
+                        marcarCritica(R.drawable.imagen_consumoalto);
                         if (infoRegistroEntrada.gettablaRegistroDeEntrada_tipoenergia().equals("R"))
                         {
                             variables.cactual =  (Double.parseDouble(infoRegistroEntrada.gettablaRegistroDeEntrada_Consumopromediocliente().trim())
@@ -16701,7 +16771,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 // procurar que el consumo a evaluar sea correcto
 
              /*   if (variables.lactual < l_anterior) {
-                    imagenLiquid_3.setImageResource(R.drawable.imagen_negativo);
+                    marcarCritica(R.drawable.imagen_negativo);
                     // Regla SIEC (ciclo 11: 151 de 153 cuentas): lectura menor a la anterior => 1 mes de promedio.
                     // SIEC no liquida giro de registro.
                     if (indicadorManual == 0 && variables.nveces < 2) {        // el lector confirma una vez
@@ -16738,7 +16808,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                         // nuevo para solo visualizar el mensaje
                         variables.consumoactual = 0;
-                        imagenLiquid_3.setImageResource(android.R.color.transparent);
+                        marcarCritica(android.R.color.transparent);
 
                         predio_temporal = VariablesGlobales.registroactual;
                         variables.lect2 = -1;
@@ -16746,7 +16816,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                         return (1);
                     } else {
-                        imagenLiquid_3.setImageResource(R.drawable.imagen_lecturasiguales);
+                        marcarCritica(R.drawable.imagen_lecturasiguales);
 
                         if (variables.lect2 == -1)
                             variables.lect2 = variables.lactual;
@@ -16783,7 +16853,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         variables.estado = "3";
                         variables.lect2 = -1;
                         variables.lect3 = -1;
-                        imagenLiquid_3.setImageResource(android.R.color.transparent);
+                        marcarCritica(android.R.color.transparent);
 
                         return (1);  // CONSUMO NORMAL
                     }
@@ -16797,14 +16867,14 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         variables.lect2 = -1;
                         variables.lect3 = -1;
 
-                        imagenLiquid_3.setImageResource(android.R.color.transparent);
+                        marcarCritica(android.R.color.transparent);
 
                         return (1);
                     } else {
                         if (giro_del_registro != 0)
-                            imagenLiquid_3.setImageResource(R.drawable.imagen_negativo);
+                            marcarCritica(R.drawable.imagen_negativo);
                         else
-                            imagenLiquid_3.setImageResource(R.drawable.imagen_consumobajo);
+                            marcarCritica(R.drawable.imagen_consumobajo);
                     }
                     if (giro_del_registro > 0)
                         variables.lactual -= potencia;
@@ -16817,7 +16887,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     if (giro_del_registro > 0) {
                         mensajeT("DESV. GRAVE X DEBAJO! GIRO MED.", msgCorto);
                         reporteEstadoCritica = "CONSUMO NEGA";
-                            imagenLiquid_3.setImageResource(R.drawable.imagen_negativo);
+                            marcarCritica(R.drawable.imagen_negativo);
                     }
 
                     if (estadoCritica == 2 && giro_del_registro == 0) {
@@ -16831,15 +16901,15 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     if (giro_del_registro > 0) {
                         mensajeT("DESV. GRAVE X DEBAJO! GIRO MED.", msgCorto);
                         reporteEstadoCritica = "CONSUMO NEGA";
-                        imagenLiquid_3.setImageResource(R.drawable.imagen_negativo);
+                        marcarCritica(R.drawable.imagen_negativo);
                         variables.estado = "8";
                     }else {
-                        imagenLiquid_3.setImageResource(R.drawable.imagen_consumoalto);
+                        marcarCritica(R.drawable.imagen_consumoalto);
                         variables.estado = "7";
                     }
                 } else if (estadoCritica == 3) {                     // Consumo Bajo lectura menor a la anterior
 
-                    imagenLiquid_3.setImageResource(R.drawable.imagen_consumobajo);
+                    marcarCritica(R.drawable.imagen_consumobajo);
                 }
 
                 if ((variables.lect2 == variables.lactual ) && (variables.nveces >= 2)) {//&& variables.lect3 == variables.lactual
@@ -16847,7 +16917,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         reporteEstadoCritica = "CONSUMO ALTO";
                         Log.e("error", "escribe 11");
                         escribirTablasSalida();
-                        imagenLiquid_3.setImageResource(android.R.color.transparent);
+                        marcarCritica(android.R.color.transparent);
                     }
 
                     if (giro_del_registro > 0)
@@ -17172,9 +17242,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                 VariablesGlobales.habilitadaimpresora = 1;
                 if (EsImpresora521 == 1)
-                    imagenPrinter.setImageResource(R.drawable.impresora_ok521);//.impresora_ok);
+                    pintarImpresora(R.drawable.impresora_ok521);//.impresora_ok);
                 else
-                    imagenPrinter.setImageResource(R.drawable.impresora_ok420);//.impresora_ok);
+                    pintarImpresora(R.drawable.impresora_ok420);//.impresora_ok);
                 //imagenPrinter.setImageResource(R.drawable.impresora_ok);
 
                 addLog("resultCode==OK");
@@ -17562,21 +17632,18 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         double latActual = parseStringToDouble(VariablesGlobales.coorTempLongitud.trim().isEmpty() ? "0" : VariablesGlobales.coorTempLongitud.trim());
         if (predioSinCoordenadas) {
             txtDistancia.setText("Predio sin coord.");
-            txtDistancia.setBackgroundResource(R.drawable.bg_lec_chip_neutro);
-            txtDistancia.setTextColor(getResources().getColor(R.color.lec_texto, getTheme()));
+            txtDistancia.setTextColor(getResources().getColor(R.color.lec_texto2, getTheme()));
             return;
         }
         if ((int) latActual == 0) {
             txtDistancia.setText("Sin GPS");
-            txtDistancia.setBackgroundResource(R.drawable.bg_lec_chip_neutro);
-            txtDistancia.setTextColor(getResources().getColor(R.color.lec_texto, getTheme()));
+            txtDistancia.setTextColor(getResources().getColor(R.color.lec_texto2, getTheme()));
             return;
         }
         int distancia = (int) variables.evaluarDistanciaAlPredio(parseStringToDouble(VariablesGlobales.coorTempLongitud),
                 parseStringToDouble(VariablesGlobales.coorTempLatitud), parseStringToDouble(cy), parseStringToDouble(cx));
         txtDistancia.setText(distancia + " m del predio");
-        txtDistancia.setBackgroundResource(distancia <= radioPermitidoMetros() ? R.drawable.bg_lec_chip_ok : R.drawable.bg_lec_chip_mal);
-        txtDistancia.setTextColor(Color.WHITE);
+        txtDistancia.setTextColor(getResources().getColor(distancia <= radioPermitidoMetros() ? R.color.lec_exito : R.color.lec_error, getTheme()));
     }
 
     public void muestraPosicionActual(Location loc) {
@@ -18047,9 +18114,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             VariablesGlobales.habilitadaimpresora = 1;
 
             if (EsImpresora521 == 1)
-                imagenPrinter.setImageResource(R.drawable.impresora_ok521);//.impresora_ok);
+                pintarImpresora(R.drawable.impresora_ok521);//.impresora_ok);
             else
-                imagenPrinter.setImageResource(R.drawable.impresora_ok420);//.impresora_ok);
+                pintarImpresora(R.drawable.impresora_ok420);//.impresora_ok);
             //imagenPrinter.setImageResource(R.drawable.impresora_ok);
 
         } else {
@@ -18506,21 +18573,21 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     public void ImpresoraStatus() {
 
         if (VariablesGlobales.habilitadaimpresora < 1) {
-            imagenPrinter.setImageResource(R.drawable.impresora_ko);
+            pintarImpresora(R.drawable.impresora_ko);
             // return;
         }
 
         switch (VariablesGlobales.btPrintService.getState()) {
             case btPrintFile.STATE_DISCONNECTED:
-                imagenPrinter.setImageResource(R.drawable.impresora_ko);
+                pintarImpresora(R.drawable.impresora_ko);
                 conn = true;
                 break;
             case btPrintFile.STATE_CONNECTED:
 
                 if (EsImpresora521 == 1)
-                    imagenPrinter.setImageResource(R.drawable.impresora_ok521);//.impresora_ok);
+                    pintarImpresora(R.drawable.impresora_ok521);//.impresora_ok);
                 else
-                    imagenPrinter.setImageResource(R.drawable.impresora_ok420);//.impresora_ok);
+                    pintarImpresora(R.drawable.impresora_ok420);//.impresora_ok);
                 //imagenPrinter.setImageResource(R.drawable.impresora_ok);
 
                 conn = true;
@@ -18528,14 +18595,14 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             case btPrintFile.STATE_CONNECTING:
                 if (prt) {
                     prt = false;
-                    imagenPrinter.setImageResource(android.R.color.transparent);
+                    pintarImpresora(android.R.color.transparent);
 
                 } else {
                     prt = true;
                     if (EsImpresora521 == 1)
-                        imagenPrinter.setImageResource(R.drawable.impresora_ok521);//.impresora_ok);
+                        pintarImpresora(R.drawable.impresora_ok521);//.impresora_ok);
                     else
-                        imagenPrinter.setImageResource(R.drawable.impresora_ok420);//.impresora_ok);
+                        pintarImpresora(R.drawable.impresora_ok420);//.impresora_ok);
                     //imagenPrinter.setImageResource(R.drawable.impresora_ok);
 
 
@@ -18544,16 +18611,16 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 // txtRemoteDevice.setText("CONECTANDO..... ");
                 break;
             case btPrintFile.STATE_IDLE:
-                imagenPrinter.setImageResource(R.drawable.impresora_ko);
+                pintarImpresora(R.drawable.impresora_ko);
                 conn = true;
                 break;
             case btPrintFile.STATE_LISTEN:
 
 
                 if (EsImpresora521 == 1)
-                    imagenPrinter.setImageResource(R.drawable.impresora_ok521);//.impresora_ok);
+                    pintarImpresora(R.drawable.impresora_ok521);//.impresora_ok);
                 else
-                    imagenPrinter.setImageResource(R.drawable.impresora_ok420);//.impresora_ok);
+                    pintarImpresora(R.drawable.impresora_ok420);//.impresora_ok);
                 //imagenPrinter.setImageResource(R.drawable.impresora_ok);
 
                 //  txtRemoteDevice.setText("CONECTADO a " + macAdress);
@@ -18902,7 +18969,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     procesandoenvioenHilos_chat = false;
                     if (respuesta_.equals("ok")) {
                         EnviarFotos();
-                        imagenRed.setImageResource(R.drawable.redactiva);
+                        pintarRed(R.drawable.redactiva);
                         Enviar_CertPostal_Censo_Aforos_Novedades_3();
                     } else {
 
@@ -18954,12 +19021,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     try {
                         Integer.parseInt(respuesta_);//genera excepcion si diferente de 1
 
-                        imagenRed.setImageResource(R.drawable.redactiva);
+                        pintarRed(R.drawable.redactiva);
                         MostrarAlertDialog("Alerta Seleccion Terminacion", "Conexion OK\n[SI] = ACTIVA EL ENVIO\n[NO] = DESACTIVA ENVIO \nAL SERVIDOR?", "validarconexion");
 
                     } catch (NumberFormatException e) {
                         // Log.e("error", "sin conexion " + e.getMessage());
-                        imagenRed.setImageResource(R.drawable.redinativa);
+                        pintarRed(R.drawable.redinativa);
                         mensajeT("NO HAY CONEXION\n CON EL SERVIDOR...\n SE INACTIVO EL\n ENVIO AUTOMATICO", msgCorto);
                         conexionGPRSActiva = 0;
                         cerrarArchivosFacturacion();
@@ -19114,13 +19181,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 case "CHATRECIBE":
                     procesandoenvioenHilos_chat = false;
                     if (respuesta_.equals("SINCONEXION")) {
-                        imagenRed.setImageResource(R.drawable.redinativa);
+                        pintarRed(R.drawable.redinativa);
                         break;
                     } else {
                     }
 
                     if (respuesta_.contains("No tiene Mensajes para leer")) {
-                        imagenRed.setImageResource(R.drawable.redactiva);
+                        pintarRed(R.drawable.redactiva);
                         if (banderaChat) {
                             //  imagenChat.setImageResource(R.drawable.chat_msg_no);//COMENTADO CHAT 0991
                         }
@@ -19128,7 +19195,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         if (!banderaChat) {
                             //  imagenChat.setImageResource(R.drawable.chat_msg_si); //COMENTADO CHAT 0991
                         }
-                        imagenRed.setImageResource(R.drawable.redactiva); //-1 si hay msg
+                        pintarRed(R.drawable.redactiva); //-1 si hay msg
                     }
                     break;
             }

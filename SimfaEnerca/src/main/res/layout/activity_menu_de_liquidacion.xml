@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Pantalla de lectura (v2, Material 3 de alto contraste). De arriba abajo:
-    barra superior: ruta, registro y sentido; mensajes, codigo de barras de la factura y menu lateral
-    franja de estado: red, tipo de cuenta, critica, envio en curso e impresora
+    barra superior: ruta; mensajes, codigo de barras de la factura y menu lateral
+    franja de estado: red, critica de la lectura (texto), envio en curso e impresora
     tarjeta del cliente: medidor, ACTIVA/REACTIVA, estado especial, direccion, marca, nombre y cuenta,
-      y el detalle (tablaResumen) que ocupa el espacio que queda y se desplaza
-    GPS y distancia al predio; contenedor en curso
-    navegacion (primero / anterior / siguiente / ultimo) y acciones (Causal, Foto, Buscar, Luz)
-    lectura y teclado (Borrar: un digito, sostenido limpia; OK liquida e imprime)
+      y el detalle (tablaResumen) que ocupa el espacio que queda y se desplaza. El aviso de desviacion
+      sale encima del final del detalle: no tapa la cabecera del cliente ni mueve los botones.
+    navegacion (primero / anterior / siguiente / ultimo) y al lado Causal, Buscar, Foto y Luz
+    lectura con el registro y el sentido de la ruta al lado; debajo GPS y distancia al predio (discreto)
+    teclado (Borrar: un digito, sostenido limpia; OK liquida e imprime)
   El lector no ve lectura anterior, promedio ni consumos. Todos los ids que usa MenuDeLiquidacion se conservan.
 -->
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -27,44 +28,26 @@
         <LinearLayout
             android:id="@+id/tabla_fondo"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="52dp"
             android:background="@color/lec_superficie"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingStart="16dp"
             android:paddingEnd="4dp">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/txtTituloLectura"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="28dp"
                 android:layout_weight="1"
-                android:orientation="vertical">
-
-                <!-- Se achican solos para que la ruta y el registro quepan completos -->
-                <TextView
-                    android:id="@+id/txtTituloLectura"
-                    android:layout_width="match_parent"
-                    android:layout_height="26dp"
-                    android:autoSizeMaxTextSize="18sp"
-                    android:autoSizeMinTextSize="12sp"
-                    android:autoSizeTextType="uniform"
-                    android:fontFeatureSettings="tnum"
-                    android:maxLines="1"
-                    android:text="Lectura"
-                    android:textColor="@color/lec_texto"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/txtSentidoRuta"
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp"
-                    android:autoSizeMaxTextSize="14sp"
-                    android:autoSizeMinTextSize="10sp"
-                    android:autoSizeTextType="uniform"
-                    android:fontFeatureSettings="tnum"
-                    android:maxLines="1"
-                    android:textColor="@color/lec_texto2" />
-            </LinearLayout>
+                android:autoSizeMaxTextSize="20sp"
+                android:autoSizeMinTextSize="12sp"
+                android:autoSizeTextType="uniform"
+                android:fontFeatureSettings="tnum"
+                android:maxLines="1"
+                android:text="Lectura"
+                android:textColor="@color/lec_texto"
+                android:textStyle="bold" />
 
             <FrameLayout
                 android:layout_width="48dp"
@@ -136,30 +119,28 @@
 
             <ImageView
                 android:id="@+id/imagenRed"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_marginEnd="8dp"
                 android:contentDescription="@string/red_inactiva" />
 
-            <ImageView
-                android:id="@+id/imagenLiquid_1"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:layout_marginEnd="6dp"
-                android:contentDescription="Tipo de cuenta" />
+            <!-- Antes imagenes; ahora la critica va en texto (txtCritica) y el estado especial en lblInfoMedida. -->
+            <ImageView android:id="@+id/imagenLiquid_1" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+            <ImageView android:id="@+id/imagenLiquid_2" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+            <ImageView android:id="@+id/imagenLiquid_3" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
 
-            <ImageView
-                android:id="@+id/imagenLiquid_3"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginEnd="6dp"
-                android:contentDescription="Crítica de la lectura" />
-
-            <ImageView
-                android:id="@+id/imagenLiquid_2"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="Alerta del predio" />
+            <!-- Critica de la lectura: Consumo alto, Consumo bajo, Menor a la anterior, Igual a la anterior -->
+            <TextView
+                android:id="@+id/txtCritica"
+                android:layout_width="wrap_content"
+                android:layout_height="22dp"
+                android:gravity="center"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:singleLine="true"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="0dp"
@@ -178,13 +159,14 @@
 
             <ImageButton
                 android:id="@+id/imagenPrinter"
-                android:layout_width="52dp"
-                android:layout_height="32dp"
+                android:layout_width="40dp"
+                android:layout_height="30dp"
                 android:background="@drawable/bg_lec_icono"
                 android:contentDescription="Impresora"
-                android:padding="0dp"
+                android:padding="4dp"
                 android:scaleType="fitCenter"
-                android:src="@drawable/impresora_ko" />
+                android:src="@drawable/ic_nav_print"
+                android:tint="@color/lec_error" />
         </LinearLayout>
 
         <!-- Tarjeta del cliente con su detalle desplazable -->
@@ -317,86 +299,41 @@
                 android:background="@color/lec_divisor" />
 
             <!-- Detalle del cliente: ocupa el espacio que queda y se desplaza -->
-            <ScrollView
-                android:id="@+id/scroll"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:fillViewport="true"
-                android:scrollbars="vertical">
+                android:layout_weight="1">
 
-                <TableLayout
-                    android:id="@+id/tablaResumen"
+                <ScrollView
+                    android:id="@+id/scroll"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-            </ScrollView>
-        </LinearLayout>
+                    android:layout_height="match_parent"
+                    android:fillViewport="true"
+                    android:scrollbars="vertical">
 
-        <!-- GPS y distancia al predio -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="38dp"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginEnd="12dp"
-            android:background="@drawable/bg_lec_gps"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="10dp"
-            android:paddingEnd="6dp">
+                    <TableLayout
+                        android:id="@+id/tablaResumen"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </ScrollView>
 
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:layout_marginEnd="6dp"
-                android:importantForAccessibility="no"
-                android:src="@drawable/ic_lec_ubicacion" />
-
-            <TextView
-                android:id="@+id/txtLatitud"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFeatureSettings="tnum"
-                android:maxLength="14"
-                android:singleLine="true"
-                android:text="0.00"
-                android:textColor="@color/lec_texto"
-                android:textSize="14sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=" · "
-                android:textColor="@color/lec_texto2"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/txtLongitud"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:fontFeatureSettings="tnum"
-                android:maxLength="14"
-                android:singleLine="true"
-                android:text="0.00"
-                android:textColor="@color/lec_texto"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/txtDistancia"
-                android:layout_width="wrap_content"
-                android:layout_height="26dp"
-                android:background="@drawable/bg_lec_chip_neutro"
-                android:fontFeatureSettings="tnum"
-                android:gravity="center"
-                android:maxLength="20"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:singleLine="true"
-                android:text="SIN GPS"
-                android:textColor="@color/lec_texto"
-                android:textSize="13sp"
-                android:textStyle="bold" />
+                <!-- Aviso de desviacion: flota sobre el final del detalle, se va solo o al tocarlo. -->
+                <TextView
+                    android:id="@+id/txtAvisoDesviacion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_margin="8dp"
+                    android:drawablePadding="12dp"
+                    android:elevation="6dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="14dp"
+                    android:paddingTop="12dp"
+                    android:paddingEnd="14dp"
+                    android:paddingBottom="12dp"
+                    android:textSize="15sp"
+                    android:visibility="gone" />
+            </FrameLayout>
         </LinearLayout>
 
         <!-- Contenedor en curso: visible solo entre "Iniciar contenedor" y "Cerrar". -->
@@ -415,111 +352,199 @@
             android:textStyle="bold"
             android:visibility="gone" />
 
-        <!-- Navegacion entre clientes y boton de acciones (Causal, Foto, Buscar, Luz) -->
+        <!-- Navegacion y, al lado, Causal, Buscar, Foto y Luz (sostener un boton muestra su nombre) -->
         <LinearLayout
             android:id="@+id/tableButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingStart="8dp"
-            android:paddingTop="8dp"
+            android:paddingTop="6dp"
             android:paddingEnd="8dp">
 
             <ImageButton
                 android:id="@+id/btnPrimero"
                 style="@style/BotonNavLectura"
                 android:contentDescription="@string/primer_registro"
-                android:src="@drawable/ic_lec_primero" />
+                android:src="@drawable/ic_lec_primero"
+                android:tooltipText="Primer registro" />
 
             <ImageButton
                 android:id="@+id/btnAtras"
                 style="@style/BotonNavLectura"
                 android:contentDescription="@string/atras_un_registro"
-                android:src="@drawable/ic_lec_anterior" />
+                android:src="@drawable/ic_lec_anterior"
+                android:tooltipText="Anterior" />
 
             <ImageButton
                 android:id="@+id/btnAdelante"
                 style="@style/BotonNavLectura"
                 android:contentDescription="@string/adelanta_un_registro"
-                android:src="@drawable/ic_lec_siguiente" />
+                android:src="@drawable/ic_lec_siguiente"
+                android:tooltipText="Siguiente" />
 
             <ImageButton
                 android:id="@+id/btnUltimo"
                 style="@style/BotonNavLectura"
                 android:contentDescription="@string/ultimo_registro"
-                android:src="@drawable/ic_lec_ultimo" />
+                android:src="@drawable/ic_lec_ultimo"
+                android:tooltipText="Ultimo registro" />
 
-            <!-- Toque o sostenido: abre Causal, Foto, Buscar y Luz -->
-            <Button
-                android:id="@+id/btnAccionesLectura"
-                style="@style/BotonNavLectura"
-                android:background="@drawable/bg_lec_acciones"
-                android:contentDescription="Acciones de la cuenta: causal, foto, buscar y luz"
-                android:drawableTop="@drawable/ic_lec_acciones"
-                android:drawableTint="@color/lec_primario"
-                android:paddingTop="6dp"
-                android:paddingBottom="4dp"
-                android:stateListAnimator="@null"
-                android:text="Acciones"
-                android:textAllCaps="false"
-                android:textColor="@color/lec_primario"
-                android:textSize="12sp"
+            <View
+                android:layout_width="6dp"
+                android:layout_height="1dp" />
+
+            <ImageButton
+                android:id="@+id/btnAnomalia"
+                style="@style/BotonAccionLectura"
+                android:contentDescription="Causal"
+                android:src="@drawable/ic_lec_causal"
+                android:tooltipText="Causal" />
+
+            <ImageButton
+                android:id="@+id/btnBuscar"
+                style="@style/BotonAccionLectura"
+                android:contentDescription="Buscar cliente"
+                android:src="@drawable/ic_lec_buscar"
+                android:tooltipText="Buscar cliente" />
+
+            <ImageButton
+                android:id="@+id/btnTomarFoto"
+                style="@style/BotonAccionLectura"
+                android:contentDescription="Tomar foto"
+                android:src="@drawable/ic_lec_foto"
+                android:tooltipText="Foto" />
+
+            <ImageButton
+                android:id="@+id/btnLinterna"
+                style="@style/BotonAccionLectura"
+                android:contentDescription="Encender linterna"
+                android:src="@drawable/ic_lec_luz"
+                android:tooltipText="Luz (o sacuda el celular dos veces)" />
+        </LinearLayout>
+
+        <!-- Lectura y, al lado, el registro y el sentido de la ruta -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="54dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_lec_campo"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:labelFor="@+id/txtElectura"
+                    android:text="Lectura"
+                    android:textColor="@color/lec_primario"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/txtElectura"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:fontFeatureSettings="tnum"
+                    android:gravity="end|center_vertical"
+                    android:hint="—"
+                    android:importantForAutofill="no"
+                    android:inputType="none"
+                    android:letterSpacing="0.06"
+                    android:maxLength="13"
+                    android:textColor="@color/lec_texto"
+                    android:textColorHint="@color/lec_borde"
+                    android:textSize="30sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- "16 / 3531" y "→ adelante" / "← atrás" -->
+            <TextView
+                android:id="@+id/txtSentidoRuta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:fontFeatureSettings="tnum"
+                android:gravity="end"
+                android:maxLines="2"
+                android:minWidth="64dp"
+                android:textColor="@color/lec_texto"
+                android:textSize="15sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Los botones de siempre, ocultos: el selector de acciones los dispara (mismos ids y listeners). -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <Button android:id="@+id/btnAnomalia" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Causal" />
-            <Button android:id="@+id/btnTomarFoto" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Foto" />
-            <Button android:id="@+id/btnBuscar" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Buscar" />
-            <Button android:id="@+id/btnLinterna" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Luz" />
-        </LinearLayout>
-
-        <!-- Lectura -->
+        <!-- GPS y distancia al predio: una linea discreta -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="58dp"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="12dp"
-            android:background="@drawable/bg_lec_campo"
+            android:layout_height="22dp"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="14dp"
             android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp">
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="13dp"
+                android:layout_height="13dp"
+                android:layout_marginEnd="4dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_lec_ubicacion"
+                android:tint="@color/lec_texto2" />
+
+            <TextView
+                android:id="@+id/txtLatitud"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFeatureSettings="tnum"
+                android:maxLength="14"
+                android:singleLine="true"
+                android:text="0.00"
+                android:textColor="@color/lec_texto2"
+                android:textSize="12sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:labelFor="@+id/txtElectura"
-                android:text="Lectura"
-                android:textColor="@color/lec_primario"
-                android:textSize="15sp"
-                android:textStyle="bold" />
+                android:text=", "
+                android:textColor="@color/lec_texto2"
+                android:textSize="12sp" />
 
-            <EditText
-                android:id="@+id/txtElectura"
+            <TextView
+                android:id="@+id/txtLongitud"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@null"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
                 android:fontFeatureSettings="tnum"
-                android:gravity="end|center_vertical"
-                android:hint="—"
-                android:importantForAutofill="no"
-                android:inputType="none"
-                android:letterSpacing="0.06"
-                android:maxLength="13"
-                android:textColor="@color/lec_texto"
-                android:textColorHint="@color/lec_borde"
-                android:textSize="32sp"
+                android:maxLength="14"
+                android:singleLine="true"
+                android:text="0.00"
+                android:textColor="@color/lec_texto2"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/txtDistancia"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFeatureSettings="tnum"
+                android:maxLength="20"
+                android:singleLine="true"
+                android:text="Sin GPS"
+                android:textColor="@color/lec_texto2"
+                android:textSize="12sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -529,7 +554,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="2dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:columnCount="3"
