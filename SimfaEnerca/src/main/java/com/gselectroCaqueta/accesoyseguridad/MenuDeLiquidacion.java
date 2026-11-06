@@ -301,12 +301,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     //double deudaAnterior = 0; //variable para imprimir inmediato
     String comandoconceptosAseo="";
     File logPrint; //Ax: Es para guardar la de mac de impresora bluetooth
-    ImageButton btnActivaScanner, btnAnomalia, btnBuscar,btnTomarFoto;
-    ImageButton btnAdelante;
-    ImageButton btnAtras;
+    ImageButton btnActivaScanner;
+    View btnAnomalia, btnBuscar, btnTomarFoto; // lectura v2: botones con texto
+    View btnAdelante;
+    View btnAtras;
     ImageButton btnFotografia;
-    ImageButton btnPrimero;
-    ImageButton btnUltimo;
+    View btnPrimero;
+    View btnUltimo;
 
     ImageView imagenChat;
     ImageView imagenLiquid_1;
@@ -739,14 +740,15 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         txtCabMarca = (TextView) findViewById(R.id.txtCabMarca);
         txtTipoMedida = (TextView) findViewById(R.id.txtTipoMedida);
         txtSentidoRuta = (TextView) findViewById(R.id.txtSentidoRuta);
+        txtTituloLectura = (TextView) findViewById(R.id.txtTituloLectura);
         progressEnvio = findViewById(R.id.progressEnvio);
         configurarMenuLateral();
 
 //        btnActivaScanner = (ImageButton) findViewById(R.id.btnActivaScanner);
 //        btnFotografia = (ImageButton) findViewById(R.id.btnFotografia);
-        btnAnomalia = (ImageButton) findViewById(R.id.btnAnomalia);
-        btnTomarFoto = (ImageButton) findViewById(R.id.btnTomarFoto);
-        btnBuscar = (ImageButton) findViewById(R.id.btnBuscar);
+        btnAnomalia = findViewById(R.id.btnAnomalia);
+        btnTomarFoto = findViewById(R.id.btnTomarFoto);
+        btnBuscar = findViewById(R.id.btnBuscar);
         prepararLinterna();
         prepararChipContenedor();
 
@@ -774,10 +776,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         imagenPrinter = (ImageButton) findViewById(R.id.imagenPrinter);
         imagenRed = (ImageView) findViewById(R.id.imagenRed);
 
-        btnAdelante = (ImageButton) findViewById(R.id.btnAdelante);
-        btnAtras = (ImageButton) findViewById(R.id.btnAtras);
-        btnPrimero = (ImageButton) findViewById(R.id.btnPrimero);
-        btnUltimo = (ImageButton) findViewById(R.id.btnUltimo);
+        btnAdelante = findViewById(R.id.btnAdelante);
+        btnAtras = findViewById(R.id.btnAtras);
+        btnPrimero = findViewById(R.id.btnPrimero);
+        btnUltimo = findViewById(R.id.btnUltimo);
 
         imagenRed.setImageResource(R.drawable.redinativa); //Ax: colocar el icono de red inactiva
 
@@ -933,6 +935,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 //                capturaImagenFotografica();
 //            }
 //        });
+        Delete.setOnLongClickListener(v -> {
+            // Lectura v2: Borrar sostenido limpia toda la lectura.
+            txtElectura.setText("");
+            code.setLength(0);
+            return true;
+        });
         Delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -7854,7 +7862,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
       //    llenarListaCliente("LECTURA ANTERIOR", infoRegistroEntrada.gettablaRegistroDeEntrada_Lecturaanterior().replace(",", "."));
 
         llenarListaCliente("CLASE SERVICIO", infoClienteEntrada.gettablaEntradaClientes_Clasedeservicio());
-        llenarListaCliente("SENTIDO RUTA", "[" + mensajepantalla + lblpuntero.getText());
+        llenarListaCliente("SENTIDO RUTA", textoSentidoRuta(puntero));
+        if (txtTituloLectura != null) txtTituloLectura.setText("Ruta " + infoClienteEntrada.gettablaEntradaClientes_Ruta().trim());
         // Tipo de medida siempre visible en la tarjeta: REACTIVA en rojo, ACTIVA en verde, texto blanco
         // (antes amarillo oliva 154,154,0, ilegible al sol). lblInfoMedida conserva su uso: lo pueden
         // reemplazar POSTAL/PROVISIONAL/CORTADO..., por eso el tipo va aparte.
@@ -8035,6 +8044,16 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 medidorCero = false;
             }
         }
+    }
+
+    private TextView txtTituloLectura;
+
+    /** Subtitulo de la barra: registro actual, total y sentido de la ruta (lo que antes era "[=>> n / N]"). */
+    private String textoSentidoRuta(String puntero) {
+        String p = puntero == null ? "" : puntero.trim();
+        String sentido = "=>>".equals(p) ? "hacia adelante" : "<<=".equals(p) ? "hacia atrás" : p.toLowerCase(java.util.Locale.ROOT);
+        return "Registro " + VariablesGlobales.registroactual + " de " + infoMedidorEntrada.getTotal_TablaMedidorEntrada()
+                + (sentido.isEmpty() ? "" : " · " + sentido);
     }
 
     // Campos que van a la tarjeta del cliente y no como fila del detalle.
@@ -14265,7 +14284,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     /** Ultima posicion recibida (cualquier proveedor), para ubicar los eventos. */
     private Location ultimaPosicionEvento;
     private Linterna linterna;
-    private ImageButton btnLinterna;
+    private android.widget.Button btnLinterna;
 
     private FotoObligatoria fotoObligatoria() {
         if (fotoObligatoria == null) fotoObligatoria = FotoObligatoria.de(this);
@@ -15270,7 +15289,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     // ======================================================================== linterna
 
     private void prepararLinterna() {
-        btnLinterna = (ImageButton) findViewById(R.id.btnLinterna);
+        btnLinterna = (android.widget.Button) findViewById(R.id.btnLinterna);
         if (btnLinterna == null) return;
         linterna = new Linterna(this, encendida -> runOnUiThread(() -> pintarLinterna(encendida)));
         if (!linterna.disponible()) {
@@ -15285,7 +15304,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
     private void pintarLinterna(boolean encendida) {
         if (btnLinterna == null) return;
-        btnLinterna.setImageResource(encendida ? R.drawable.ic_linterna_on : R.drawable.ic_linterna_off);
+        btnLinterna.setBackgroundResource(encendida ? R.drawable.bg_lec_contorno_on : R.drawable.bg_lec_contorno);
+        int color = getResources().getColor(encendida ? android.R.color.white : R.color.lec_primario, getTheme());
+        btnLinterna.setTextColor(color);
+        btnLinterna.setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(color));
         btnLinterna.setContentDescription(encendida ? "Apagar linterna" : "Encender linterna");
     }
 
@@ -17486,27 +17508,22 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         boolean predioSinCoordenadas = cx.isEmpty() || parseStringToDouble(cx) == 0 || cy.isEmpty() || parseStringToDouble(cy) == 0;
         double latActual = parseStringToDouble(VariablesGlobales.coorTempLongitud.trim().isEmpty() ? "0" : VariablesGlobales.coorTempLongitud.trim());
         if (predioSinCoordenadas) {
-            txtDistancia.setText("SIN COORD.");
-            txtDistancia.setBackgroundColor(Color.TRANSPARENT);
-            txtDistancia.setTextColor(Color.DKGRAY);
+            txtDistancia.setText("Predio sin coord.");
+            txtDistancia.setBackgroundResource(R.drawable.bg_lec_chip_neutro);
+            txtDistancia.setTextColor(getResources().getColor(R.color.lec_texto, getTheme()));
             return;
         }
         if ((int) latActual == 0) {
-            txtDistancia.setText("SIN GPS");
-            txtDistancia.setBackgroundColor(Color.TRANSPARENT);
-            txtDistancia.setTextColor(Color.DKGRAY);
+            txtDistancia.setText("Sin GPS");
+            txtDistancia.setBackgroundResource(R.drawable.bg_lec_chip_neutro);
+            txtDistancia.setTextColor(getResources().getColor(R.color.lec_texto, getTheme()));
             return;
         }
         int distancia = (int) variables.evaluarDistanciaAlPredio(parseStringToDouble(VariablesGlobales.coorTempLongitud),
                 parseStringToDouble(VariablesGlobales.coorTempLatitud), parseStringToDouble(cy), parseStringToDouble(cx));
-        txtDistancia.setText(distancia + " - Mts.");
-        if (distancia <= radioPermitidoMetros()) {
-            txtDistancia.setBackgroundColor(Color.GREEN);
-            txtDistancia.setTextColor(Color.BLACK);
-        } else {
-            txtDistancia.setBackgroundColor(Color.RED);
-            txtDistancia.setTextColor(Color.WHITE);
-        }
+        txtDistancia.setText(distancia + " m del predio");
+        txtDistancia.setBackgroundResource(distancia <= radioPermitidoMetros() ? R.drawable.bg_lec_chip_ok : R.drawable.bg_lec_chip_mal);
+        txtDistancia.setTextColor(Color.WHITE);
     }
 
     public void muestraPosicionActual(Location loc) {

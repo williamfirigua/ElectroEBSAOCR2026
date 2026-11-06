@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Causal, Foto, Buscar, Luz. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#33003F73">
+    <item>
+    <shape android:shape="rectangle">
+        <solid android:color="#00FFFFFF" />
+        <stroke android:width="1dp" android:color="#FF5B6472" />
+        <corners android:radius="24dp" />
+    </shape>
+    </item>
+</ripple>

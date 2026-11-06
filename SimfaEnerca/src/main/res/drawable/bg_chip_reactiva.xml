@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Etiqueta de tipo de medida en la tarjeta del cliente (texto blanco, alto contraste al sol). -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#FFD10000" />
+<!-- Tipo de medida REACTIVA (texto blanco). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#FFB3261E" />
     <corners android:radius="6dp" />
 </shape>

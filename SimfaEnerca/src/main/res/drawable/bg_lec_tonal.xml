@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Botones de navegacion entre clientes. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#33003F73">
+    <item>
+    <shape android:shape="rectangle">
+        <solid android:color="#FFE3E8F0" />
+        <corners android:radius="12dp" />
+    </shape>
+    </item>
+</ripple>

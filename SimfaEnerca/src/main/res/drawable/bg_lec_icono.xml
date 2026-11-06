@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Botones de icono de la barra superior. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#33003F73">
+    <item>
+    <shape android:shape="rectangle">
+        <solid android:color="#00FFFFFF" />
+        <corners android:radius="24dp" />
+    </shape>
+    </item>
+</ripple>
