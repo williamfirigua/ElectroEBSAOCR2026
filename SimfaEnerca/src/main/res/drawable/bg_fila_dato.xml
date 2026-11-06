@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Fila del detalle del cliente: fondo blanco y divisor abajo. -->
+<!-- Fila del detalle del cliente: fondo blanco y divisor oscuro abajo. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item><shape><solid android:color="#FFFFFFFF" /></shape></item>
-    <item android:gravity="bottom"><shape><size android:height="1dp" /><solid android:color="#FFEEF1F6" /></shape></item>
+    <item android:gravity="bottom"><shape><size android:height="1dp" /><solid android:color="#FF9AA3B0" /></shape></item>
 </layer-list>

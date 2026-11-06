@@ -15011,6 +15011,41 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         txtMensajesNoLeidos.setVisibility(n > 0 ? View.VISIBLE : View.GONE);
         txtMensajesNoLeidos.setText(n > 99 ? "99+" : String.valueOf(n));
         if (n > 0) pintarChat(R.drawable.chat_msg_si);
+        actualizarBannerMensaje(n);
+    }
+
+    private TextView txtBannerMensaje;
+
+    /**
+     * Franja bajo la barra: el ultimo mensaje que la oficina le envio al tecnico, desplazandose como el banner del
+     * ingreso. Sin leer va en amarillo; tocarla abre la bandeja (y quedan leidos).
+     */
+    private void actualizarBannerMensaje(int noLeidos) {
+        if (txtBannerMensaje == null) {
+            txtBannerMensaje = findViewById(R.id.txtBannerMensaje);
+            if (txtBannerMensaje == null) return;
+            View franja = findViewById(R.id.franjaMensaje);
+            if (franja != null) franja.setOnClickListener(v -> abrirBandeja());
+        }
+        java.util.List<BandejaMensajes.Mensaje> lista = bandeja().todos();
+        String texto;
+        if (lista.isEmpty()) {
+            texto = "Sin mensajes de la oficina";
+        } else {
+            BandejaMensajes.Mensaje m = lista.get(0);
+            StringBuilder b = new StringBuilder(noLeidos > 0 ? "NUEVO · " : "");
+            String de = m.nombre != null && !m.nombre.trim().isEmpty() ? m.nombre.trim() : "Oficina";
+            b.append(de).append(": ");
+            if (m.asunto != null && !m.asunto.trim().isEmpty()) b.append(m.asunto.trim()).append(" — ");
+            b.append(m.texto == null ? "" : m.texto.replace('\n', ' ').trim());
+            texto = b.toString();
+        }
+        View franja = findViewById(R.id.franjaMensaje);
+        boolean nuevo = noLeidos > 0;
+        if (franja != null) franja.setBackgroundColor(colorLec(nuevo ? R.color.lec_banner_nuevo : R.color.lec_banner));
+        txtBannerMensaje.setTextColor(colorLec(nuevo ? R.color.lec_banner_nuevo_texto : R.color.lec_banner_texto));
+        if (!texto.contentEquals(txtBannerMensaje.getText())) txtBannerMensaje.setText(texto);
+        txtBannerMensaje.setSelected(true); // el marquee solo corre con la vista seleccionada
     }
 
     private void abrirBandeja() {
@@ -15429,7 +15464,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     private void pintarLinterna(boolean encendida) {
         if (btnLinterna == null) return;
         btnLinterna.setBackgroundResource(encendida ? R.drawable.bg_lec_accion_on : R.drawable.bg_lec_accion);
-        int color = getResources().getColor(encendida ? android.R.color.white : R.color.lec_primario, getTheme());
+        int color = getResources().getColor(encendida ? R.color.lec_texto : R.color.lec_primario, getTheme());
         btnLinterna.setImageTintList(android.content.res.ColorStateList.valueOf(color));
         btnLinterna.setContentDescription(encendida ? "Apagar linterna" : "Encender linterna");
     }

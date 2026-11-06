@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Fila que exige atencion del lector (anomalia, comentario...): fondo ambar. -->
+<!-- Fila que exige atencion: amarillo fuerte. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item><shape><solid android:color="#FFFFDDB3" /></shape></item>
-    <item android:gravity="bottom"><shape><size android:height="1dp" /><solid android:color="#FFEEF1F6" /></shape></item>
+    <item><shape><solid android:color="#FFFFD180" /></shape></item>
+    <item android:gravity="bottom"><shape><size android:height="1dp" /><solid android:color="#FF9AA3B0" /></shape></item>
 </layer-list>

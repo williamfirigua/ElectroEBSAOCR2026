@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Pantalla de lectura (v2, Material 3 de alto contraste). De arriba abajo:
-    barra superior: ruta; mensajes, codigo de barras de la factura y menu lateral
-    franja de estado: red, critica de la lectura (texto), envio en curso e impresora
+    barra superior: ruta; conexion al servidor, impresora (con el envio en curso), mensajes, codigo de barras y menu
+    franja: critica de la lectura y el ultimo mensaje de la oficina desplazandose (tocar abre la bandeja)
     tarjeta del cliente: medidor, ACTIVA/REACTIVA, estado especial, direccion, marca, nombre y cuenta,
       y el detalle (tablaResumen) que ocupa el espacio que queda y se desplaza. El aviso de desviacion
       sale encima del final del detalle: no tapa la cabecera del cliente ni mueve los botones.
@@ -32,8 +32,8 @@
             android:background="@color/lec_superficie"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingStart="16dp"
-            android:paddingEnd="4dp">
+            android:paddingStart="14dp"
+            android:paddingEnd="2dp">
 
             <TextView
                 android:id="@+id/txtTituloLectura"
@@ -49,9 +49,44 @@
                 android:textColor="@color/lec_texto"
                 android:textStyle="bold" />
 
+            <!-- Conexion al servidor (verde: hay, gris: no) -->
+            <ImageView
+                android:id="@+id/imagenRed"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:contentDescription="@string/red_inactiva"
+                android:padding="6dp" />
+
+            <!-- Impresora (verde: conectada, roja: no); el circulo gira mientras hay un envio en curso -->
             <FrameLayout
-                android:layout_width="48dp"
-                android:layout_height="48dp">
+                android:layout_width="42dp"
+                android:layout_height="44dp">
+
+                <ImageButton
+                    android:id="@+id/imagenPrinter"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_lec_icono"
+                    android:contentDescription="Impresora"
+                    android:padding="9dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_nav_print"
+                    android:tint="@color/lec_error" />
+
+                <ProgressBar
+                    android:id="@+id/progressEnvio"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="2dp"
+                    android:indeterminate="true"
+                    android:indeterminateTint="@color/lec_primario"
+                    android:visibility="invisible" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="44dp"
+                android:layout_height="44dp">
 
                 <ImageView
                     android:id="@+id/imagenChat"
@@ -70,8 +105,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="18dp"
                     android:layout_gravity="top|end"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginEnd="4dp"
+                    android:layout_marginTop="3dp"
+                    android:layout_marginEnd="2dp"
                     android:background="@drawable/bg_badge_mensajes"
                     android:gravity="center"
                     android:minWidth="18dp"
@@ -86,43 +121,37 @@
             <!-- Leer el codigo de barras de la factura (cupon de pago) para ir a esa cuenta. -->
             <ImageButton
                 android:id="@+id/btnBarras"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
                 android:background="@drawable/bg_lec_icono"
                 android:contentDescription="Leer el código de barras de la factura"
-                android:padding="12dp"
+                android:padding="11dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_nav_barcode"
                 android:tint="@color/lec_texto" />
 
             <ImageButton
                 android:id="@+id/btnMenu"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
                 android:background="@drawable/bg_lec_icono"
                 android:contentDescription="Menú"
-                android:padding="12dp"
+                android:padding="11dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_nav_menu"
                 android:tint="@color/lec_texto" />
         </LinearLayout>
 
-        <!-- Franja de estado: red, tipo de cuenta, critica de la lectura, envio en curso e impresora -->
+        <!-- Franja: critica de la lectura y el ultimo mensaje de la oficina desplazandose -->
         <LinearLayout
+            android:id="@+id/franjaMensaje"
             android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:background="@color/lec_contenedor"
+            android:layout_height="32dp"
+            android:background="@color/lec_banner"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingStart="12dp"
+            android:paddingStart="8dp"
             android:paddingEnd="8dp">
-
-            <ImageView
-                android:id="@+id/imagenRed"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginEnd="8dp"
-                android:contentDescription="@string/red_inactiva" />
 
             <!-- Antes imagenes; ahora la critica va en texto (txtCritica) y el estado especial en lblInfoMedida. -->
             <ImageView android:id="@+id/imagenLiquid_1" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
@@ -133,40 +162,30 @@
             <TextView
                 android:id="@+id/txtCritica"
                 android:layout_width="wrap_content"
-                android:layout_height="22dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="8dp"
                 android:gravity="center"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
                 android:singleLine="true"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 android:textStyle="bold"
                 android:visibility="gone" />
 
-            <View
+            <TextView
+                android:id="@+id/txtBannerMensaje"
                 android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
-
-            <!-- Envio en curso -->
-            <ProgressBar
-                android:id="@+id/progressEnvio"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginEnd="10dp"
-                android:indeterminate="true"
-                android:indeterminateTint="@color/lec_primario"
-                android:visibility="invisible" />
-
-            <ImageButton
-                android:id="@+id/imagenPrinter"
-                android:layout_width="40dp"
-                android:layout_height="30dp"
-                android:background="@drawable/bg_lec_icono"
-                android:contentDescription="Impresora"
-                android:padding="4dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_nav_print"
-                android:tint="@color/lec_error" />
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:ellipsize="marquee"
+                android:gravity="center_vertical"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:text="Sin mensajes de la oficina"
+                android:textColor="@color/lec_banner_texto"
+                android:textSize="15sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <!-- Tarjeta del cliente con su detalle desplazable -->
@@ -606,7 +625,8 @@
                     android:contentDescription="Borrar un dígito; sostenido limpia la lectura"
                     android:paddingBottom="12dp"
                     android:scaleType="center"
-                    android:src="@drawable/ic_lec_borrar" />
+                    android:src="@drawable/ic_lec_borrar"
+                    android:tint="@color/lec_tecla_texto" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -615,7 +635,7 @@
                     android:layout_marginBottom="3dp"
                     android:importantForAccessibility="no"
                     android:text="sostener: limpiar"
-                    android:textColor="@color/lec_texto2"
+                    android:textColor="@color/lec_tecla_ayuda"
                     android:textSize="10sp" />
             </com.google.android.material.card.MaterialCardView>
 
@@ -626,7 +646,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/BotonOk"
                 style="@style/TeclaLectura"
-                app:cardBackgroundColor="@color/lec_primario">
+                app:cardBackgroundColor="@color/lec_ok">
 
                 <TextView
                     android:id="@+id/Btn_ok"
@@ -637,7 +657,7 @@
                     android:gravity="center"
                     android:text="OK"
                     android:textColor="#FFFFFFFF"
-                    android:textSize="24sp"
+                    android:textSize="26sp"
                     android:textStyle="bold" />
             </com.google.android.material.card.MaterialCardView>
         </GridLayout>

@@ -1,18 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Pantalla de lectura v2 (Material 3, esquema claro de alto contraste para el sol). -->
+<!-- Pantalla de lectura v2: paleta para trabajar bajo el sol. Fondo blanco, texto negro, nada de grises claros
+     (el reflejo los borra), bordes de 2dp y teclas oscuras con numeros blancos. -->
 <resources>
-    <color name="lec_primario">#FF003F73</color>
+    <color name="lec_primario">#FF0047A0</color>
     <color name="lec_primario_cont">#FFD3E4FF</color>
-    <color name="lec_superficie">#FFFCFCFF</color>
-    <color name="lec_contenedor">#FFEEF1F6</color>
-    <color name="lec_tecla">#FFE3E8F0</color>
-    <color name="lec_borde">#FFC3C8D2</color>
-    <color name="lec_contorno">#FF5B6472</color>
-    <color name="lec_divisor">#FFDDE2EA</color>
-    <color name="lec_texto">#FF10131A</color>
-    <color name="lec_texto2">#FF3B4350</color>
-    <color name="lec_exito">#FF146C2E</color>
-    <color name="lec_error">#FFB3261E</color>
-    <color name="lec_aviso_cont">#FFFFDDB3</color>
-    <color name="lec_aviso_texto">#FF3D2600</color>
+    <color name="lec_superficie">#FFFFFFFF</color>
+    <color name="lec_contenedor">#FFE6EAF0</color>
+    <color name="lec_tecla">#FF16243A</color>
+    <color name="lec_tecla_texto">#FFFFFFFF</color>
+    <color name="lec_tecla_ayuda">#FFC9D3E0</color>
+    <color name="lec_ok">#FF0B7A33</color>
+    <color name="lec_borde">#FF5B6472</color>
+    <color name="lec_contorno">#FF2B3340</color>
+    <color name="lec_divisor">#FF9AA3B0</color>
+    <color name="lec_texto">#FF000000</color>
+    <color name="lec_texto2">#FF1F2733</color>
+    <color name="lec_exito">#FF0B7A33</color>
+    <color name="lec_error">#FFC00000</color>
+    <color name="lec_aviso_cont">#FFFFD180</color>
+    <color name="lec_aviso_texto">#FF2E1A00</color>
+    <color name="lec_banner">#FF0B1F3A</color>
+    <color name="lec_banner_texto">#FFFFFFFF</color>
+    <color name="lec_banner_nuevo">#FFFFB000</color>
+    <color name="lec_banner_nuevo_texto">#FF000000</color>
 </resources>

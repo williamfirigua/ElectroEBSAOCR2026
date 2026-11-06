@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Aviso de desviacion leve (consumo bajo, lectura igual a la anterior). -->
+<!-- Aviso de desviacion leve. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
-    <solid android:color="#FFFFDDB3" />
-    <stroke android:width="2dp" android:color="#FF8A5300" />
+    <solid android:color="#FFFFD180" />
+    <stroke android:width="2dp" android:color="#FF000000" />
     <corners android:radius="16dp" />
 </shape>
