@@ -1,481 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Comunicaciones (paleta para el sol, como la pantalla de lectura v2). De arriba abajo:
+    barra: volver, titulo y conexion con el servidor (verde = hay, roja = no; Comunicaciones alterna los dos iconos)
+    franja oscura con el ultimo mensaje del proceso (txtInfo)
+    Ruta en el equipo: archivo cargado y Descargar mi ruta (API, reanudable)
+    Enviar al servidor: Enviar datos (accion principal), Validar envio, Enviar fotos
+    Equipo: buscar actualizacion, configurar servidor, respaldo de fotos
+    Carga antigua (SOAP), de respaldo: ciclo, municipio, seccion, division, Traer ruta y Recibir datos
+  Se conservan todos los ids que usa Comunicaciones.java (los iconos de los botones ya vienen en el layout).
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/lec_superficie"
     android:orientation="vertical"
     tools:context="com.gselectroCaqueta.comunicaciones.Comunicaciones">
 
-    <!-- <TableLayout
-         android:id="@+id/tabla_cuerpo"
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content">-->
-
+    <!-- Barra superior -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center">
+        android:layout_height="60dp"
+        android:background="@color/lec_superficie"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="4dp"
+        android:paddingEnd="8dp">
 
         <ImageButton
-            android:id="@+id/btnLogos"
-            android:layout_width="90dp"
-            android:layout_height="60dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/info"
-            android:scaleType="centerCrop"
-            android:src="@drawable/gss_logo40x40" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        android:gravity="center_vertical">
+            android:id="@+id/btnRegresar"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:background="@drawable/bg_lec_icono"
+            android:contentDescription="@string/com_volver"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_nav_back"
+            android:tint="@color/lec_texto" />
 
         <TextView
-            android:id="@+id/txtTitleComunicaciones"
-            android:layout_width="357dp"
-            android:layout_height="25dp"
-            android:layout_gravity="bottom|right"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
             android:layout_weight="1"
-            android:background="@color/orangehuila"
-            android:gravity="center|bottom"
-            android:text="OKINNOM - COMUNICACIONES"
-            android:textColor="@color/white"
-            android:textSize="17dp"
-            android:textStyle="bold">
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/com_titulo"
+            android:textColor="@color/lec_texto"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
-        </TextView>
-        <!-- </TableRow>-->
+        <!-- Conexion con el servidor: los dos iconos ocupan el mismo lugar. -->
+        <FrameLayout
+            android:layout_width="48dp"
+            android:layout_height="48dp">
+
+            <ImageView
+                android:id="@+id/iconwebserviceon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_lec_tarjeta"
+                android:contentDescription="@string/com_red_activa"
+                android:padding="10dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_nav_wifi"
+                android:tint="@color/lec_exito"
+                android:visibility="invisible" />
+
+            <ImageView
+                android:id="@+id/iconwebserviceoff"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_lec_tarjeta"
+                android:contentDescription="@string/com_red_inactiva"
+                android:padding="10dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_nav_warning"
+                android:tint="@color/lec_error"
+                android:visibility="visible" />
+        </FrameLayout>
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="380dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:background="@drawable/bg_card"
-        android:elevation="6dp"
-        android:orientation="vertical"
-        android:padding="10dp"
-        android:scrollbarDefaultDelayBeforeFade="420"
-        android:scrollbarFadeDuration="250">
-
-        <Button
-            android:id="@+id/btnMiRuta"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="@drawable/bg_boton_redondeado"
-            android:backgroundTint="@color/greenPop"
-            android:gravity="center"
-            android:text="Descargar mi ruta" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:layout_marginLeft="5dp"
-            android:text="Carga antigua (SOAP): digite el ciclo, Traer Ruta y Recibir Datos."
-            android:textSize="12sp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="3dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/lblCiclo"
-                android:layout_width="75dp"
-                android:layout_height="20dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="5dp"
-                android:layout_weight="0"
-                android:text="CICLO"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/txtCiclo"
-                android:layout_width="130dp"
-                android:layout_height="48dp"
-                android:layout_gravity="left"
-                android:layout_weight="1"
-                android:background="@drawable/bg_input"
-                android:inputType="text"
-                android:maxLength="4"
-                android:minHeight="48dp"
-                android:padding="8dp"
-                android:text="0000" />
-
-            <Button
-                android:id="@+id/btnTraerRuta"
-                android:layout_width="240dp"
-                android:layout_height="48dp"
-                android:layout_gravity="right"
-                android:layout_weight="7"
-                android:background="@drawable/bg_boton_redondeado"
-                android:backgroundTint="@color/redPop"
-                android:gravity="center"
-                android:text="  Traer Ruta   " />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/lblMunicipio"
-                android:layout_width="75dp"
-                android:layout_height="wrap_content"
-                android:layout_columnSpan="1"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="5dp"
-                android:layout_weight="0"
-                android:text="MUNICIPIO"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/txtMunicipio"
-                android:layout_width="130dp"
-                android:layout_height="48dp"
-                android:layout_gravity="left"
-                android:layout_weight="1"
-                android:background="@drawable/bg_input"
-                android:inputType="number"
-                android:maxLength="4"
-                android:text="0000" />
-
-            <Button
-                android:id="@+id/btnRecibirDatos"
-                android:layout_width="240dp"
-                android:layout_height="48dp"
-                android:layout_gravity="right"
-                android:layout_weight="7"
-                android:background="@drawable/bg_boton_redondeado"
-                android:backgroundTint="@color/bluePop"
-                android:gravity="center"
-                android:text="Recibir Datos" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/lblSeccion"
-                android:layout_width="75dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="5dp"
-                android:layout_weight="0"
-                android:text="SECCION"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/txtSeccion"
-                android:layout_width="130dp"
-                android:layout_height="48dp"
-                android:layout_gravity="left"
-                android:layout_weight="1"
-                android:background="@drawable/bg_input"
-                android:inputType="number"
-                android:maxLength="3"
-                android:text="000" />
-
-            <Button
-                android:id="@+id/btnEnviarDatos"
-                android:layout_width="240dp"
-                android:layout_height="48dp"
-                android:layout_gravity="right"
-                android:layout_weight="7"
-
-                android:background="@drawable/bg_boton_redondeado"
-                android:backgroundTint="@color/ocrePop"
-
-                android:gravity="center"
-                android:text="Enviar Datos" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/lblDivision"
-                android:layout_width="75dp"
-                android:layout_height="wrap_content"
-                android:layout_columnSpan="1"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="5dp"
-                android:layout_weight="0"
-                android:text="DIVISION"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/txtDivision"
-                android:layout_width="130dp"
-                android:layout_height="48dp"
-                android:layout_gravity="left"
-                android:layout_weight="1"
-                android:background="@drawable/bg_input"
-                android:inputType="number"
-                android:maxLength="1"
-                android:text="0" />
-
-            <Button
-                android:id="@+id/btnValidaEnvio"
-                android:layout_width="240dp"
-                android:layout_height="48dp"
-                android:layout_gravity="right"
-                android:layout_weight="7"
-                android:background="@drawable/bg_boton_redondeado"
-                android:backgroundTint="@color/greenPop"
-                android:gravity="center"
-                android:text="Valida Envio " />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/lblArchivo"
-                android:layout_width="75dp"
-                android:layout_height="wrap_content"
-                android:layout_columnSpan="1"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="5dp"
-                android:layout_weight="0"
-                android:text="Archivo"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/lblTxtArchivo"
-                android:layout_width="110dp"
-                android:layout_height="wrap_content"
-                android:layout_columnSpan="1"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="5dp"
-                android:layout_weight="0"
-                android:text=" ARCHIVO ." />
-
-            <Button
-                android:id="@+id/btnEnviarFotos"
-                android:layout_width="240dp"
-                android:layout_height="48dp"
-                android:layout_gravity="right"
-                android:layout_weight="7"
-                android:background="@drawable/bg_boton_redondeado"
-                android:backgroundTint="@color/purplePop"
-                android:enabled="false"
-                android:gravity="center"
-                android:text="Enviar Fotos" />
-        </LinearLayout>
-
-    </LinearLayout>
-    <!--</TableLayout>-->
-
-    <!--<TableLayout
-        android:id="@+id/tabla_cuerp2o"
+    <!-- Ultimo mensaje del proceso -->
+    <TextView
+        android:id="@+id/txtInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:weightSum="8">-->
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/bg_com_banner"
+        android:hint="@string/com_sin_mensajes"
+        android:minHeight="52dp"
+        android:gravity="center_vertical"
+        android:paddingStart="14dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="10dp"
+        android:text=""
+        android:textColor="@color/lec_banner_texto"
+        android:textColorHint="@color/lec_tecla_ayuda"
+        android:textSize="17sp"
+        android:textStyle="bold" />
 
-    <!--<TableRow
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">-->
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:gravity="center">
-
-        <TextView
-            android:id="@+id/txtInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:layout_marginTop="10dp"
-            android:layout_weight="1"
-            android:text=".. .. .... "
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="16dp" />
-
-        <ImageView
-            android:id="@+id/iconwebserviceon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|right"
-            android:layout_marginTop="10dp"
-            android:adjustViewBounds="true"
-            android:contentDescription="@string/red_activa"
-            android:maxHeight="36dp"
-            android:maxWidth="36dp"
-            android:scaleType="fitCenter"
-            android:src="@mipmap/webserviceon"
-            android:visibility="invisible" />
-
-        <ImageView
-            android:id="@+id/iconwebserviceoff"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|right"
-            android:layout_marginTop="10dp"
-            android:layout_marginRight="5dp"
-            android:adjustViewBounds="true"
-            android:contentDescription="@string/red_activa"
-            android:maxWidth="36dp"
-            android:maxHeight="36dp"
-            android:scaleType="fitCenter"
-            android:src="@mipmap/webserviceoff"
-            android:visibility="visible" />
-
-    </LinearLayout>
-    <!--</TableRow>-->
-
-
-    <!--</TableLayout>-->
-    <!-- organiza bandeja inferio -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:padding="5dp">
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="20dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:background="@drawable/bg_card"
-            android:elevation="6dp"
-            android:orientation="vertical"
-            android:padding="10dp"
-            android:scrollbarDefaultDelayBeforeFade="400"
-            android:scrollbarFadeDuration="250">
+            android:orientation="vertical">
 
-            <TableLayout
-                android:id="@+id/tabla_cuerpo2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+            <!-- Ruta en el equipo -->
+            <LinearLayout style="@style/ComTarjeta">
 
-                <TableRow
+                <TextView
+                    style="@style/ComTituloSeccion"
+                    android:text="@string/com_seccion_ruta" />
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="7dp">
+                    android:layout_marginTop="6dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                    <Button
-                        android:id="@+id/btnBackupFotos"
+                    <TextView
+                        android:id="@+id/lblArchivo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_boton_redondeado"
-                        android:backgroundTint="@color/bluePopSoft"
-                        android:ellipsize="end"
-                        android:enabled="false"
-                        android:gravity="center"
-                        android:lines="2"
-                        android:text=" Backup \nFotos "
-                        android:textColor="@color/white"
-                        android:textSize="14sp" />
+                        android:text="@string/com_archivo"
+                        android:textColor="@color/lec_texto2"
+                        android:textSize="17sp" />
 
-                    <Button
-                        android:id="@+id/btnBorrarBackupFotos"
-                        android:layout_width="wrap_content"
+                    <TextView
+                        android:id="@+id/lblTxtArchivo"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="10dp"
                         android:layout_weight="1"
-                        android:background="@drawable/bg_boton_redondeado"
-                        android:backgroundTint="@color/purplePopHard"
                         android:ellipsize="end"
-                        android:enabled="false"
-                        android:gravity="center"
-                        android:lines="2"
-                        android:text="Borrar Backup\nFotos"
-                        android:textColor="@color/white"
-                        android:textSize="14sp" />
+                        android:fontFeatureSettings="tnum"
+                        android:maxLines="1"
+                        android:text="—"
+                        android:textColor="@color/lec_texto"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
 
-                </TableRow>
+                <Button
+                    android:id="@+id/btnMiRuta"
+                    style="@style/ComBotonLleno"
+                    android:background="@drawable/bg_com_oscuro"
+                    android:drawableStart="@drawable/ic_com_descargar"
+                    android:text="@string/com_mi_ruta" />
 
-                <TableRow
+                <TextView
+                    style="@style/ComDescripcion"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/com_mi_ruta_desc" />
+            </LinearLayout>
+
+            <!-- Enviar al servidor -->
+            <LinearLayout style="@style/ComTarjeta">
+
+                <TextView
+                    style="@style/ComTituloSeccion"
+                    android:text="@string/com_seccion_envio" />
+
+                <Button
+                    android:id="@+id/btnEnviarDatos"
+                    style="@style/ComBotonLleno"
+                    android:drawableStart="@drawable/ic_nav_send"
+                    android:text="@string/com_enviar_datos" />
+
+                <TextView
+                    style="@style/ComDescripcion"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/com_enviar_datos_desc" />
+
+                <Button
+                    android:id="@+id/btnValidaEnvio"
+                    style="@style/ComBotonAccion"
+                    android:layout_marginTop="14dp"
+                    android:drawableStart="@drawable/ic_com_verificado"
+                    android:text="@string/com_valida_envio" />
+
+                <Button
+                    android:id="@+id/btnEnviarFotos"
+                    style="@style/ComBotonAccion"
+                    android:drawableStart="@drawable/ic_nav_camera"
+                    android:enabled="false"
+                    android:text="@string/com_enviar_fotos" />
+            </LinearLayout>
+
+            <!-- Equipo -->
+            <LinearLayout style="@style/ComTarjeta">
+
+                <TextView
+                    style="@style/ComTituloSeccion"
+                    android:text="@string/com_seccion_equipo" />
+
+                <Button
+                    android:id="@+id/btnValidarVersion"
+                    style="@style/ComBotonAccion"
+                    android:drawableStart="@drawable/ic_nav_sync"
+                    android:text="@string/com_validar_version" />
+
+                <Button
+                    android:id="@+id/btnConfigurarWeb"
+                    style="@style/ComBotonAccion"
+                    android:drawableStart="@drawable/ic_nav_tune"
+                    android:text="@string/com_configurar_web" />
+
+                <Button
+                    android:id="@+id/btnBackupFotos"
+                    style="@style/ComBotonAccion"
+                    android:drawableStart="@drawable/ic_nav_photo_library"
+                    android:enabled="false"
+                    android:text="@string/com_backup_fotos" />
+
+                <Button
+                    android:id="@+id/btnBorrarBackupFotos"
+                    style="@style/ComBotonAccion"
+                    android:drawableStart="@drawable/ic_lec_borrar"
+                    android:enabled="false"
+                    android:text="@string/com_borrar_backup" />
+            </LinearLayout>
+
+            <!-- Carga antigua (SOAP), de respaldo -->
+            <LinearLayout
+                style="@style/ComTarjeta"
+                android:background="@drawable/bg_com_soap">
+
+                <TextView
+                    style="@style/ComTituloSeccion"
+                    android:text="@string/com_seccion_soap" />
+
+                <TextView
+                    style="@style/ComDescripcion"
+                    android:text="@string/com_soap_desc" />
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="7dp">
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
 
-                    <Button
-                        android:id="@+id/btnValidarVersion"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
+                        android:layout_marginEnd="6dp"
                         android:layout_weight="1"
-                        android:background="@drawable/bg_boton_redondeado"
-                        android:backgroundTint="@color/greenPopHard"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:lines="2"
-                        android:text="Validar \nVersion"
-                        android:textColor="@color/white"
-                        android:textSize="14sp" />
+                        android:orientation="vertical">
 
-                    <Button
-                        android:id="@+id/btnConfigurarWeb"
-                        android:layout_width="wrap_content"
+                        <TextView
+                            android:id="@+id/lblCiclo"
+                            style="@style/ComEtiquetaCampo"
+                            android:labelFor="@+id/txtCiclo"
+                            android:text="@string/com_ciclo" />
+
+                        <EditText
+                            android:id="@+id/txtCiclo"
+                            style="@style/ComCampo"
+                            android:inputType="text"
+                            android:maxLength="4"
+                            android:text="0000" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginStart="6dp"
                         android:layout_weight="1"
-                        android:background="@drawable/bg_boton_redondeado"
-                        android:backgroundTint="@color/bluePopHard"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:lines="2"
-                        android:text="  Configurar  \n  WebService  "
-                        android:textColor="@color/white"
-                        android:textSize="14sp" />
+                        android:orientation="vertical">
 
-                </TableRow>
+                        <TextView
+                            android:id="@+id/lblMunicipio"
+                            style="@style/ComEtiquetaCampo"
+                            android:labelFor="@+id/txtMunicipio"
+                            android:text="@string/com_municipio" />
 
+                        <EditText
+                            android:id="@+id/txtMunicipio"
+                            style="@style/ComCampo"
+                            android:inputType="number"
+                            android:maxLength="4"
+                            android:text="0000" />
+                    </LinearLayout>
+                </LinearLayout>
 
-                <TableRow
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="71dp"
-                    android:layout_marginTop="7dp">
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
 
-                    <Button
-                        android:id="@+id/btnRegresar"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginLeft="15dp"
-                        android:layout_marginRight="15dp"
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="6dp"
                         android:layout_weight="1"
-                        android:background="@drawable/bg_boton_redondeado"
-                        android:backgroundTint="@color/grayPop"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:lines="1"
-                        android:text="Regresar" />
+                        android:orientation="vertical">
 
-                </TableRow>
-            </TableLayout>
+                        <TextView
+                            android:id="@+id/lblSeccion"
+                            style="@style/ComEtiquetaCampo"
+                            android:labelFor="@+id/txtSeccion"
+                            android:text="@string/com_seccion" />
+
+                        <EditText
+                            android:id="@+id/txtSeccion"
+                            style="@style/ComCampo"
+                            android:inputType="number"
+                            android:maxLength="3"
+                            android:text="000" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/lblDivision"
+                            style="@style/ComEtiquetaCampo"
+                            android:labelFor="@+id/txtDivision"
+                            android:text="@string/com_division" />
+
+                        <EditText
+                            android:id="@+id/txtDivision"
+                            style="@style/ComCampo"
+                            android:inputType="number"
+                            android:maxLength="1"
+                            android:text="0" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnTraerRuta"
+                    style="@style/ComBotonAccion"
+                    android:layout_marginTop="14dp"
+                    android:drawableStart="@drawable/ic_nav_map"
+                    android:text="@string/com_traer_ruta" />
+
+                <Button
+                    android:id="@+id/btnRecibirDatos"
+                    style="@style/ComBotonAccion"
+                    android:drawableStart="@drawable/ic_com_descargar"
+                    android:text="@string/com_recibir_datos" />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>
-
-

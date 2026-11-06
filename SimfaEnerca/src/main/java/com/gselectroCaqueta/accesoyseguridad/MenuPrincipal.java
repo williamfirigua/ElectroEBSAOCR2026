@@ -263,13 +263,13 @@ public class MenuPrincipal extends AppCompatActivity {
     private void pintarEnvios(EstadoEnvios e) {
         if (e == null) {
             txtEnvios.setText("Envíos: no se pudo leer la cola");
-            txtEnvios.setTextColor(0xFF607D8B);
+            txtEnvios.setTextColor(0xFF1F2733);
             txtInsignia.setVisibility(View.GONE);
             return;
         }
         int pendientes = e.pendientesDeRuta();
         txtEnvios.setText("Envíos: " + e.resumenCorto());
-        txtEnvios.setTextColor(!e.modoRest ? 0xFF607D8B : e.rechazados() > 0 ? 0xFFC62828 : pendientes > 0 ? 0xFFEF6C00 : 0xFF2E7D32);
+        txtEnvios.setTextColor(!e.modoRest ? 0xFF1F2733 : e.rechazados() > 0 ? 0xFFC00000 : pendientes > 0 ? 0xFF8A4B00 : 0xFF0B7A33);
         if (e.modoRest && pendientes > 0) {
             txtInsignia.setText(pendientes > 999 ? "999+" : String.valueOf(pendientes));
             txtInsignia.setVisibility(View.VISIBLE);

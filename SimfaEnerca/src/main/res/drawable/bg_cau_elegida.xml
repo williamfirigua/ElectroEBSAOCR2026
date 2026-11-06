@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Causal elegida / estado de la busqueda: azul claro con borde azul. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/lec_primario_cont" />
+    <stroke android:width="2dp" android:color="@color/lec_primario" />
+    <corners android:radius="12dp" />
+</shape>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Campos de la carga antigua: negro; bloqueados (ruta ya cargada), gris oscuro. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/lec_borde" android:state_enabled="false" />
+    <item android:color="@color/lec_texto" />
+</selector>

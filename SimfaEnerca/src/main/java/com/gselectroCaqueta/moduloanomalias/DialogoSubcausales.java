@@ -60,7 +60,7 @@ public final class DialogoSubcausales {
     public static void mostrar(Activity activity, String titulo, final List<String> subcausales, final Callback callback) {
         final String[] items = subcausales.toArray(new String[0]);
         final boolean[] resuelto = {false};
-        AlertDialog d = new AlertDialog.Builder(activity)
+        AlertDialog d = new AlertDialog.Builder(activity, com.gselectroCaqueta.accesoyseguridad.R.style.CauDialogo)
                 .setTitle(titulo)
                 .setItems(items, (dialog, which) -> {
                     resuelto[0] = true;

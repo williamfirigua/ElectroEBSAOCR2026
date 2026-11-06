@@ -163,7 +163,9 @@ public class Comunicaciones extends AppCompatActivity implements ConfigurarWEBFr
         verificarArchivos();
        // ProbarConn();  //Ax: comunicaciones es el unico que comprueba primero la conexion, las otras actividades no.
         ProbarWS();
-        SetIconButtons();
+        // Los iconos de los botones vienen ahora en activity_comunicaciones (vectores con el color del boton);
+        // SetIconButtons los reemplazaba por los PNG antiguos.
+        // SetIconButtons();
 
         //kim version de codigo
         try {

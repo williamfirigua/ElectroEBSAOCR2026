@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Texto del criterio de busqueda: blanco sobre el azul del marcado, negro en los demas. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/lec_tecla_texto" android:state_checked="true" />
+    <item android:color="@color/lec_texto" />
+</selector>

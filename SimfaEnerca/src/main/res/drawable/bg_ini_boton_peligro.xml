@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Inicio: Borrar la ruta, blanco con borde rojo de 2dp. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#33000000">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#FFFFFFFF" />
+            <stroke android:width="2dp" android:color="#FFC00000" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+</ripple>

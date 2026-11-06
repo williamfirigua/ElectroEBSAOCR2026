@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fondo de los dialogos (causal, subcausal, informe, busqueda, galeria): blanco, borde oscuro de 2dp. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="16dp"
+    android:insetTop="16dp"
+    android:insetRight="16dp"
+    android:insetBottom="16dp">
+    <shape android:shape="rectangle">
+        <solid android:color="@color/lec_superficie" />
+        <stroke android:width="2dp" android:color="@color/lec_contorno" />
+        <corners android:radius="20dp" />
+    </shape>
+</inset>

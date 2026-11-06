@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Pantalla de lectura (v2, Material 3 de alto contraste). De arriba abajo:
-    barra superior: ruta; conexion al servidor, impresora (con el envio en curso), mensajes, codigo de barras y menu
+    barra superior: a la izquierda conexion al servidor, impresora (con el envio en curso), mensajes y codigo de barras;
+      luego la ruta y el menu pegado a la derecha
     franja: critica de la lectura y el ultimo mensaje de la oficina desplazandose (tocar abre la bandeja)
     tarjeta del cliente: medidor, ACTIVA/REACTIVA, estado especial, direccion, marca, nombre y cuenta,
       y el detalle (tablaResumen) que ocupa el espacio que queda y se desplaza. El aviso de desviacion
@@ -32,22 +33,8 @@
             android:background="@color/lec_superficie"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingStart="14dp"
+            android:paddingStart="4dp"
             android:paddingEnd="2dp">
-
-            <TextView
-                android:id="@+id/txtTituloLectura"
-                android:layout_width="0dp"
-                android:layout_height="28dp"
-                android:layout_weight="1"
-                android:autoSizeMaxTextSize="20sp"
-                android:autoSizeMinTextSize="12sp"
-                android:autoSizeTextType="uniform"
-                android:fontFeatureSettings="tnum"
-                android:maxLines="1"
-                android:text="Lectura"
-                android:textColor="@color/lec_texto"
-                android:textStyle="bold" />
 
             <!-- Conexion al servidor (verde: hay, gris: no) -->
             <ImageView
@@ -129,6 +116,22 @@
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_nav_barcode"
                 android:tint="@color/lec_texto" />
+
+            <TextView
+                android:id="@+id/txtTituloLectura"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="4dp"
+                android:autoSizeMaxTextSize="20sp"
+                android:autoSizeMinTextSize="12sp"
+                android:autoSizeTextType="uniform"
+                android:fontFeatureSettings="tnum"
+                android:maxLines="1"
+                android:text="Lectura"
+                android:textColor="@color/lec_texto"
+                android:textStyle="bold" />
 
             <ImageButton
                 android:id="@+id/btnMenu"

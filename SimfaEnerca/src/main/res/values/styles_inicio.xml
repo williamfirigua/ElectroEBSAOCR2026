@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Estilos de la pantalla de inicio (activity_menu_principal). Misma paleta para el sol que la lectura v2. -->
+<resources>
+
+    <!-- Fila de la lista de opciones (Comunicaciones, Utilidades): toda la fila responde. -->
+    <style name="IniFila">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">64dp</item>
+        <item name="android:background">@drawable/bg_ini_fila</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">12dp</item>
+    </style>
+
+    <style name="IniFilaIcono">
+        <item name="android:layout_width">28dp</item>
+        <item name="android:layout_height">28dp</item>
+        <item name="android:tint">@color/lec_primario</item>
+        <item name="android:importantForAccessibility">no</item>
+    </style>
+
+    <style name="IniFilaTexto">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:textColor">@color/lec_texto</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+    <style name="IniFilaFlecha">
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">24dp</item>
+        <item name="android:src">@drawable/ic_ini_chevron</item>
+        <item name="android:tint">@color/lec_texto</item>
+        <item name="android:importantForAccessibility">no</item>
+    </style>
+
+    <!-- Borrar la ruta y Salir: mismo nivel, abajo. -->
+    <style name="IniBotonInferior">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">60dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:drawablePadding">8dp</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <!-- Textos dentro de la tarjeta azul de la ruta. -->
+    <style name="IniRutaSecundario">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/lec_primario_cont</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+    </style>
+</resources>

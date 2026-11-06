@@ -289,7 +289,7 @@ public final class DialogoBusqueda {
         };
         lista.setAdapter(adaptador);
 
-        final AlertDialog dialogo = new AlertDialog.Builder(activity)
+        final AlertDialog dialogo = new AlertDialog.Builder(activity, R.style.CauDialogo)
                 .setTitle("Buscar cliente")
                 .setView(contenido)
                 .setNegativeButton("Cerrar", null)

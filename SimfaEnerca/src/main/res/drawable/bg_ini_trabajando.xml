@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Inicio: franja de 'el sistema esta trabajando'. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#FFD3E4FF" />
+    <corners android:radius="0dp" />
+</shape>

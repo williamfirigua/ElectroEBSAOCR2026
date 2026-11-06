@@ -177,9 +177,9 @@ public class GuiAcceso extends AppCompatActivity {
     TextView txtRemoteDevice;
     Button btnIngresar;
     ImageButton btnSalir;
-    ImageButton btnComunicar;
-    ImageButton btnAcercaDe;
-    ImageButton btnImprime;
+    Button btnComunicar;
+    Button btnAcercaDe;
+    Button btnImprime;
     ImageButton btnBluetooth;
     ImageButton btnBateria;
     ImageButton btnInfo;
@@ -230,9 +230,9 @@ public class GuiAcceso extends AppCompatActivity {
 
         btnIngresar = (Button) findViewById(R.id.btnIngresar);
         btnSalir = (ImageButton) findViewById(R.id.btnSalir);
-        btnComunicar = (ImageButton) findViewById(R.id.btnComunicar2);
-        btnAcercaDe = (ImageButton) findViewById(R.id.btnAcercaDe);
-        btnImprime = (ImageButton) findViewById(R.id.btnImprime);
+        btnComunicar = (Button) findViewById(R.id.btnComunicar2);
+        btnAcercaDe = (Button) findViewById(R.id.btnAcercaDe);
+        btnImprime = (Button) findViewById(R.id.btnImprime);
         btnBluetooth = (ImageButton) findViewById(R.id.btnBluetooth);
         txtRemoteDevice = (TextView) findViewById(R.id.txtRemoteDevice);
         btnBateria = (ImageButton) findViewById(R.id.btnBateria);
@@ -241,12 +241,13 @@ public class GuiAcceso extends AppCompatActivity {
         txtVersion= (TextView) findViewById(R.id.txtVerion);
         btnSalir.setEnabled(false);
         btnIngresar.setEnabled(false);
-        btnIngresar.setBackgroundTintList(ColorStateList.valueOf(Color.GRAY));
+        btnIngresar.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF5B6472")));
         txtCodInterno = (TextView) findViewById(R.id.txtCodInterno);
         txtCodigo = (TextView) findViewById(R.id.txtUsername);
         txtClave = (TextView) findViewById(R.id.txtPassword);
         txtNombreUsuario = (TextView) findViewById(R.id.txtNombreUsuario);
         txtCondicion= (TextView) findViewById(R.id.txtCondicion);
+        txtCondicion.setSelected(true); // cinta de la ruta: se desplaza sola
         txtCodigo.setText("");
         txtClave.setText("");
         txtClave.setEnabled(false);
@@ -423,7 +424,7 @@ public class GuiAcceso extends AppCompatActivity {
                     txtClave.setText("");
                     btnSalir.setEnabled(false);
                     btnIngresar.setEnabled(false);
-                    btnIngresar.setBackgroundTintList(ColorStateList.valueOf(Color.GRAY));
+                    btnIngresar.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF5B6472")));
                     Log.e("error", "boton 1");
 
                 } else {
@@ -533,7 +534,7 @@ public class GuiAcceso extends AppCompatActivity {
                             // crearArchivoAdministrado();
                             nivelOperador = "A";
                             btnIngresar.setEnabled(true);
-                            btnIngresar.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF6A00")));
+                            btnIngresar.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF0047A0")));
                             btnSalir.setEnabled(true);
 
                         } else {
@@ -548,7 +549,7 @@ public class GuiAcceso extends AppCompatActivity {
                     } else {
 
                         btnIngresar.setEnabled(true);
-                        btnIngresar.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF6A00")));
+                        btnIngresar.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF0047A0")));
                         btnSalir.setEnabled(true);
                     }
 
@@ -556,7 +557,7 @@ public class GuiAcceso extends AppCompatActivity {
 
                     Log.e("error", "boton 2");
                     btnIngresar.setEnabled(false);
-                    btnIngresar.setBackgroundTintList(ColorStateList.valueOf(Color.GRAY));
+                    btnIngresar.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF5B6472")));
                     btnSalir.setEnabled(false);
                 }
 
@@ -1287,12 +1288,12 @@ public class GuiAcceso extends AppCompatActivity {
     private void preNombreArchivo(Integer Alerta) {
 
         File archivoNombre = new File(VariablesGlobales.getDirectorioactual() + "/DATOSDEENTRADA/NOMBRE");
-        txtCondicion.setText(" | Archivo:" + "CicXXXX" + " " + "Csecxxxx.ddd");
+        txtCondicion.setText("Sin ruta cargada en el equipo");
         if (!archivoNombre.exists() && archivoNombre.length() < 1) {
             if (Alerta>0)
                 mostrarDialogoAlerta("Advertencia", "Dispositivo no tiene Archivos\n Cargados... Favor Cargar Datos: ");
 
-            btnInfo.setImageResource(R.drawable.protecciondedatos1);
+            btnInfo.setImageResource(R.drawable.ic_acc_carga_no);
             return;
         }
 
@@ -1304,9 +1305,9 @@ public class GuiAcceso extends AppCompatActivity {
             String archivo_cargado = new String(byteArray);
 //| Archivo: AAAAMMRRR LXXXXXXX.000 txtcondicion
             String NombreArchivos_0 = archivo_cargado.substring(4, 12);//cambia 5, 14
-            txtCondicion.setText(" | Carga: CIC" + archivo_cargado.substring(0, 4).trim() + " Rut. " + NombreArchivos_0);
+            txtCondicion.setText("Ruta cargada " + NombreArchivos_0 + "  ·  Ciclo " + archivo_cargado.substring(0, 4).trim());
             rFile.close();
-            btnInfo.setImageResource(R.drawable.protecciondedatos);
+            btnInfo.setImageResource(R.drawable.ic_acc_carga_ok);
         } catch (Exception ex) {
             utils.Log(logfile, "[GuiAcceso]preNombreArchivo()|ERROR -> " + ex.getMessage());
             mensajes("Error Procesando Archivo Nombre! \n" + ex.getMessage(), 1000);
@@ -1330,7 +1331,7 @@ public class GuiAcceso extends AppCompatActivity {
                 variables.setNombregeneral(VariablesGlobales.getDirectorioactual() + "/DATOSDEENTRADA/GENERAL.TXT");
 
                 archivocargado = archivo_cargado.substring(4, 12);
-                txtCondicion.setText("Archivo: CIC"+archivo_cargado.substring(0, 4)+" - "+archivocargado);
+                txtCondicion.setText("Ruta cargada " + archivocargado + "  ·  Ciclo " + archivo_cargado.substring(0, 4).trim());
                 mensajeDeAlerta = "Ruta Cargada: " + archivocargado;
                 rFile.close();
 
@@ -1567,7 +1568,7 @@ public class GuiAcceso extends AppCompatActivity {
                 nivelOperador = tablaAforadores.gettablaAforadores_ESTADO();
                 btnSalir.setEnabled(true);
                 btnIngresar.setEnabled(true);
-                btnIngresar.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF6A00")));
+                btnIngresar.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF0047A0")));
                 btnSalir.requestFocus();
                 Toast.makeText(getApplicationContext(), "Ingreso como Administrador", Toast.LENGTH_LONG).show();
 
@@ -1590,7 +1591,7 @@ public class GuiAcceso extends AppCompatActivity {
                     aforadorClaveCorrecto = 1;
                     btnSalir.setEnabled(true);
                     btnIngresar.setEnabled(true);
-                    btnIngresar.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF6A00")));
+                    btnIngresar.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF0047A0")));
                     btnSalir.requestFocus();
                 } else {
 
@@ -1603,7 +1604,7 @@ public class GuiAcceso extends AppCompatActivity {
                     btnSalir.setEnabled(false);
                     Log.e("error", "boton 3");
                     btnIngresar.setEnabled(false);
-                    btnIngresar.setBackgroundTintList(ColorStateList.valueOf(Color.GRAY));
+                    btnIngresar.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF5B6472")));
                     return;
                 }
                 cargarImagenUsuario("" + txtCodigo.getText().toString().trim());

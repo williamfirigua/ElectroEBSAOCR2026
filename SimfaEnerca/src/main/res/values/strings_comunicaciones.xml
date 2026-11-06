@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Textos de la pantalla de Comunicaciones. Las tarjetas de accion llevan titulo en negrita y una linea de
+     descripcion mas pequena (<small>) en el mismo boton, para que toda la tarjeta responda al toque. -->
+<resources>
+    <string name="com_titulo">Comunicaciones</string>
+    <string name="com_volver">Volver</string>
+    <string name="com_red_activa">Conectado al servidor</string>
+    <string name="com_red_inactiva">Sin conexión con el servidor</string>
+    <string name="com_sin_mensajes">Sin mensajes. Aquí sale el resultado de cada envío o descarga.</string>
+
+    <string name="com_seccion_ruta">Ruta en el equipo</string>
+    <string name="com_archivo">Archivo</string>
+    <string name="com_mi_ruta">Descargar mi ruta</string>
+    <string name="com_mi_ruta_desc">Trae la ruta que la oficina le asignó. Si se corta la señal, sigue donde quedó.</string>
+
+    <string name="com_seccion_envio">Enviar al servidor</string>
+    <string name="com_enviar_datos">Enviar datos</string>
+    <string name="com_enviar_datos_desc">Sube las lecturas y facturas liquidadas en el equipo.</string>
+    <string name="com_valida_envio"><b>Validar envío</b>\n<small>Confirma que el servidor recibió todo</small></string>
+    <string name="com_enviar_fotos"><b>Enviar fotos</b>\n<small>Sube las fotos tomadas en la ruta</small></string>
+
+    <string name="com_seccion_equipo">Equipo</string>
+    <string name="com_validar_version"><b>Buscar actualización</b>\n<small>Descarga la versión nueva de la app</small></string>
+    <string name="com_configurar_web"><b>Configurar servidor</b>\n<small>Dirección del web service</small></string>
+    <string name="com_backup_fotos"><b>Respaldar fotos</b>\n<small>Copia las fotos en el equipo</small></string>
+    <string name="com_borrar_backup"><b>Borrar respaldo de fotos</b>\n<small>Libera espacio en el equipo</small></string>
+
+    <string name="com_seccion_soap">Carga antigua (SOAP)</string>
+    <string name="com_soap_desc">Solo si Descargar mi ruta falla: digite el ciclo, toque Traer ruta y luego Recibir datos.</string>
+    <string name="com_ciclo">Ciclo</string>
+    <string name="com_municipio">Municipio</string>
+    <string name="com_seccion">Sección</string>
+    <string name="com_division">División</string>
+    <string name="com_traer_ruta"><b>1. Traer ruta</b>\n<small>Valida la versión y trae la ruta del ciclo</small></string>
+    <string name="com_recibir_datos"><b>2. Recibir datos</b>\n<small>Carga los clientes de la ruta en el equipo</small></string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Miniatura de la galeria mientras carga (y recorte redondeado). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/lec_contenedor" />
+    <corners android:radius="12dp" />
+</shape>

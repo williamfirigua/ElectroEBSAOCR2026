@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Comunicaciones: franja con el ultimo mensaje del proceso (txtInfo). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/lec_banner" />
+    <corners android:radius="12dp" />
+</shape>

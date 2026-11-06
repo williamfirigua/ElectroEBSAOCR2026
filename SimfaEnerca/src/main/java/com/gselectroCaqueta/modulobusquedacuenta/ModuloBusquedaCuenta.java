@@ -2,7 +2,6 @@ package com.gselectroCaqueta.modulobusquedacuenta;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -207,7 +206,7 @@ public class ModuloBusquedaCuenta extends AppCompatActivity {
         ((TextView) fila.findViewById(R.id.txtItemNombre)).setText(indice.getNombre(i) + "  ·  Cta " + indice.getCuenta(i));
         fila.setClickable(true);
         fila.setOnClickListener(v -> {
-            v.setBackgroundColor(Color.rgb(255, 255, 153));
+            v.setBackgroundColor(getColor(R.color.lec_banner_nuevo));
             if (opcion == IndiceBusquedaClientes.CAMPO_MEDIDOR) {
                 devolver(String.valueOf(indice.getPrimerRegistro(i)), IndiceBusquedaClientes.CAMPO_MEDIDOR);
             } else {

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icono de las tarjetas de accion: azul primario; deshabilitada, gris. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/lec_borde" android:state_enabled="false" />
+    <item android:color="@color/lec_primario" />
+</selector>

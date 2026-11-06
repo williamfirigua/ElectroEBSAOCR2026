@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dialogos de causal, subcausal, informe, busqueda y galeria con la paleta de sol de la lectura v2
+     (colors_lectura.xml): fondo blanco, texto negro, bordes oscuros de 2dp y botones grandes. -->
+<resources>
+
+    <!-- Tema de los AlertDialog de AppCompat: new AlertDialog.Builder(activity, R.style.CauDialogo). -->
+    <style name="CauDialogo" parent="ThemeOverlay.AppCompat.Dialog.Alert">
+        <item name="colorPrimary">@color/lec_primario</item>
+        <item name="colorAccent">@color/lec_primario</item>
+        <item name="colorControlNormal">@color/lec_contorno</item>
+        <item name="colorControlActivated">@color/lec_primario</item>
+        <item name="android:windowBackground">@drawable/bg_cau_dialogo</item>
+        <item name="android:textColorPrimary">@color/lec_texto</item>
+        <item name="android:textColorSecondary">@color/lec_texto2</item>
+        <item name="android:textColorHint">@color/lec_texto2</item>
+        <item name="android:windowTitleStyle">@style/CauDialogo.Titulo</item>
+        <item name="buttonBarPositiveButtonStyle">@style/CauDialogo.BotonPrimario</item>
+        <item name="buttonBarNegativeButtonStyle">@style/CauDialogo.BotonContorno</item>
+        <item name="buttonBarNeutralButtonStyle">@style/CauDialogo.BotonContorno</item>
+        <item name="alertDialogStyle">@style/CauDialogo.Alerta</item>
+    </style>
+
+    <!-- Filas de setItems (subcausales) de 60dp, en negrita. -->
+    <style name="CauDialogo.Alerta" parent="AlertDialog.AppCompat">
+        <item name="listItemLayout">@layout/item_cau_subcausal</item>
+    </style>
+
+    <style name="CauDialogo.Titulo" parent="RtlOverlay.DialogWindowTitle.AppCompat">
+        <item name="android:textAppearance">@style/CauDialogo.TituloTexto</item>
+    </style>
+
+    <style name="CauDialogo.TituloTexto" parent="TextAppearance.AppCompat.Title">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/lec_texto</item>
+    </style>
+
+    <style name="CauDialogo.BotonPrimario" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:background">@drawable/bg_cau_boton_primario</item>
+        <item name="android:textColor">@color/cau_boton_primario_texto</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:minWidth">112dp</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <style name="CauDialogo.BotonContorno" parent="CauDialogo.BotonPrimario">
+        <item name="android:background">@drawable/bg_cau_boton_contorno</item>
+        <item name="android:textColor">@color/lec_primario</item>
+    </style>
+
+    <!-- Campos de busqueda: blanco con borde negro (bg_lec_campo), texto grande en negrita. -->
+    <style name="CauCampo">
+        <item name="android:background">@drawable/bg_lec_campo</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:textColor">@color/lec_texto</item>
+        <item name="android:textColorHint">@color/lec_texto2</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:drawablePadding">12dp</item>
+        <item name="android:drawableTint">@color/lec_texto</item>
+    </style>
+
+    <!-- Criterio de busqueda (RadioButton sin circulo). -->
+    <style name="BusChip">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:background">@drawable/bg_bus_chip</item>
+        <item name="android:button">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:textColor">@color/bus_chip_texto</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

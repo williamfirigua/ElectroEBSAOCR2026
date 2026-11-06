@@ -1,10 +1,17 @@
 package com.gselectroCaqueta.moduloanomalias;
 
 import android.app.Activity;
+import android.graphics.Typeface;
 import android.text.Editable;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -152,13 +159,30 @@ public final class DialogoCausas {
         final ListView lista = contenido.findViewById(R.id.listaCausas);
         final TextView txtElegida = contenido.findViewById(R.id.txtCausaElegida);
 
-        final ArrayAdapter<Causa> adaptador = new ArrayAdapter<>(activity, R.layout.item_causa, visibles);
+        final int colorCodigo = activity.getColor(R.color.lec_primario);
+        final ArrayAdapter<Causa> adaptador = new ArrayAdapter<Causa>(activity, R.layout.item_causa, visibles) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                // Solo presentación: el código en azul y negrita, la descripción en negro.
+                TextView v = (TextView) super.getView(position, convertView, parent);
+                Causa c = getItem(position);
+                if (c != null) {
+                    SpannableString s = new SpannableString(c.codigoLimpio + "   " + c.descripcion);
+                    int fin = c.codigoLimpio.length();
+                    s.setSpan(new StyleSpan(Typeface.BOLD), 0, fin, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    s.setSpan(new ForegroundColorSpan(colorCodigo), 0, fin, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    s.setSpan(new RelativeSizeSpan(1.12f), 0, fin, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    v.setText(s);
+                }
+                return v;
+            }
+        };
         lista.setAdapter(adaptador);
 
         final Causa[] elegida = {null};
         final boolean[] respondido = {false};
 
-        final AlertDialog dialogo = new AlertDialog.Builder(activity)
+        final AlertDialog dialogo = new AlertDialog.Builder(activity, R.style.CauDialogo)
                 .setTitle("Causa de no lectura")
                 .setView(contenido)
                 .setNegativeButton("Cancelar", null)
