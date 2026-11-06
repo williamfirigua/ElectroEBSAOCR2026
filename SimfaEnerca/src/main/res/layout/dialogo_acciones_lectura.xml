@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Acciones de la cuenta (lectura v2): se abren con el boton de acciones junto a las flechas. -->
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:columnCount="2"
+    android:paddingStart="16dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="8dp">
+
+    <Button
+        android:id="@+id/accCausal"
+        style="@style/BotonAccionDialogo"
+        android:drawableTop="@drawable/ic_lec_causal"
+        android:text="Causal" />
+
+    <Button
+        android:id="@+id/accFoto"
+        style="@style/BotonAccionDialogo"
+        android:drawableTop="@drawable/ic_lec_foto"
+        android:text="Foto" />
+
+    <Button
+        android:id="@+id/accBuscar"
+        style="@style/BotonAccionDialogo"
+        android:drawableTop="@drawable/ic_lec_buscar"
+        android:text="Buscar cliente" />
+
+    <Button
+        android:id="@+id/accLuz"
+        style="@style/BotonAccionDialogo"
+        android:drawableTop="@drawable/ic_lec_luz"
+        android:text="Luz" />
+</GridLayout>

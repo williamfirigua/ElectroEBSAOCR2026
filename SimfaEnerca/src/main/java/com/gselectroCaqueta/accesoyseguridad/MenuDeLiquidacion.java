@@ -750,6 +750,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         btnTomarFoto = findViewById(R.id.btnTomarFoto);
         btnBuscar = findViewById(R.id.btnBuscar);
         prepararLinterna();
+        configurarBotonAcciones();
         prepararChipContenedor();
 
         // txtInformeEscrito = (TextView) findViewById(R.id.txtInformeEscrito);
@@ -15300,6 +15301,58 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         btnLinterna.setOnClickListener(v -> {
             if (!linterna.alternar()) mensajeT("No se pudo cambiar la linterna (camara en uso)", msgCorto);
         });
+        // Sacudir el celular prende o apaga la luz (dos sacudones seguidos).
+        sacudida = new DetectorSacudida(this, () -> {
+            if (camaraAbierta || linterna == null) return;
+            if (linterna.alternar()) {
+                getWindow().getDecorView().performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
+            }
+        });
+        sacudida.iniciar();
+    }
+
+    private DetectorSacudida sacudida;
+
+    // ======================================================================== acciones de la cuenta
+
+    /** Boton junto a las flechas: toque o sostenido abre Causal, Foto, Buscar y Luz. */
+    private void configurarBotonAcciones() {
+        View b = findViewById(R.id.btnAccionesLectura);
+        if (b == null) return;
+        b.setOnClickListener(v -> mostrarAccionesLectura());
+        b.setOnLongClickListener(v -> {
+            v.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
+            mostrarAccionesLectura();
+            return true;
+        });
+    }
+
+    private void mostrarAccionesLectura() {
+        View contenido = getLayoutInflater().inflate(R.layout.dialogo_acciones_lectura, null, false);
+        final androidx.appcompat.app.AlertDialog d = new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Acciones de la cuenta")
+                .setView(contenido)
+                .setNegativeButton("Cerrar", null)
+                .create();
+        android.widget.Button luz = contenido.findViewById(R.id.accLuz);
+        if (linterna == null || !linterna.disponible() || btnLinterna == null) {
+            luz.setVisibility(View.GONE);
+        } else {
+            luz.setText(linterna.encendida() ? "Apagar luz" : "Prender luz");
+        }
+        // Cada opcion dispara el boton de siempre (oculto): misma logica y mismas validaciones.
+        vincularAccion(d, contenido, R.id.accCausal, btnAnomalia);
+        vincularAccion(d, contenido, R.id.accFoto, btnTomarFoto);
+        vincularAccion(d, contenido, R.id.accBuscar, btnBuscar);
+        vincularAccion(d, contenido, R.id.accLuz, btnLinterna);
+        d.show();
+    }
+
+    private static void vincularAccion(android.app.Dialog d, View contenido, int id, View destino) {
+        contenido.findViewById(id).setOnClickListener(v -> {
+            d.dismiss();
+            if (destino != null) destino.performClick();
+        });
     }
 
     private void pintarLinterna(boolean encendida) {
@@ -18164,11 +18217,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         // Mensajes que baja el servicio de sincronizacion: el contador del icono se refresca solo.
         BandejaMensajes.oyente(() -> runOnUiThread(this::actualizarBadgeMensajes));
         actualizarBadgeMensajes();
+        if (sacudida != null) sacudida.iniciar();
     }
 
     @Override
     protected void onPause() {
         BandejaMensajes.oyente(null);
+        if (sacudida != null) sacudida.detener(); // fuera de la pantalla (o con la camara abierta) no escucha
         com.gselectroCaqueta.sync.RespaldoSd.ahora(this); // sale de la pantalla: copiar lo último a la SD
         // La linterna no queda encendida fuera de la liquidacion (se apaga tambien al abrir la camara).
         if (!camaraAbierta) apagarLinterna();

@@ -40,24 +40,30 @@
                 android:layout_weight="1"
                 android:orientation="vertical">
 
+                <!-- Se achican solos para que la ruta y el registro quepan completos -->
                 <TextView
                     android:id="@+id/txtTituloLectura"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:singleLine="true"
+                    android:layout_width="match_parent"
+                    android:layout_height="26dp"
+                    android:autoSizeMaxTextSize="18sp"
+                    android:autoSizeMinTextSize="12sp"
+                    android:autoSizeTextType="uniform"
+                    android:fontFeatureSettings="tnum"
+                    android:maxLines="1"
                     android:text="Lectura"
                     android:textColor="@color/lec_texto"
-                    android:textSize="18sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/txtSentidoRuta"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="20dp"
+                    android:autoSizeMaxTextSize="14sp"
+                    android:autoSizeMinTextSize="10sp"
+                    android:autoSizeTextType="uniform"
                     android:fontFeatureSettings="tnum"
-                    android:singleLine="true"
-                    android:textColor="@color/lec_texto2"
-                    android:textSize="13sp" />
+                    android:maxLines="1"
+                    android:textColor="@color/lec_texto2" />
             </LinearLayout>
 
             <FrameLayout
@@ -121,7 +127,7 @@
         <!-- Franja de estado: red, tipo de cuenta, critica de la lectura, envio en curso e impresora -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="34dp"
+            android:layout_height="30dp"
             android:background="@color/lec_contenedor"
             android:gravity="center_vertical"
             android:orientation="horizontal"
@@ -409,107 +415,69 @@
             android:textStyle="bold"
             android:visibility="gone" />
 
-        <!-- Navegacion entre clientes -->
+        <!-- Navegacion entre clientes y boton de acciones (Causal, Foto, Buscar, Luz) -->
         <LinearLayout
             android:id="@+id/tableButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingStart="12dp"
+            android:paddingStart="8dp"
             android:paddingTop="8dp"
-            android:paddingEnd="12dp">
+            android:paddingEnd="8dp">
 
             <ImageButton
                 android:id="@+id/btnPrimero"
-                android:layout_width="52dp"
-                android:layout_height="46dp"
-                android:background="@drawable/bg_lec_tonal"
+                style="@style/BotonNavLectura"
                 android:contentDescription="@string/primer_registro"
                 android:src="@drawable/ic_lec_primero" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/btnAtras"
-                android:layout_width="0dp"
-                android:layout_height="46dp"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_lec_tonal"
+                style="@style/BotonNavLectura"
                 android:contentDescription="@string/atras_un_registro"
-                android:drawableStart="@drawable/ic_lec_anterior"
-                android:paddingStart="14dp"
-                android:paddingEnd="18dp"
-                android:stateListAnimator="@null"
-                android:text="Anterior"
-                android:textAllCaps="false"
-                android:textColor="@color/lec_texto"
-                android:textSize="15sp" />
+                android:src="@drawable/ic_lec_anterior" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/btnAdelante"
-                android:layout_width="0dp"
-                android:layout_height="46dp"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_lec_tonal"
+                style="@style/BotonNavLectura"
                 android:contentDescription="@string/adelanta_un_registro"
-                android:drawableEnd="@drawable/ic_lec_siguiente"
-                android:paddingStart="18dp"
-                android:paddingEnd="14dp"
-                android:stateListAnimator="@null"
-                android:text="Siguiente"
-                android:textAllCaps="false"
-                android:textColor="@color/lec_texto"
-                android:textSize="15sp" />
+                android:src="@drawable/ic_lec_siguiente" />
 
             <ImageButton
                 android:id="@+id/btnUltimo"
-                android:layout_width="52dp"
-                android:layout_height="46dp"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/bg_lec_tonal"
+                style="@style/BotonNavLectura"
                 android:contentDescription="@string/ultimo_registro"
                 android:src="@drawable/ic_lec_ultimo" />
+
+            <!-- Toque o sostenido: abre Causal, Foto, Buscar y Luz -->
+            <Button
+                android:id="@+id/btnAccionesLectura"
+                style="@style/BotonNavLectura"
+                android:background="@drawable/bg_lec_acciones"
+                android:contentDescription="Acciones de la cuenta: causal, foto, buscar y luz"
+                android:drawableTop="@drawable/ic_lec_acciones"
+                android:drawableTint="@color/lec_primario"
+                android:paddingTop="6dp"
+                android:paddingBottom="4dp"
+                android:stateListAnimator="@null"
+                android:text="Acciones"
+                android:textAllCaps="false"
+                android:textColor="@color/lec_primario"
+                android:textSize="12sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Acciones de la cuenta, encima de la lectura -->
+        <!-- Los botones de siempre, ocultos: el selector de acciones los dispara (mismos ids y listeners). -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingStart="12dp"
-            android:paddingTop="8dp"
-            android:paddingEnd="12dp">
+            android:visibility="gone">
 
-            <Button
-                android:id="@+id/btnAnomalia"
-                style="@style/BotonAccionLectura"
-                android:contentDescription="Causal de no lectura"
-                android:drawableStart="@drawable/ic_lec_causal"
-                android:text="Causal" />
-
-            <Button
-                android:id="@+id/btnTomarFoto"
-                style="@style/BotonAccionLectura"
-                android:layout_marginStart="8dp"
-                android:contentDescription="Tomar foto"
-                android:drawableStart="@drawable/ic_lec_foto"
-                android:text="Foto" />
-
-            <Button
-                android:id="@+id/btnBuscar"
-                style="@style/BotonAccionLectura"
-                android:layout_marginStart="8dp"
-                android:contentDescription="Buscar cliente"
-                android:drawableStart="@drawable/ic_lec_buscar"
-                android:text="Buscar" />
-
-            <Button
-                android:id="@+id/btnLinterna"
-                style="@style/BotonAccionLectura"
-                android:layout_marginStart="8dp"
-                android:contentDescription="Encender linterna"
-                android:drawableStart="@drawable/ic_lec_luz"
-                android:text="Luz" />
+            <Button android:id="@+id/btnAnomalia" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Causal" />
+            <Button android:id="@+id/btnTomarFoto" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Foto" />
+            <Button android:id="@+id/btnBuscar" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Buscar" />
+            <Button android:id="@+id/btnLinterna" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Luz" />
         </LinearLayout>
 
         <!-- Lectura -->
