@@ -8623,6 +8623,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 break;
             case 15: // Evaluar Noenviadas Gprs
                 code.setLength(0);
+                // Envio por API: ENVIOSGPRS.SDA queda siempre completo como respaldo, asi que la validacion vieja
+                // por archivos siempre decia "Aun existen registros sin enviar". Aqui se compara contra la BD.
+                if (ConfigSync.modoRest(this)) {
+                    evaluarEnviosApi();
+                    break;
+                }
                 androidx.appcompat.app.AlertDialog.Builder builder2 = DialogosLectura.builder(this);
                 builder2.setTitle("Evaluar envíos");
                 builder2.setMessage("¿Revisa si todas sus lecturas fueron enviadas al servidor?");
@@ -15502,45 +15508,137 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
      * en texto en la franja de estado y, si es una desviacion, como aviso encima del final del detalle. No cambia la
      * liquidacion: solo muestra lo que ella ya decidio.
      */
+    // ======================================================================== evaluar envios (API)
+
+    /**
+     * Evaluar no enviadas en modo API: lo que sigue en la cola del equipo y, contra la base de datos del
+     * servidor, el respaldo completo (ENVIOSGPRS.SDA + CO_COBRO.SDA). El servidor guarda lo que le falte y
+     * cuenta lo que ya tenia, igual que "Subir respaldo" en Pendientes de envio.
+     */
+    private void evaluarEnviosApi() {
+        final ColaEnvioSqlite cola = ColaEnvioSqlite.de(this);
+        final int pendientes = cola.contar(ColaEnvio.LIQUIDACION, ColaEnvio.PENDIENTE);
+        final int rechazadas = cola.contar(ColaEnvio.LIQUIDACION, ColaEnvio.ERROR);
+        DialogosLectura.builder(this)
+                .setTitle("Evaluar envíos")
+                .setMessage("Se compara lo leído en este equipo con lo que ya está en el servidor. "
+                        + "Lo que falte queda guardado en el servidor.\n\nEn el equipo: " + pendientes
+                        + " por enviar y " + rechazadas + " rechazadas.")
+                .setNegativeButton("Cancelar", null)
+                .setPositiveButton("Evaluar", (d, w) -> subirRespaldoEvaluacion(pendientes, rechazadas))
+                .show();
+    }
+
+    private void subirRespaldoEvaluacion(final int pendientes, final int rechazadas) {
+        final File envio = new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/ENVIOSGPRS.SDA");
+        final File cobros = new File(VariablesGlobales.directorioactual + "/DATOSDESALIDA/CO_COBRO.SDA");
+        if (!envio.isFile() || envio.length() == 0) {
+            mostrarResultadoEvaluacion("Todavía no hay lecturas tomadas en este equipo.", pendientes, rechazadas);
+            return;
+        }
+        final ConfigSync cfg = new ConfigSync(this);
+        if (cfg.baseApi().isEmpty()) {
+            mostrarResultadoEvaluacion("No hay dirección del servidor configurada.", pendientes, rechazadas);
+            return;
+        }
+        mensajeT("Comparando con el servidor…", msgMedio);
+        new Thread(() -> {
+            com.gselectroCaqueta.sync.MotorSincronizacion.Resumen r = new com.gselectroCaqueta.sync.MotorSincronizacion.Resumen();
+            com.gselectroCaqueta.sync.MotorSincronizacion motor = new com.gselectroCaqueta.sync.MotorSincronizacion(
+                    new ApiMovil(cfg.baseApi()), ColaEnvioSqlite.de(this), cfg, cfg, null);
+            final ApiMovil.Respuesta resp = motor.subirRespaldo(envio, cobros, r);
+            runOnUiThread(() -> {
+                String texto;
+                if (resp.ok()) {
+                    texto = "Lecturas en el equipo: " + com.gselectroCaqueta.sync.Json.texto(resp.cuerpo, "lineas")
+                            + "\nYa estaban en el servidor: " + com.gselectroCaqueta.sync.Json.texto(resp.cuerpo, "duplicados")
+                            + "\nFaltaban y quedaron guardadas: " + com.gselectroCaqueta.sync.Json.texto(resp.cuerpo, "aceptados")
+                            + "\nRechazadas por el servidor: " + com.gselectroCaqueta.sync.Json.texto(resp.cuerpo, "rechazados");
+                } else if (resp.codigo == 0) {
+                    texto = "Sin sesión con el servidor: " + resp.error + "\nIngrese de nuevo con su clave.";
+                } else if (resp.codigo == ApiMovil.SIN_RED) {
+                    texto = "Sin conexión con el servidor. Intente cuando tenga señal.";
+                } else {
+                    texto = "El servidor no pudo comparar las lecturas (" + resp + ").";
+                }
+                escribeResumenTiempo("Evaluar envios API: " + texto.replace("\n", " | ") + "|" + VariablesGlobales.registroactual);
+                mostrarResultadoEvaluacion(texto, pendientes, rechazadas);
+            });
+        }).start();
+    }
+
+    private void mostrarResultadoEvaluacion(String texto, int pendientes, int rechazadas) {
+        String cola = pendientes == 0 && rechazadas == 0 ? "\n\nNo queda nada por enviar en el equipo."
+                : "\n\nEn el equipo: " + pendientes + " por enviar (salen solas) y " + rechazadas + " rechazadas.";
+        DialogosLectura.builder(this)
+                .setTitle("Resultado de la evaluación")
+                .setMessage(texto + cola)
+                .setPositiveButton("Aceptar", null)
+                .show();
+    }
+
+    // Tipo de critica para el aviso: icono y color segun lo que paso con la lectura.
+    private static final int CRIT_ALTA = 0, CRIT_MENOR = 1, CRIT_BAJA = 2, CRIT_IGUAL = 3;
+
     private void marcarCritica(int recurso) {
         if (imagenLiquid_3 != null) imagenLiquid_3.setImageResource(recurso);
         final String corto, titulo;
-        final boolean grave;
+        final int tipo;
         if (recurso == R.drawable.imagen_consumoalto) {
-            corto = "Consumo alto"; titulo = "Consumo alto"; grave = true;
+            corto = "Consumo alto"; titulo = "Consumo alto"; tipo = CRIT_ALTA;
         } else if (recurso == R.drawable.imagen_negativo) {
-            corto = "Menor a la anterior"; titulo = "Lectura menor a la anterior"; grave = true;
+            corto = "Menor a la anterior"; titulo = "Lectura menor a la anterior"; tipo = CRIT_MENOR;
         } else if (recurso == R.drawable.imagen_consumobajo) {
-            corto = "Consumo bajo"; titulo = "Consumo bajo"; grave = false;
+            corto = "Consumo bajo"; titulo = "Consumo bajo"; tipo = CRIT_BAJA;
         } else if (recurso == R.drawable.imagen_lecturasiguales) {
-            corto = "Igual a la anterior"; titulo = "Lectura igual a la anterior"; grave = false;
+            corto = "Igual a la anterior"; titulo = "Lectura igual a la anterior"; tipo = CRIT_IGUAL;
         } else {
-            corto = null; titulo = null; grave = false;
+            corto = null; titulo = null; tipo = -1;
         }
         if (txtCritica != null) {
             if (corto == null) {
                 txtCritica.setVisibility(View.GONE);
             } else {
                 txtCritica.setText(corto);
-                txtCritica.setBackgroundResource(grave ? R.drawable.bg_lec_chip_mal : R.drawable.bg_lec_chip_aviso);
-                txtCritica.setTextColor(grave ? Color.WHITE : colorLec(R.color.lec_aviso_texto));
+                // Alta y giro/negativo en rojo, baja en amarillo, iguales en verde.
+                int fondo = tipo == CRIT_BAJA ? R.drawable.bg_lec_chip_aviso
+                        : tipo == CRIT_IGUAL ? R.drawable.bg_lec_chip_ok : R.drawable.bg_lec_chip_mal;
+                txtCritica.setBackgroundResource(fondo);
+                txtCritica.setTextColor(tipo == CRIT_BAJA ? colorLec(R.color.lec_aviso_texto) : Color.WHITE);
                 txtCritica.setVisibility(View.VISIBLE);
             }
         }
         if (titulo == null) {
             ocultarAvisoDesviacion();
         } else if (indicadorManual == 0) { // en la liquidacion automatica no hay a quien avisar
-            mostrarAvisoDesviacion(titulo, grave);
+            mostrarAvisoDesviacion(titulo, tipo);
         }
     }
 
-    private void mostrarAvisoDesviacion(String titulo, boolean grave) {
+    private void mostrarAvisoDesviacion(String titulo, int tipo) {
         if (txtAvisoDesviacion == null) return;
-        int texto = grave ? 0xFF410E0B : colorLec(R.color.lec_aviso_texto);
-        txtAvisoDesviacion.setBackgroundResource(grave ? R.drawable.bg_lec_aviso_grave : R.drawable.bg_lec_aviso);
+        final int fondo, icono, texto, colorIcono;
+        switch (tipo) {
+            case CRIT_ALTA:
+                fondo = R.drawable.bg_lec_aviso_grave; icono = R.drawable.ic_lec_crit_alta;
+                texto = 0xFF410E0B; colorIcono = colorLec(R.color.lec_error);
+                break;
+            case CRIT_MENOR:
+                fondo = R.drawable.bg_lec_aviso_grave; icono = R.drawable.ic_lec_crit_menos;
+                texto = 0xFF410E0B; colorIcono = colorLec(R.color.lec_error);
+                break;
+            case CRIT_BAJA:
+                fondo = R.drawable.bg_lec_aviso; icono = R.drawable.ic_lec_crit_baja;
+                texto = colorLec(R.color.lec_aviso_texto); colorIcono = texto;
+                break;
+            default: // CRIT_IGUAL
+                fondo = R.drawable.bg_lec_aviso_ok; icono = R.drawable.ic_lec_crit_igual;
+                texto = 0xFF06361A; colorIcono = colorLec(R.color.lec_exito);
+        }
+        txtAvisoDesviacion.setBackgroundResource(fondo);
         txtAvisoDesviacion.setTextColor(texto);
-        txtAvisoDesviacion.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_lec_alerta, 0, 0, 0);
-        txtAvisoDesviacion.setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(grave ? colorLec(R.color.lec_error) : texto));
+        txtAvisoDesviacion.setCompoundDrawablesRelativeWithIntrinsicBounds(icono, 0, 0, 0);
+        txtAvisoDesviacion.setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(colorIcono));
         android.text.SpannableStringBuilder sb = new android.text.SpannableStringBuilder(titulo);
         sb.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, titulo.length(), 0);
         sb.setSpan(new android.text.style.RelativeSizeSpan(1.25f), 0, titulo.length(), 0);
@@ -15553,7 +15651,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             txtAvisoDesviacion.setVisibility(View.VISIBLE);
             txtAvisoDesviacion.animate().alpha(1f).translationY(0f).setDuration(180).start();
         }
-        if (grave) txtAvisoDesviacion.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
+        if (tipo == CRIT_ALTA || tipo == CRIT_MENOR) {
+            txtAvisoDesviacion.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
+        }
         avisoHandler.postDelayed(ocultarAvisoRunnable, 4500);
     }
 
