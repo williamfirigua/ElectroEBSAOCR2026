@@ -8,6 +8,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
@@ -99,17 +100,25 @@ public class GaleriaFotos extends Activity {
     private EditText txtBuscar;
     private AlmacenEstado anuladas;
 
+    /** Toques más seguidos que esto sobre la lista se ignoran (un doble toque abría dos diálogos). */
+    private static final long ESPERA_TOQUE_MS = 600;
+    /** Diálogo de la foto abierto: la lista no abre otro hasta que se cierre (onDismiss). */
+    private boolean fotoAbierta;
+    /** Diálogo de borrar / anular abierto: no se abre otro igual con un segundo toque. */
+    private boolean accionAbierta;
+    private long ultimoToque;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         anuladas = AlmacenEstado.de(this, "fotos_anuladas");
-        int pad = dp(16);
+        int pad = dp(12);
 
         // Presentación con la paleta de sol de la lectura v2 (colors_lectura.xml).
         LinearLayout raiz = new LinearLayout(this);
         raiz.setOrientation(LinearLayout.VERTICAL);
         raiz.setBackgroundColor(getColor(R.color.lec_superficie));
-        raiz.setPadding(pad, dp(8), pad, 0);
+        raiz.setPadding(pad, dp(4), pad, 0);
 
         LinearLayout cabecera = new LinearLayout(this);
         cabecera.setOrientation(LinearLayout.HORIZONTAL);
@@ -120,7 +129,7 @@ public class GaleriaFotos extends Activity {
         volver.setBackgroundResource(R.drawable.bg_lec_icono);
         volver.setContentDescription("Volver");
         volver.setOnClickListener(v -> finish());
-        LinearLayout.LayoutParams lpVolver = new LinearLayout.LayoutParams(dp(48), dp(48));
+        LinearLayout.LayoutParams lpVolver = new LinearLayout.LayoutParams(dp(44), dp(44));
         lpVolver.setMarginStart(-dp(8));
         lpVolver.setMarginEnd(dp(4));
         cabecera.addView(volver, lpVolver);
@@ -129,13 +138,13 @@ public class GaleriaFotos extends Activity {
         textos.setOrientation(LinearLayout.VERTICAL);
         TextView titulo = new TextView(this);
         titulo.setText("Galería de fotos");
-        titulo.setTextSize(24);
+        titulo.setTextSize(20);
         titulo.setTypeface(Typeface.DEFAULT_BOLD);
         titulo.setTextColor(getColor(R.color.lec_texto));
         textos.addView(titulo);
 
         txtResumen = new TextView(this);
-        txtResumen.setTextSize(16);
+        txtResumen.setTextSize(13);
         txtResumen.setTypeface(Typeface.DEFAULT_BOLD);
         txtResumen.setTextColor(getColor(R.color.lec_texto2));
         txtResumen.setFontFeatureSettings("tnum");
@@ -148,14 +157,14 @@ public class GaleriaFotos extends Activity {
         txtBuscar.setSingleLine(true);
         txtBuscar.setInputType(InputType.TYPE_CLASS_NUMBER);
         txtBuscar.setBackgroundResource(R.drawable.bg_lec_campo);
-        txtBuscar.setPadding(dp(16), 0, dp(16), 0);
-        txtBuscar.setTextSize(20);
+        txtBuscar.setPadding(dp(12), 0, dp(12), 0);
+        txtBuscar.setTextSize(15);
         txtBuscar.setTypeface(Typeface.DEFAULT_BOLD);
         txtBuscar.setTextColor(getColor(R.color.lec_texto));
         txtBuscar.setHintTextColor(getColor(R.color.lec_texto2));
         txtBuscar.setFontFeatureSettings("tnum");
         txtBuscar.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_lec_buscar, 0, 0, 0);
-        txtBuscar.setCompoundDrawablePadding(dp(12));
+        txtBuscar.setCompoundDrawablePadding(dp(8));
         txtBuscar.setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(getColor(R.color.lec_texto)));
         txtBuscar.addTextChangedListener(new TextWatcher() {
             public void beforeTextChanged(CharSequence s, int a, int b, int c) {
@@ -168,8 +177,8 @@ public class GaleriaFotos extends Activity {
                 filtrar();
             }
         });
-        LinearLayout.LayoutParams lpBuscar = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(56));
-        lpBuscar.setMargins(0, dp(12), 0, dp(8));
+        LinearLayout.LayoutParams lpBuscar = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48));
+        lpBuscar.setMargins(0, dp(6), 0, dp(6));
         raiz.addView(txtBuscar, lpBuscar);
 
         ListView lista = new ListView(this);
@@ -178,7 +187,13 @@ public class GaleriaFotos extends Activity {
         lista.setSelector(android.R.color.transparent);
         adaptador = new Adaptador();
         lista.setAdapter(adaptador);
-        lista.setOnItemClickListener((p, v, pos, id) -> abrir(visibles.get(pos)));
+        lista.setOnItemClickListener((p, v, pos, id) -> {
+            if (pos < 0 || pos >= visibles.size() || fotoAbierta || accionAbierta) return;
+            long ahora = SystemClock.elapsedRealtime();
+            if (ahora - ultimoToque < ESPERA_TOQUE_MS) return;
+            ultimoToque = ahora;
+            abrir(visibles.get(pos));
+        });
         raiz.addView(lista, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
         setContentView(raiz);
@@ -279,23 +294,37 @@ public class GaleriaFotos extends Activity {
 
     // ------------------------------------------------------------------ acciones
 
+    /**
+     * Diálogo de la foto. El archivo y la fecha van dentro de la vista (no con setMessage): con mensaje y vista a
+     * la vez el AlertDialog no reparte el alto y la foto empujaba los botones (Borrar / Anular foto / Cerrar) fuera
+     * de la pantalla. La foto tiene alto fijo (~42% de la pantalla, fitCenter) para que título, textos y botones
+     * se vean siempre sin desplazar.
+     */
     private void abrir(Foto f) {
+        int altoFoto = Math.round(getResources().getDisplayMetrics().heightPixels * 0.42f);
         ImageView img = new ImageView(this);
         img.setAdjustViewBounds(true);
         img.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        img.setMaxHeight(altoFoto);
         img.setBackgroundResource(R.drawable.bg_gal_miniatura);
         img.setClipToOutline(true);
-        img.setMinimumHeight(dp(160));
         hilo.execute(() -> {
             Bitmap b = decodificar(f.archivo, 1080);
             ui.post(() -> img.setImageBitmap(b));
         });
         LinearLayout marco = new LinearLayout(this);
-        marco.setPadding(dp(20), dp(4), dp(20), 0);
-        marco.addView(img, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        marco.setOrientation(LinearLayout.VERTICAL);
+        marco.setPadding(dp(20), dp(2), dp(20), dp(4));
+        TextView datos = new TextView(this);
+        datos.setText(f.archivo.getName() + "\n" + new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US).format(new Date(f.archivo.lastModified())));
+        datos.setTextSize(14);
+        datos.setTextColor(getColor(R.color.lec_texto2));
+        datos.setFontFeatureSettings("tnum");
+        datos.setPadding(0, 0, 0, dp(8));
+        marco.addView(datos);
+        marco.addView(img, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, altoFoto));
         AlertDialog.Builder d = new AlertDialog.Builder(this, R.style.CauDialogo)
                 .setTitle("Cuenta " + f.cuenta + " · " + textoEstado(f.estado))
-                .setMessage(f.archivo.getName() + "\n" + new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.US).format(new Date(f.archivo.lastModified())))
                 .setView(marco)
                 .setNegativeButton("Cerrar", null);
         if (f.estado == SIN_ENVIAR) {
@@ -303,16 +332,30 @@ public class GaleriaFotos extends Activity {
         } else if (f.estado == ENVIADA) {
             d.setPositiveButton("Anular foto", (x, w) -> pedirAnulacion(f));
         }
-        botonPeligro(d.show());
+        AlertDialog dlg = d.create();
+        dlg.setOnDismissListener(x -> fotoAbierta = false);
+        fotoAbierta = true;
+        dlg.show();
+        botonPeligro(dlg);
     }
 
     private void confirmarBorrar(Foto f) {
-        botonPeligro(new AlertDialog.Builder(this, R.style.CauDialogo)
+        if (accionAbierta) return; // segundo toque sobre Borrar
+        final boolean[] hecho = {false};
+        AlertDialog dlg = new AlertDialog.Builder(this, R.style.CauDialogo)
                 .setTitle("Borrar foto")
                 .setMessage("La foto " + f.archivo.getName() + " no se ha enviado. Se borra del celular y no se enviará.")
                 .setNegativeButton("Cancelar", null)
-                .setPositiveButton("Borrar", (x, w) -> borrar(f))
-                .show());
+                .setPositiveButton("Borrar", (x, w) -> {
+                    if (hecho[0]) return; // doble toque: borrar una sola vez
+                    hecho[0] = true;
+                    borrar(f);
+                })
+                .create();
+        dlg.setOnDismissListener(x -> accionAbierta = false);
+        accionAbierta = true;
+        dlg.show();
+        botonPeligro(dlg);
     }
 
     /** Borrar / anular en rojo con borde (solo presentación). */
@@ -392,6 +435,7 @@ public class GaleriaFotos extends Activity {
     }
 
     private void pedirAnulacion(Foto f) {
+        if (accionAbierta) return; // segundo toque sobre Anular foto
         LinearLayout caja = new LinearLayout(this);
         caja.setOrientation(LinearLayout.VERTICAL);
         int pad = dp(20);
@@ -423,6 +467,7 @@ public class GaleriaFotos extends Activity {
         dlg.setOnShowListener(d -> {
             botonPeligro(dlg);
             dlg.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                if (!dlg.isShowing()) return; // doble toque después de anular
                 String motivo = txtMotivo.getText().toString().trim();
                 if (motivo.isEmpty()) {
                     txtMotivo.setError("Escriba el motivo");
@@ -440,6 +485,8 @@ public class GaleriaFotos extends Activity {
                 anular(f, s, motivo);
             });
         });
+        dlg.setOnDismissListener(x -> accionAbierta = false);
+        accionAbierta = true;
         dlg.show();
     }
 
@@ -551,38 +598,38 @@ public class GaleriaFotos extends Activity {
                 fila = new LinearLayout(GaleriaFotos.this);
                 fila.setOrientation(LinearLayout.HORIZONTAL);
                 fila.setGravity(Gravity.CENTER_VERTICAL);
-                fila.setMinimumHeight(dp(108));
-                fila.setPadding(0, dp(10), 0, dp(10));
+                fila.setMinimumHeight(dp(80));
+                fila.setPadding(0, dp(8), 0, dp(8));
                 fila.setBackgroundResource(R.drawable.bg_bus_item);
                 img = new ImageView(GaleriaFotos.this);
                 img.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 img.setBackgroundResource(R.drawable.bg_gal_miniatura);
                 img.setClipToOutline(true);
-                fila.addView(img, new LinearLayout.LayoutParams(dp(88), dp(88)));
+                fila.addView(img, new LinearLayout.LayoutParams(dp(64), dp(64)));
 
                 LinearLayout col = new LinearLayout(GaleriaFotos.this);
                 col.setOrientation(LinearLayout.VERTICAL);
-                col.setPadding(dp(14), 0, 0, 0);
+                col.setPadding(dp(12), 0, 0, 0);
                 txtCuenta = new TextView(GaleriaFotos.this);
-                txtCuenta.setTextSize(19);
+                txtCuenta.setTextSize(16);
                 txtCuenta.setTypeface(Typeface.DEFAULT_BOLD);
                 txtCuenta.setTextColor(getColor(R.color.lec_texto));
                 txtCuenta.setFontFeatureSettings("tnum");
                 col.addView(txtCuenta);
                 txtArchivo = new TextView(GaleriaFotos.this);
-                txtArchivo.setTextSize(14);
+                txtArchivo.setTextSize(13);
                 txtArchivo.setTextColor(getColor(R.color.lec_texto2));
                 txtArchivo.setFontFeatureSettings("tnum");
                 txtArchivo.setSingleLine(true);
                 txtArchivo.setEllipsize(android.text.TextUtils.TruncateAt.MIDDLE);
                 col.addView(txtArchivo);
                 txtEstado = new TextView(GaleriaFotos.this);
-                txtEstado.setTextSize(14);
+                txtEstado.setTextSize(12);
                 txtEstado.setTypeface(Typeface.DEFAULT_BOLD);
                 txtEstado.setGravity(Gravity.CENTER_VERTICAL);
-                txtEstado.setPadding(dp(10), 0, dp(10), 0);
-                LinearLayout.LayoutParams lpEstado = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(28));
-                lpEstado.setMargins(0, dp(6), 0, 0);
+                txtEstado.setPadding(dp(8), 0, dp(8), 0);
+                LinearLayout.LayoutParams lpEstado = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, dp(24));
+                lpEstado.setMargins(0, dp(4), 0, 0);
                 col.addView(txtEstado, lpEstado);
                 fila.addView(col, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
                 fila.setTag(new Object[]{img, txtCuenta, txtArchivo, txtEstado});

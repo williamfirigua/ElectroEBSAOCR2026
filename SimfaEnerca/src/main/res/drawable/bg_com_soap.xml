@@ -3,5 +3,5 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
     <solid android:color="@color/lec_superficie" />
     <stroke android:width="2dp" android:color="@color/lec_contorno" android:dashWidth="8dp" android:dashGap="5dp" />
-    <corners android:radius="14dp" />
+    <corners android:radius="12dp" />
 </shape>

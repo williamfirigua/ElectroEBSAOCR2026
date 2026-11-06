@@ -6,10 +6,10 @@
     <style name="ComTarjeta">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginTop">14dp</item>
+        <item name="android:layout_marginTop">12dp</item>
         <item name="android:background">@drawable/bg_lec_tarjeta</item>
         <item name="android:orientation">vertical</item>
-        <item name="android:padding">14dp</item>
+        <item name="android:padding">12dp</item>
     </style>
 
     <!-- Titulo de la tarjeta. -->
@@ -17,7 +17,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">@color/lec_texto</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
@@ -27,24 +27,24 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginTop">4dp</item>
         <item name="android:textColor">@color/lec_texto2</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">13sp</item>
     </style>
 
-    <!-- Boton lleno grande (Enviar datos / Descargar mi ruta). -->
+    <!-- Boton lleno (Enviar datos / Descargar mi ruta). -->
     <style name="ComBotonLleno">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">64dp</item>
-        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_marginTop">10dp</item>
         <item name="android:background">@drawable/bg_com_primario</item>
-        <item name="android:drawablePadding">12dp</item>
+        <item name="android:drawablePadding">8dp</item>
         <item name="android:drawableTint">@color/com_texto_lleno</item>
         <item name="android:gravity">center</item>
-        <item name="android:paddingStart">20dp</item>
-        <item name="android:paddingEnd">20dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
         <item name="android:stateListAnimator">@null</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textColor">@color/com_texto_lleno</item>
-        <item name="android:textSize">21sp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
@@ -52,21 +52,21 @@
     <style name="ComBotonAccion">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:minHeight">72dp</item>
-        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:layout_marginTop">8dp</item>
         <item name="android:background">@drawable/bg_com_accion</item>
-        <item name="android:drawablePadding">16dp</item>
+        <item name="android:drawablePadding">12dp</item>
         <item name="android:drawableTint">@color/com_icono_accion</item>
         <item name="android:gravity">start|center_vertical</item>
-        <item name="android:lineSpacingExtra">2dp</item>
-        <item name="android:paddingStart">16dp</item>
-        <item name="android:paddingTop">10dp</item>
-        <item name="android:paddingEnd">16dp</item>
-        <item name="android:paddingBottom">10dp</item>
+        <item name="android:lineSpacingExtra">1dp</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:paddingBottom">8dp</item>
         <item name="android:stateListAnimator">@null</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textColor">@color/com_texto_accion</item>
-        <item name="android:textSize">19sp</item>
+        <item name="android:textSize">15sp</item>
     </style>
 
     <!-- Etiqueta encima de un campo de la carga antigua. -->
@@ -74,22 +74,22 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">@color/lec_texto</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">13sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
     <!-- Campo de la carga antigua (ciclo, municipio, seccion, division). -->
     <style name="ComCampo">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">56dp</item>
+        <item name="android:layout_height">48dp</item>
         <item name="android:layout_marginTop">4dp</item>
         <item name="android:background">@drawable/bg_lec_campo</item>
         <item name="android:fontFeatureSettings">tnum</item>
         <item name="android:gravity">center_vertical</item>
-        <item name="android:paddingStart">14dp</item>
-        <item name="android:paddingEnd">14dp</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
         <item name="android:textColor">@color/com_texto_campo</item>
-        <item name="android:textSize">22sp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 </resources>

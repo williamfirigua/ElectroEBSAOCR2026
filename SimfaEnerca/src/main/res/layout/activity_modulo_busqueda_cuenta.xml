@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Busqueda de cliente (ModuloBusquedaCuenta) con la paleta de sol de la lectura v2: fondo blanco, texto negro,
-  campo con borde negro, criterio en chips y resultados grandes que se filtran mientras se digita.
+  campo con borde negro, criterio en chips y resultados que se filtran mientras se digita.
   Ids conservados: btnvol, rgBotones, rb*, txtBuscar, txtTipoBusqueda, cabeceraDatos, scroll, tablaResumenDatos.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -14,7 +14,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="56dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="4dp"
@@ -30,13 +30,13 @@
             android:drawablePadding="8dp"
             android:drawableTint="@color/lec_texto"
             android:minWidth="48dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
             android:stateListAnimator="@null"
             android:text="Volver"
             android:textAllCaps="false"
             android:textColor="@color/lec_texto"
-            android:textSize="17sp"
+            android:textSize="15sp"
             android:textStyle="bold" />
 
         <TextView
@@ -46,7 +46,7 @@
             android:gravity="end"
             android:text="Buscar cliente"
             android:textColor="@color/lec_texto"
-            android:textSize="22sp"
+            android:textSize="20sp"
             android:textStyle="bold" />
     </LinearLayout>
 
@@ -54,7 +54,7 @@
         android:id="@+id/txtBuscar"
         style="@style/CauCampo"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="50dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="16dp"
@@ -66,7 +66,7 @@
         android:inputType="number"
         android:maxLength="63"
         android:singleLine="true"
-        android:textSize="22sp">
+        android:textSize="16sp">
 
         <requestFocus />
     </EditText>
@@ -74,7 +74,7 @@
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="10dp"
         android:clipToPadding="false"
         android:paddingStart="16dp"
         android:paddingEnd="8dp"
@@ -109,7 +109,7 @@
             <RadioButton
                 android:id="@+id/rbRuta"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
+                android:layout_height="40dp"
                 android:text="@string/ruta"
                 android:visibility="gone" />
         </RadioGroup>
@@ -120,13 +120,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="4dp"
         android:fontFeatureSettings="tnum"
         android:text="Buscando por: Medidor"
         android:textColor="@color/lec_texto2"
-        android:textSize="16sp"
+        android:textSize="13sp"
         android:textStyle="bold" />
 
     <TableLayout

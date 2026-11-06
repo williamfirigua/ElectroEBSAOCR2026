@@ -20,7 +20,7 @@
     <!-- Barra superior -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="56dp"
         android:background="@color/lec_superficie"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -29,8 +29,8 @@
 
         <ImageButton
             android:id="@+id/btnRegresar"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="@drawable/bg_lec_icono"
             android:contentDescription="@string/com_volver"
             android:padding="12dp"
@@ -47,13 +47,13 @@
             android:maxLines="1"
             android:text="@string/com_titulo"
             android:textColor="@color/lec_texto"
-            android:textSize="24sp"
+            android:textSize="20sp"
             android:textStyle="bold" />
 
         <!-- Conexion con el servidor: los dos iconos ocupan el mismo lugar. -->
         <FrameLayout
-            android:layout_width="48dp"
-            android:layout_height="48dp">
+            android:layout_width="40dp"
+            android:layout_height="40dp">
 
             <ImageView
                 android:id="@+id/iconwebserviceon"
@@ -61,7 +61,7 @@
                 android:layout_height="match_parent"
                 android:background="@drawable/bg_lec_tarjeta"
                 android:contentDescription="@string/com_red_activa"
-                android:padding="10dp"
+                android:padding="8dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_nav_wifi"
                 android:tint="@color/lec_exito"
@@ -73,7 +73,7 @@
                 android:layout_height="match_parent"
                 android:background="@drawable/bg_lec_tarjeta"
                 android:contentDescription="@string/com_red_inactiva"
-                android:padding="10dp"
+                android:padding="8dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_nav_warning"
                 android:tint="@color/lec_error"
@@ -86,20 +86,20 @@
         android:id="@+id/txtInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:background="@drawable/bg_com_banner"
         android:hint="@string/com_sin_mensajes"
-        android:minHeight="52dp"
+        android:minHeight="44dp"
         android:gravity="center_vertical"
-        android:paddingStart="14dp"
-        android:paddingTop="10dp"
-        android:paddingEnd="14dp"
-        android:paddingBottom="10dp"
+        android:paddingStart="12dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="8dp"
         android:text=""
         android:textColor="@color/lec_banner_texto"
         android:textColorHint="@color/lec_tecla_ayuda"
-        android:textSize="17sp"
+        android:textSize="14sp"
         android:textStyle="bold" />
 
     <ScrollView
@@ -108,9 +108,9 @@
         android:layout_weight="1"
         android:clipToPadding="false"
         android:fillViewport="true"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:paddingBottom="20dp">
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -137,7 +137,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/com_archivo"
                         android:textColor="@color/lec_texto2"
-                        android:textSize="17sp" />
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/lblTxtArchivo"
@@ -150,7 +150,7 @@
                         android:maxLines="1"
                         android:text="—"
                         android:textColor="@color/lec_texto"
-                        android:textSize="22sp"
+                        android:textSize="18sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -188,7 +188,7 @@
                 <Button
                     android:id="@+id/btnValidaEnvio"
                     style="@style/ComBotonAccion"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="12dp"
                     android:drawableStart="@drawable/ic_com_verificado"
                     android:text="@string/com_valida_envio" />
 
@@ -250,7 +250,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
                     <LinearLayout
@@ -299,7 +299,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="8dp"
                     android:orientation="horizontal">
 
                     <LinearLayout
@@ -348,7 +348,7 @@
                 <Button
                     android:id="@+id/btnTraerRuta"
                     style="@style/ComBotonAccion"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="12dp"
                     android:drawableStart="@drawable/ic_nav_map"
                     android:text="@string/com_traer_ruta" />
 

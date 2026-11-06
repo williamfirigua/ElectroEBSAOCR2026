@@ -473,6 +473,11 @@ public final class ResumenRuta {
         return totalClientes <= 0 ? 0 : (int) Math.min(100, (clientesProcesados * 100L) / totalClientes);
     }
 
+    /** Porcentaje de registros (registradores) procesados (0..100): registrosProcesados / registros. */
+    public int getAvanceRegistros() {
+        return registros <= 0 ? 0 : (int) Math.min(100, (registrosProcesados * 100L) / registros);
+    }
+
     // ------------------------------------------------------------------ utilidades
 
     private static DataInputStream abrir(File f) throws IOException {

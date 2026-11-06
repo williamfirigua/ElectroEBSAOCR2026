@@ -12,7 +12,7 @@
         android:id="@+id/txtBusquedaUnica"
         style="@style/CauCampo"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="48dp"
         android:drawableStart="@drawable/ic_lec_buscar"
         android:hint="Medidor, cuenta, nombre o dirección"
         android:imeOptions="actionSearch|flagNoExtractUi"
@@ -20,17 +20,17 @@
         android:inputType="textNoSuggestions|textCapCharacters"
         android:maxLength="60"
         android:maxLines="1"
-        android:textSize="18sp" />
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/txtEstadoBusqueda"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fontFeatureSettings="tnum"
-        android:paddingTop="10dp"
-        android:paddingBottom="6dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="4dp"
         android:textColor="@color/lec_texto2"
-        android:textSize="15sp"
+        android:textSize="13sp"
         android:textStyle="bold" />
 
     <ListView

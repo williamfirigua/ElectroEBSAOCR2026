@@ -6,10 +6,10 @@
     android:background="@drawable/bg_cau_item"
     android:fontFeatureSettings="tnum"
     android:gravity="center_vertical"
-    android:minHeight="56dp"
+    android:minHeight="48dp"
     android:paddingStart="12dp"
-    android:paddingTop="8dp"
+    android:paddingTop="6dp"
     android:paddingEnd="12dp"
-    android:paddingBottom="8dp"
+    android:paddingBottom="6dp"
     android:textColor="@color/lec_texto"
-    android:textSize="17sp" />
+    android:textSize="15sp" />

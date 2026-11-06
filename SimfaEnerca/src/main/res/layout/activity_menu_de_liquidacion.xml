@@ -129,7 +129,8 @@
                 android:autoSizeTextType="uniform"
                 android:fontFeatureSettings="tnum"
                 android:maxLines="1"
-                android:text="Lectura"
+                android:visibility="invisible"
+                android:text=""
                 android:textColor="@color/lec_texto"
                 android:textStyle="bold" />
 

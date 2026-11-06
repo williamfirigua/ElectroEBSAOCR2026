@@ -9,6 +9,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
@@ -26,6 +27,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,8 +62,10 @@ import java.util.Map;
 public class ResumenEstadistico extends Activity {
 
     private static final long ESPERA_BUSQUEDA_MS = 250;
-    /** La lista muestra como máximo estas filas; la estadística completa va debajo, al pie de la lista. */
+    /** La lista muestra como máximo estas filas; la estadística completa se abre con el botón de gráfica. */
     private static final int MAX_FILAS = 10;
+    /** Toques sobre el botón de gráfica más seguidos que esto se ignoran (no abre dos diálogos). */
+    private static final long ESPERA_TOQUE_MS = 600;
 
     // Paleta para el sol (colors_lectura): textos negros, valores fuertes, nada de gris claro.
     private static final int C_TEXTO = 0xFF000000;
@@ -99,8 +103,9 @@ public class ResumenEstadistico extends Activity {
     private int[] visibles = new int[0];
     /** Índice en visibles de la primera fila que muestra la lista (se muestran hasta MAX_FILAS). */
     private int inicio;
-    /** Pie de la lista: la estadística completa de la ruta. */
-    private LinearLayout pieEstadistica;
+    /** Diálogo de la estadística abierto (evita abrir dos con doble toque). */
+    private boolean estadisticaAbierta;
+    private long ultimoToqueDetalle;
     private int seleccion; // posición del registrador seleccionado (0 = ninguno)
     /** false si el lector no aceptó seguir con la fecha del equipo descuadrada. */
     private boolean puedeLiquidar = true;
@@ -146,10 +151,6 @@ public class ResumenEstadistico extends Activity {
         btnDetalle = findViewById(R.id.btnDetalle);
 
         soloConsulta = getCallingActivity() == null;
-        pieEstadistica = new LinearLayout(this);
-        pieEstadistica.setOrientation(LinearLayout.VERTICAL);
-        pieEstadistica.setPadding(0, dp(6), 0, dp(8));
-        lista.addFooterView(pieEstadistica, null, false); // después de las filas: no cambia sus índices
         lista.setAdapter(adaptador);
         habilitar(btnContinuar, false);
         habilitar(btnLiquidarSeleccion, false);
@@ -159,7 +160,7 @@ public class ResumenEstadistico extends Activity {
         }
 
         findViewById(R.id.btnVolver).setOnClickListener(v -> volver());
-        btnDetalle.setOnClickListener(v -> lista.setSelection(adaptador.getCount())); // baja a la estadística
+        btnDetalle.setOnClickListener(v -> mostrarEstadistica());
         btnContinuar.setOnClickListener(v -> {
             if (soloConsulta) volver();
             else devolver(-1);
@@ -251,29 +252,29 @@ public class ResumenEstadistico extends Activity {
         if (!soloConsulta) CargaResumen.publicarGlobales(resumen, true);
 
         pintarIndicadores();
-        llenarEstadistica();
         prepararCausas();
         aplicarFiltro();
         btnDetalle.setEnabled(true);
         habilitar(btnContinuar, true);
         if (!soloConsulta) validarFechaSistema();
 
-        if (resumen.getClientesPendientes() == 0) {
+        if (resumen.getRegistrosPendientes() == 0) {
             mostrarAviso("Proceso de facturación concluido: envíe la información y cargue datos nuevos.");
             Toast.makeText(this, "Proceso de facturación concluido debes descargar y cargar datos nuevos", Toast.LENGTH_LONG).show();
         }
     }
 
+    /** Todo en una sola unidad: REGISTROS (registradores), igual que los filtros y la lista. */
     private void pintarIndicadores() {
-        txtTotal.setText(String.valueOf(resumen.getTotalClientes()));
-        txtLeidos.setText(String.valueOf(resumen.getClientesProcesados()));
-        txtPendientes.setText(String.valueOf(resumen.getClientesPendientes()));
-        txtAnomalias.setText(String.valueOf(resumen.getClientesConCausa())); // clientes, como las otras tres casillas
-        barAvance.setProgress(resumen.getAvance());
+        txtTotal.setText(String.valueOf(resumen.getRegistros()));
+        txtLeidos.setText(String.valueOf(resumen.getRegistrosProcesados()));
+        txtPendientes.setText(String.valueOf(resumen.getRegistrosPendientes()));
+        txtAnomalias.setText(String.valueOf(resumen.getRegistrosConCausa()));
+        barAvance.setProgress(resumen.getAvanceRegistros());
 
         StringBuilder b = new StringBuilder();
-        b.append(resumen.getAvance()).append("% de los clientes");
-        if (resumen.getClientesHoy() > 0) b.append(" · ").append(resumen.getClientesHoy()).append(resumen.getClientesHoy() == 1 ? " cliente hoy" : " clientes hoy");
+        b.append(resumen.getAvanceRegistros()).append("% de los registros");
+        if (resumen.getProcesadosHoy() > 0) b.append(" · ").append(resumen.getProcesadosHoy()).append(" hoy");
         if (!resumen.getUltimaLectura().isEmpty()) b.append(" · última ").append(hora(resumen.getUltimaLectura()));
         txtAvance.setText(b);
 
@@ -287,8 +288,10 @@ public class ResumenEstadistico extends Activity {
         causasSpinner.clear();
         causasSpinner.addAll(resumen.getCausas());
         List<String> items = new ArrayList<>(causasSpinner.size() + 1);
-        items.add("Todas las causas (" + resumen.getClientesConCausa() + " clientes · " + resumen.getRegistrosConCausa() + " reg.)");
-        for (ResumenRuta.ConteoCausa c : causasSpinner) items.add(c.toString());
+        items.add("Todas las causas (" + registros(resumen.getRegistrosConCausa()) + ")");
+        for (ResumenRuta.ConteoCausa c : causasSpinner) {
+            items.add(c.codigo + (c.descripcion.isEmpty() ? "" : " - " + c.descripcion) + " (" + registros(c.cantidad) + ")");
+        }
         ArrayAdapter<String> a = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);
         a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spCausa.setAdapter(a);
@@ -318,12 +321,11 @@ public class ResumenEstadistico extends Activity {
         }
 
         int mostradas = adaptador.getCount();
-        String unidad = visibles.length == 1 ? " registrador" : " registradores";
         txtConteoLista.setText(mostradas < visibles.length
-                ? "Mostrando " + mostradas + " de " + visibles.length + unidad + " · busque la cuenta para ver otra"
-                : visibles.length + unidad);
+                ? "Mostrando " + mostradas + " de " + registros(visibles.length) + " · busque la cuenta para ver otra"
+                : registros(visibles.length));
         if (visibles.length == 0) {
-            txtVacio.setText(txtBuscar.getText().length() > 0 ? "Sin coincidencias" : "No hay registradores en este filtro");
+            txtVacio.setText(txtBuscar.getText().length() > 0 ? "Sin coincidencias" : "No hay registros en este filtro");
             txtVacio.setVisibility(View.VISIBLE);
         } else {
             txtVacio.setVisibility(View.GONE);
@@ -351,7 +353,7 @@ public class ResumenEstadistico extends Activity {
     // ------------------------------------------------------------------ selección y salida
 
     private void tocarFila(int index) {
-        if (index < 0 || index >= adaptador.getCount()) return; // el pie (estadística) no se selecciona
+        if (index < 0 || index >= adaptador.getCount()) return;
         int posicion = visibles[inicio + index];
         if (posicion == seleccion && !soloConsulta) { // segundo toque sobre la misma fila: abrir (como antes)
             abrirSeleccion();
@@ -365,7 +367,7 @@ public class ResumenEstadistico extends Activity {
     private void actualizarBotonSeleccion() {
         LectorFilas.Fila f = seleccion > 0 && lector != null ? lector.fila(seleccion) : null;
         habilitar(btnLiquidarSeleccion, f != null && puedeLiquidar);
-        btnLiquidarSeleccion.setText(f == null ? "Ir a la seleccionada" : "Ir a " + f.cuenta);
+        btnLiquidarSeleccion.setText(f == null ? "Ir a la cuenta" : "Ir a " + f.cuenta);
     }
 
     private void abrirSeleccion() {
@@ -435,93 +437,88 @@ public class ResumenEstadistico extends Activity {
                 .show();
     }
 
-    // ------------------------------------------------------------------ estadística (pie de la lista)
+    // ------------------------------------------------------------------ estadística (diálogo)
 
     /**
-     * La estadística completa de la ruta, debajo de la lista (antes era un diálogo). Mismos conteos que antes:
-     * clientes y registradores van en tarjetas separadas porque un cliente puede tener varios registradores.
+     * La estadística completa de la ruta en un diálogo con desplazamiento que abre el botón de gráfica (antes iba
+     * al pie de la lista y la pantalla quedaba apretada). Todo en REGISTROS, la misma unidad de las casillas, los
+     * filtros y la lista. Un segundo toque mientras está abierto (o en menos de ESPERA_TOQUE_MS) no abre otro.
      */
-    private void llenarEstadistica() {
-        if (resumen == null) return;
-        final LinearLayout cont = pieEstadistica;
-        cont.removeAllViews();
+    private void mostrarEstadistica() {
+        if (resumen == null || estadisticaAbierta) return;
+        long ahora = SystemClock.elapsedRealtime();
+        if (ahora - ultimoToqueDetalle < ESPERA_TOQUE_MS) return;
+        ultimoToqueDetalle = ahora;
 
-        TextView titulo = new TextView(this);
-        titulo.setText("Estadística de la ruta");
-        titulo.setTextSize(22);
-        titulo.setTypeface(Typeface.DEFAULT_BOLD);
-        titulo.setTextColor(C_TEXTO);
-        titulo.setPadding(dp(4), dp(10), dp(4), 0);
-        cont.addView(titulo);
-        TextView explica = nota(cont, "Un cliente puede tener varios registradores (activa, reactiva): por eso los totales de clientes y de registradores son distintos.");
-        explica.setPadding(dp(4), dp(2), dp(4), dp(4));
+        final androidx.appcompat.app.AlertDialog[] dlg = new androidx.appcompat.app.AlertDialog[1];
+        LinearLayout cont = new LinearLayout(this);
+        cont.setOrientation(LinearLayout.VERTICAL);
+        cont.setPadding(dp(20), 0, dp(20), dp(8));
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(cont, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        LinearLayout s = seccion(cont, "Clientes");
-        fila(s, "Total", resumen.getTotalClientes());
-        filaColor(s, "Procesados", resumen.getClientesProcesados() + " (" + resumen.getAvance() + "%)", 0xFF0B7A33);
-        fila(s, "Pendientes", resumen.getClientesPendientes());
-        fila(s, "Factura impresa", resumen.getClientesImpresos());
-        fila(s, "Liquidada sin imprimir", resumen.getClientesSinImprimir());
-        fila(s, "Solo lectura", resumen.getClientesSoloLectura());
-        if (resumen.getClientesIncompletos() > 0) {
-            filaColor(s, "Con registradores sin leer", String.valueOf(resumen.getClientesIncompletos()), C_AVISO);
-        }
-        if (resumen.getClientesOtroEstado() > 0) fila(s, "Otro estado", resumen.getClientesOtroEstado());
-        fila(s, "Con anomalía", resumen.getClientesConCausa());
+        seccion(cont, "Registros");
+        fila(cont, "Total", resumen.getRegistros());
+        filaColor(cont, "Procesados", resumen.getRegistrosProcesados() + " (" + resumen.getAvanceRegistros() + "%)", 0xFF0B7A33);
+        fila(cont, "Pendientes", resumen.getRegistrosPendientes());
+        fila(cont, "Con anomalía", resumen.getRegistrosConCausa());
+        fila(cont, "Con observación", resumen.getRegistrosConComentario());
+        fila(cont, "Con informe", resumen.getRegistrosConInforme());
 
-        s = seccion(cont, "Registradores");
-        fila(s, "Total", resumen.getRegistros());
-        fila(s, "Procesados", resumen.getRegistrosProcesados());
-        fila(s, "Pendientes", resumen.getRegistrosPendientes());
-        fila(s, "Con anomalía", resumen.getRegistrosConCausa());
-        fila(s, "Con observación", resumen.getRegistrosConComentario());
-        fila(s, "Con informe", resumen.getRegistrosConInforme());
-
-        s = seccion(cont, "Crítica de la lectura");
+        seccion(cont, "Crítica de la lectura");
         for (ResumenRuta.Critica c : ResumenRuta.Critica.values()) {
             if (c == ResumenRuta.Critica.PENDIENTE) continue;
             int n = resumen.getPorCritica(c);
-            if (n > 0 || c == ResumenRuta.Critica.NORMAL) filaColor(s, c.etiqueta, String.valueOf(n), colorDe(c));
+            if (n > 0 || c == ResumenRuta.Critica.NORMAL) filaColor(cont, c.etiqueta, String.valueOf(n), colorDe(c));
         }
 
-        s = seccion(cont, "Anomalías por causa");
+        seccion(cont, "Anomalías por causa");
         if (resumen.getCausas().isEmpty()) {
-            nota(s, "Sin anomalías registradas.");
+            nota(cont, "Sin anomalías registradas.");
         } else {
-            nota(s, "Toque una causa para ver sus registradores.");
+            nota(cont, "Toque una causa para ver sus registros.");
             for (final ResumenRuta.ConteoCausa c : resumen.getCausas()) {
-                View v = filaColor(s, c.codigo + (c.descripcion.isEmpty() ? "" : " · " + c.descripcion),
-                        c.conteo(), C_AVISO);
+                View v = filaColor(cont, c.codigo + (c.descripcion.isEmpty() ? "" : " · " + c.descripcion),
+                        String.valueOf(c.cantidad), C_AVISO);
                 v.setBackgroundResource(R.drawable.bg_res_seleccionable);
                 v.setOnClickListener(x -> {
+                    if (dlg[0] != null) dlg[0].dismiss();
                     verCausa(c.codigo);
-                    lista.setSelection(0); // sube a la lista ya filtrada
+                    lista.setSelection(0); // la lista ya filtrada, desde arriba
                 });
             }
         }
 
-        s = seccion(cont, "Tiempos");
-        fila(s, "Primera lectura", fechaHora(resumen.getPrimeraLectura()));
-        fila(s, "Última lectura", fechaHora(resumen.getUltimaLectura()));
-        fila(s, "Clientes hoy", resumen.getClientesHoy());
-        fila(s, "Registradores hoy", resumen.getProcesadosHoy());
+        seccion(cont, "Tiempos");
+        fila(cont, "Primera lectura", fechaHora(resumen.getPrimeraLectura()));
+        fila(cont, "Última lectura", fechaHora(resumen.getUltimaLectura()));
+        fila(cont, "Registros hoy", resumen.getProcesadosHoy());
 
-        s = seccion(cont, "Respaldo");
-        nota(s, com.gselectroCaqueta.sync.RespaldoSd.estado(this));
+        seccion(cont, "Respaldo");
+        nota(cont, com.gselectroCaqueta.sync.RespaldoSd.estado(this));
 
-        s = seccion(cont, "Envíos");
+        seccion(cont, "Envíos");
         EstadoEnvios e = resultado == null ? null : resultado.envios;
         if (e == null) {
-            nota(s, "No se pudo leer la cola de envío.");
+            nota(cont, "No se pudo leer la cola de envío.");
         } else if (!e.modoRest) {
-            nota(s, e.resumenCorto());
+            nota(cont, e.resumenCorto());
         } else {
-            fila(s, "Lecturas enviadas", e.liquidacionesEnviadas);
-            fila(s, "Lecturas por enviar", e.liquidacionesPendientes);
-            fila(s, "Fotos por enviar", e.fotosPendientes);
-            fila(s, "Facturas (LBL) por enviar", e.lblPendientes);
-            if (e.rechazados() > 0) filaColor(s, "Rechazados por el servidor", String.valueOf(e.rechazados()), C_ERROR);
+            fila(cont, "Lecturas enviadas", e.liquidacionesEnviadas);
+            fila(cont, "Lecturas por enviar", e.liquidacionesPendientes);
+            fila(cont, "Fotos por enviar", e.fotosPendientes);
+            fila(cont, "Facturas (LBL) por enviar", e.lblPendientes);
+            if (e.rechazados() > 0) filaColor(cont, "Rechazados por el servidor", String.valueOf(e.rechazados()), C_ERROR);
         }
+
+        dlg[0] = new androidx.appcompat.app.AlertDialog.Builder(this, R.style.CauDialogo)
+                .setTitle("Estadística de la ruta")
+                .setView(scroll)
+                .setPositiveButton("Cerrar", null)
+                .create();
+        dlg[0].setOnDismissListener(d -> estadisticaAbierta = false);
+        estadisticaAbierta = true;
+        dlg[0].show();
     }
 
     private void verCausa(String codigo) {
@@ -539,32 +536,23 @@ public class ResumenEstadistico extends Activity {
         }
     }
 
-    /** Tarjeta de un grupo de la estadística (blanca, borde oscuro de 2dp) con su título; devuelve la tarjeta. */
-    private LinearLayout seccion(LinearLayout cont, String titulo) {
-        LinearLayout tarjeta = new LinearLayout(this);
-        tarjeta.setOrientation(LinearLayout.VERTICAL);
-        tarjeta.setBackgroundResource(R.drawable.bg_lec_tarjeta);
-        tarjeta.setPadding(dp(14), dp(10), dp(14), dp(8));
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lp.topMargin = dp(12);
-        cont.addView(tarjeta, lp);
-
+    /** Encabezado de un grupo de la tabla (15sp, negrita). */
+    private void seccion(LinearLayout cont, String titulo) {
         TextView t = new TextView(this);
         t.setText(titulo);
-        t.setTextSize(18);
+        t.setTextSize(15);
         t.setTypeface(Typeface.DEFAULT_BOLD);
         t.setTextColor(C_PRIMARIO);
-        t.setPadding(0, 0, 0, dp(4));
-        tarjeta.addView(t);
-        return tarjeta;
+        t.setPadding(0, dp(12), 0, dp(2));
+        cont.addView(t);
     }
 
     private TextView nota(LinearLayout cont, String texto) {
         TextView t = new TextView(this);
         t.setText(texto);
-        t.setTextSize(15);
+        t.setTextSize(13);
         t.setTextColor(C_TEXTO2);
-        t.setPadding(0, dp(4), 0, dp(4));
+        t.setPadding(0, dp(2), 0, dp(4));
         cont.addView(t);
         return t;
     }
@@ -573,6 +561,7 @@ public class ResumenEstadistico extends Activity {
         filaColor(cont, etiqueta, String.valueOf(valor), C_TEXTO);
     }
 
+    /** Fila de la tabla: etiqueta a la izquierda, número a la derecha (14sp, ~36dp de alto). */
     private View filaColor(LinearLayout cont, String etiqueta, String valor, int colorValor) {
         View linea = new View(this);
         linea.setBackgroundColor(C_DIVISOR);
@@ -581,16 +570,16 @@ public class ResumenEstadistico extends Activity {
         LinearLayout f = new LinearLayout(this);
         f.setOrientation(LinearLayout.HORIZONTAL);
         f.setGravity(Gravity.CENTER_VERTICAL);
-        f.setMinimumHeight(dp(44));
-        f.setPadding(0, dp(6), 0, dp(6));
+        f.setMinimumHeight(dp(36));
+        f.setPadding(0, dp(4), 0, dp(4));
         TextView a = new TextView(this);
         a.setText(etiqueta);
-        a.setTextSize(16);
+        a.setTextSize(14);
         a.setTextColor(C_TEXTO);
         f.addView(a, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         TextView b = new TextView(this);
         b.setText(valor);
-        b.setTextSize(18);
+        b.setTextSize(14);
         b.setTypeface(Typeface.DEFAULT_BOLD);
         b.setTextColor(colorValor);
         b.setFontFeatureSettings("tnum");
@@ -599,6 +588,11 @@ public class ResumenEstadistico extends Activity {
         f.addView(b, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         cont.addView(f);
         return f;
+    }
+
+    /** "1 registro" / "N registros". */
+    private static String registros(int n) {
+        return n + (n == 1 ? " registro" : " registros");
     }
 
     // ------------------------------------------------------------------ lista

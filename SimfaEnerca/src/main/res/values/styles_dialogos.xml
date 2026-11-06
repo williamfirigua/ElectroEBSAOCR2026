@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Dialogos de causal, subcausal, informe, busqueda y galeria con la paleta de sol de la lectura v2
-     (colors_lectura.xml): fondo blanco, texto negro, bordes oscuros de 2dp y botones grandes. -->
+     (colors_lectura.xml): fondo blanco, texto negro, bordes oscuros de 2dp y botones de 44dp. -->
 <resources>
 
     <!-- Tema de los AlertDialog de AppCompat: new AlertDialog.Builder(activity, R.style.CauDialogo). -->
@@ -20,7 +20,7 @@
         <item name="alertDialogStyle">@style/CauDialogo.Alerta</item>
     </style>
 
-    <!-- Filas de setItems (subcausales) de 60dp, en negrita. -->
+    <!-- Filas de setItems (subcausales) de 48dp, en negrita. -->
     <style name="CauDialogo.Alerta" parent="AlertDialog.AppCompat">
         <item name="listItemLayout">@layout/item_cau_subcausal</item>
     </style>
@@ -30,7 +30,7 @@
     </style>
 
     <style name="CauDialogo.TituloTexto" parent="TextAppearance.AppCompat.Title">
-        <item name="android:textSize">22sp</item>
+        <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/lec_texto</item>
     </style>
@@ -38,13 +38,13 @@
     <style name="CauDialogo.BotonPrimario" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
         <item name="android:background">@drawable/bg_cau_boton_primario</item>
         <item name="android:textColor">@color/cau_boton_primario_texto</item>
-        <item name="android:textSize">17sp</item>
+        <item name="android:textSize">15sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:minHeight">52dp</item>
-        <item name="android:minWidth">112dp</item>
-        <item name="android:paddingStart">20dp</item>
-        <item name="android:paddingEnd">20dp</item>
+        <item name="android:minHeight">44dp</item>
+        <item name="android:minWidth">88dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
         <item name="android:layout_marginStart">8dp</item>
         <item name="android:stateListAnimator">@null</item>
     </style>
@@ -54,32 +54,32 @@
         <item name="android:textColor">@color/lec_primario</item>
     </style>
 
-    <!-- Campos de busqueda: blanco con borde negro (bg_lec_campo), texto grande en negrita. -->
+    <!-- Campos de busqueda: blanco con borde negro (bg_lec_campo), texto de 16sp en negrita. -->
     <style name="CauCampo">
         <item name="android:background">@drawable/bg_lec_campo</item>
-        <item name="android:minHeight">56dp</item>
-        <item name="android:paddingStart">16dp</item>
-        <item name="android:paddingEnd">16dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
         <item name="android:textColor">@color/lec_texto</item>
         <item name="android:textColorHint">@color/lec_texto2</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:drawablePadding">12dp</item>
+        <item name="android:drawablePadding">8dp</item>
         <item name="android:drawableTint">@color/lec_texto</item>
     </style>
 
     <!-- Criterio de busqueda (RadioButton sin circulo). -->
     <style name="BusChip">
         <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_height">40dp</item>
         <item name="android:layout_marginEnd">8dp</item>
         <item name="android:background">@drawable/bg_bus_chip</item>
         <item name="android:button">@null</item>
         <item name="android:gravity">center</item>
-        <item name="android:paddingStart">16dp</item>
-        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
         <item name="android:textColor">@color/bus_chip_texto</item>
-        <item name="android:textSize">17sp</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 </resources>

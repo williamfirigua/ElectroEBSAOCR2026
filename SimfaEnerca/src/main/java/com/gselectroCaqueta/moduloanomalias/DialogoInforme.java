@@ -85,10 +85,10 @@ public final class DialogoInforme {
 
         TextView rotulo = new TextView(activity);
         rotulo.setText(etiqueta);
-        rotulo.setTextSize(17);
+        rotulo.setTextSize(15);
         rotulo.setTextColor(colorTexto);
         rotulo.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-        rotulo.setPadding(0, 0, 0, (int) (10 * densidad));
+        rotulo.setPadding(0, 0, 0, (int) (8 * densidad));
         contenedor.addView(rotulo);
 
         EditText campo = new EditText(activity);
@@ -98,16 +98,16 @@ public final class DialogoInforme {
         campo.setImeOptions(EditorInfo.IME_ACTION_DONE);
         campo.setFilters(new InputFilter[]{new InputFilter.LengthFilter(LARGO_INFORME)});
         campo.setBackgroundResource(com.gselectroCaqueta.accesoyseguridad.R.drawable.bg_lec_campo);
-        campo.setMinHeight((int) (56 * densidad));
-        campo.setPadding((int) (16 * densidad), 0, (int) (16 * densidad), 0);
-        campo.setTextSize(19);
+        campo.setMinHeight((int) (48 * densidad));
+        campo.setPadding((int) (14 * densidad), 0, (int) (14 * densidad), 0);
+        campo.setTextSize(16);
         campo.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
         campo.setTextColor(colorTexto);
         campo.setHintTextColor(colorTexto2);
         contenedor.addView(campo);
 
         TextView contador = new TextView(activity);
-        contador.setTextSize(15);
+        contador.setTextSize(13);
         contador.setTextColor(colorTexto2);
         contador.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
         contador.setGravity(android.view.Gravity.END);
@@ -120,11 +120,11 @@ public final class DialogoInforme {
         dictar.setAllCaps(false);
         dictar.setBackgroundResource(com.gselectroCaqueta.accesoyseguridad.R.drawable.bg_lec_accion);
         dictar.setTextColor(activity.getColor(com.gselectroCaqueta.accesoyseguridad.R.color.lec_primario));
-        dictar.setTextSize(17);
+        dictar.setTextSize(15);
         dictar.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
         dictar.setStateListAnimator(null);
         dictar.setOnClickListener(v -> iniciarDictado(activity));
-        contenedor.addView(dictar, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) (52 * densidad)));
+        contenedor.addView(dictar, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, (int) (48 * densidad)));
         campoAbierto = new WeakReference<>(campo);
 
         AlertDialog dialogo = new AlertDialog.Builder(activity, com.gselectroCaqueta.accesoyseguridad.R.style.CauDialogo)

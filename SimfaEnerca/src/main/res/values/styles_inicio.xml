@@ -5,19 +5,19 @@
     <!-- Fila de la lista de opciones (Comunicaciones, Utilidades): toda la fila responde. -->
     <style name="IniFila">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">64dp</item>
+        <item name="android:layout_height">52dp</item>
         <item name="android:background">@drawable/bg_ini_fila</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:orientation">horizontal</item>
-        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingStart">14dp</item>
         <item name="android:paddingEnd">12dp</item>
     </style>
 
     <style name="IniFilaIcono">
-        <item name="android:layout_width">28dp</item>
-        <item name="android:layout_height">28dp</item>
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">24dp</item>
         <item name="android:tint">@color/lec_primario</item>
         <item name="android:importantForAccessibility">no</item>
     </style>
@@ -26,16 +26,16 @@
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">1</item>
-        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:layout_marginStart">12dp</item>
         <item name="android:textColor">@color/lec_texto</item>
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">15sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:maxLines">1</item>
     </style>
 
     <style name="IniFilaFlecha">
-        <item name="android:layout_width">24dp</item>
-        <item name="android:layout_height">24dp</item>
+        <item name="android:layout_width">20dp</item>
+        <item name="android:layout_height">20dp</item>
         <item name="android:src">@drawable/ic_ini_chevron</item>
         <item name="android:tint">@color/lec_texto</item>
         <item name="android:importantForAccessibility">no</item>
@@ -44,14 +44,18 @@
     <!-- Borrar la ruta y Salir: mismo nivel, abajo. -->
     <style name="IniBotonInferior">
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">60dp</item>
+        <item name="android:layout_height">48dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:gravity">center</item>
-        <item name="android:drawablePadding">8dp</item>
-        <item name="android:paddingStart">12dp</item>
-        <item name="android:paddingEnd">12dp</item>
+        <item name="android:drawablePadding">6dp</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:paddingEnd">10dp</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">15sp</item>
+        <!-- Si la letra del equipo esta en grande, baja hasta 12sp antes que cortar "Borrar la ruta". -->
+        <item name="android:autoSizeTextType">uniform</item>
+        <item name="android:autoSizeMinTextSize">12sp</item>
+        <item name="android:autoSizeMaxTextSize">15sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:maxLines">1</item>
         <item name="android:stateListAnimator">@null</item>
@@ -62,7 +66,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">@color/lec_primario_cont</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">13sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:fontFeatureSettings">tnum</item>
     </style>

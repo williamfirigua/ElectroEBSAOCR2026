@@ -12,14 +12,14 @@
         android:id="@+id/txtBuscarCausa"
         style="@style/CauCampo"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="48dp"
         android:drawableStart="@drawable/ic_lec_buscar"
         android:hint="Código o descripción"
         android:imeOptions="actionDone|flagNoExtractUi"
         android:importantForAutofill="no"
         android:inputType="textNoSuggestions|textCapCharacters"
         android:maxLines="1"
-        android:textSize="18sp" />
+        android:textSize="16sp" />
 
     <ListView
         android:id="@+id/listaCausas"
@@ -39,13 +39,13 @@
         android:layout_marginTop="10dp"
         android:background="@drawable/bg_cau_elegida"
         android:gravity="center_vertical"
-        android:minHeight="56dp"
-        android:paddingStart="14dp"
-        android:paddingTop="8dp"
-        android:paddingEnd="14dp"
-        android:paddingBottom="8dp"
+        android:minHeight="48dp"
+        android:paddingStart="12dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="6dp"
         android:text="Toque una causa o digite el código"
         android:textColor="@color/lec_texto"
-        android:textSize="17sp"
+        android:textSize="15sp"
         android:textStyle="bold" />
 </LinearLayout>
