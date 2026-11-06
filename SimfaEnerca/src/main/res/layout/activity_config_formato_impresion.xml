@@ -1,198 +1,233 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Formato de impresion (ModuloConfigFormatoImpresion) con la paleta de sol de la lectura v2.
+  Ids conservados: chkbxcigap, btnciguardar, txtcicorrer, txtcitemperatura, chkbxdosbarras, chkbxdosImpre,
+  chkbxzq521, chkbxrw420 (los dos modelos siguen siendo CheckBox: el Java mantiene la exclusion entre ellos).
+  Volver sigue bloqueado ("Debe Guardar y salir"), por eso no hay flecha ni Cancelar.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/lec_superficie"
+    android:orientation="vertical"
     tools:context="com.gselectroCaqueta.modulocaptnovedlect.ModuloConfigFormatoImpresion">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:orientation="vertical">
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
 
-        <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:background="@drawable/titulo"
-            android:gravity="right"
-            android:stretchColumns="1"
-            android:weightSum="4">
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="12dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_nav_print"
+            android:tint="@color/lec_primario" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|center"
-                android:layout_weight="1"
-                android:background="@color/orangehuila"
-                android:gravity="center|bottom"
-                android:text="CONF. FORMATO IMPRESION"
-                android:textColor="@color/white"
-                android:textSize="15dp"
-                android:textStyle="bold">
+        <TextView
+            style="@style/lex_Titulo"
+            android:text="Formato de impresión" />
+    </LinearLayout>
 
-            </TextView>
-        </TableRow>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/lec_divisor" />
 
-        <TableLayout
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:shrinkColumns="0"
-            android:stretchColumns="0">
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingTop="14dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp">
 
+            <TextView
+                style="@style/lex_Seccion"
+                android:text="Modelo de impresora" />
 
-            <TableRow
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="2dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="20dp"
-                android:gravity="center">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:text="Colocar Temperatura"
-                    android:textSize="16dp" />
-
-                <EditText
-                    android:id="@+id/txtcitemperatura"
-                    android:layout_width="0dp"
-                    android:layout_height="55px"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="2dp"
-                    android:layout_marginRight="7dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_bordes"
-                    android:inputType="numberSigned"
-                    android:maxLength="4"
-                    android:paddingLeft="3dp"
-                    android:privateImeOptions="nm"
-                    android:text="0" />
-            </TableRow>
-
-            <TableRow
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="2dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="20dp"
-                android:gravity="center">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:text="Valor por correr"
-                    android:textSize="16dp" />
-
-                <EditText
-                    android:id="@+id/txtcicorrer"
-                    android:layout_width="0dp"
-                    android:layout_height="55px"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_bordes"
-                    android:inputType="numberSigned"
-                    android:maxLength="3"
-                    android:paddingLeft="3dp"
-                    android:privateImeOptions="nm"
-                    android:text="0" />
-            </TableRow>
-
-
-            <TableRow
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:gravity="center">
-
-                <CheckBox
-                    android:id="@+id/chkbxcigap"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Imprimir Grafico" />
-            </TableRow>
-
-            <TableRow
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:gravity="center">
-
-                <CheckBox
-                    android:id="@+id/chkbxdosbarras"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Dos Barras" />
-            </TableRow>
-            <TableRow
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:gravity="center">
-
-                <CheckBox
-                    android:id="@+id/chkbxrw420"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Con Impresora RW420" />
-            </TableRow>
-            <TableRow
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:gravity="center">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:background="@drawable/lex_segmentado"
+                android:orientation="horizontal"
+                android:padding="2dp">
 
                 <CheckBox
                     android:id="@+id/chkbxzq521"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    style="@style/lex_Segmento"
                     android:checked="false"
-                    android:text="Con Impresora ZQ521" />
-            </TableRow>
-<!--//nuevo-->
-            <TableRow
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:gravity="center">
+                    android:text="ZQ521" />
 
                 <CheckBox
-                    android:id="@+id/chkbxdosImpre"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Es RW420"
-                    android:visibility="gone"/>
-            </TableRow>
+                    android:id="@+id/chkbxrw420"
+                    style="@style/lex_Segmento"
+                    android:text="RW420" />
+            </LinearLayout>
 
+            <TextView
+                style="@style/lex_Seccion"
+                android:layout_marginTop="18dp"
+                android:text="Ajustes del papel" />
 
-            <TableRow
-                android:layout_width="wrap_content"
+            <TextView
+                style="@style/lex_Etiqueta"
+                android:labelFor="@id/txtcitemperatura"
+                android:text="Temperatura de impresión" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:gravity="center">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/btnciguardar"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="center"
+                    android:id="@+id/imp_btnTempMenos"
+                    style="@style/lex_Paso"
+                    android:contentDescription="Bajar temperatura"
+                    android:text="−" />
 
-                    android:layout_marginRight="10dp"
-                    android:background="@drawable/bg_botonestados"
-                    android:text="GUARDAR Y RETORNAR"
-                    android:textColor="@color/white" />
-            </TableRow>
+                <EditText
+                    android:id="@+id/txtcitemperatura"
+                    style="@style/lex_CampoNumero"
+                    android:inputType="numberSigned"
+                    android:maxLength="4"
+                    android:privateImeOptions="nm"
+                    android:text="0" />
 
+                <Button
+                    android:id="@+id/imp_btnTempMas"
+                    style="@style/lex_Paso"
+                    android:contentDescription="Subir temperatura"
+                    android:text="+" />
+            </LinearLayout>
 
+            <TextView
+                style="@style/lex_Ayuda"
+                android:text="De -30 a 200. Más alto, letra más oscura." />
 
-        </TableLayout>
-    </LinearLayout>
-</ScrollView>
+            <TextView
+                android:id="@+id/imp_txtErrorTemp"
+                style="@style/lex_Error" />
+
+            <TextView
+                style="@style/lex_Etiqueta"
+                android:layout_marginTop="14dp"
+                android:labelFor="@id/txtcicorrer"
+                android:text="Mover el texto (líneas)" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/imp_btnLineasMenos"
+                    style="@style/lex_Paso"
+                    android:contentDescription="Mover hacia arriba"
+                    android:text="−" />
+
+                <EditText
+                    android:id="@+id/txtcicorrer"
+                    style="@style/lex_CampoNumero"
+                    android:inputType="numberSigned"
+                    android:maxLength="3"
+                    android:privateImeOptions="nm"
+                    android:text="0" />
+
+                <Button
+                    android:id="@+id/imp_btnLineasMas"
+                    style="@style/lex_Paso"
+                    android:contentDescription="Mover hacia abajo"
+                    android:text="+" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/lex_Ayuda"
+                android:text="De -200 a 200. Vacío deja 70." />
+
+            <TextView
+                android:id="@+id/imp_txtErrorLineas"
+                style="@style/lex_Error" />
+
+            <TextView
+                style="@style/lex_Seccion"
+                android:layout_marginTop="18dp"
+                android:layout_marginBottom="0dp"
+                android:text="Qué se imprime" />
+
+            <CheckBox
+                android:id="@+id/chkbxcigap"
+                style="@style/lex_Interruptor"
+                android:text="Imprimir gráfico" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-10dp"
+                android:paddingBottom="8dp"
+                android:text="Gráfico de consumo en la factura"
+                android:textColor="@color/lec_texto2"
+                android:textSize="13sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/lec_divisor" />
+
+            <CheckBox
+                android:id="@+id/chkbxdosbarras"
+                style="@style/lex_Interruptor"
+                android:text="Dos barras" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-10dp"
+                android:paddingBottom="8dp"
+                android:text="El gráfico sale con dos barras"
+                android:textColor="@color/lec_texto2"
+                android:textSize="13sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/lec_divisor" />
+
+            <CheckBox
+                android:id="@+id/chkbxdosImpre"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Es RW420"
+                android:visibility="gone" />
+        </LinearLayout>
+    </ScrollView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/lec_divisor" />
+
+    <Button
+        android:id="@+id/btnciguardar"
+        style="@style/lex_BotonPrimario"
+        android:layout_width="match_parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="Guardar formato" />
+</LinearLayout>

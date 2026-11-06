@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Caja de contexto de los dialogos de la lectura: cuenta, medidor y direccion sobre azul claro. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/lec_primario_cont" />
+    <corners android:radius="12dp" />
+</shape>

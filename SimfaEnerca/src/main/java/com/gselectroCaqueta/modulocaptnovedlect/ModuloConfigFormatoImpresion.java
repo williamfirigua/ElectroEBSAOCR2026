@@ -13,6 +13,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gselectroCaqueta.accesoyseguridad.R;
@@ -39,6 +40,8 @@ public class ModuloConfigFormatoImpresion extends AppCompatActivity {
 
     CheckBox chkbxzq521;
     CheckBox chkbxzw420;
+    // Errores en linea (los mismos mensajes del Toast, bajo cada campo)
+    TextView txtErrorTemp, txtErrorLineas;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +56,15 @@ public class ModuloConfigFormatoImpresion extends AppCompatActivity {
 
         chkbxzq521= (CheckBox) findViewById(R.id.chkbxzq521);
         chkbxzw420= (CheckBox) findViewById(R.id.chkbxrw420);
+        txtErrorTemp = (TextView) findViewById(R.id.imp_txtErrorTemp);
+        txtErrorLineas = (TextView) findViewById(R.id.imp_txtErrorLineas);
+
+        // Botones - / + : solo cambian el numero del campo dentro del rango que acepta guardar()
+        configurarPaso(R.id.imp_btnTempMenos, txtcitemperatura, -5, -30, 200);
+        configurarPaso(R.id.imp_btnTempMas, txtcitemperatura, 5, -30, 200);
+        // txtcicorrer acepta 3 caracteres (maxLength), por eso el minimo alcanzable con - es -99
+        configurarPaso(R.id.imp_btnLineasMenos, txtcicorrer, -10, -99, 200);
+        configurarPaso(R.id.imp_btnLineasMas, txtcicorrer, 10, -99, 200);
 
         Bundle bundle = getIntent().getExtras();
 
@@ -198,19 +210,24 @@ public class ModuloConfigFormatoImpresion extends AppCompatActivity {
 
             if (Integer.parseInt(txtcitemperatura.getText().toString().trim()) < (-30) || Integer.parseInt(txtcitemperatura.getText().toString().trim()) > 200) {
                 mensajes("El Valor de la temp. no puede ser menor a -30");
+                mostrarError(txtErrorTemp, "La temperatura va de -30 a 200");
                 txtcitemperatura.setText("0");
                 return;
             }
 
             if (Integer.parseInt(txtcicorrer.getText().toString().trim()) < -200 || Integer.parseInt(txtcicorrer.getText().toString().trim()) > 200) {
                 mensajes("Error en el valor por correr");
+                mostrarError(txtErrorLineas, "Las líneas van de -200 a 200");
                 txtcicorrer.setText("0");
                 return;
             }
         } catch (Exception e) {
             mensajes("Error en el valor");
+            mostrarError(txtErrorTemp, "Revise los valores: solo números");
             return;
         }
+        txtErrorTemp.setVisibility(View.GONE);
+        txtErrorLineas.setVisibility(View.GONE);
         //-----------------------------------------------------------
 
         if (txtcitemperatura.getText().toString().trim().equals("")) {
@@ -286,6 +303,31 @@ public class ModuloConfigFormatoImpresion extends AppCompatActivity {
             mensajes("Error al crear archivo! consulte con admin.");
             return;
         }
+    }
+
+    /** Solo presentacion: suma "paso" al numero del campo sin salirse de [min, max]. */
+    private void configurarPaso(int idBoton, final EditText campo, final int paso, final int min, final int max) {
+        findViewById(idBoton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int valor;
+                try {
+                    valor = Integer.parseInt(campo.getText().toString().trim());
+                } catch (Exception e) {
+                    valor = 0;
+                }
+                valor = Math.max(min, Math.min(max, valor + paso));
+                campo.setText(String.valueOf(valor));
+                campo.setSelection(campo.getText().length());
+            }
+        });
+    }
+
+    private void mostrarError(TextView error, String msg) {
+        txtErrorTemp.setVisibility(View.GONE);
+        txtErrorLineas.setVisibility(View.GONE);
+        error.setText(msg);
+        error.setVisibility(View.VISIBLE);
     }
 
     private void mensajes(String msg) {

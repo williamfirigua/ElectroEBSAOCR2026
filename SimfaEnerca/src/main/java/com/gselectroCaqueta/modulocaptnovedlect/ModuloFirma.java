@@ -125,8 +125,16 @@ public class ModuloFirma extends AppCompatActivity {
         });
 
 
-        SetIconButtons();
+        // Iconos y estilos ahora vienen del layout (control segmentado Lapiz / Borrador); el lapiz arranca marcado
+        // SetIconButtons();
+        marcarHerramienta(false);
     }//End Oncreate
+
+    /** Solo presentacion: marca en el control segmentado la herramienta activa. */
+    private void marcarHerramienta(boolean borrador) {
+        btnmfErase.setActivated(borrador);
+        btnmfDraw.setActivated(!borrador);
+    }
 
     @Override
     public void onBackPressed() {
@@ -175,21 +183,27 @@ public class ModuloFirma extends AppCompatActivity {
         switch (i) {
             case 1://Borrador
                 mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+                marcarHerramienta(true);
                 break;
 
             case 2://delete
                 View = new CustomView(this);
                 dibujo = false;
+                // Solo repintar el lienzo que se ve para que quede en blanco de inmediato
+                if (reloutmf.getChildCount() > 0)
+                    reloutmf.getChildAt(reloutmf.getChildCount() - 1).invalidate();
                 break;
 
             case 3://draw
                 mPaint.setXfermode(null);
+                marcarHerramienta(false);
                 break;
 
             case 4://save
 
                 if (!dibujo && !firmaEst) {
                     mensajes("debe crear firma!");
+                    findViewById(R.id.lex_txtErrorFirma).setVisibility(android.view.View.VISIBLE);
                     break;
                 }
                 if (firmaEst) {
@@ -297,6 +311,7 @@ public class ModuloFirma extends AppCompatActivity {
         @Override
         public boolean onTouchEvent(MotionEvent event) {
             dibujo = true;
+            ModuloFirma.this.findViewById(R.id.lex_txtErrorFirma).setVisibility(android.view.View.GONE);
             float x = event.getX();
             float y = event.getY();
 

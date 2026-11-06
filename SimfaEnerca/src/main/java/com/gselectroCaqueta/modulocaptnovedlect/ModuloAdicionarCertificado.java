@@ -1,12 +1,17 @@
 package com.gselectroCaqueta.modulocaptnovedlect;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,6 +56,11 @@ public class ModuloAdicionarCertificado extends AppCompatActivity {
     String ruta = "";
     Utils utils = new Utils();//Ax log y utilidades
 
+    // Presentacion: errores en linea y tarjeta de firma
+    TextView txtErrorTel, txtErrorRecibe, txtErrorCuenta, txtEstadoFirma;
+    View tarjetaFirma;
+    ImageView imgFirma;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +82,16 @@ public class ModuloAdicionarCertificado extends AppCompatActivity {
 
         btnacfirma = (Button) findViewById(R.id.btnacfirma);
         btnacreotornar = (Button) findViewById(R.id.btnacreotornar);
+
+        txtErrorTel = (TextView) findViewById(R.id.lex_txtErrorTel);
+        txtErrorRecibe = (TextView) findViewById(R.id.lex_txtErrorRecibe);
+        txtErrorCuenta = (TextView) findViewById(R.id.lex_txtErrorCuenta);
+        txtEstadoFirma = (TextView) findViewById(R.id.lex_txtEstadoFirma);
+        tarjetaFirma = findViewById(R.id.lex_tarjetaFirma);
+        imgFirma = (ImageView) findViewById(R.id.lex_imgFirma);
+        limpiarErrorAlEscribir(txtacTelefono, txtErrorTel);
+        limpiarErrorAlEscribir(txtacRecibe, txtErrorRecibe);
+        limpiarErrorAlEscribir(txtacCuenta, txtErrorCuenta);
 
         Bundle bundle = getIntent().getExtras();
 
@@ -119,6 +139,7 @@ public class ModuloAdicionarCertificado extends AppCompatActivity {
 
                 if (!hafirmado) {
                     mensajes("Falta la firma");
+                    marcarFirmaFaltante();
                     return;
                 }
                 if (ValidarDatos()) {
@@ -126,6 +147,7 @@ public class ModuloAdicionarCertificado extends AppCompatActivity {
                     getSendData();
                 } else {
                     mensajes("Faltan Datos Por Tomar");
+                    marcarFaltantes();
                 }
             }
         });
@@ -135,6 +157,12 @@ public class ModuloAdicionarCertificado extends AppCompatActivity {
                 abrirFirma();
             }
 
+        });
+        // Toda la tarjeta de firma abre la firma (mismo camino que el boton)
+        tarjetaFirma.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                btnacfirma.performClick();
+            }
         });
 
     }//End Oncreate
@@ -154,6 +182,7 @@ public class ModuloAdicionarCertificado extends AppCompatActivity {
         i.putExtras(bundle);
         if (txtacCuenta.getText().toString().trim().equals("")) {
             mensajes("Debe ingresar numero de cuenta");
+            txtErrorCuenta.setVisibility(View.VISIBLE);
         } else {
             startActivityForResult(i, FIRMA_REQUEST_CODE);
         }
@@ -258,8 +287,75 @@ public class ModuloAdicionarCertificado extends AppCompatActivity {
                     ruta = data.getStringExtra("ruta");
                 } catch (Exception ex) {
                 }
+                mostrarEstadoFirma();
             }
         }
+    }
+
+    /** Solo presentacion: marca en rojo los obligatorios vacios (mismas condiciones de ValidarDatos). */
+    private void marcarFaltantes() {
+        boolean faltaTel = txtacTelefono.getText().toString().trim().equals("");
+        boolean faltaRecibe = txtacRecibe.getText().toString().trim().equals("");
+        boolean faltaCuenta = txtacCuenta.getText().toString().trim().equals("");
+        txtErrorTel.setVisibility(faltaTel ? View.VISIBLE : View.GONE);
+        txtacTelefono.setBackgroundResource(faltaTel ? R.drawable.lex_campo_error : R.drawable.lex_campo);
+        txtErrorRecibe.setVisibility(faltaRecibe ? View.VISIBLE : View.GONE);
+        txtacRecibe.setBackgroundResource(faltaRecibe ? R.drawable.lex_campo_error : R.drawable.lex_campo);
+        txtErrorCuenta.setVisibility(faltaCuenta ? View.VISIBLE : View.GONE);
+        if (faltaTel) txtacTelefono.requestFocus();
+        else if (faltaRecibe) txtacRecibe.requestFocus();
+    }
+
+    private void marcarFirmaFaltante() {
+        tarjetaFirma.setBackgroundResource(R.drawable.lex_tarjeta_error);
+        txtEstadoFirma.setText("Falta la firma");
+        txtEstadoFirma.setTextColor(getResources().getColor(R.color.lec_error, getTheme()));
+    }
+
+    /** Solo presentacion: tarjeta de firma vacia o con la vista previa de la firma guardada. */
+    private void mostrarEstadoFirma() {
+        if (hafirmado) {
+            tarjetaFirma.setBackgroundResource(R.drawable.lex_tarjeta_ok);
+            txtEstadoFirma.setText("✓ Firma tomada");
+            txtEstadoFirma.setTextColor(getResources().getColor(R.color.lec_ok, getTheme()));
+            btnacfirma.setText("Firmar de nuevo");
+            try {
+                BitmapFactory.Options op = new BitmapFactory.Options();
+                op.inSampleSize = 4;
+                Bitmap b = BitmapFactory.decodeFile(ruta, op);
+                if (b != null) {
+                    imgFirma.setImageTintList(null);
+                    imgFirma.setPadding(2, 2, 2, 2);
+                    imgFirma.setImageBitmap(b);
+                }
+            } catch (Exception ignored) {
+            }
+        } else {
+            tarjetaFirma.setBackgroundResource(R.drawable.lex_tarjeta);
+            txtEstadoFirma.setText("Sin firma");
+            txtEstadoFirma.setTextColor(getResources().getColor(R.color.lec_texto, getTheme()));
+            btnacfirma.setText("Tomar firma");
+        }
+    }
+
+    private void limpiarErrorAlEscribir(final TextView campo, final TextView error) {
+        campo.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (error.getVisibility() == View.VISIBLE && s.toString().trim().length() > 0) {
+                    error.setVisibility(View.GONE);
+                    if (campo != txtacCuenta) campo.setBackgroundResource(R.drawable.lex_campo);
+                }
+            }
+        });
     }
 
     private void mensajes(String msg) {

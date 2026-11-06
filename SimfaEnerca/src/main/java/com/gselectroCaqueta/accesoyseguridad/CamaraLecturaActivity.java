@@ -138,77 +138,84 @@ public class CamaraLecturaActivity extends AppCompatActivity {
         recuadroGuia.setLayoutParams(new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-        // Barra inferior
+        // Barra inferior (sobre la vista previa: fondo oscuro, botones de la paleta de sol)
         LinearLayout barra = new LinearLayout(this);
         barra.setOrientation(LinearLayout.VERTICAL);
         barra.setGravity(Gravity.CENTER);
-        barra.setBackgroundColor(Color.argb(210, 0, 0, 0));
-        barra.setPadding(32, 16, 32, 28);
+        barra.setBackgroundColor(Color.argb(225, 11, 31, 58)); // lec_banner translucido
+        barra.setPadding(dp(16), dp(12), dp(16), dp(16));
         FrameLayout.LayoutParams barraLp = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         barraLp.gravity = Gravity.BOTTOM;
         barra.setLayoutParams(barraLp);
 
         TextView hint = new TextView(this);
-        hint.setText("Mueva el recuadro sobre la pantalla del medidor\n"
-                + "Tire de la esquina \u25E2 para ajustar el alto");
-        hint.setTextSize(12f);
-        hint.setTextColor(Color.parseColor("#FFEB3B"));
+        hint.setText("Mueva el recuadro sobre la pantalla del medidor.\n"
+                + "Tire de la esquina ◢ para ajustar el alto.");
+        hint.setTextSize(14f);
+        hint.setTextColor(color(R.color.lec_banner_texto));
         hint.setGravity(Gravity.CENTER);
-        hint.setPadding(0, 0, 0, 12);
+        hint.setPadding(0, 0, 0, dp(10));
 
         Button btnCap = new Button(this);
-        btnCap.setText("CAPTURAR LECTURA");
-        btnCap.setTextSize(16f);
-        btnCap.setTextColor(Color.WHITE);
-        btnCap.setBackgroundColor(Color.parseColor("#E65100"));
+        btnCap.setText("Capturar lectura");
+        estiloBoton(btnCap, R.drawable.bg_cau_boton_primario, color(R.color.lec_superficie), 16f);
+        btnCap.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_nav_camera, 0, 0, 0);
+        btnCap.setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(color(R.color.lec_superficie)));
+        btnCap.setPadding(dp(16), 0, dp(16), 0);
         LinearLayout.LayoutParams lpCap = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lpCap.setMargins(0, 0, 0, 8);
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(52));
         btnCap.setLayoutParams(lpCap);
         btnCap.setOnClickListener(v -> tomarFoto());
 
         Button btnCancel = new Button(this);
-        btnCancel.setText("CANCELAR");
-        btnCancel.setTextSize(13f);
-        btnCancel.setTextColor(Color.parseColor("#AAAAAA"));
-        btnCancel.setBackgroundColor(Color.TRANSPARENT);
+        btnCancel.setText("Cancelar");
+        estiloBoton(btnCancel, R.drawable.bg_cau_boton_contorno, color(R.color.lec_texto), 15f);
+        LinearLayout.LayoutParams lpCancel = new LinearLayout.LayoutParams(0, dp(48));
+        lpCancel.weight = 1;
+        lpCancel.setMarginStart(dp(8));
+        btnCancel.setLayoutParams(lpCancel);
         btnCancel.setOnClickListener(v -> cancelar());
 
         barra.addView(hint);
 
-        // Fila con botón flash a la izquierda
+        // Fila: Luz (flash) y Cancelar
         LinearLayout filaFlash = new LinearLayout(this);
         filaFlash.setOrientation(LinearLayout.HORIZONTAL);
         filaFlash.setGravity(Gravity.CENTER_VERTICAL);
         LinearLayout.LayoutParams lpFila = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lpFila.setMargins(0, 0, 0, 8);
+        lpFila.setMargins(0, 0, 0, dp(8));
         filaFlash.setLayoutParams(lpFila);
 
         Button btnFlash = new Button(this);
-        btnFlash.setText("⚡ FLASH OFF");
-        btnFlash.setTextSize(13f);
-        btnFlash.setTextColor(Color.WHITE);
-        btnFlash.setBackgroundColor(Color.parseColor("#424242"));
-        LinearLayout.LayoutParams lpFlash = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        btnFlash.setText("Luz apagada");
+        estiloBoton(btnFlash, R.drawable.bg_lec_accion, color(R.color.lec_primario), 15f);
+        btnFlash.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_nav_flash, 0, 0, 0);
+        btnFlash.setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(color(R.color.lec_primario)));
+        btnFlash.setCompoundDrawablePadding(dp(6));
+        btnFlash.setPadding(dp(12), 0, dp(14), 0);
+        LinearLayout.LayoutParams lpFlash = new LinearLayout.LayoutParams(0, dp(48));
+        lpFlash.weight = 1;
         btnFlash.setLayoutParams(lpFlash);
         btnFlash.setOnClickListener(v -> {
             flashEncendido = !flashEncendido;
             if (camera != null) {
                 camera.getCameraControl().enableTorch(flashEncendido);
             }
-            btnFlash.setText(flashEncendido ? "⚡ FLASH ON" : "⚡ FLASH OFF");
-            btnFlash.setBackgroundColor(flashEncendido
-                    ? Color.parseColor("#F9A825")  // amarillo cuando encendido
-                    : Color.parseColor("#424242")); // gris cuando apagado
+            btnFlash.setText(flashEncendido ? "Luz encendida" : "Luz apagada");
+            int texto = flashEncendido ? color(R.color.lec_texto) : color(R.color.lec_primario);
+            btnFlash.setBackgroundResource(flashEncendido
+                    ? R.drawable.bg_lec_accion_on   // ambar con borde negro cuando encendido
+                    : R.drawable.bg_lec_accion);    // blanco con borde azul cuando apagado
+            btnFlash.setTextColor(texto);
+            btnFlash.setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(texto));
         });
 
         filaFlash.addView(btnFlash);
+        filaFlash.addView(btnCancel);
         barra.addView(filaFlash);
         barra.addView(btnCap);
-        barra.addView(btnCancel);
 
         panelCamara.addView(previewView);
         panelCamara.addView(recuadroGuia);
@@ -225,98 +232,236 @@ public class CamaraLecturaActivity extends AppCompatActivity {
         scrollResultado = new ScrollView(this);
         scrollResultado.setLayoutParams(new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        scrollResultado.setBackgroundColor(Color.parseColor("#1A1A2E"));
+        scrollResultado.setBackgroundColor(color(R.color.lec_superficie));
+        scrollResultado.setFillViewport(true);
         scrollResultado.setVisibility(View.GONE);
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setGravity(Gravity.CENTER_HORIZONTAL);
-        layout.setPadding(32, 40, 32, 40);
+        layout.setPadding(0, 0, 0, dp(20));
+
+        // Barra superior: volver (= Cancelar) y titulo
+        LinearLayout barraSup = new LinearLayout(this);
+        barraSup.setOrientation(LinearLayout.HORIZONTAL);
+        barraSup.setGravity(Gravity.CENTER_VERTICAL);
+        barraSup.setPadding(dp(4), 0, dp(16), 0);
+        barraSup.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(56)));
+        android.widget.ImageButton btnVolver = new android.widget.ImageButton(this);
+        btnVolver.setImageResource(R.drawable.ic_nav_back);
+        btnVolver.setImageTintList(android.content.res.ColorStateList.valueOf(color(R.color.lec_texto)));
+        btnVolver.setBackgroundResource(R.drawable.bg_lec_icono);
+        btnVolver.setContentDescription("Cancelar y volver a la lectura");
+        btnVolver.setLayoutParams(new LinearLayout.LayoutParams(dp(48), dp(48)));
+        btnVolver.setOnClickListener(v -> cancelar());
+        TextView tituloBarra = new TextView(this);
+        tituloBarra.setText("Lectura por cámara");
+        tituloBarra.setTextSize(20f);
+        tituloBarra.setTypeface(null, android.graphics.Typeface.BOLD);
+        tituloBarra.setTextColor(color(R.color.lec_texto));
+        LinearLayout.LayoutParams lpTit = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lpTit.weight = 1;
+        lpTit.setMarginStart(dp(4));
+        tituloBarra.setLayoutParams(lpTit);
+        barraSup.addView(btnVolver);
+        barraSup.addView(tituloBarra);
+        View divisor = new View(this);
+        divisor.setBackgroundColor(color(R.color.lec_divisor));
+        divisor.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(1)));
 
         imgResultado = new ImageView(this);
         LinearLayout.LayoutParams imgLp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, 0);
-        imgLp.weight = 1;
-        imgLp.setMargins(0, 0, 0, 24);
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(180));
+        imgLp.setMargins(dp(16), dp(12), dp(16), 0);
         imgResultado.setLayoutParams(imgLp);
+        imgResultado.setBackgroundResource(R.drawable.lex_recorte);
+        imgResultado.setClipToOutline(true);
+        imgResultado.setPadding(dp(6), dp(6), dp(6), dp(6));
         imgResultado.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        imgResultado.setAdjustViewBounds(true);
+        imgResultado.setContentDescription("Recorte de la pantalla del medidor");
 
         lblEstadoOcr = new TextView(this);
         lblEstadoOcr.setText("Analizando imagen...");
-        lblEstadoOcr.setTextSize(14f);
-        lblEstadoOcr.setTextColor(Color.parseColor("#4CAF50"));
-        lblEstadoOcr.setGravity(Gravity.CENTER);
-        lblEstadoOcr.setPadding(0, 0, 0, 8);
+        lblEstadoOcr.setTextSize(15f);
+        lblEstadoOcr.setTypeface(null, android.graphics.Typeface.BOLD);
+        lblEstadoOcr.setGravity(Gravity.CENTER_VERTICAL);
+        lblEstadoOcr.setMinHeight(dp(48));
+        lblEstadoOcr.setPadding(dp(12), dp(8), dp(12), dp(8));
+        lblEstadoOcr.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+        LinearLayout.LayoutParams lpEstado = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lpEstado.setMargins(dp(16), dp(12), dp(16), 0);
+        lblEstadoOcr.setLayoutParams(lpEstado);
+        // Color de la banda segun el estado que escribe el OCR (solo presentacion)
+        lblEstadoOcr.addTextChangedListener(new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) { }
+            @Override public void onTextChanged(CharSequence s, int a, int b, int c) { }
+            @Override public void afterTextChanged(android.text.Editable s) { pintarEstadoOcr(s.toString()); }
+        });
+        pintarEstadoOcr(lblEstadoOcr.getText().toString());
 
-        progressOcr = new android.widget.ProgressBar(this);
+        progressOcr = new android.widget.ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
         progressOcr.setIndeterminate(true);
+        progressOcr.setIndeterminateTintList(android.content.res.ColorStateList.valueOf(color(R.color.lec_primario)));
         LinearLayout.LayoutParams lpProg = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lpProg.gravity = Gravity.CENTER_HORIZONTAL;
-        lpProg.setMargins(0, 0, 0, 16);
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(6));
+        lpProg.setMargins(dp(16), dp(6), dp(16), 0);
         progressOcr.setLayoutParams(lpProg);
         progressOcr.setVisibility(View.GONE);
 
         TextView titulo = new TextView(this);
-        titulo.setText("Lectura extraída:");
-        titulo.setTextSize(14f);
-        titulo.setTextColor(Color.parseColor("#AAAAAA"));
-        titulo.setPadding(0, 0, 0, 4);
+        titulo.setText("Lectura extraída");
+        titulo.setTextSize(13f);
+        titulo.setTypeface(null, android.graphics.Typeface.BOLD);
+        titulo.setTextColor(color(R.color.lec_texto));
+        LinearLayout.LayoutParams lpTitulo = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lpTitulo.setMargins(dp(16), dp(14), dp(16), dp(4));
+        titulo.setLayoutParams(lpTitulo);
 
         txtLecturaOcr = new EditText(this);
         txtLecturaOcr.setInputType(InputType.TYPE_CLASS_NUMBER);
         txtLecturaOcr.setFilters(new InputFilter[]{new InputFilter.LengthFilter(10)});
         txtLecturaOcr.setTextSize(36f);
-        txtLecturaOcr.setTextColor(Color.WHITE);
-        txtLecturaOcr.setBackgroundColor(Color.argb(80, 255, 255, 255));
+        txtLecturaOcr.setTypeface(null, android.graphics.Typeface.BOLD);
+        txtLecturaOcr.setLetterSpacing(0.1f);
+        txtLecturaOcr.setFontFeatureSettings("tnum");
+        txtLecturaOcr.setTextColor(color(R.color.lec_texto));
+        txtLecturaOcr.setHintTextColor(color(R.color.lec_texto2));
+        txtLecturaOcr.setBackgroundResource(R.drawable.bg_lec_campo);
         txtLecturaOcr.setGravity(Gravity.CENTER);
-        txtLecturaOcr.setPadding(24, 20, 24, 20);
+        txtLecturaOcr.setPadding(dp(16), 0, dp(16), 0);
+        txtLecturaOcr.setContentDescription("Lectura extraída");
         LinearLayout.LayoutParams lpEdit = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lpEdit.setMargins(0, 0, 0, 32);
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(72));
+        lpEdit.setMargins(dp(16), 0, dp(16), 0);
         txtLecturaOcr.setLayoutParams(lpEdit);
 
-        btnConfirmar = new Button(this);
-        btnConfirmar.setText("CONFIRMAR LECTURA");
-        btnConfirmar.setTextSize(16f);
-        btnConfirmar.setTextColor(Color.WHITE);
-        btnConfirmar.setBackgroundColor(Color.parseColor("#388E3C"));
-        LinearLayout.LayoutParams lpConf = new LinearLayout.LayoutParams(
+        TextView ayuda = new TextView(this);
+        ayuda.setText("Compare con el medidor. Si un número no coincide, corríjalo aquí.");
+        ayuda.setTextSize(13f);
+        ayuda.setTextColor(color(R.color.lec_texto2));
+        LinearLayout.LayoutParams lpAyuda = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lpConf.setMargins(0, 0, 0, 12);
+        lpAyuda.setMargins(dp(16), dp(4), dp(16), 0);
+        ayuda.setLayoutParams(lpAyuda);
+
+        View empuje = new View(this);
+        LinearLayout.LayoutParams lpEmpuje = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
+        lpEmpuje.weight = 1;
+        lpEmpuje.setMargins(0, dp(16), 0, 0);
+        empuje.setLayoutParams(lpEmpuje);
+
+        btnConfirmar = new Button(this);
+        btnConfirmar.setText("Confirmar lectura");
+        estiloBoton(btnConfirmar, R.drawable.bg_cau_boton_primario, 0, 16f);
+        btnConfirmar.setTextColor(ContextCompat.getColorStateList(this, R.color.cau_boton_primario_texto));
+        LinearLayout.LayoutParams lpConf = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(48));
+        lpConf.setMargins(dp(16), 0, dp(16), dp(8));
         btnConfirmar.setLayoutParams(lpConf);
         btnConfirmar.setOnClickListener(v -> confirmarLectura());
+        // El boton repite la lectura que se va a confirmar (solo presentacion)
+        txtLecturaOcr.addTextChangedListener(new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) { }
+            @Override public void onTextChanged(CharSequence s, int a, int b, int c) { }
+            @Override public void afterTextChanged(android.text.Editable s) {
+                String l = s.toString().trim();
+                btnConfirmar.setText(l.isEmpty() ? "Confirmar lectura" : "Confirmar lectura " + l);
+            }
+        });
+
+        LinearLayout filaBotones = new LinearLayout(this);
+        filaBotones.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams lpFilaBot = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lpFilaBot.setMargins(dp(16), 0, dp(16), 0);
+        filaBotones.setLayoutParams(lpFilaBot);
 
         Button btnRep = new Button(this);
-        btnRep.setText("REPETIR FOTO");
-        btnRep.setTextSize(14f);
-        btnRep.setTextColor(Color.WHITE);
-        btnRep.setBackgroundColor(Color.parseColor("#1565C0"));
-        LinearLayout.LayoutParams lpRep = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lpRep.setMargins(0, 0, 0, 12);
+        btnRep.setText("Repetir foto");
+        estiloBoton(btnRep, R.drawable.bg_lec_accion, color(R.color.lec_primario), 16f);
+        btnRep.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_nav_camera, 0, 0, 0);
+        btnRep.setCompoundDrawableTintList(android.content.res.ColorStateList.valueOf(color(R.color.lec_primario)));
+        btnRep.setCompoundDrawablePadding(dp(6));
+        btnRep.setPadding(dp(12), 0, dp(12), 0);
+        LinearLayout.LayoutParams lpRep = new LinearLayout.LayoutParams(0, dp(48));
+        lpRep.weight = 1;
         btnRep.setLayoutParams(lpRep);
         btnRep.setOnClickListener(v -> volverACamara());
 
         Button btnCan = new Button(this);
-        btnCan.setText("CANCELAR");
-        btnCan.setTextSize(13f);
-        btnCan.setTextColor(Color.parseColor("#AAAAAA"));
-        btnCan.setBackgroundColor(Color.parseColor("#424242"));
+        btnCan.setText("Cancelar");
+        estiloBoton(btnCan, R.drawable.bg_cau_boton_contorno, color(R.color.lec_texto), 16f);
+        LinearLayout.LayoutParams lpCan = new LinearLayout.LayoutParams(0, dp(48));
+        lpCan.weight = 1;
+        lpCan.setMarginStart(dp(8));
+        btnCan.setLayoutParams(lpCan);
         btnCan.setOnClickListener(v -> cancelar());
 
+        filaBotones.addView(btnRep);
+        filaBotones.addView(btnCan);
+
+        layout.addView(barraSup);
+        layout.addView(divisor);
         layout.addView(imgResultado);
         layout.addView(lblEstadoOcr);
         layout.addView(progressOcr);
         layout.addView(titulo);
         layout.addView(txtLecturaOcr);
+        layout.addView(ayuda);
+        layout.addView(empuje);
         layout.addView(btnConfirmar);
-        layout.addView(btnRep);
-        layout.addView(btnCan);
+        layout.addView(filaBotones);
 
         scrollResultado.addView(layout);
         contenedor.addView(scrollResultado);
+    }
+
+    // ── Ayudas de presentacion (paleta de sol, colors_lectura.xml) ──────────
+
+    private int dp(int v) {
+        return Math.round(v * getResources().getDisplayMetrics().density);
+    }
+
+    private int color(int id) {
+        return ContextCompat.getColor(this, id);
+    }
+
+    /** Boton plano con drawable propio, texto en negrita sin mayusculas sostenidas. */
+    private void estiloBoton(Button b, int fondo, int colorTexto, float sp) {
+        b.setBackgroundResource(fondo);
+        b.setStateListAnimator(null);
+        b.setAllCaps(false);
+        b.setTextSize(sp);
+        b.setTypeface(null, android.graphics.Typeface.BOLD);
+        if (colorTexto != 0) b.setTextColor(colorTexto);
+    }
+
+    /** Banda de estado: verde si se detecto, azul mientras analiza, ambar si hay que escribirla, rojo si hubo error. */
+    private void pintarEstadoOcr(String estado) {
+        if (estado == null || estado.trim().isEmpty()) {
+            lblEstadoOcr.setVisibility(View.GONE);
+            return;
+        }
+        lblEstadoOcr.setVisibility(View.VISIBLE);
+        String e = estado.toLowerCase();
+        int fondo, texto;
+        if (e.startsWith("error")) {
+            fondo = R.drawable.bg_lec_chip_mal;
+            texto = color(R.color.lec_superficie);
+        } else if (e.contains("detectada")) {
+            fondo = R.drawable.bg_lec_chip_ok;
+            texto = color(R.color.lec_superficie);
+        } else if (e.startsWith("analizando")) {
+            fondo = R.drawable.lex_estado_info;
+            texto = color(R.color.lec_texto);
+        } else {
+            fondo = R.drawable.lex_estado_aviso;
+            texto = color(R.color.lec_aviso_texto);
+        }
+        lblEstadoOcr.setBackgroundResource(fondo);
+        lblEstadoOcr.setTextColor(texto);
     }
 
     // ─────────────────────────────────────────────────────────────────────────

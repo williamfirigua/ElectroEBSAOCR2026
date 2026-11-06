@@ -59,6 +59,7 @@ public class ActLicencia extends AppCompatActivity {
     private Button btnActivar;
     private LinearLayout panelActivar;
     private ProgressBar progreso;
+    private View tarjetaEstado; // Solo presentacion: fondo de la tarjeta del mensaje
 
     private boolean revisando;
 
@@ -77,6 +78,7 @@ public class ActLicencia extends AppCompatActivity {
         btnActivar = findViewById(R.id.btnActivarLicencia);
         panelActivar = findViewById(R.id.panelActivar);
         progreso = findViewById(R.id.prgLicencia);
+        tarjetaEstado = findViewById(R.id.sis_estado_licencia);
 
         txtEquipo.setText(Build.MANUFACTURER + " " + Build.MODEL + " · Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")");
         btnActivar.setOnClickListener(v -> activar());
@@ -178,6 +180,7 @@ public class ActLicencia extends AppCompatActivity {
 
     private void mostrarFormulario(String mensaje) {
         txtMensaje.setText(mensaje == null || mensaje.isEmpty() ? "El equipo no tiene licencia." : mensaje);
+        tarjetaEstado.setBackgroundResource(R.drawable.sis_bg_aviso);
         panelActivar.setVisibility(View.VISIBLE);
     }
 
@@ -185,6 +188,7 @@ public class ActLicencia extends AppCompatActivity {
         revisando = si;
         progreso.setVisibility(si ? View.VISIBLE : View.GONE);
         btnActivar.setEnabled(!si);
+        if (si) tarjetaEstado.setBackgroundResource(R.drawable.sis_bg_resultado_neutro);
         if (mensaje != null) txtMensaje.setText(mensaje);
     }
 
@@ -199,7 +203,7 @@ public class ActLicencia extends AppCompatActivity {
     }
 
     private void alerta(String titulo, String mensaje) {
-        new AlertDialog.Builder(this)
+        new AlertDialog.Builder(this, R.style.CauDialogo)
                 .setIcon(R.drawable.gss_logo40x40)
                 .setTitle(titulo)
                 .setMessage(mensaje)
@@ -215,6 +219,7 @@ public class ActLicencia extends AppCompatActivity {
         boolean concedido = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
         if (!concedido) {
             txtMensaje.setText("La aplicación necesita todos los permisos para funcionar. Cierre y abra la app para concederlos.");
+            tarjetaEstado.setBackgroundResource(R.drawable.sis_bg_resultado_error);
             return;
         }
         switch (requestCode) {

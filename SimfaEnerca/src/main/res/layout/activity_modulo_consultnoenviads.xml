@@ -1,194 +1,305 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Pendientes de envio (ModuloConsultaNoEnviados), paleta para el sol de colors_lectura. De arriba abajo:
+    barra: titulo y Cerrar (btnCerrarNe2: vuelve a la liquidacion con RESULT_OK, que dispara el envio, como antes;
+      el boton atras del sistema sigue inhabilitado)
+    resumen: total sin enviar (txtregnoenviados, no editable) y, en modo API REST, los contadores
+      Pendientes / Rechazadas / Archivos (sis_contadores, los llena el Java con los mismos conteos)
+    tabla (tblcabecera + tblcuentacontador): filas armadas en el Java con medidas en dp
+    paginador: primero, anterior, posicion (lblpos), siguiente, ultimo
+    acciones de la cola (filaAccionesRest, solo API REST): Enviar ahora, Reintentar rechazadas, Subir respaldo
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:background="@color/lec_superficie"
+    android:orientation="vertical"
+    tools:context="com.gselectroCaqueta.modulobusquedacuenta.ModuloConsultaNoEnviados">
 
-    <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:background="@drawable/titulo"
-        android:gravity="right"
-        android:stretchColumns="1"
-        android:weightSum="4">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center"
-            android:layout_weight="1"
-            android:background="@color/orangehuila"
-            android:gravity="center|bottom"
-            android:text="CONSULTA NO ENVIADOS"
-            android:textColor="@color/white"
-            android:textSize="15dp"
-            android:textStyle="bold">
-
-        </TextView>
-    </TableRow>
-
-    <HorizontalScrollView
-
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:scrollbars="horizontal">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:orientation="vertical">
-
-            <TableLayout
-                android:id="@+id/tblcabecera"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"></TableLayout>
-
-            <ScrollView
-                android:id="@+id/scrollNe2"
-                android:layout_width="wrap_content"
-                android:layout_height="300dp"
-                android:clickable="false"
-                android:scrollbars="horizontal|vertical">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TableLayout
-                        android:id="@+id/tblcuentacontador"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:clickable="true"></TableLayout>
-                </LinearLayout>
-            </ScrollView>
-        </LinearLayout>
-    </HorizontalScrollView>
-
-    <GridLayout
-        android:layout_width="wrap_content"
-        android:layout_height="100px">
-
-        <ImageButton
-            android:id="@+id/btnAtrasNe2"
-            android:layout_height="wrap_content"
-            android:layout_margin="13px"
-            android:layout_marginBottom="2px"
-            android:layout_marginTop="2px"
-            android:contentDescription="@string/atras_un_registro"
-            android:src="@drawable/atras" />
-
-        <ImageButton
-            android:id="@+id/btnPrimeroNe2"
-            android:layout_height="wrap_content"
-            android:layout_margin="13px"
-            android:layout_marginBottom="2px"
-            android:layout_marginTop="2px"
-            android:contentDescription="@string/primer_registro"
-            android:src="@drawable/primero" />
-
-        <ImageButton
-            android:id="@+id/btnUltimoNe2"
-            android:layout_height="wrap_content"
-            android:layout_margin="13px"
-            android:layout_marginBottom="2px"
-            android:layout_marginTop="2px"
-            android:contentDescription="@string/ultimo_registro"
-            android:src="@drawable/ultimo" />
-
-        <ImageButton
-            android:id="@+id/btnAdelanteNe2"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:layout_margin="13px"
-            android:layout_marginBottom="2px"
-            android:layout_marginTop="2px"
-            android:contentDescription="@string/adelanta_un_registro"
-            android:src="@drawable/adelante" />
-
-    </GridLayout>
-
-    <TableRow
+    <!-- Barra superior -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right">
+        android:layout_height="56dp"
+        android:background="@color/lec_superficie"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="10dp"
             android:layout_weight="1"
-            android:text="Reg. No enviados"
-            android:textSize="16dp" />
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Pendientes de envío"
+            android:textColor="@color/lec_texto"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnCerrarNe2"
+            style="@style/SisBotonContorno"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="0dp"
+            android:minWidth="88dp"
+            android:text="@string/cerrar" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/lec_divisor" />
+
+    <!-- Total sin enviar (modo SOAP; en API REST lo reemplazan los contadores) -->
+    <LinearLayout
+        android:id="@+id/sis_resumen_total"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_lec_tarjeta"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Registros sin enviar"
+            android:textColor="@color/lec_texto2"
+            android:textSize="13sp" />
 
         <EditText
             android:id="@+id/txtregnoenviados"
             android:layout_width="0dp"
-            android:layout_height="60px"
-            android:layout_gravity="center"
-            android:layout_marginBottom="2dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="2dp"
-            android:layout_weight="2"
-            android:background="@drawable/bg_bordes"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:background="@null"
             android:clickable="false"
             android:cursorVisible="false"
             android:focusable="false"
             android:focusableInTouchMode="false"
-            android:paddingLeft="4dp" />
+            android:fontFeatureSettings="tnum"
+            android:gravity="end|center_vertical"
+            android:importantForAutofill="no"
+            android:inputType="none"
+            android:longClickable="false"
+            android:padding="0dp"
+            android:textColor="@color/lec_texto"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Contadores en modo API REST -->
+    <LinearLayout
+        android:id="@+id/sis_contadores"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <LinearLayout
+            style="@style/SisContador"
+            android:layout_marginEnd="4dp">
+
+            <TextView
+                style="@style/SisContadorEtiqueta"
+                android:text="Pendientes" />
+
+            <TextView
+                android:id="@+id/sis_cnt_pendientes"
+                style="@style/SisContadorValor"
+                android:text="0" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sis_caja_rechazadas"
+            style="@style/SisContador"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp">
+
+            <TextView
+                android:id="@+id/sis_etq_rechazadas"
+                style="@style/SisContadorEtiqueta"
+                android:text="Rechazadas" />
+
+            <TextView
+                android:id="@+id/sis_cnt_rechazadas"
+                style="@style/SisContadorValor"
+                android:text="0" />
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/SisContador"
+            android:layout_marginStart="4dp">
+
+            <TextView
+                style="@style/SisContadorEtiqueta"
+                android:text="Archivos" />
+
+            <TextView
+                android:id="@+id/sis_cnt_archivos"
+                style="@style/SisContadorValor"
+                android:text="0" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Tabla: encabezado fijo y filas con desplazamiento -->
+    <TableLayout
+        android:id="@+id/tblcabecera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:shrinkColumns="1"
+        android:stretchColumns="1" />
+
+    <ScrollView
+        android:id="@+id/scrollNe2"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TableLayout
+                android:id="@+id/tblcuentacontador"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:shrinkColumns="1"
+                android:stretchColumns="1" />
+
+            <TextView
+                android:id="@+id/sis_vacio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="24dp"
+                android:text="No hay lecturas pendientes de envío"
+                android:textColor="@color/lec_texto2"
+                android:textSize="15sp"
+                android:visibility="gone" />
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Paginador -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/lec_divisor" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="14dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="8dp">
+
+        <ImageButton
+            android:id="@+id/btnPrimeroNe2"
+            style="@style/BotonNavLectura"
+            android:contentDescription="@string/primer_registro"
+            android:src="@drawable/ic_lec_primero"
+            android:tooltipText="Primera página" />
+
+        <ImageButton
+            android:id="@+id/btnAtrasNe2"
+            style="@style/BotonNavLectura"
+            android:contentDescription="@string/atras_un_registro"
+            android:src="@drawable/ic_lec_anterior"
+            android:tooltipText="Página anterior" />
 
         <TextView
             android:id="@+id/lblpos"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="10dp"
-            android:layout_weight="1"
+            android:layout_weight="1.4"
+            android:fontFeatureSettings="tnum"
+            android:gravity="center"
+            android:maxLines="1"
             android:text="0/0"
-            android:textSize="16dp" />
+            android:textColor="@color/lec_texto"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
-    </TableRow>
+        <ImageButton
+            android:id="@+id/btnAdelanteNe2"
+            style="@style/BotonNavLectura"
+            android:contentDescription="@string/adelanta_un_registro"
+            android:src="@drawable/ic_lec_siguiente"
+            android:tooltipText="Página siguiente" />
 
-    <!-- Envío por API REST: acciones sobre la cola (ocultas en modo SOAP). -->
+        <ImageButton
+            android:id="@+id/btnUltimoNe2"
+            style="@style/BotonNavLectura"
+            android:contentDescription="@string/ultimo_registro"
+            android:src="@drawable/ic_lec_ultimo"
+            android:tooltipText="Última página" />
+    </LinearLayout>
+
+    <!-- Envio por API REST: acciones sobre la cola (ocultas en modo SOAP). -->
     <LinearLayout
         android:id="@+id/filaAccionesRest"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp"
         android:visibility="gone">
 
         <Button
             android:id="@+id/btnEnviarAhora"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Enviar ahora"
-            android:textSize="12sp" />
+            style="@style/ComBotonLleno"
+            android:layout_marginTop="4dp"
+            android:drawableStart="@drawable/ic_nav_send"
+            android:text="Enviar ahora" />
 
-        <Button
-            android:id="@+id/btnReintentarRechazados"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Reintentar rechazados"
-            android:textSize="12sp" />
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/btnSubirRespaldo"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Subir respaldo"
-            android:textSize="12sp" />
+            <Button
+                android:id="@+id/btnReintentarRechazados"
+                style="@style/SisBotonContorno"
+                android:layout_width="0dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="Reintentar rechazadas"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/btnSubirRespaldo"
+                style="@style/SisBotonContorno"
+                android:layout_width="0dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="8dp"
+                android:layout_weight="1"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="Subir respaldo"
+                android:textSize="15sp" />
+        </LinearLayout>
     </LinearLayout>
-
-    <Button
-        android:id="@+id/btnCerrarNe2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="1dp"
-        android:text="@string/cerrar" />
-
 </LinearLayout>

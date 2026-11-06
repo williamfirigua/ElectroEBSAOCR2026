@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Texto e icono de una opcion del control segmentado: blanco sobre la marcada, negro en las demas. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/lec_tecla_texto" android:state_checked="true" />
+    <item android:color="@color/lec_tecla_texto" android:state_activated="true" />
+    <item android:color="@color/lec_texto" />
+</selector>

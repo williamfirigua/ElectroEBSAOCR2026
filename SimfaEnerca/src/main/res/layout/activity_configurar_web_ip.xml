@@ -1,409 +1,294 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Conexion al servidor (Configurar_webIp), paleta para el sol de colors_lectura. De arriba abajo:
+    barra: volver (btnRegresar1), titulo e iconos de la ultima prueba (iconwebserviceon / iconwebserviceoff)
+    nota con candado (sis_aviso_admin): la muestra Configurar_webIp cuando el operador no puede editar
+    Servidor activo: chkIp1 / chkIp2 con aspecto de control segmentado (la exclusion la sigue haciendo el Java)
+    Servidor: direccion (txtdirWs) y nombre del servicio web (txtDescServWeb)
+    Opciones avanzadas: ruta administrador (txtrutaadmin), puerto API (edtxPuertoAPI) y protocolo (chkEnvioRest,
+      se guarda al marcar como antes; no tiene candado)
+    Prueba de conexion: btnPruebaWs y su resultado (lblTransmite)
+    abajo: Guardar (btnGrabarIp)
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/lec_superficie"
+    android:orientation="vertical"
     tools:context="com.gselectroCaqueta.comunicaciones.Configurar_webIp">
 
-    <TableRow
+    <!-- Barra superior -->
+    <LinearLayout
         android:id="@+id/tittle"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:background="@drawable/titulo"
-        android:gravity="right"
-        android:stretchColumns="1"
-        android:weightSum="4">
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/lec_superficie"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="4dp"
+        android:paddingEnd="8dp">
+
+        <ImageButton
+            android:id="@+id/btnRegresar1"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_lec_icono"
+            android:contentDescription="Volver"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_nav_back"
+            android:tint="@color/lec_texto" />
 
         <TextView
-            android:layout_width="332dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center"
+            android:layout_marginStart="6dp"
             android:layout_weight="1"
-            android:background="@color/ocrePop"
-            android:gravity="center|bottom"
-            android:text="CONFIGURACION WEB"
-            android:textColor="@color/white"
-            android:textSize="15dp"
-            android:textStyle="bold">
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Conexión al servidor"
+            android:textColor="@color/lec_texto"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-        </TextView>
-    </TableRow>
-
-    <TableLayout
-        android:layout_below="@+id/tittle"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerHorizontal="true"
-        tools:ignore="UselessParent">
-
-        <TableRow
-            android:id="@+id/tableRow19"
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:layout_marginTop="10dp"
-            android:layout_weight="0"
-            android:orientation="horizontal">
-
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tableRow1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <CheckBox
-                android:id="@+id/chkIp1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Activa IP1" />
-
-            <CheckBox
-                android:id="@+id/chkIp2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Activa IP2" />
-
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tableRow2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/lblIpws"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:text="IP WS"
-                android:textStyle="bold"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
-
-            <!--<EditText
-                android:id="@+id/txtIpWs1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="number"
-                android:lines="1"
-                android:maxLength="3"
-                android:maxLines="1"
-                android:textColor="#AA2323">
-
-                <requestFocus />
-
-            </EditText>
-
-            <EditText
-                android:id="@+id/txtIpWs2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="number"
-                android:maxLength="3"
-                android:maxLines="1"
-                android:textColor="#AA2323" />
-
-            <EditText
-                android:id="@+id/txtIpWs3"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="number"
-                android:maxLength="3"
-                android:maxLines="1"
-                android:textColor="#AA2323" />
-
-            <EditText
-                android:id="@+id/txtIpWs4"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="number"
-                android:maxLength="3"
-                android:maxLines="1"
-                android:textColor="#AA2323" />-->
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tableRow7"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <EditText
-                android:id="@+id/txtdirWs"
-                android:layout_width="wrap_content"
-                android:layout_height="38dp"
-                android:background="@drawable/bg_input"
-                android:layout_weight="1"
-                android:inputType="text"
-                android:lines="1"
-                android:maxLines="1"
-                android:textColor="#AA2323">
-
-                <requestFocus />
-
-            </EditText>
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tableRow3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/lblNombreServicioWeb"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Nombre Servicio Web:"
-                android:textStyle="bold"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tableRow4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <EditText
-                android:id="@+id/txtDescServWeb"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ems="10"
-                android:inputType="textMultiLine|textFilter"
-                android:textColor="#AA2323" />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tableRow5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/lblrutaadministrador"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Ruta Administrador:"
-                android:textStyle="bold"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tableRow10"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <EditText
-                android:id="@+id/txtrutaadmin"
-                android:layout_width="match_parent"
-                android:layout_height="38dp"
-                android:background="@drawable/bg_input"
-                android:layout_weight="1"
-                android:ems="10"
-                android:enabled="false"
-                android:inputType="textMultiLine|textFilter"
-                android:textColor="#AA2323" />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tableRow11"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/lblpuertoAPI"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Puerto comunicaciones API:"
-                android:textStyle="bold"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tableRow12"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <EditText
-                android:id="@+id/edtxPuertoAPI"
-                android:layout_width="match_parent"
-                android:layout_height="38dp"
-                android:background="@drawable/bg_input"
-                android:layout_weight="1"
-                android:ems="10"
-                android:inputType="textMultiLine|textFilter"
-                android:textColor="#AA2323" />
-        </TableRow>
-        <TableRow
-            android:id="@+id/tableRowEnvioRest"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp">
-
-            <CheckBox
-                android:id="@+id/chkEnvioRest"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Enviar por API REST (JSON)"
-                android:textStyle="bold" />
-        </TableRow>
-        <!--<TableRow
-            android:id="@+id/tableRow5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/lblPuerto"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/nro_puerto"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-
-            <EditText
-                android:id="@+id/txtPuerto"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="number"
-                android:lines="1"
-                android:maxLength="4"
-                android:maxLines="1"
-                android:textColor="#AA2323" />
-        </TableRow>-->
-
-        <!--<TableRow
-            android:id="@+id/tableRow7"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/lblNroTramas"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/nro_tramas"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-
-            <EditText
-                android:id="@+id/txtTramas"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="number"
-                android:lines="1"
-                android:maxLength="10"
-                android:maxLines="1"
-                android:textColor="#AA2323" />
-        </TableRow>-->
-
-        <TableRow
-            android:id="@+id/tableRow6"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <Button
-                android:id="@+id/btnGrabarIp"
-                style="@style/AppTheme"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_boton_redondeado"
-                android:layout_weight="1"
-                android:text="Establecer Datos"
-                android:textStyle="bold"/>
-
-            <Button
-                android:id="@+id/btnPruebaWs"
-                style="@style/AppTheme"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_boton_redondeado"
-                android:layout_weight="1"
-                android:text="PRUEBA WS"
-                android:textStyle="bold"/>
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tableRow8"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/lblTransmite"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tableRow9"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+        <!-- Resultado de la ultima prueba: los dos iconos ocupan el mismo lugar. -->
+        <FrameLayout
+            android:layout_width="40dp"
+            android:layout_height="40dp">
 
             <ImageView
                 android:id="@+id/iconwebserviceon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|right"
-                android:layout_marginTop="10dp"
-                android:adjustViewBounds="true"
-                android:contentDescription="RED ACTIVA"
-                android:maxWidth="36dp"
-                android:maxHeight="36dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_lec_tarjeta"
+                android:contentDescription="Conexión correcta"
+                android:padding="8dp"
                 android:scaleType="fitCenter"
-                android:src="@mipmap/webserviceon"
+                android:src="@drawable/ic_nav_wifi"
+                android:tint="@color/lec_exito"
                 android:visibility="invisible" />
 
             <ImageView
                 android:id="@+id/iconwebserviceoff"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|right"
-                android:layout_marginTop="10dp"
-                android:layout_marginRight="5dp"
-                android:adjustViewBounds="true"
-                android:contentDescription="RED ACTIVA"
-                android:maxWidth="36dp"
-                android:maxHeight="36dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_lec_tarjeta"
+                android:contentDescription="Sin probar o sin conexión"
+                android:padding="8dp"
                 android:scaleType="fitCenter"
-                android:src="@mipmap/webserviceoff"
+                android:src="@drawable/ic_nav_warning"
+                android:tint="@color/lec_error"
                 android:visibility="visible" />
-        </TableRow>
+        </FrameLayout>
+    </LinearLayout>
 
-        <TableRow
-            android:id="@+id/tableRow1x"
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/lec_divisor" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="22dp">
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp">
 
-        </TableRow>
+            <!-- Candado: visible solo cuando el operador no es administrador. -->
+            <TextView
+                android:id="@+id/sis_aviso_admin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/sis_bg_nota"
+                android:drawableStart="@drawable/sis_ic_candado"
+                android:drawablePadding="10dp"
+                android:drawableTint="@color/lec_primario"
+                android:gravity="center_vertical"
+                android:lineSpacingExtra="1dp"
+                android:paddingStart="12dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="10dp"
+                android:text="Solo el administrador puede cambiar estos datos. Usted puede elegir el servidor y probar la conexión."
+                android:textColor="@color/lec_texto"
+                android:textSize="14sp"
+                android:visibility="gone" />
 
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:gravity="center"
-            android:orientation="vertical">
+            <!-- Servidor activo: control segmentado -->
+            <TextView
+                android:id="@+id/lblIpws"
+                style="@style/ComEtiquetaCampo"
+                android:layout_marginTop="16dp"
+                android:text="Servidor activo" />
+
+            <LinearLayout
+                android:id="@+id/tableRow1"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/sis_bg_segmentado"
+                android:orientation="horizontal"
+                android:padding="2dp">
+
+                <CheckBox
+                    android:id="@+id/chkIp1"
+                    style="@style/SisSegmento"
+                    android:background="@drawable/sis_bg_segmento_izq"
+                    android:text="Principal (IP1)" />
+
+                <View
+                    android:layout_width="2dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/lec_contorno" />
+
+                <CheckBox
+                    android:id="@+id/chkIp2"
+                    style="@style/SisSegmento"
+                    android:background="@drawable/sis_bg_segmento_der"
+                    android:text="Alterno (IP2)" />
+            </LinearLayout>
+
+            <!-- Servidor -->
+            <LinearLayout style="@style/ComTarjeta">
+
+                <TextView
+                    style="@style/ComTituloSeccion"
+                    android:text="Servidor" />
+
+                <TextView
+                    style="@style/ComEtiquetaCampo"
+                    android:layout_marginTop="10dp"
+                    android:text="Dirección del servidor" />
+
+                <EditText
+                    android:id="@+id/txtdirWs"
+                    style="@style/SisCampo"
+                    android:importantForAutofill="no"
+                    android:inputType="text"
+                    android:lines="1"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:id="@+id/lblNombreServicioWeb"
+                    style="@style/ComEtiquetaCampo"
+                    android:layout_marginTop="12dp"
+                    android:text="Nombre del servicio web" />
+
+                <EditText
+                    android:id="@+id/txtDescServWeb"
+                    style="@style/SisCampo"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine|textFilter" />
+            </LinearLayout>
+
+            <!-- Opciones avanzadas (siempre visibles, agrupadas) -->
+            <LinearLayout style="@style/ComTarjeta">
+
+                <TextView
+                    style="@style/ComTituloSeccion"
+                    android:text="Opciones avanzadas" />
+
+                <TextView
+                    style="@style/ComDescripcion"
+                    android:text="Cámbielas solo si se lo indica el administrador del sistema." />
+
+                <TextView
+                    android:id="@+id/lblrutaadministrador"
+                    style="@style/ComEtiquetaCampo"
+                    android:layout_marginTop="12dp"
+                    android:text="Ruta del administrador" />
+
+                <EditText
+                    android:id="@+id/txtrutaadmin"
+                    style="@style/SisCampo"
+                    android:enabled="false"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine|textFilter" />
+
+                <TextView
+                    android:id="@+id/lblpuertoAPI"
+                    style="@style/ComEtiquetaCampo"
+                    android:layout_marginTop="12dp"
+                    android:text="Puerto de la API" />
+
+                <EditText
+                    android:id="@+id/edtxPuertoAPI"
+                    style="@style/SisCampo"
+                    android:importantForAutofill="no"
+                    android:inputType="textMultiLine|textFilter" />
+
+                <TextView
+                    style="@style/ComEtiquetaCampo"
+                    android:layout_marginTop="12dp"
+                    android:text="Protocolo de envío" />
+
+                <!-- Se guarda al marcar (como antes). Marcada: API REST (JSON); sin marcar: SOAP. -->
+                <CheckBox
+                    android:id="@+id/chkEnvioRest"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/sis_bg_fila_opcion"
+                    android:buttonTint="@color/lec_primario"
+                    android:minHeight="56dp"
+                    android:paddingStart="8dp"
+                    android:paddingTop="6dp"
+                    android:paddingEnd="12dp"
+                    android:paddingBottom="6dp"
+                    android:text="Enviar por API REST (JSON)\nSin marcar se envía por SOAP"
+                    android:textColor="@color/lec_texto"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <!-- Prueba de conexion -->
+            <TextView
+                style="@style/ComTituloSeccion"
+                android:layout_marginTop="20dp"
+                android:text="Prueba de conexión" />
 
             <Button
-                android:id="@+id/btnRegresar1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:width="200dp"
+                android:id="@+id/btnPruebaWs"
+                style="@style/SisBotonContorno"
+                android:layout_marginTop="8dp"
+                android:drawableStart="@drawable/ic_nav_sync"
+                android:text="Probar conexión" />
 
-                android:background="@drawable/bg_boton_redondeado"
-
-                android:gravity="center"
-                android:lines="1"
-                android:text="Regresar al modulo"
-                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/lblTransmite"
+                style="@style/SisResultado"
+                android:hint="Elija el servidor y toque Probar conexión."
+                android:textColorHint="@color/lec_texto2" />
         </LinearLayout>
-    </TableLayout>
-</RelativeLayout>
+    </ScrollView>
+
+    <!-- Accion principal -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/lec_superficie"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lec_divisor" />
+
+        <Button
+            android:id="@+id/btnGrabarIp"
+            style="@style/ComBotonLleno"
+            android:layout_marginTop="12dp"
+            android:text="Guardar" />
+    </LinearLayout>
+</LinearLayout>

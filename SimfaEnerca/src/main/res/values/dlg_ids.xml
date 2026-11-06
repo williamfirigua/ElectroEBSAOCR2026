@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Etiquetas (setTag) de los campos que arma DialogosLectura: error en linea, texto a la derecha de la etiqueta y grupo. -->
+<resources>
+    <item name="dlg_error" type="id" />
+    <item name="dlg_lado" type="id" />
+    <item name="dlg_grupo" type="id" />
+</resources>

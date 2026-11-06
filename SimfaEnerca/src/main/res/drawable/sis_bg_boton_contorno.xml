@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Boton secundario: blanco con borde primario de 2dp; deshabilitado, gris con borde gris. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#330047A0">
+    <item>
+        <selector>
+            <item android:state_enabled="false">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/lec_contenedor" />
+                    <stroke android:width="2dp" android:color="@color/lec_borde" />
+                    <corners android:radius="12dp" />
+                </shape>
+            </item>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/lec_superficie" />
+                    <stroke android:width="2dp" android:color="@color/lec_primario" />
+                    <corners android:radius="12dp" />
+                </shape>
+            </item>
+        </selector>
+    </item>
+</ripple>

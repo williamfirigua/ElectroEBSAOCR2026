@@ -1,82 +1,230 @@
-<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2009 The Android Open Source Project
-
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Impresora Bluetooth (DeviceListActivity) con la paleta de sol de la lectura v2: impresora asociada en una
+  tarjeta con su estado y Desasociar, impresoras encontradas en una lista y el boton Buscar / Detener abajo.
+  Ids conservados: title_paired_devices, paired_devices, title_new_devices, new_devices, button_scan.
+  La lista paired_devices se sigue llenando como antes (queda oculta: la tarjeta muestra lo mismo).
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:minWidth="320dp"
+    android:orientation="vertical"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_nav_print"
+            android:tint="@color/lec_primario" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:text="Impresora Bluetooth"
+            android:textColor="@color/lec_texto"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/title_paired_devices"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#666"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="8dp"
+        android:text="Impresora asociada"
+        android:textColor="@color/lec_texto"
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
-        android:paddingLeft="5dp"
-        android:text="@string/title_paired_devices"
-        android:textColor="#fff" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/bg_lec_tarjeta"
+        android:orientation="vertical"
+        android:padding="12dp">
 
-    <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:background="@drawable/titulo"
-        android:gravity="right"
-        android:stretchColumns="1"
-        android:weightSum="4">
-
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center"
-            android:layout_weight="1"
-            android:background="@color/orangehuila"
-            android:gravity="center|bottom"
-            android:text="LISTA DE DISPOSITIVOS"
-            android:textColor="@color/white"
-            android:textSize="15dp"
-            android:textStyle="bold">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        </TextView>
-    </TableRow>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/imp_txtAsociada"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Sin impresora asociada"
+                    android:textColor="@color/lec_texto"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/imp_txtMacAsociada"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFeatureSettings="tnum"
+                    android:text="Busque y toque su impresora en la lista"
+                    android:textColor="@color/lec_texto2"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/imp_chipEstado"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_lec_chip_neutro"
+                android:gravity="center"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="Sin asociar"
+                android:textColor="@color/lec_texto"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/imp_btnDesasociar"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/lex_boton_peligro"
+            android:stateListAnimator="@null"
+            android:text="Desasociar"
+            android:textAllCaps="false"
+            android:textColor="@color/lec_error"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+    </LinearLayout>
 
     <ListView
         android:id="@+id/paired_devices"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:stackFromBottom="true" />
+        android:stackFromBottom="true"
+        android:visibility="gone" />
 
-    <TextView
-        android:id="@+id/title_new_devices"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#666"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-        android:paddingLeft="5dp"
-        android:text="@string/title_other_devices"
-        android:textColor="#fff" />
+        <TextView
+            android:id="@+id/title_new_devices"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Otras impresoras cerca"
+            android:textColor="@color/lec_texto"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/imp_txtEstadoBusqueda"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFeatureSettings="tnum"
+            android:textColor="@color/lec_texto2"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/imp_progresoBusqueda"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="20dp"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/lec_primario"
+        android:visibility="invisible" />
 
     <ListView
         android:id="@+id/new_devices"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="2"
+        android:layout_height="0dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="20dp"
+        android:layout_weight="1"
+        android:divider="@null"
+        android:minHeight="120dp"
         android:stackFromBottom="true" />
 
-    <Button
-        android:id="@+id/button_scan"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/button_scan" />
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
+        android:text="Si no aparece su impresora: enciéndala, acérquela a menos de 2 metros y busque de nuevo."
+        android:textColor="@color/lec_texto2"
+        android:textSize="13sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="20dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/imp_btnCerrar"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_lec_accion"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:stateListAnimator="@null"
+            android:text="Cerrar"
+            android:textAllCaps="false"
+            android:textColor="@color/lec_primario"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/button_scan"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_cau_boton_primario"
+            android:stateListAnimator="@null"
+            android:text="@string/imp_buscar_impresoras"
+            android:textAllCaps="false"
+            android:textColor="@color/lec_superficie"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 </LinearLayout>

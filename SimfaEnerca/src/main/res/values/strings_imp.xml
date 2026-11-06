@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Textos de la ventana de impresora Bluetooth (DeviceListActivity). -->
+<resources>
+    <string name="imp_buscar_impresoras">Buscar impresoras</string>
+    <string name="imp_detener_busqueda">Detener búsqueda</string>
+</resources>

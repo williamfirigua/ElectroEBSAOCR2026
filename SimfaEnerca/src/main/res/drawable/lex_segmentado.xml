@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Marco del control segmentado: blanco con borde oscuro de 2dp. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/lec_superficie" />
+    <stroke android:width="2dp" android:color="@color/lec_contorno" />
+    <corners android:radius="12dp" />
+</shape>

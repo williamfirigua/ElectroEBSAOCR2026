@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Interruptor dibujado al final de un CheckBox (drawableEnd): encendido azul con bola blanca a la derecha,
+     apagado blanco con borde oscuro y bola oscura a la izquierda. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true">
+        <layer-list>
+            <item android:width="60dp" android:height="36dp">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/lec_primario" />
+                    <corners android:radius="18dp" />
+                </shape>
+            </item>
+            <item android:width="24dp" android:height="24dp" android:gravity="end|center_vertical" android:end="6dp">
+                <shape android:shape="oval">
+                    <solid android:color="@color/lec_superficie" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item>
+        <layer-list>
+            <item android:width="60dp" android:height="36dp">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/lec_superficie" />
+                    <stroke android:width="2dp" android:color="@color/lec_contorno" />
+                    <corners android:radius="18dp" />
+                </shape>
+            </item>
+            <item android:width="24dp" android:height="24dp" android:gravity="start|center_vertical" android:start="6dp">
+                <shape android:shape="oval">
+                    <solid android:color="@color/lec_contorno" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</selector>

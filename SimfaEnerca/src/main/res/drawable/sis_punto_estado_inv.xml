@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Diagnostico: punto de Modo avion. Marcado (encendido) = oscuro sobre ambar; sin marcar = verde. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true">
+        <shape android:shape="oval">
+            <solid android:color="@color/lec_aviso_texto" />
+            <size android:width="10dp" android:height="10dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/lec_ok" />
+            <size android:width="10dp" android:height="10dp" />
+        </shape>
+    </item>
+</selector>

@@ -19,6 +19,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.gselectroCaqueta.accesoyseguridad.R;
@@ -45,6 +46,10 @@ public class DeviceListActivity extends Activity {
     private BluetoothAdapter mBtAdapter;
     private ArrayAdapter<String> mPairedDevicesArrayAdapter;
     private ArrayAdapter<String> mNewDevicesArrayAdapter;
+    // Vistas de presentacion (tarjeta de la impresora asociada y estado de la busqueda)
+    private TextView txtAsociada, txtMacAsociada, chipEstado, txtEstadoBusqueda;
+    private Button btnDesasociar;
+    private ProgressBar progresoBusqueda;
     //String directorioactual = "";//Ax recibe directorio de las varaibles globales
     // The BroadcastReceiver that listens for discovered devices and
     // changes the title when discovery is finished
@@ -63,16 +68,18 @@ public class DeviceListActivity extends Activity {
                 if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
                     addLog("adding new bonded device: " + device.getName() + " " + device.getAddress());
                     mNewDevicesArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                    mostrarBusqueda(true);
                 }
                 // When discovery is finished, change the Activity title
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                setProgressBarIndeterminateVisibility(false);
+                mostrarBusqueda(false);
                 setTitle(R.string.select_device);
                 if (mNewDevicesArrayAdapter.getCount() == 0) {
                     String noDevices = getResources().getText(R.string.none_found).toString();
                     mNewDevicesArrayAdapter.add(noDevices);
                 }
                 scanButton.setText(scanButtonTextScan);
+                mostrarBusqueda(false);
             }
         }
     };
@@ -117,9 +124,17 @@ public class DeviceListActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addLog("+++OnCreate+++");
-        // Setup the window
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        // Setup the window (dialogo blanco de la paleta de sol; el progreso de busqueda va en el layout)
+        setTheme(R.style.imp_Dialogo);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.device_list);
+
+        txtAsociada = (TextView) findViewById(R.id.imp_txtAsociada);
+        txtMacAsociada = (TextView) findViewById(R.id.imp_txtMacAsociada);
+        chipEstado = (TextView) findViewById(R.id.imp_chipEstado);
+        txtEstadoBusqueda = (TextView) findViewById(R.id.imp_txtEstadoBusqueda);
+        progresoBusqueda = (ProgressBar) findViewById(R.id.imp_progresoBusqueda);
+        btnDesasociar = (Button) findViewById(R.id.imp_btnDesasociar);
 
         // Set result CANCELED incase the user backs out
         setResult(Activity.RESULT_CANCELED);
@@ -152,6 +167,19 @@ public class DeviceListActivity extends Activity {
 
         Bundle bundle = getIntent().getExtras();
         conectadoa = bundle.getString("conectadoa");
+
+        // Desasociar desde la tarjeta: mismo camino que tocar la impresora asociada en la lista
+        btnDesasociar.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                mDeviceClickListenerII.onItemClick(null, v, 0, 0);
+            }
+        });
+        // Cerrar: igual que volver atras (resultado CANCELED)
+        findViewById(R.id.imp_btnCerrar).setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                finish();
+            }
+        });
         //directorioactual= bundle.getString("directorioactual");
 
         // Get the local Bluetooth adapter-
@@ -160,8 +188,9 @@ public class DeviceListActivity extends Activity {
         initDeviceList();
 
         // Initialize the button to perform device discovery
-        scanButtonTextScan = getResources().getString(R.string.devicelist_action_button_text_scan);
-        scanButtonTextStop = getResources().getString(R.string.devicelist_action_button_text_cancel);
+        // Mismo texto al poner y al comparar (antes ponia "STOP" y comparaba con "DETENER": nunca se detenia)
+        scanButtonTextScan = getResources().getString(R.string.imp_buscar_impresoras);
+        scanButtonTextStop = getResources().getString(R.string.imp_detener_busqueda);
         scanButton = (Button) findViewById(R.id.button_scan);
         scanButton.setText(scanButtonTextScan);
 
@@ -216,9 +245,22 @@ public class DeviceListActivity extends Activity {
             ListView listabusqueda = (ListView) findViewById(R.id.new_devices);
             // listabusqueda.setEnabled(false);
 
+            txtAsociada.setText("Impresora asociada");
+            txtMacAsociada.setText(conectadoa);
+            chipEstado.setText("Asociada");
+            chipEstado.setBackgroundResource(R.drawable.bg_lec_chip_ok);
+            chipEstado.setTextColor(getResources().getColor(R.color.lec_superficie, getTheme()));
+            btnDesasociar.setVisibility(View.VISIBLE);
         } else {
             String noDevices = getResources().getText(R.string.none_paired).toString();
             mPairedDevicesArrayAdapter.add(noDevices);
+
+            txtAsociada.setText("Sin impresora asociada");
+            txtMacAsociada.setText("Busque y toque su impresora en la lista");
+            chipEstado.setText("Sin asociar");
+            chipEstado.setBackgroundResource(R.drawable.bg_lec_chip_neutro);
+            chipEstado.setTextColor(getResources().getColor(R.color.lec_texto, getTheme()));
+            btnDesasociar.setVisibility(View.GONE);
         }
     }
 
@@ -235,12 +277,13 @@ public class DeviceListActivity extends Activity {
                     addLog("stop discovery requested");
                     mBtAdapter.cancelDiscovery();
                     scanButton.setText(scanButtonTextScan);
+                    mostrarBusqueda(false);
                     return;
                 }
             }
         }
         // Indicate scanning in the title
-        setProgressBarIndeterminateVisibility(true);
+        mostrarBusqueda(true);
         setTitle(R.string.scanning);
 
         // Turn on sub-title for new devices
@@ -253,8 +296,20 @@ public class DeviceListActivity extends Activity {
 
         // Request discover from BluetoothAdapter
         mBtAdapter.startDiscovery();
-        scanButton.setText("STOP");
+        scanButton.setText(scanButtonTextStop);
         addLog("Discovery() started");
+    }
+
+    /** Solo presentacion: barra de progreso y "Buscando · N encontradas" junto al titulo de la lista. */
+    private void mostrarBusqueda(boolean buscando) {
+        progresoBusqueda.setVisibility(buscando ? View.VISIBLE : View.INVISIBLE);
+        int n = 0;
+        String vacio = getResources().getText(R.string.none_found).toString();
+        for (int i = 0; i < mNewDevicesArrayAdapter.getCount(); i++) {
+            if (!vacio.equals(mNewDevicesArrayAdapter.getItem(i))) n++;
+        }
+        String cuantas = n == 1 ? "1 encontrada" : n + " encontradas";
+        txtEstadoBusqueda.setText(buscando ? "Buscando · " + cuantas : cuantas);
     }
 
     public void addLog(String s) {
@@ -280,11 +335,11 @@ public class DeviceListActivity extends Activity {
     }
 
     public void AlertDialogEscoger(String titulo, final String mensaje, final String method) {
-        new AlertDialog.Builder(DeviceListActivity.this)
-                .setTitle(titulo)
-                .setMessage(mensaje)
-                .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        new AlertDialog.Builder(DeviceListActivity.this, android.R.style.Theme_Material_Light_Dialog_Alert)
+                .setTitle("Desasociar impresora")
+                .setMessage("La app dejará de imprimir en " + conectadoa + ". ¿Desea desasociarla?")
+                .setNegativeButton("Cancelar", null)
+                .setPositiveButton("Desasociar", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         switch (method) {

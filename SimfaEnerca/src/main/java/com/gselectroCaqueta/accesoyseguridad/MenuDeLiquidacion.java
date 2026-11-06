@@ -1452,13 +1452,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     private boolean MensajeriaCliente() {//Ax: MENSAJERIA ESPECIAL
         String Mensaje = infoClienteEntrada.gettablaEntradaClientes_Informacionadicional().trim();
 
-        new AlertDialog.Builder(this)
+        DialogosLectura.builder(this)
                 .setTitle("Mensaje programado")
-                .setMessage(Mensaje.toUpperCase())
-                .setPositiveButton("OK", (dialog, which) -> {
+                .setMessage(Mensaje)
+                .setPositiveButton("Entendido", (dialog, which) -> {
                     dialog.dismiss();
                 })
-                .setNeutralButton("BANDEJA", (dialog, which) -> abrirBandeja())
+                .setNeutralButton("Ver bandeja", (dialog, which) -> abrirBandeja())
                 .show();
 
         return true;
@@ -2649,13 +2649,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 }
             } else {
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Mensaje de Reimpresion");
-                builder.setMessage("Cliente ya se encuentra facturado.\nDesea Reimprimir la Factura?");
+                androidx.appcompat.app.AlertDialog.Builder builder = DialogosLectura.builder(this);
+                builder.setTitle("Reimprimir la factura");
+                builder.setView(cuerpoDialogoCliente(null, "Este cliente ya está facturado. ¿Imprime una copia de la factura?"));
 
-                builder.setIcon(R.drawable.gss_logo40x40);
-
-                builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton("Reimprimir factura", new DialogInterface.OnClickListener() {
 
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -2717,7 +2715,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     }
                 });
 
-                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -2779,7 +2777,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                     if (indicadorManual == 0 && !infoClienteEntrada.gettablaEntradaClientes_Facturadomiciliada().equals("L")) {
 
-                        MostrarAlertDialog("ALERTA DE IMPRESION", "Desea Imprimir la Factura? con:\n" + MensajeAlerta, "procesoDeLiquidacionEImpresion20");
+                        MostrarAlertDialog("Imprimir la factura", "¿Imprime la factura de este cliente?", "procesoDeLiquidacionEImpresion20",
+                                "No imprimir", "Imprimir factura", cuerpoDialogoCliente(motivoAlerta(MensajeAlerta), "¿Imprime la factura de este cliente?"));
                         ventanaConsumo = true;// Ax: indica que debo esperar respuesta para ir a procesarLecuras3
                         return;
                     }
@@ -2816,7 +2815,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                         if (indicadorManual == 0 && !infoClienteEntrada.gettablaEntradaClientes_Facturadomiciliada().equals("L")) {
 
-                            MostrarAlertDialog("ALERTA DE IMPRESION", "Desea Imprimir la Factura? con:\n" + MensajeAlerta, "procesoDeLiquidacionEImpresion20");
+                            MostrarAlertDialog("Imprimir la factura", "¿Imprime la factura de este cliente?", "procesoDeLiquidacionEImpresion20",
+                                "No imprimir", "Imprimir factura", cuerpoDialogoCliente(motivoAlerta(MensajeAlerta), "¿Imprime la factura de este cliente?"));
                             ventanaConsumo = true;// Ax: indica que debo esperar respuesta para ir a procesarLecuras3
                             return;
                         }
@@ -3344,9 +3344,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
      */
     private void preguntarReimpresion(final File archivo, String detalle) {
         if (isFinishing() || !reimpresionesPreguntadas.add(archivo.getAbsolutePath())) return;
-        new AlertDialog.Builder(this)
+        LinearLayout cuerpo = DialogosLectura.cuerpo(this);
+        DialogosLectura.texto(cuerpo, "La impresora no respondió o se cortó el envío. ¿Vuelve a mandar la factura?");
+        DialogosLectura.contexto(cuerpo, archivo.getName(), detalle);
+        DialogosLectura.builder(this)
                 .setTitle("No se pudo imprimir")
-                .setMessage(archivo.getName() + "\n" + detalle + "\n\n¿Desea reimprimir?")
+                .setView(DialogosLectura.desplazable(cuerpo))
                 .setCancelable(false)
                 .setPositiveButton("Reimprimir", (d, w) -> {
                     reimpresionesPreguntadas.remove(archivo.getAbsolutePath());
@@ -3357,7 +3360,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         mensajeT("No se pudo leer " + archivo.getName(), msgLargo);
                     }
                 })
-                .setNegativeButton("No", (d, w) -> {
+                .setNegativeButton("Descartar", (d, w) -> {
                     reimpresionesPreguntadas.remove(archivo.getAbsolutePath());
                     escribeResumenTiempo("Reimpresion descartada por el tecnico " + archivo.getName());
                 })
@@ -5525,7 +5528,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     indicadorManual = 1;
 
                     if (MODO == "MANU" && !modoRetorna) {
-                        MostrarAlertDialog("ALERTA!", "¿Continuar Proceso? \n Lectura Auto", "liquidacionautomatica");
+                        MostrarAlertDialog("Lectura automática", "¿Sigue el proceso con la lectura automática o en manual?", "liquidacionautomatica");
                     }
 
                     if (txt_Lectura_Actual.trim().length() > 0)
@@ -8442,9 +8445,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     leerInformacionUsuario(1);
                     visualizarInformacionCliente(0);
                     if (infoClienteEntrada.gettablaEntradaClientes_Clasedeservicio().trim().equals("IC") || infoClienteEntrada.gettablaEntradaClientes_Clasedeservicio().trim().equals("MC")) {
-                        mensajeT("ESTA CUENTA ES MACRO MEDIDA NO SE GENERA LIQUIDACION NI FACTURA", msgLargo);
+                        mensajeT("Cuenta macromedida: no se genera liquidación ni factura.", msgLargo);
                     } else {
-                        MostrarAlertDialog("ALERTA DE IMPRESION", "Desea Reimprimir el Cliente?", "reimpresiondefactura");
+                        // Si la cuenta en pantalla no estaba leida, arriba se paso al ultimo cliente leido (alterno guarda el original).
+                        String avisoReimpresion = VariablesGlobales.registroactual != alterno
+                                ? "La cuenta en pantalla no está leída. Se lo llevó al último cliente leído." : null;
+                        MostrarAlertDialog("Reimprimir la factura", "Sale una copia igual a la factura impresa de este cliente:", "reimpresiondefactura",
+                                "Cancelar", "Reimprimir factura", cuerpoDialogoCliente(avisoReimpresion, "Sale una copia igual a la factura impresa de este cliente:"));
                     }
                 }
                 break;
@@ -8616,13 +8623,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 break;
             case 15: // Evaluar Noenviadas Gprs
                 code.setLength(0);
-                AlertDialog.Builder builder2 = new AlertDialog.Builder(this);
-                builder2.setTitle("ALERTA EVALUAR ENVIOS");
-                builder2.setMessage("DESEA EVALUAR SI TODAS SUS LECTURAS FUERON ENVIADAS? ");
+                androidx.appcompat.app.AlertDialog.Builder builder2 = DialogosLectura.builder(this);
+                builder2.setTitle("Evaluar envíos");
+                builder2.setMessage("¿Revisa si todas sus lecturas fueron enviadas al servidor?");
 
-                builder2.setIcon(R.drawable.gss_logo40x40);
-
-                builder2.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                builder2.setNegativeButton("Cancelar", null); // igual que tocar fuera: solo cierra
+                builder2.setPositiveButton("Evaluar", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                         myThread.interrupt();
@@ -8630,7 +8636,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         VariablesGlobales.btPrintService.stop();
                         mensajeAdm(MenuDeLiquidacion.this); // No enviados
                         metodo = "ValidarNoEnviados";
-                        msgAdmon = String.format("%-42s", "VALIDANDO REGISTROS NO ENVIADOS");
+                        msgAdmon = "Validando registros no enviados";
                         TaskHelper.execute(new AsyncCallWS(), metodo);
                     }
                 });
@@ -8644,7 +8650,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
             case 16: // Liquidación Automática
                 code.setLength(0);
-                MostrarAlertDialog("ALERTA!", "DESEA INICIAR PROCESO \n *** OPCIONES ***\n1. RESUMEN_ENVIOSGPRS.TXT\n2. RESUMEN_REGISTRO.TXT\n3. RESUMEN_TABLADB.TXT \n[SI]AUTOMATICO \n[NO] MANUAL", "liquidacionautomatica");
+                MostrarAlertDialog("Liquidación automática", "¿Cómo inicia el proceso?\n\nLa automática toma el primero que encuentre de estos archivos:\n1. RESUMEN_ENVIOSGPRS.TXT\n2. RESUMEN_REGISTRO.TXT\n3. RESUMEN_TABLADB.TXT", "liquidacionautomatica");
                 break;
             case 17: // Enviar Fotos
                 code.setLength(0);
@@ -9818,20 +9824,18 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         marcarLlegada(SecuenciaCampo.LLEGADA_ULTIMO_LEIDO);
         visualizarInformacionCliente(0);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Alerta de Liquidacion Carga Instalada");
-        builder.setMessage("Desea Reprocesar el Cliente?");
+        androidx.appcompat.app.AlertDialog.Builder builder = DialogosLectura.builder(this);
+        builder.setTitle("Reprocesar el cliente");
+        builder.setView(cuerpoDialogoCliente(null, "¿Reprocesa el último cliente leído?"));
 
-        builder.setIcon(R.drawable.gss_logo40x40);
-
-        builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Reprocesar", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
 
                 cerrarArchivosFacturacion();
             }
         });
 
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -10168,14 +10172,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                 nombreDeArchivo = VariablesGlobales.directorioactual + "/DatosDeEntrada/Leido.txt";
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Alerta Seleccion Terminacion");
-                builder.setMessage("Ya termino de realizar\n la Facturacion? " + VariablesGlobales.totalprediosleidos + " == "
-                        + infoClienteEntrada.getTotal_TablaEntradaClientes());
+                androidx.appcompat.app.AlertDialog.Builder builder = DialogosLectura.builder(this);
+                builder.setTitle("Terminar la facturación");
+                builder.setMessage("Leídos: " + VariablesGlobales.totalprediosleidos + " de "
+                        + infoClienteEntrada.getTotal_TablaEntradaClientes() + ". ¿Ya terminó la facturación de la ruta?");
 
-                builder.setIcon(R.drawable.gss_logo40x40);
-
-                builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton("Terminar ruta", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 
                         try {
@@ -10194,7 +10196,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     }
                 });
 
-                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton("Seguir revisando", new DialogInterface.OnClickListener() {
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -10341,8 +10343,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         // Las causas 9 y 15 conservan la confirmacion explicita que pedia ModuloDeAnomalias.
         String codigo = AnomaliaDeNoLectura.normalizarCodigo(causal);
         if (codigo.equals("9") || codigo.equals("15")) {
-            MostrarAlertDialog("Causas no lectura", "Acepta Anomalia seleccionada?\n" + causal.trim() + " "
-                    + anomaliaDeLectura.getanomaliaDeNoLectura_DESCRIPCION().trim(), "ProcesarAnomalias");
+            MostrarAlertDialog("Causal de no lectura", "¿Acepta la anomalía seleccionada?\n" + causal.trim() + " · "
+                    + DialogosLectura.oracion(anomaliaDeLectura.getanomaliaDeNoLectura_DESCRIPCION()), "ProcesarAnomalias");
             return;
         }
         pedirInformeYProcesar();
@@ -10414,16 +10416,82 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         cerrarArchivosFacturacion();
     }
 
+    /**
+     * Cuerpo de un dialogo de la lectura: aviso ambar opcional, la pregunta y la caja con la cuenta, el medidor y la
+     * direccion del cliente cargado (el que se va a imprimir, reprocesar o liquidar).
+     */
+    private View cuerpoDialogoCliente(String aviso, String mensaje) {
+        LinearLayout c = DialogosLectura.cuerpo(this);
+        if (aviso != null && !aviso.trim().isEmpty()) DialogosLectura.aviso(c, aviso);
+        if (mensaje != null && !mensaje.trim().isEmpty()) DialogosLectura.texto(c, mensaje);
+        String cuenta = "", medidor = "", direccion = "";
+        try {
+            cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
+            medidor = infoRegistroEntrada.gettablaRegistroDeEntrada_nrocontador().trim();
+            direccion = infoClienteEntrada.gettablaEntradaClientes_Direccion().trim();
+        } catch (Exception ignored) {
+        }
+        DialogosLectura.contexto(c, DialogosLectura.lineaCliente(cuenta, medidor), direccion);
+        return DialogosLectura.desplazable(c);
+    }
+
+    /** Primera linea de MensajeAlerta (el motivo, sin lecturas ni consumos) en tipo oracion; null si no hay. */
+    private static String motivoAlerta(String mensajeAlerta) {
+        if (mensajeAlerta == null || mensajeAlerta.trim().isEmpty()) return null;
+        String motivo = DialogosLectura.oracion(mensajeAlerta.trim().split("\n")[0]);
+        return motivo.isEmpty() ? null : motivo + ".";
+    }
+
     //Ax: metodo para lanzar AlertDialog (que es asincrono) y post-ejecutar algun otro metodo con el parametro 'metodo'
     public void MostrarAlertDialog(String titulo, String mensaje, final String NombreMetodo) { //Crea un alertDialog con si-no y espera hasta un clic SI o No
+        String[] verbos = verbosAlertDialog(NombreMetodo);
+        MostrarAlertDialog(titulo, mensaje, NombreMetodo, verbos[0], verbos[1], null);
+    }
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(MenuDeLiquidacion.this);
+    /** Verbos de los botones de MostrarAlertDialog por 'NombreMetodo': {boton No (negativo), boton Si (positivo)}. */
+    private static String[] verbosAlertDialog(String NombreMetodo) {
+        switch (NombreMetodo) {
+            case "ProcesarAnomalias":
+                return new String[]{"Cambiar", "Aceptar anomalía"};
+            case "ProcesarCuentaDirecta":
+            case "ProcesarLectura":
+            case "procesarLectura2":
+                return new String[]{"Procesar novedad", "Liquidar medida"};
+            case "validarconexion":
+                return new String[]{"Desactivar envío", "Activar envío"};
+            case "ImpresionLote":
+                return new String[]{"Cancelar", "Imprimir resumen"};
+            case "procesoDeLiquidacionEImpresion20":
+                return new String[]{"No imprimir", "Imprimir factura"};
+            case "liquidacionautomatica":
+            case "liquidacionautomatica_2":
+                return new String[]{"Manual", "Automática"};
+            case "reimpresiondefactura":
+                return new String[]{"Cancelar", "Reimprimir factura"};
+            default:
+                return new String[]{"No", "Sí"};
+        }
+    }
+
+    /**
+     * Igual que MostrarAlertDialog(titulo, mensaje, NombreMetodo) con los verbos de los botones dados.
+     *
+     * @param textoNo   boton negativo (la rama "No" de NombreMetodo).
+     * @param textoSi   boton positivo (la rama "Si" de NombreMetodo).
+     * @param contenido cuerpo completo del dialogo (ya trae el mensaje); null = solo el mensaje.
+     */
+    public void MostrarAlertDialog(String titulo, String mensaje, final String NombreMetodo, String textoNo, String textoSi, View contenido) {
+
+        final androidx.appcompat.app.AlertDialog.Builder builder = DialogosLectura.builder(MenuDeLiquidacion.this);
 
         builder.setTitle(titulo);
-        builder.setMessage(mensaje);
-        builder.setIcon(R.drawable.gss_logo40x40);
+        if (contenido != null) {
+            builder.setView(contenido);
+        } else {
+            builder.setMessage(mensaje);
+        }
 
-        builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(textoSi, new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
 
@@ -10488,7 +10556,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         myThread.interrupt();
                         ColaImpresion.esperarVacia(3000); // no cortar una factura en curso (< 5 s de ANR)
                         VariablesGlobales.btPrintService.stop();
-                        msgAdmon = String.format("%-42s", "LIQUIDACION AUTOMATICA");
+                        msgAdmon = "Liquidación automática";
                         mensajeAdm(MenuDeLiquidacion.this);
                         //metodo = "liquidacionautomatica1";
                        // 1. RESUMEN_ENVIOSGPRS.TXT
@@ -10547,7 +10615,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             }
         });
 
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(textoNo, new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -11197,14 +11265,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
             final File nombreDeArchivo = new File(VariablesGlobales.directorioactual + "/DATOSDEENTRADA/LEIDO.TXT");
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Alerta Seleccion Terminacion");
-            builder.setMessage("Ya termino de realizar\n la Facturacion? " + VariablesGlobales.totalprediosleidos + " == "
-                    + infoClienteEntrada.getTotal_TablaEntradaClientes());
+            androidx.appcompat.app.AlertDialog.Builder builder = DialogosLectura.builder(this);
+            builder.setTitle("Terminar la facturación");
+            builder.setMessage("Leídos: " + VariablesGlobales.totalprediosleidos + " de "
+                    + infoClienteEntrada.getTotal_TablaEntradaClientes() + ". ¿Ya terminó la facturación de la ruta?");
 
-            builder.setIcon(R.drawable.gss_logo40x40);
-
-            builder.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+            builder.setPositiveButton("Terminar ruta", new DialogInterface.OnClickListener() {
 
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -11227,7 +11293,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 }
             });
 
-            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            builder.setNegativeButton("Seguir revisando", new DialogInterface.OnClickListener() {
 
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -11298,20 +11364,22 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         activaLectorBarras = false;
                         String titulo = ""; //cv001
                         String mensaje = "";
+                        String textoNo = "Procesar novedad"; // [NO]: no liquida (la novedad se registra desde el menu)
 
                         if (indicadorManual == 0) // nuevo para cuando se le da automatico si esta en 1
                         {
                             if (String.format("%1$1s", infoMedidorEntrada.gettablaMedidorEntrada_idcortado().trim()).equals("1")) {
-                                titulo = "ALERTA DE RETIRADOS";
-                                mensaje = "MEDIDOR RETIRADO\n" + "[SI] LIQUIDAR MEDIDA\n[NO]APLICAR NOVEDAD?";
+                                titulo = "Medidor retirado";
+                                mensaje = "¿Cómo registra este medidor?";
+                                textoNo = "Aplicar novedad";
                             } else {
-                                titulo = "ALERTA DE CTA. DIRECTAS";
-                                mensaje = "CARGA DIRECTA\n" + "[SI] LIQUIDAR MEDIDA \n [NO] PROCESAR NOVEDAD";
+                                titulo = "Carga directa";
+                                mensaje = "¿Cómo registra esta cuenta?";
                             }
                         }
 
                         // Log.e("error", "cta directa2");
-                        MostrarAlertDialog(titulo, mensaje, "ProcesarLectura");
+                        MostrarAlertDialog(titulo, mensaje, "ProcesarLectura", textoNo, "Liquidar medida", cuerpoDialogoCliente(null, mensaje));
                     }
                     return;
                 }
@@ -11347,12 +11415,14 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                                 // no se sale de la liquidacion ni se pierden apuntadores.
                                     if (infoMedidorEntrada.gettablaMedidorEntrada_idcortado().trim().equals("1")) {
                                         //  alertasCuentasD("MEDIDOR RETIRADO\n" + "[SI] LIQUIDAR MEDIDA\n[NO]APLICAR NOVEDAD?");
-                                        MostrarAlertDialog("ALERTA DE RETIRADOS", "MEDIDOR RETIRADO\n" + "[SI] LIQUIDAR MEDIDA\n[NO] APLICAR NOVEDAD?", "ProcesarCuentaDirecta");
+                                        MostrarAlertDialog("Medidor retirado", "¿Cómo registra este medidor?", "ProcesarCuentaDirecta",
+                                                "Aplicar novedad", "Liquidar medida", cuerpoDialogoCliente(null, "¿Cómo registra este medidor?"));
                                         // MostrarAlertDialog("ALERTA DE RETIRASOS", "MEDIDOR RETIRADO\n" + "[SI] LIQUIDAR MEDIDA\n[NO]APLICAR NOVEDAD?", "procesarLectura2");
                                         // RespuestaPreguntaPro = MessageBox.Show("MEDIDOR RETIRADO\n" + "[SI] LIQUIDAR MEDIDA\n[NO]APLICAR NOVEDAD?", "ALERTA DE RETIRASOS", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
                                     } else {
                                         // alertasCuentasD("CARGA DIRECTA\n" + "[SI] LIQUIDAR MEDIDA \n \n[NO] PROCESAR NOVEDAD");
-                                        MostrarAlertDialog("ALERTA DE CTA. DIRECTAS", "CARGA DIRECTA\n" + "[SI] LIQUIDAR MEDIDA\n[NO] PROCESAR NOVEDAD", "ProcesarCuentaDirecta");
+                                        MostrarAlertDialog("Carga directa", "¿Cómo registra esta cuenta?", "ProcesarCuentaDirecta",
+                                                "Procesar novedad", "Liquidar medida", cuerpoDialogoCliente(null, "¿Cómo registra esta cuenta?"));
                                     }
                                     variables.estado = "3";
 
@@ -12166,23 +12236,30 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
      */
     private void pedirConsumoImpreso(final int intento) {
         final String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
-        final EditText campo = new EditText(this);
-        campo.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        campo.setHint("kWh");
-        campo.setFilters(new InputFilter[]{new InputFilter.LengthFilter(9)});
-        int margen = (int) (20 * getResources().getDisplayMetrics().density);
-        LinearLayout contenedor = new LinearLayout(this);
-        contenedor.setPadding(margen, 0, margen, 0);
-        contenedor.addView(campo, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        LinearLayout contenedor = DialogosLectura.cuerpo(this);
+        String medidorConsumo = "";
+        try {
+            medidorConsumo = infoRegistroEntrada.gettablaRegistroDeEntrada_nrocontador().trim();
+        } catch (Exception ignored) {
+        }
+        DialogosLectura.contexto(contenedor, DialogosLectura.lineaCliente(cuenta, medidorConsumo), null);
+        DialogosLectura.texto(contenedor, "Busque en la factura que acaba de salir el renglón «Total consumo» y digite ese número.");
+        final EditText campo = DialogosLectura.campo(contenedor, "Total consumo (kWh)", false, "kWh",
+                android.text.InputType.TYPE_CLASS_NUMBER, 9);
+        DialogosLectura.textoLado(campo, "Intento " + intento + " de " + INTENTOS_CONSUMO_IMPRESO);
+        if (intento > 1) {
+            // El intento anterior no coincidio (el aviso tambien sale como mensaje).
+            DialogosLectura.mostrarError(campo, "El consumo no coincide con la factura. Revise el número e intente de nuevo.");
+        }
+        DialogosLectura.nota(contenedor, "Si no coincide en " + INTENTOS_CONSUMO_IMPRESO
+                + " intentos, la lectura queda marcada para revisión y puede seguir con el siguiente cliente.");
 
         dialogoEnCurso = true;
-        new AlertDialog.Builder(this)
-                .setTitle("Verificar consumo alto")
-                .setMessage("Digite el TOTAL CONSUMO que salio impreso en la factura."
-                        + (intento > 1 ? "\nIntento " + intento + " de " + INTENTOS_CONSUMO_IMPRESO : ""))
-                .setView(contenedor)
+        DialogosLectura.builder(this)
+                .setTitle("Verifique el consumo impreso")
+                .setView(DialogosLectura.desplazable(contenedor))
                 .setCancelable(false)
-                .setPositiveButton("Verificar", (d, w) -> {
+                .setPositiveButton("Verificar consumo", (d, w) -> {
                     dialogoEnCurso = false;
                     long digitado;
                     try {
@@ -12506,7 +12583,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
             } else {
                 //msgEntregaCarta("MENSAJE DE ADM","DEBE ENTREGAR CARTA AL USUARIO");
-                mensajeAdmCnf(MenuDeLiquidacion.this, "DEBE ENTREGAR CARTA AL USUARIO", "       ANALITICA CARTA                   ", 1);
+                mensajeAdmCnf(MenuDeLiquidacion.this, "Entregue la carta al usuario antes de seguir.", "Entregar carta al usuario", 1);
                 imprimirLabelRetencion();
             }
             //----------------------------------------------------------------------------------
@@ -14262,12 +14339,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         Log.e("INFO","[MenuDeLiquidacion]verificarFotoObligatoriaAlCargarCliente() fotoOcrObligatoria: " + fotoOcrObligatoria);
         Log.e("INFO","[MenuDeLiquidacion]verificarFotoObligatoriaAlCargarCliente() yaTomoFotoOcr: " + yaTomoFotoOcr);
         if (fotoOcrObligatoria && !yaTomoFotoOcr) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            androidx.appcompat.app.AlertDialog.Builder builder = DialogosLectura.builder(this);
             builder.setTitle("Foto obligatoria");
-            builder.setMessage("Esta cuenta requiere captura de lectura por fotografía.\nAl presionar TOMAR FOTO se abrirá la cámara.");
+            builder.setMessage("Esta cuenta requiere la lectura por fotografía. Con «Tomar foto» se abre la cámara.");
             builder.setCancelable(false);
-            builder.setPositiveButton("TOMAR FOTO", (dialog, which) -> capturaImagenFotografica());
-            builder.setNegativeButton("AHORA NO", null);
+            builder.setPositiveButton("Tomar foto", (dialog, which) -> capturaImagenFotografica());
+            builder.setNegativeButton("Ahora no", null);
             builder.show();
         }
     }
@@ -14282,7 +14359,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     private FotoObligatoria fotoObligatoria;
     /** La camara se abrio y no ha vuelto: lo que intente avanzar en ese lapso es el flujo de la lectura. */
     private boolean camaraAbierta = false;
-    private AlertDialog dialogoFotoPendiente;
+    private androidx.appcompat.app.AlertDialog dialogoFotoPendiente;
     private int intentosClaveSupervisor = 0;
     /** Ultima posicion recibida (cualquier proveedor), para ubicar los eventos. */
     private Location ultimaPosicionEvento;
@@ -14782,17 +14859,20 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         if (g == null) return;
         final FotoObligatoria.Pendiente p = g.pendiente();
         if (dialogoFotoPendiente != null && dialogoFotoPendiente.isShowing()) return;
-        AlertDialog.Builder b = new AlertDialog.Builder(this);
+        androidx.appcompat.app.AlertDialog.Builder b = DialogosLectura.builder(this);
+        LinearLayout cuerpo = DialogosLectura.cuerpo(this);
         if (g == muestraFactura()) {
             boolean barras = MuestraFactura.BARRAS.equals(tipoMuestra(p));
             b.setTitle("Control de la factura impresa");
-            b.setMessage("La cuenta " + p.cuenta + " salio en la muestra de control.\n\n"
-                    + (barras ? "Escanee el codigo de barras del cupon de la factura que acaba de imprimir."
-                              : "Tome una foto de la factura que acaba de imprimir, completa y legible.") + "\n\n"
-                    + "No puede pasar a otro cliente sin hacerlo. Si no es posible, el supervisor debe autorizar con su codigo y clave.");
+            DialogosLectura.texto(cuerpo, "La cuenta " + p.cuenta + " salió en la muestra de control.");
+            DialogosLectura.texto(cuerpo, barras ? "Escanee el código de barras del cupón de la factura que acaba de imprimir."
+                    : "Tome una foto de la factura que acaba de imprimir, completa y legible.");
+            DialogosLectura.aviso(cuerpo, "No puede pasar a otro cliente sin hacerlo.");
+            DialogosLectura.nota(cuerpo, "Si no es posible, el supervisor autoriza con su código y clave.");
+            b.setView(DialogosLectura.desplazable(cuerpo));
             b.setCancelable(false);
-            b.setPositiveButton(barras ? "ESCANEAR" : "TOMAR FOTO", (d, w) -> relanzarFotoPendiente());
-            b.setNeutralButton("CLAVE SUPERVISOR", (d, w) -> pedirClaveSupervisor());
+            b.setPositiveButton(barras ? "Escanear código" : "Tomar foto", (d, w) -> relanzarFotoPendiente());
+            b.setNeutralButton("Clave del supervisor", (d, w) -> pedirClaveSupervisor());
             dialogoFotoPendiente = b.create();
             dialogoFotoPendiente.show();
             return;
@@ -14801,11 +14881,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         if (enCurso != null && enCurso.metodo.esLibre() && enCurso.indice > 0) {
             // Fotos libres: ya tomo al menos una; puede tomar otra o terminar.
             b.setTitle("¿Otra foto?");
-            b.setMessage("Cuenta " + p.cuenta + ": lleva " + enCurso.indice + " de " + enCurso.metodo.libres + " fotos.\n\n"
-                    + enCurso.paso.instruccion);
+            DialogosLectura.contexto(cuerpo, "Cuenta " + p.cuenta, "Lleva " + enCurso.indice + " de " + enCurso.metodo.libres + " fotos");
+            DialogosLectura.texto(cuerpo, enCurso.paso.instruccion);
+            b.setView(DialogosLectura.desplazable(cuerpo));
             b.setCancelable(false);
-            b.setPositiveButton("TOMAR OTRA", (d, w) -> relanzarFotoPendiente());
-            b.setNegativeButton("TERMINAR", (d, w) -> {
+            b.setPositiveButton("Tomar otra", (d, w) -> relanzarFotoPendiente());
+            b.setNegativeButton("Terminar", (d, w) -> {
                 escribeResumenTiempo(p.cuenta + ";FOTOS LIBRES TERMINADAS;" + getPhoneDate() + "-" + getPhoneHour() + ";fotos=" + enCurso.indice);
                 liberarExigencia(fotoObligatoria());
             });
@@ -14817,19 +14898,20 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             int total = g == fotoObligatoria() && !enCurso.metodo.esLibre() ? enCurso.metodo.pasosAntes().size() : 1;
             b.setTitle(total > 1 ? "Foto " + (enCurso.indice + 1) + " de " + total + ": " + enCurso.paso.titulo
                     : "Foto: " + enCurso.paso.titulo);
-            b.setMessage("Cuenta " + p.cuenta + ".\n\n" + enCurso.paso.instruccion + "\n\n"
-                    + "No puede pasar a otro cliente sin tomarla.\n"
-                    + "Si la camara no funciona, avise al supervisor: debe autorizar con su codigo y clave.");
+            DialogosLectura.aviso(cuerpo, "No puede pasar a otro cliente sin tomarla.");
+            DialogosLectura.contexto(cuerpo, "Cuenta " + p.cuenta, null);
+            DialogosLectura.texto(cuerpo, enCurso.paso.instruccion);
         } else {
             b.setTitle("Foto obligatoria");
-            b.setMessage("La cuenta " + p.cuenta + " requiere registro fotografico"
-                    + (p.motivo.isEmpty() ? "" : " (" + p.motivo + ")") + ".\n\n"
-                    + "No puede pasar a otro cliente sin tomarla.\n"
-                    + "Si la camara no funciona, avise al supervisor: debe autorizar con su codigo y clave.");
+            DialogosLectura.aviso(cuerpo, "No puede pasar a otro cliente sin tomarla.");
+            DialogosLectura.texto(cuerpo, "La cuenta " + p.cuenta + " requiere registro fotográfico"
+                    + (p.motivo.isEmpty() ? "" : " (" + p.motivo + ")") + ".");
         }
+        DialogosLectura.nota(cuerpo, "Si la cámara no funciona, avise al supervisor: debe autorizar con su código y clave.");
+        b.setView(DialogosLectura.desplazable(cuerpo));
         b.setCancelable(false);
-        b.setPositiveButton("TOMAR FOTO", (d, w) -> relanzarFotoPendiente());
-        b.setNeutralButton("CLAVE SUPERVISOR", (d, w) -> pedirClaveSupervisor());
+        b.setPositiveButton("Tomar foto", (d, w) -> relanzarFotoPendiente());
+        b.setNeutralButton("Clave del supervisor", (d, w) -> pedirClaveSupervisor());
         dialogoFotoPendiente = b.create();
         dialogoFotoPendiente.show();
     }
@@ -14874,32 +14956,36 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         if (g == null) return;
         final FotoObligatoria.Pendiente p = g.pendiente();
 
-        LinearLayout caja = new LinearLayout(this);
-        caja.setOrientation(LinearLayout.VERTICAL);
-        int pad = (int) (16 * getResources().getDisplayMetrics().density);
-        caja.setPadding(pad, pad / 2, pad, 0);
-        final EditText txtCodigo = new EditText(this);
-        txtCodigo.setHint("Codigo del supervisor");
-        txtCodigo.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        final EditText txtClave = new EditText(this);
-        txtClave.setHint("Clave");
-        txtClave.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-        caja.addView(txtCodigo);
-        caja.addView(txtClave);
-        final EditText txtCodigoUnico = new EditText(this);
-        txtCodigoUnico.setHint("o codigo de un solo uso (6 digitos)");
-        txtCodigoUnico.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        txtCodigoUnico.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(6)});
-        caja.addView(txtCodigoUnico);
+        LinearLayout caja = DialogosLectura.cuerpo(this);
+        DialogosLectura.texto(caja, "Cuenta " + p.cuenta + (g == muestraFactura() ? " sin control de la factura." : " sin foto.")
+                + " La autorización queda registrada con su código.");
+        // Selector solo visual: muestra un juego de campos a la vez. Al autorizar se usa el que este lleno, como siempre
+        // (si hay codigo de un solo uso, ese; si no, codigo y clave).
+        final View[] gruposClave = new View[2];
+        final View[] grupoUnico = new View[1];
+        DialogosLectura.segmentado(caja, "Código y clave", "Código de un solo uso", opcion -> {
+            if (gruposClave[0] == null) return;
+            gruposClave[0].setVisibility(opcion == 0 ? View.VISIBLE : View.GONE);
+            gruposClave[1].setVisibility(opcion == 0 ? View.VISIBLE : View.GONE);
+            grupoUnico[0].setVisibility(opcion == 1 ? View.VISIBLE : View.GONE);
+        });
+        final EditText txtCodigo = DialogosLectura.campo(caja, "Código del supervisor", false, null,
+                android.text.InputType.TYPE_CLASS_NUMBER, 0);
+        final EditText txtClave = DialogosLectura.campo(caja, "Clave", false, null,
+                android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD, 0);
+        final EditText txtCodigoUnico = DialogosLectura.campo(caja, "Código de 6 dígitos que le dio el supervisor", false, "6 dígitos",
+                android.text.InputType.TYPE_CLASS_NUMBER, 6);
+        gruposClave[0] = DialogosLectura.grupo(txtCodigo);
+        gruposClave[1] = DialogosLectura.grupo(txtClave);
+        grupoUnico[0] = DialogosLectura.grupo(txtCodigoUnico);
+        grupoUnico[0].setVisibility(View.GONE);
 
-        final AlertDialog dlg = new AlertDialog.Builder(this)
-                .setTitle("Autorizacion del supervisor")
-                .setMessage("Cuenta " + p.cuenta + (g == muestraFactura() ? " sin control de la factura." : " sin foto.")
-                        + " La autorizacion queda registrada con su codigo.")
-                .setView(caja)
+        final androidx.appcompat.app.AlertDialog dlg = DialogosLectura.builder(this)
+                .setTitle("Autorización del supervisor")
+                .setView(DialogosLectura.desplazable(caja))
                 .setCancelable(false)
-                .setPositiveButton("AUTORIZAR", null)
-                .setNegativeButton("VOLVER", (d, w) -> mostrarDialogoFotoPendiente())
+                .setPositiveButton("Autorizar", null)
+                .setNegativeButton("Volver", (d, w) -> mostrarDialogoFotoPendiente())
                 .create();
         dlg.setOnShowListener(d -> dlg.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             String unico = txtCodigoUnico.getText().toString().trim();
@@ -14915,7 +15001,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 escribeResumenTiempo(p.cuenta + ";CLAVE SUPERVISOR INCORRECTA;" + getPhoneDate() + "-" + getPhoneHour()
                         + ";codigo=" + codigo + ";intento=" + intentosClaveSupervisor);
                 txtClave.setText("");
-                txtClave.setError("Codigo o clave de supervisor incorrectos");
+                DialogosLectura.mostrarError(txtClave, "Código o clave de supervisor incorrectos.");
                 return;
             }
             dlg.dismiss();
@@ -15050,30 +15136,30 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
     private void abrirBandeja() {
         java.util.List<BandejaMensajes.Mensaje> lista = bandeja().todos();
-        int pad = (int) (16 * getResources().getDisplayMetrics().density);
-        LinearLayout caja = new LinearLayout(this);
-        caja.setOrientation(LinearLayout.VERTICAL);
-        caja.setPadding(pad, pad / 2, pad, pad / 2);
+        LinearLayout caja = DialogosLectura.cuerpo(this);
         if (lista.isEmpty()) {
-            TextView vacio = new TextView(this);
-            vacio.setText(ConfigSync.modoRest(this) ? "No hay mensajes de la oficina." : "La bandeja requiere el envio por API (v1).");
-            caja.addView(vacio);
+            if (ConfigSync.modoRest(this)) {
+                DialogosLectura.estado(caja, "No hay mensajes de la oficina.",
+                        "Si su supervisor le escribe, el mensaje aparece aquí y en el banner de Lectura.");
+            } else {
+                DialogosLectura.estado(caja, "La bandeja requiere el envío por API (v1).", null);
+            }
+        } else {
+            int nuevos = 0;
+            for (BandejaMensajes.Mensaje m : lista) if (!m.leido) nuevos++;
+            DialogosLectura.nota(caja, (nuevos > 0 ? (nuevos == 1 ? "1 nuevo. " : nuevos + " nuevos. ") : "")
+                    + "Los mensajes llegan en cada sincronización.");
         }
         for (BandejaMensajes.Mensaje m : lista) {
-            TextView t = new TextView(this);
-            String cabecera = (m.leido ? "" : "NUEVO  ") + (m.asunto.isEmpty() ? "(sin asunto)" : m.asunto);
-            t.setText(cabecera + "\n" + m.nombre + " · " + m.enviado + "\n" + m.texto);
-            t.setPadding(0, pad / 2, 0, pad / 2);
-            if (!m.leido) t.setTypeface(null, android.graphics.Typeface.BOLD);
-            caja.addView(t);
+            String de = m.nombre != null && !m.nombre.trim().isEmpty() ? m.nombre.trim() : "Oficina";
+            DialogosLectura.tarjetaMensaje(caja, !m.leido, m.asunto.isEmpty() ? "Sin asunto" : m.asunto,
+                    de + " · " + m.enviado, m.texto);
         }
-        ScrollView scroll = new ScrollView(this);
-        scroll.addView(caja);
-        new AlertDialog.Builder(this)
+        DialogosLectura.builder(this)
                 .setTitle("Mensajes de la oficina")
-                .setView(scroll)
-                .setPositiveButton("CERRAR", null)
-                .setNeutralButton("ESCRIBIR A LA OFICINA", (d, w) -> escribirAOficina())
+                .setView(DialogosLectura.desplazable(caja))
+                .setPositiveButton("Cerrar", null)
+                .setNeutralButton("Escribir a la oficina", (d, w) -> escribirAOficina())
                 .show();
 
         java.util.List<Long> leidos = bandeja().marcarLeidos();
@@ -15092,29 +15178,33 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             mensajeT("Los mensajes a la oficina requieren el envio por API (v1).", msgLargo);
             return;
         }
-        int pad = (int) (16 * getResources().getDisplayMetrics().density);
-        LinearLayout caja = new LinearLayout(this);
-        caja.setOrientation(LinearLayout.VERTICAL);
-        caja.setPadding(pad, pad / 2, pad, 0);
+        LinearLayout caja = DialogosLectura.cuerpo(this);
         final String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
-        TextView info = new TextView(this);
-        info.setText("Llega a su supervisor. Cuenta en pantalla: " + cuenta);
-        caja.addView(info);
-        final EditText txtAsunto = campoNovedad(caja, "Asunto (opcional)", android.text.InputType.TYPE_CLASS_TEXT
+        String medidorMensaje = "";
+        try {
+            medidorMensaje = infoRegistroEntrada.gettablaRegistroDeEntrada_nrocontador().trim();
+        } catch (Exception ignored) {
+        }
+        DialogosLectura.contexto(caja, "Llega a su supervisor",
+                "Se adjunta la cuenta en pantalla: " + DialogosLectura.lineaCliente(cuenta, medidorMensaje).replace("Cta ", ""));
+        final EditText txtAsunto = DialogosLectura.campo(caja, "Asunto", true, null, android.text.InputType.TYPE_CLASS_TEXT
                 | android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES, 120);
-        final EditText txtTexto = campoNovedad(caja, "Mensaje", android.text.InputType.TYPE_CLASS_TEXT
+        DialogosLectura.conContador(txtAsunto, 120);
+        final EditText txtTexto = DialogosLectura.campo(caja, "Mensaje", false, null, android.text.InputType.TYPE_CLASS_TEXT
                 | android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE | android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES, 1000);
-        txtTexto.setMinLines(3);
-        final AlertDialog dlg = new AlertDialog.Builder(this)
+        DialogosLectura.conContador(txtTexto, 1000);
+        txtTexto.setMinLines(4);
+        txtTexto.setGravity(android.view.Gravity.TOP | android.view.Gravity.START);
+        final androidx.appcompat.app.AlertDialog dlg = DialogosLectura.builder(this)
                 .setTitle("Mensaje a la oficina")
-                .setView(caja)
-                .setPositiveButton("ENVIAR", null)
-                .setNegativeButton("CANCELAR", null)
+                .setView(DialogosLectura.desplazable(caja))
+                .setPositiveButton("Enviar mensaje", null)
+                .setNegativeButton("Cancelar", null)
                 .create();
         dlg.setOnShowListener(d -> dlg.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             String texto = txtTexto.getText().toString().trim();
             if (texto.isEmpty()) {
-                txtTexto.setError("Escriba el mensaje");
+                DialogosLectura.mostrarError(txtTexto, "Escriba el mensaje.");
                 return;
             }
             java.util.Map<String, Object> datos = new java.util.LinkedHashMap<>();
@@ -15124,7 +15214,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     infoClienteEntrada.gettablaEntradaClientes_mes().trim(), datos);
             escribeResumenTiempo(cuenta + ";MENSAJE A LA OFICINA;" + getPhoneDate() + "-" + getPhoneHour());
             dlg.dismiss();
-            mensajeT("Mensaje enviado. Llega a la oficina en la proxima sincronizacion.", msgMedio);
+            mensajeT("Mensaje enviado. Llega a la oficina en la próxima sincronización.", msgMedio);
         }));
         dlg.show();
     }
@@ -15134,7 +15224,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
      * si el equipo nunca las bajo, contra el servidor (en segundo plano, con el dialogo abierto).
      */
     private void validarCodigoUnico(final FotoObligatoria g, final FotoObligatoria.Pendiente p, final String codigo,
-                                    final AlertDialog dlg, final EditText campo) {
+                                    final androidx.appcompat.app.AlertDialog dlg, final EditText campo) {
         CodigoSupervisor.Clave k = codigosSupervisor().validar(codigo, p.codCuenta, System.currentTimeMillis());
         if (k != null) {
             aplicarCodigoUnico(g, p, codigo, k.supervisor, k.nombre, dlg);
@@ -15168,7 +15258,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
     private void aplicarCodigoUnico(FotoObligatoria g, FotoObligatoria.Pendiente p, String codigo, String supervisor, String nombre,
-                                    AlertDialog dlg) {
+                                    androidx.appcompat.app.AlertDialog dlg) {
         codigosSupervisor().marcarUsado(codigo, p.codCuenta);
         codigoAutorizacion = codigo;
         escribeResumenTiempo(p.cuenta + ";CODIGO DE SUPERVISOR;" + getPhoneDate() + "-" + getPhoneHour() + ";supervisor=" + supervisor);
@@ -15186,7 +15276,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         escribeResumenTiempo(p.cuenta + ";CODIGO DE SUPERVISOR RECHAZADO;" + getPhoneDate() + "-" + getPhoneHour()
                 + ";motivo=" + motivo + ";intento=" + intentosClaveSupervisor);
         campo.setText("");
-        campo.setError(motivo);
+        DialogosLectura.mostrarError(campo, motivo);
     }
 
     // ======================================================================== novedad: medidor encontrado
@@ -15213,30 +15303,34 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             mensajeT("Sin posicion GPS vigente: espere la senal (cielo abierto) antes de registrar la novedad.", msgLargo);
             return;
         }
-        int pad = (int) (16 * getResources().getDisplayMetrics().density);
-        LinearLayout caja = new LinearLayout(this);
-        caja.setOrientation(LinearLayout.VERTICAL);
-        caja.setPadding(pad, pad / 2, pad, 0);
+        LinearLayout caja = DialogosLectura.cuerpo(this);
         final String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
-        TextView info = new TextView(this);
-        info.setText("Medidor encontrado cerca de la cuenta " + cuenta + ". Despues de guardar se toma la foto del medidor.");
-        caja.addView(info);
-        final EditText txtNumero = campoNovedad(caja, "Numero del medidor", android.text.InputType.TYPE_CLASS_TEXT
+        String direccionNovedad = "";
+        try {
+            direccionNovedad = infoClienteEntrada.gettablaEntradaClientes_Direccion().trim();
+        } catch (Exception ignored) {
+        }
+        DialogosLectura.texto(caja, "Medidor encontrado cerca de la cuenta " + cuenta
+                + (direccionNovedad.isEmpty() ? "" : ", " + direccionNovedad) + ".");
+        DialogosLectura.contexto(caja, null, "Después de guardar se abre la cámara para la foto del medidor.");
+        final EditText txtNumero = DialogosLectura.campo(caja, "Número del medidor", false, null, android.text.InputType.TYPE_CLASS_TEXT
                 | android.text.InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS, NovedadMedidor.MAX_NUMERO);
-        final EditText txtMarca = campoNovedad(caja, "Marca", android.text.InputType.TYPE_CLASS_TEXT
+        final EditText txtMarca = DialogosLectura.campo(caja, "Marca", false, null, android.text.InputType.TYPE_CLASS_TEXT
                 | android.text.InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS, NovedadMedidor.MAX_MARCA);
-        final EditText txtLectura = campoNovedad(caja, "Lectura", android.text.InputType.TYPE_CLASS_NUMBER, NovedadMedidor.MAX_LECTURA);
-        final EditText txtObs = campoNovedad(caja, "Observacion (opcional)", android.text.InputType.TYPE_CLASS_TEXT
-                | android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE, NovedadMedidor.MAX_OBSERVACION);
-        ScrollView scroll = new ScrollView(this);
-        scroll.addView(caja);
+        final EditText txtLectura = DialogosLectura.campo(caja, "Lectura", false, "Lo que marca el medidor",
+                android.text.InputType.TYPE_CLASS_NUMBER, NovedadMedidor.MAX_LECTURA);
+        final EditText txtObs = DialogosLectura.campo(caja, "Observación", true, "Dónde estaba, estado del sello...",
+                android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE, NovedadMedidor.MAX_OBSERVACION);
+        txtObs.setMinLines(3);
+        txtObs.setGravity(android.view.Gravity.TOP | android.view.Gravity.START);
+        final TextView errNovedad = DialogosLectura.error(caja);
 
-        final AlertDialog dlg = new AlertDialog.Builder(this)
-                .setTitle("Novedad: medidor encontrado")
-                .setView(scroll)
+        final androidx.appcompat.app.AlertDialog dlg = DialogosLectura.builder(this)
+                .setTitle("Medidor encontrado")
+                .setView(DialogosLectura.desplazable(caja))
                 .setCancelable(false)
-                .setPositiveButton("GUARDAR Y TOMAR FOTO", null)
-                .setNegativeButton("CANCELAR", null)
+                .setPositiveButton("Guardar y tomar foto", null)
+                .setNegativeButton("Cancelar", null)
                 .create();
         dlg.setOnShowListener(d -> dlg.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             NovedadMedidor n = new NovedadMedidor();
@@ -15260,6 +15354,15 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             String error = n.validar();
             if (error != null) {
                 mensajeT(error, msgMedio);
+                // El mismo aviso en linea, bajo el campo al que se refiere (o al final si no es de un campo).
+                String e = error.toLowerCase(java.util.Locale.ROOT);
+                EditText campoError = e.contains("numero") ? txtNumero : e.contains("marca") ? txtMarca
+                        : e.contains("lectura") ? txtLectura : e.contains("observacion") ? txtObs : null;
+                if (campoError != null) {
+                    DialogosLectura.mostrarError(campoError, error);
+                } else {
+                    DialogosLectura.mostrarError(errNovedad, error);
+                }
                 return;
             }
             n.guardar(almacenNovedad());
@@ -15311,12 +15414,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
     private void dialogoFotoNovedad(final NovedadMedidor n) {
         if (isFinishing()) return;
-        new AlertDialog.Builder(this)
+        DialogosLectura.builder(this)
                 .setTitle("Novedad sin foto")
                 .setMessage("La novedad del medidor " + n.numero.trim() + " requiere la foto del medidor.")
                 .setCancelable(false)
-                .setPositiveButton("TOMAR FOTO", (d, w) -> tomarFotoNovedad(n))
-                .setNegativeButton("DESCARTAR NOVEDAD", (d, w) -> {
+                .setPositiveButton("Tomar foto", (d, w) -> tomarFotoNovedad(n))
+                .setNegativeButton("Descartar novedad", (d, w) -> {
                     escribeResumenTiempo(n.cuentaReferencia + ";NOVEDAD MEDIDOR DESCARTADA;" + getPhoneDate() + "-" + getPhoneHour()
                             + ";numero=" + n.numero.trim());
                     NovedadMedidor.borrar(almacenNovedad());
@@ -15583,11 +15686,11 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     /** Menu: Iniciar / Cerrar contenedor. Todo lo leido en medio queda como un mismo banco de medidores. */
     private void alternarContenedor() {
         if (!secuencia().contenedorActivo()) {
-            new AlertDialog.Builder(this)
+            DialogosLectura.builder(this)
                     .setTitle("Iniciar contenedor")
-                    .setMessage("Las cuentas que lea desde ahora quedaran agrupadas en un mismo contenedor (banco de medidores) "
+                    .setMessage("Las cuentas que lea desde ahora quedarán agrupadas en un mismo contenedor (banco de medidores) "
                             + "hasta que lo cierre.")
-                    .setPositiveButton("INICIAR", (d, w) -> {
+                    .setPositiveButton("Iniciar contenedor", (d, w) -> {
                         Location pos = posicionVigente() ? ultimaPosicionEvento : null;
                         String id = EventoMovil.nuevoUid();
                         secuencia().iniciarContenedor(id, System.currentTimeMillis(),
@@ -15596,26 +15699,36 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                                 + getPhoneDate() + "-" + getPhoneHour() + ";id=" + id);
                         actualizarChipContenedor();
                     })
-                    .setNegativeButton("CANCELAR", null)
+                    .setNegativeButton("Cancelar", null)
                     .show();
             return;
         }
         final int n = secuencia().cuentasContenedor().size();
         if (n < SecuenciaCampo.MIN_CUENTAS_CONTENEDOR) {
-            new AlertDialog.Builder(this)
-                    .setTitle("Cerrar contenedor")
-                    .setMessage("El contenedor tiene " + n + " medidor(es) leido(s). Un contenedor necesita al menos "
-                            + SecuenciaCampo.MIN_CUENTAS_CONTENEDOR + ". ¿Descartarlo?")
-                    .setPositiveButton("DESCARTAR", (d, w) -> cerrarContenedor(false))
-                    .setNegativeButton("SEGUIR LEYENDO", null)
+            androidx.appcompat.app.AlertDialog descartar = DialogosLectura.builder(this)
+                    .setTitle("Descartar contenedor")
+                    .setMessage("Un contenedor necesita al menos " + SecuenciaCampo.MIN_CUENTAS_CONTENEDOR + " medidores y este tiene "
+                            + n + ". ¿Lo descarta?")
+                    .setPositiveButton("Descartar", (d, w) -> cerrarContenedor(false))
+                    .setNegativeButton("Seguir leyendo", null)
                     .show();
+            DialogosLectura.peligro(descartar, DialogInterface.BUTTON_POSITIVE);
             return;
         }
-        new AlertDialog.Builder(this)
+        LinearLayout cuerpoContenedor = DialogosLectura.cuerpo(this);
+        DialogosLectura.texto(cuerpoContenedor, "Se agrupan " + n + " medidores en el contenedor.");
+        java.util.List<String> cuentasCont = secuencia().cuentasContenedor();
+        if (!cuentasCont.isEmpty()) {
+            java.util.List<String[]> filasCont = new java.util.ArrayList<>();
+            filasCont.add(new String[]{"Primero", "Cta " + cuentasCont.get(0)});
+            filasCont.add(new String[]{"Último", "Cta " + cuentasCont.get(cuentasCont.size() - 1)});
+            DialogosLectura.datos(cuerpoContenedor, filasCont);
+        }
+        DialogosLectura.builder(this)
                 .setTitle("Cerrar contenedor")
-                .setMessage("Se agrupan " + n + " medidores en el contenedor.")
-                .setPositiveButton("CERRAR", (d, w) -> cerrarContenedor(true))
-                .setNegativeButton("SEGUIR LEYENDO", null)
+                .setView(DialogosLectura.desplazable(cuerpoContenedor))
+                .setPositiveButton("Cerrar contenedor", (d, w) -> cerrarContenedor(true))
+                .setNegativeButton("Seguir leyendo", null)
                 .show();
     }
 
@@ -15666,12 +15779,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             String previa = estadoNotas().leer("cuenta." + codCuenta);
             if (previa != null && !previa.isEmpty()) {
                 final String[] p = previa.split("\\|", 2);
-                new AlertDialog.Builder(this)
-                        .setTitle("Factura retenida")
-                        .setMessage("La cuenta " + cuenta + " ya tiene la nota No. " + p[0] + ".")
-                        .setPositiveButton("REIMPRIMIR", (d, w) -> reimprimirNota(p.length > 1 ? p[1] : ""))
-                        .setNeutralButton("NOTA NUEVA", (d, w) -> mostrarFormularioNota(cuenta, codCuenta, lecturaSistema))
-                        .setNegativeButton("CANCELAR", null)
+                DialogosLectura.builder(this)
+                        .setTitle("Nota de factura retenida")
+                        .setMessage("La cuenta " + cuenta + " ya tiene la nota No. " + p[0] + ". ¿La reimprime o hace una nota nueva?")
+                        .setPositiveButton("Reimprimir", (d, w) -> reimprimirNota(p.length > 1 ? p[1] : ""))
+                        .setNeutralButton("Nota nueva", (d, w) -> mostrarFormularioNota(cuenta, codCuenta, lecturaSistema))
+                        .setNegativeButton("Cancelar", null)
                         .show();
                 return;
             }
@@ -15685,47 +15798,40 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
     private void mostrarFormularioNota(final String cuenta, final String codCuenta, final String lecturaSistema) {
-        int pad = (int) (16 * getResources().getDisplayMetrics().density);
-        LinearLayout caja = new LinearLayout(this);
-        caja.setOrientation(LinearLayout.VERTICAL);
-        caja.setPadding(pad, pad / 2, pad, 0);
+        LinearLayout caja = DialogosLectura.cuerpo(this);
+        DialogosLectura.contexto(caja, "Cuenta " + cuenta, "Lectura en la terminal " + lecturaSistema);
 
-        TextView info = new TextView(this);
-        info.setText("Cuenta " + cuenta + " · lectura en la terminal " + lecturaSistema + "\nMotivo:");
-        caja.addView(info);
-
+        DialogosLectura.subtitulo(caja, "Motivo");
         final android.widget.RadioGroup motivos = new android.widget.RadioGroup(this);
         for (int i = 0; i < NotaRetencion.MOTIVOS.length; i++) {
-            android.widget.RadioButton rb = new android.widget.RadioButton(this);
+            android.widget.RadioButton rb = DialogosLectura.opcionLista(this, NotaRetencion.MOTIVOS[i][1]);
             rb.setId(1000 + i);
-            rb.setText(NotaRetencion.MOTIVOS[i][1]);
             motivos.addView(rb);
         }
         caja.addView(motivos);
+        final TextView errMotivo = DialogosLectura.error(caja);
 
-        final EditText txtOtros = new EditText(this);
-        txtOtros.setHint("Motivo (Otros), p. ej. Error lectura");
+        final EditText txtOtros = DialogosLectura.campo(caja, "Describa el motivo", false, "Por ejemplo: error de lectura",
+                android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES, 40);
+        DialogosLectura.conContador(txtOtros, 40);
         txtOtros.setEnabled(false);
-        txtOtros.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(40)});
-        caja.addView(txtOtros);
+        DialogosLectura.grupo(txtOtros).setVisibility(View.GONE);
         motivos.setOnCheckedChangeListener((g, id) -> {
             boolean otros = id == 1000 + NotaRetencion.MOTIVOS.length - 1;
             txtOtros.setEnabled(otros);
+            DialogosLectura.grupo(txtOtros).setVisibility(otros ? View.VISIBLE : View.GONE);
+            DialogosLectura.mostrarError(errMotivo, null);
             if (otros) txtOtros.requestFocus();
         });
 
-        final EditText txtLectura = new EditText(this);
-        txtLectura.setHint("Lectura actual del medidor");
-        txtLectura.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        caja.addView(txtLectura);
+        final EditText txtLectura = DialogosLectura.campo(caja, "Lectura actual del medidor", false, "Lo que marca hoy el medidor",
+                android.text.InputType.TYPE_CLASS_NUMBER, 0);
 
-        final EditText txtTelefono = new EditText(this);
-        txtTelefono.setHint("Telefono de contacto (opcional)");
-        txtTelefono.setInputType(android.text.InputType.TYPE_CLASS_PHONE);
-        caja.addView(txtTelefono);
+        final EditText txtTelefono = DialogosLectura.campo(caja, "Teléfono", true, "7 a 10 dígitos",
+                android.text.InputType.TYPE_CLASS_PHONE, 0);
 
-        final EditText txtFecha = new EditText(this);
-        txtFecha.setHint("Factura corregida despues del dia (opcional)");
+        final EditText txtFecha = DialogosLectura.campo(caja, "Corregida desde", true, "dd/mm/aaaa",
+                android.text.InputType.TYPE_CLASS_TEXT, 0);
         txtFecha.setFocusable(false);
         txtFecha.setOnClickListener(v -> {
             java.util.Calendar c = java.util.Calendar.getInstance();
@@ -15733,17 +15839,15 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     String.format(java.util.Locale.ROOT, "%02d/%02d/%04d", d, m + 1, y)),
                     c.get(java.util.Calendar.YEAR), c.get(java.util.Calendar.MONTH), c.get(java.util.Calendar.DAY_OF_MONTH)).show();
         });
-        caja.addView(txtFecha);
+        DialogosLectura.nota(caja, "Fecha desde la que la factura sale corregida.");
+        final TextView errNota = DialogosLectura.error(caja);
 
-        ScrollView scroll = new ScrollView(this);
-        scroll.addView(caja);
-
-        final AlertDialog dlg = new AlertDialog.Builder(this)
+        final androidx.appcompat.app.AlertDialog dlg = DialogosLectura.builder(this)
                 .setTitle("Nota de factura retenida")
-                .setView(scroll)
+                .setView(DialogosLectura.desplazable(caja))
                 .setCancelable(false)
-                .setPositiveButton("IMPRIMIR NOTA", null)
-                .setNegativeButton("CANCELAR", null)
+                .setPositiveButton("Imprimir nota", null)
+                .setNegativeButton("Cancelar", null)
                 .create();
         dlg.setOnShowListener(d -> dlg.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             NotaRetencion nota = new NotaRetencion();
@@ -15756,6 +15860,21 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             String error = nota.validar(System.currentTimeMillis());
             if (error != null) {
                 mensajeT(error, msgMedio);
+                // El mismo aviso en linea, junto a lo que hay que corregir.
+                String e = error.toLowerCase(java.util.Locale.ROOT);
+                if (e.contains("otros")) {
+                    DialogosLectura.mostrarError(txtOtros, error);
+                } else if (e.contains("motivo")) {
+                    DialogosLectura.mostrarError(errMotivo, error);
+                } else if (e.contains("lectura")) {
+                    DialogosLectura.mostrarError(txtLectura, error);
+                } else if (e.contains("teléfono")) {
+                    DialogosLectura.mostrarError(txtTelefono, error);
+                } else if (e.contains("fecha")) {
+                    DialogosLectura.mostrarError(txtFecha, error);
+                } else {
+                    DialogosLectura.mostrarError(errNota, error);
+                }
                 return;
             }
             dlg.dismiss();
@@ -15920,7 +16039,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     /** Ultima posicion del proveedor GPS en esta sesion: la usa ControlEntornoTerminal para comparar el reloj. */
     private Location ultimaPosicionGps;
     /** Aviso de bloqueo abierto: evita apilar dialogos si el tecnico insiste. */
-    private AlertDialog dialogoBloqueoEntorno;
+    private androidx.appcompat.app.AlertDialog dialogoBloqueoEntorno;
 
     /**
      * EBSA: modo avion, ubicacion apagada o reloj manipulado bloquean la toma (lectura o causal). Solo en modo
@@ -15951,10 +16070,26 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         if (isFinishing() || (dialogoBloqueoEntorno != null && dialogoBloqueoEntorno.isShowing())) {
             return;
         }
-        dialogoBloqueoEntorno = new AlertDialog.Builder(this)
+        LinearLayout cuerpo = DialogosLectura.cuerpo(this);
+        DialogosLectura.aviso(cuerpo, "La facturación está detenida.");
+        DialogosLectura.texto(cuerpo, bloqueo.mensaje);
+        String paso2;
+        switch (bloqueo.codigo) {
+            case "MODO_AVION":
+                paso2 = "Desactive el modo avión.";
+                break;
+            case "SIN_UBICACION":
+                paso2 = "Active la ubicación (GPS).";
+                break;
+            default:
+                paso2 = "Active «Fecha y hora automáticas».";
+                break;
+        }
+        DialogosLectura.subtitulo(cuerpo, "Cómo corregirlo");
+        DialogosLectura.texto(cuerpo, "1. Toque «Ir a ajustes».\n2. " + paso2 + "\n3. Vuelva a la aplicación y siga con la lectura.");
+        dialogoBloqueoEntorno = DialogosLectura.builder(this)
                 .setTitle(bloqueo.titulo)
-                .setMessage(bloqueo.mensaje)
-                .setIcon(R.drawable.gss_logo40x40)
+                .setView(DialogosLectura.desplazable(cuerpo))
                 .setCancelable(false)
                 .setPositiveButton("Ir a ajustes", (d, w) -> {
                     try {
@@ -17388,8 +17523,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         // realizar proceso de impresion en lote
                         abrirArchivosDeFacturacion();
 
-                        MostrarAlertDialog("IMPRIMIR RESUMEN", "Este Proceso Imprime el resumen\n" + "Clientes ya Facturados.\n" +
-                                "Desea Continuar ?\n" + VariablesGlobales.rangoinicialimpresion + " al " + VariablesGlobales.rangofinalimpresion, "ImpresionLote");
+                        MostrarAlertDialog("Imprimir el resumen", "Se imprime el resumen de los clientes ya facturados, del registro "
+                                + VariablesGlobales.rangoinicialimpresion + " al " + VariablesGlobales.rangofinalimpresion + ". ¿Continúa?", "ImpresionLote");
                     }
                 } catch (Exception ex) {
                     utils.Log(logfile, "[MenuDeLiquidacion]SELECCIONDELOTE_REQUEST_CODE. " + ex.toString());
@@ -17537,12 +17672,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     Log.e("INFO","9 - SETEA EL VALOR DE yaTomoFotoOcr: " + yaTomoFotoOcr);
                 } else {
                     // foto obligatoria y canceló → mostrar diálogo de nuevo
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    androidx.appcompat.app.AlertDialog.Builder builder = DialogosLectura.builder(this);
                     builder.setTitle("Foto obligatoria");
-                    builder.setMessage("La foto del medidor es obligatoria para esta cuenta.\nDebe tomarla para poder registrar la lectura.");
+                    builder.setMessage("La foto del medidor es obligatoria para esta cuenta. Debe tomarla para registrar la lectura.");
                     builder.setCancelable(false);
-                    builder.setPositiveButton("TOMAR FOTO", (dialog, which) -> capturaImagenFotografica());
-                    builder.setNegativeButton("AHORA NO", null);
+                    builder.setPositiveButton("Tomar foto", (dialog, which) -> capturaImagenFotografica());
+                    builder.setNegativeButton("Ahora no", null);
                     builder.show();
                 }
                 vecesImagen = 1;
@@ -18570,10 +18705,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     //Ax: muestra mensaje en pantalla con boton 'ok' pero no hace nada
     public void mensajeOk(String msg, final String metodos) {
         if (indicadorManual == 0) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            androidx.appcompat.app.AlertDialog.Builder builder = DialogosLectura.builder(this);
             builder.setMessage(msg)
                     .setCancelable(false)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    .setPositiveButton("Entendido", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             switch (metodos) {
                                 case "retomaFoto":
@@ -18583,20 +18718,18 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                             }
                         }
                     });
-            AlertDialog alert = builder.create();
+            androidx.appcompat.app.AlertDialog alert = builder.create();
             alert.show();
         }
     }
 
     private void mostrarDialogoAlerta(String titulo, String mensaje) {
         if (indicadorManual == 0) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            androidx.appcompat.app.AlertDialog.Builder builder = DialogosLectura.builder(this);
             builder.setTitle(titulo);
             builder.setMessage(mensaje);
 
-            builder.setIcon(R.drawable.gss_logo40x40);
-
-            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     Log.i("Dialogo Acerca De", "Boton Ok pulsado");
                 }
@@ -19057,7 +19190,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         Integer.parseInt(respuesta_);//genera excepcion si diferente de 1
 
                         pintarRed(R.drawable.redactiva);
-                        MostrarAlertDialog("Alerta Seleccion Terminacion", "Conexion OK\n[SI] = ACTIVA EL ENVIO\n[NO] = DESACTIVA ENVIO \nAL SERVIDOR?", "validarconexion");
+                        MostrarAlertDialog("Envío al servidor", "La conexión está bien. ¿Activa el envío de las lecturas al servidor?", "validarconexion");
 
                     } catch (NumberFormatException e) {
                         // Log.e("error", "sin conexion " + e.getMessage());

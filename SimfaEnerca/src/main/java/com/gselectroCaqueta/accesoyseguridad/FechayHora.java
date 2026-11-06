@@ -41,6 +41,7 @@ public class FechayHora extends AppCompatActivity {
     Button btnPruebaWs;
     TextView macP;
     TextView ip2;
+    TextView resultadoWs; // Resultado de Probar conexion en pantalla (ademas del Toast)
 
     private static boolean isAirplaneModeOn(Context context) {
 
@@ -62,6 +63,7 @@ public class FechayHora extends AppCompatActivity {
         btnPruebaWs = (Button) findViewById(R.id.btnPruebaWs);
         macP = (TextView) findViewById(R.id.txtMac);
         ip2 = (TextView) findViewById(R.id.txvIp2);
+        resultadoWs = (TextView) findViewById(R.id.sis_resultado_ws);
         // Button btnRegresarf = (Button) findViewById(R.id.btnRegresarfecha);
         ProbarConn();
         verificarBattery();
@@ -78,19 +80,19 @@ public class FechayHora extends AppCompatActivity {
         //  locationmanager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, mlocListener);
 
         if (!locationmanager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            gps.setTextOff("Gps off");
+            gps.setTextOff("Apagado");
             gps.setChecked(false);
 
         } else {
-            gps.setTextOn("Gps on");
+            gps.setTextOn("Activo");
             gps.setChecked(true);
         }
 
         if (isAirplaneModeOn(getApplicationContext())) {
-            modoAvion.setTextOn("M.avion on");
+            modoAvion.setTextOn("Encendido");
             modoAvion.setChecked(true);
         } else {
-            modoAvion.setTextOff("M.avion off");
+            modoAvion.setTextOff("Apagado");
             modoAvion.setChecked(false);
         }
 
@@ -145,12 +147,12 @@ public class FechayHora extends AppCompatActivity {
         if (level == -1 || scale == -1) {
 
 
-            Bateria.setTextOff("B." + Float.toString(50.0f) + "%");
+            Bateria.setTextOff(Math.round(50.0f) + " %");
             Bateria.setChecked(false);
 
         } else {
 
-            Bateria.setTextOn("B." + Float.toString(((float) level / (float) scale) * 100.0f) + "%");
+            Bateria.setTextOn(Math.round(((float) level / (float) scale) * 100.0f) + " %");
             Bateria.setChecked(true);
         }
 
@@ -163,12 +165,40 @@ public class FechayHora extends AppCompatActivity {
             if (bdc != null) {
                 URL = "http://" + bdc.getURL();
                 paginaWs = bdc.getPaginaWs();
+                mostrarDirecciones(bdc);
                 return true;
             }
         } catch (Exception ignored) {
         }
         return false;
     }
+    /**
+     * Muestra la direccion configurada (antes txvIp/txvIp2 quedaban vacios porque su llenado estaba comentado).
+     * Misma fuente que usa la app para conectarse: el registro activo de CrudComunicaciones (Configurar web) y,
+     * en modo API REST, la base de ConfigSync que usa "Probar conexion". Solo presentacion.
+     */
+    private void mostrarDirecciones(BDComunicaciones activa) {
+        try {
+            String pagina = activa.getPaginaWs() == null ? "" : activa.getPaginaWs().trim();
+            ip.setText(URL + (pagina.isEmpty() ? "" : (pagina.startsWith("/") ? "" : "/") + pagina)
+                    + "  · IP" + activa.getId() + " activa");
+            StringBuilder linea = new StringBuilder();
+            if (com.gselectroCaqueta.sync.ConfigSync.modoRest(getApplicationContext())) {
+                String base = new com.gselectroCaqueta.sync.ConfigSync(getApplicationContext()).baseApi();
+                linea.append("Protocolo: API REST (JSON)");
+                if (base != null && !base.trim().isEmpty()) linea.append("\nAPI: ").append(base.trim());
+            } else {
+                linea.append("Protocolo: SOAP");
+            }
+            BDComunicaciones otra = CrudComunicaciones.getParamsbyId(activa.getId() == 1 ? 2 : 1);
+            if (otra != null && otra.getURL() != null && !otra.getURL().trim().isEmpty()) {
+                linea.append("\nIP").append(otra.getId()).append(" inactiva: http://").append(otra.getURL().trim());
+            }
+            ip2.setText(linea.toString());
+        } catch (Exception ignored) {
+        }
+    }
+
     /*private boolean seleccionUrl() {
         try {
             String nombreArchivo = Environment.getExternalStorageDirectory().getAbsolutePath() + "/DIRECCIONEIP.TXT";
@@ -233,7 +263,7 @@ public class FechayHora extends AppCompatActivity {
 
             reader.close();
 
-            macP.setText(" Mac Impresora: " + datos);
+            macP.setText("MAC " + datos);
             return true;
 
         } catch (IOException e) {
@@ -241,6 +271,15 @@ public class FechayHora extends AppCompatActivity {
 
         }
         return false;
+    }
+
+    /** Resultado de Probar conexion en pantalla: borde verde si respondio, rojo si no. */
+    private void mostrarResultado(boolean ok, String texto) {
+        if (resultadoWs == null) return;
+        resultadoWs.setBackgroundResource(ok ? R.drawable.sis_bg_resultado_ok : R.drawable.sis_bg_resultado_error);
+        resultadoWs.setTextColor(getResources().getColor(ok ? R.color.lec_ok : R.color.lec_error, getTheme()));
+        resultadoWs.setText(texto);
+        resultadoWs.setVisibility(View.VISIBLE);
     }
 
     private class UsarGPS implements LocationListener {
@@ -317,10 +356,10 @@ public class FechayHora extends AppCompatActivity {
                 case "HAY_CONEXION":
 
                     if (respuesta_.equals("SI")) {
-                        Red.setTextOn("Red on");
+                        Red.setTextOn("Con conexión");
                         Red.setChecked(true);
                     } else {
-                        Red.setTextOff("Red off");
+                        Red.setTextOff("Sin conexión");
                         Red.setChecked(false);
                     }
                     break;
@@ -328,10 +367,12 @@ public class FechayHora extends AppCompatActivity {
                     try {
                         Integer.parseInt(respuesta_);
                         Toast.makeText(getApplicationContext(), "Conexion con Webservice OK", Toast.LENGTH_LONG).show();
+                        mostrarResultado(true, "Conexión con el servidor correcta");
 
                     } catch (NumberFormatException e) {
 
                         Toast.makeText(getApplicationContext(), "Error de conexion con Webservice\n" + respuesta_, Toast.LENGTH_LONG).show();
+                        mostrarResultado(false, "Error de conexión con el servidor\n" + respuesta_);
                     }
                     break;
             }
@@ -340,6 +381,12 @@ public class FechayHora extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
+            if ("VALIDAR_CONEXION".equals(metodo) && resultadoWs != null) {
+                resultadoWs.setBackgroundResource(R.drawable.sis_bg_resultado_neutro);
+                resultadoWs.setTextColor(getResources().getColor(R.color.lec_texto, getTheme()));
+                resultadoWs.setText("Probando conexión…");
+                resultadoWs.setVisibility(View.VISIBLE);
+            }
         }
 
         @Override

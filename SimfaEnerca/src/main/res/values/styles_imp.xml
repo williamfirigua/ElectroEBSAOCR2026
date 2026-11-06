@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ventana de impresora Bluetooth (DeviceListActivity): dialogo blanco con borde oscuro de 2dp, sin barra de titulo.
+     Se aplica con setTheme() en onCreate (el manifiesto sigue con Theme.Dialog). -->
+<resources>
+    <style name="imp_Dialogo" parent="android:Theme.Material.Light.Dialog.NoActionBar">
+        <item name="android:windowBackground">@drawable/bg_cau_dialogo</item>
+        <item name="android:colorPrimary">@color/lec_primario</item>
+        <item name="android:colorAccent">@color/lec_primario</item>
+        <item name="android:windowMinWidthMajor">92%</item>
+        <item name="android:windowMinWidthMinor">96%</item>
+        <item name="android:textColorPrimary">@color/lec_texto</item>
+        <item name="android:textColorSecondary">@color/lec_texto2</item>
+    </style>
+</resources>

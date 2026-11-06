@@ -87,8 +87,9 @@ public class ModuloConsultaNoEnviados extends AppCompatActivity {
         tabla = (TableLayout) findViewById(R.id.tblcuentacontador);
         cabecera = (TableLayout) findViewById(R.id.tblcabecera);
         layoutFila = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT);
-        layoutCuenta = new TableRow.LayoutParams(200, TableRow.LayoutParams.WRAP_CONTENT);
-        layoutContador = new TableRow.LayoutParams(200, TableRow.LayoutParams.WRAP_CONTENT);
+        // Columnas en dp (antes 200px fijos): cuenta de 150dp y la segunda ocupa el resto (stretch/shrink en el XML).
+        layoutCuenta = new TableRow.LayoutParams(dp(150), TableRow.LayoutParams.WRAP_CONTENT);
+        layoutContador = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT);
 
         btnAdelante1 = (ImageButton) findViewById(R.id.btnAdelanteNe2);
         btnAtras1 = (ImageButton) findViewById(R.id.btnAtrasNe2);
@@ -298,17 +299,29 @@ public class ModuloConsultaNoEnviados extends AppCompatActivity {
 
         fila = new TableRow(this);
         fila.setLayoutParams(layoutFila);
+        fila.setBackgroundResource(R.drawable.sis_fila_tabla);
+        fila.setMinimumHeight(dp(48));
 
         txtCuenta.setText(cuenta);
-        txtCuenta.setGravity(Gravity.LEFT);
-        txtCuenta.setTextAppearance(this, R.style.etiqueta);
-        txtCuenta.setBackgroundResource(R.drawable.tabla_celda);
+        txtCuenta.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+        estiloCelda(txtCuenta, true);
+        txtCuenta.setTextColor(color(R.color.lec_texto));
+        txtCuenta.setTypeface(null, android.graphics.Typeface.BOLD);
         txtCuenta.setLayoutParams(layoutCuenta);
 
         txtNroContador.setText(nrocontador);
-        txtNroContador.setGravity(Gravity.LEFT);
-        txtNroContador.setTextAppearance(this, R.style.etiqueta);
-        txtNroContador.setBackgroundResource(R.drawable.tabla_celda);
+        txtNroContador.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+        estiloCelda(txtNroContador, false);
+        // Estado con color: Rechazada en rojo, Pendiente en gris oscuro (solo presentacion).
+        String txt = nrocontador == null ? "" : nrocontador;
+        if (txt.startsWith("Rechazada")) {
+            txtNroContador.setTextColor(color(R.color.lec_error));
+            txtNroContador.setTypeface(null, android.graphics.Typeface.BOLD);
+        } else if (txt.startsWith("Pendiente")) {
+            txtNroContador.setTextColor(color(R.color.lec_texto2));
+        } else {
+            txtNroContador.setTextColor(color(R.color.lec_texto));
+        }
         txtNroContador.setLayoutParams(layoutContador);
 
         fila.addView(txtCuenta);
@@ -324,22 +337,44 @@ public class ModuloConsultaNoEnviados extends AppCompatActivity {
 
         fila = new TableRow(this);
         fila.setLayoutParams(layoutFila);
+        fila.setBackgroundResource(R.drawable.sis_fila_cabecera);
 
-        txtCuenta.setText("CUENTA");
-        txtCuenta.setGravity(Gravity.CENTER_HORIZONTAL);
-        txtCuenta.setTextAppearance(this, R.style.etiqueta);
-        txtCuenta.setBackgroundResource(R.drawable.tabla_celda_cabecera);
+        txtCuenta.setText("Cuenta");
+        txtCuenta.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+        estiloCelda(txtCuenta, true);
+        txtCuenta.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 13);
+        txtCuenta.setTextColor(color(R.color.lec_texto));
+        txtCuenta.setTypeface(null, android.graphics.Typeface.BOLD);
         txtCuenta.setLayoutParams(layoutCuenta);
 
-        txtNroContador.setText("CONTADOR");
-        txtNroContador.setGravity(Gravity.CENTER_HORIZONTAL);
-        txtNroContador.setTextAppearance(this, R.style.etiqueta);
-        txtNroContador.setBackgroundResource(R.drawable.tabla_celda_cabecera);
+        txtNroContador.setText("Contador");
+        txtNroContador.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
+        estiloCelda(txtNroContador, false);
+        txtNroContador.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 13);
+        txtNroContador.setTextColor(color(R.color.lec_texto));
+        txtNroContador.setTypeface(null, android.graphics.Typeface.BOLD);
         txtNroContador.setLayoutParams(layoutContador);
 
         fila.addView(txtCuenta);
         fila.addView(txtNroContador);
         cabecera.addView(fila);
+    }
+
+    // ------------------------------------------------------------------ presentacion de la tabla
+
+    private int dp(int v) {
+        return Math.round(v * getResources().getDisplayMetrics().density);
+    }
+
+    private int color(int id) {
+        return getResources().getColor(id, getTheme());
+    }
+
+    /** Celda de 14sp con relleno en dp; la primera columna arranca en el margen de 16dp. */
+    private void estiloCelda(TextView t, boolean primera) {
+        t.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 14);
+        t.setFontFeatureSettings("tnum");
+        t.setPadding(dp(primera ? 16 : 8), dp(10), dp(primera ? 8 : 16), dp(10));
     }
 
 //    // Captura numero IMEI del telefono
@@ -391,10 +426,27 @@ public class ModuloConsultaNoEnviados extends AppCompatActivity {
         total = pendientes + rechazadas;
         txtregnoenviados.setText(total + (rechazadas > 0 ? " (" + rechazadas + " rech.)" : "") + " · archivos " + archivos);
         if (cabecera.getChildCount() == 0) agregarCabecera();
-        ((TextView) ((TableRow) cabecera.getChildAt(0)).getChildAt(1)).setText("ESTADO");
+        ((TextView) ((TableRow) cabecera.getChildAt(0)).getChildAt(1)).setText("Estado");
+        mostrarContadores(pendientes, rechazadas, archivos);
         registroactual = 1;
         leerRest();
         if (total == 0) mensajes("No hay lecturas pendientes de envío");
+    }
+
+    /** Solo presentacion: los mismos conteos de cargarRest en tres casillas, y el aviso de lista vacia. */
+    private void mostrarContadores(int pendientes, int rechazadas, int archivos) {
+        findViewById(R.id.sis_resumen_total).setVisibility(View.GONE);
+        findViewById(R.id.sis_contadores).setVisibility(View.VISIBLE);
+        ((TextView) findViewById(R.id.sis_cnt_pendientes)).setText(String.valueOf(pendientes));
+        ((TextView) findViewById(R.id.sis_cnt_archivos)).setText(String.valueOf(archivos));
+        TextView cntRech = (TextView) findViewById(R.id.sis_cnt_rechazadas);
+        TextView etqRech = (TextView) findViewById(R.id.sis_etq_rechazadas);
+        cntRech.setText(String.valueOf(rechazadas));
+        boolean hay = rechazadas > 0;
+        findViewById(R.id.sis_caja_rechazadas).setBackgroundResource(hay ? R.drawable.sis_bg_contador_error : R.drawable.bg_lec_tarjeta);
+        cntRech.setTextColor(color(hay ? R.color.lec_error : R.color.lec_texto));
+        etqRech.setTextColor(color(hay ? R.color.lec_error : R.color.lec_texto2));
+        findViewById(R.id.sis_vacio).setVisibility(pendientes + rechazadas == 0 ? View.VISIBLE : View.GONE);
     }
 
     private void leerRest() {
@@ -466,7 +518,7 @@ public class ModuloConsultaNoEnviados extends AppCompatActivity {
         } else {
             texto = "El servidor no recibió el respaldo (" + resp + ")";
         }
-        new AlertDialog.Builder(this).setTitle("Respaldo de lecturas").setMessage(texto).setPositiveButton("Aceptar", null).show();
+        new AlertDialog.Builder(this, R.style.CauDialogo).setTitle("Respaldo de lecturas").setMessage(texto).setPositiveButton("Aceptar", null).show();
     }
 
     private void mensajes(String msg) {

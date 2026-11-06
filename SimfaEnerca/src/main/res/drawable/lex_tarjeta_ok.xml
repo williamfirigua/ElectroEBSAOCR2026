@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tarjeta de firma con la firma tomada: borde verde de 2dp. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#33000000">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/lec_superficie" />
+            <stroke android:width="2dp" android:color="@color/lec_ok" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+</ripple>

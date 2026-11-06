@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Licencia del equipo (ActLicencia), primera pantalla al abrir. Paleta para el sol de colors_lectura.
+    logos GS&S y EBSA (como en Acceso)
+    titulo (txtTitleLicencia) y equipo (txtEquipoLicencia)
+    tarjeta de estado: spinner (prgLicencia) + mensaje (txtMensajeLicencia); ActLicencia la pone ambar
+      cuando hay que activar
+    panel de activacion (panelActivar): instrucciones, campo (txtOperadorLicencia) y Activar equipo
+      (btnActivarLicencia)
+-->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_act_licencia"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/lec_superficie"
     android:fillViewport="true"
     tools:context="com.gselectroCaqueta.moduloLicencia.ActLicencia">
 
@@ -11,78 +21,147 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingBottom="@dimen/activity_vertical_margin">
+        android:paddingBottom="24dp">
 
-        <TextView
-            android:id="@+id/txtTitleLicencia"
+        <!-- Logos -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="@color/orangehuila"
-            android:gravity="center"
-            android:text="LICENCIA DEL EQUIPO"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:layout_height="80dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
 
-        <ProgressBar
-            android:id="@+id/prgLicencia"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:visibility="gone" />
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="Global Solutions &amp; Service S.A.S."
+                android:scaleType="fitCenter"
+                android:src="@drawable/acc_logo_gss" />
 
-        <TextView
-            android:id="@+id/txtMensajeLicencia"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Revisando la licencia..."
-            android:textSize="15sp"
-            android:textStyle="bold" />
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
 
-        <TextView
-            android:id="@+id/txtEquipoLicencia"
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="EBSA, Empresa de Energía de Boyacá"
+                android:scaleType="fitCenter"
+                android:src="@drawable/acc_logo_ebsa" />
+        </LinearLayout>
+
+        <View
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:textSize="13sp" />
+            android:layout_height="1dp"
+            android:background="@color/lec_divisor" />
 
         <LinearLayout
-            android:id="@+id/panelActivar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="gone">
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
 
             <TextView
+                android:id="@+id/txtTitleLicencia"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                android:text="Digite su código o su usuario. Si el celular no tiene señal, pida el código temporal."
+                android:layout_marginTop="20dp"
+                android:text="Licencia del equipo"
+                android:textColor="@color/lec_texto"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtEquipoLicencia"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:fontFeatureSettings="tnum"
+                android:textColor="@color/lec_texto2"
                 android:textSize="13sp" />
 
-            <EditText
-                android:id="@+id/txtOperadorLicencia"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_input"
-                android:hint="Código, usuario o código temporal"
-                android:imeOptions="actionDone"
-                android:inputType="textNoSuggestions"
-                android:maxLength="30"
-                android:singleLine="true" />
-
-            <Button
-                android:id="@+id/btnActivarLicencia"
+            <!-- Estado: spinner mientras revisa o activa; el mensaje lo pone ActLicencia. -->
+            <LinearLayout
+                android:id="@+id/sis_estado_licencia"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Activar" />
+                android:layout_marginTop="14dp"
+                android:background="@drawable/sis_bg_resultado_neutro"
+                android:gravity="center_vertical"
+                android:minHeight="56dp"
+                android:orientation="horizontal"
+                android:paddingStart="14dp"
+                android:paddingTop="12dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="12dp">
+
+                <ProgressBar
+                    android:id="@+id/prgLicencia"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_marginEnd="12dp"
+                    android:indeterminate="true"
+                    android:indeterminateTint="@color/lec_primario"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/txtMensajeLicencia"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:lineSpacingExtra="1dp"
+                    android:text="Revisando la licencia…"
+                    android:textColor="@color/lec_texto"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Activacion -->
+            <LinearLayout
+                android:id="@+id/panelActivar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:lineSpacingExtra="2dp"
+                    android:text="Digite su código o su usuario. Si el celular no tiene señal, pida el código temporal."
+                    android:textColor="@color/lec_texto"
+                    android:textSize="15sp" />
+
+                <TextView
+                    style="@style/ComEtiquetaCampo"
+                    android:layout_marginTop="12dp"
+                    android:text="Código, usuario o código temporal" />
+
+                <EditText
+                    android:id="@+id/txtOperadorLicencia"
+                    style="@style/CauCampo"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="6dp"
+                    android:hint="Ej.: lector214 o código temporal"
+                    android:imeOptions="actionDone"
+                    android:importantForAutofill="no"
+                    android:inputType="textNoSuggestions"
+                    android:maxLength="30"
+                    android:singleLine="true" />
+
+                <Button
+                    android:id="@+id/btnActivarLicencia"
+                    style="@style/ComBotonLleno"
+                    android:layout_marginTop="16dp"
+                    android:text="Activar equipo" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

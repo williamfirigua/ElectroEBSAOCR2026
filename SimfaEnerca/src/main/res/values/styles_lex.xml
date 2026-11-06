@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Estilos compartidos de las ventanas de formato de impresion, digitos, certificado, firma
+     (paleta de sol de colors_lectura.xml). -->
+<resources>
+
+    <!-- Barra superior de 56dp: titulo de 20sp en negrita. -->
+    <style name="lex_Titulo">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textColor">@color/lec_texto</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <!-- Titulo de seccion. -->
+    <style name="lex_Seccion">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:textColor">@color/lec_texto</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Etiqueta de campo: 13sp en negrita, encima del campo. -->
+    <style name="lex_Etiqueta">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">4dp</item>
+        <item name="android:textColor">@color/lec_texto</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Ayuda bajo un campo. -->
+    <style name="lex_Ayuda">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:textColor">@color/lec_texto2</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <!-- Error en linea bajo un campo (oculto hasta que haya error). -->
+    <style name="lex_Error">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:drawableStart">@drawable/ic_lec_alerta</item>
+        <item name="android:drawablePadding">6dp</item>
+        <item name="android:drawableTint">@color/lec_error</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textColor">@color/lec_error</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <!-- Campo numerico grande centrado (48dp, borde negro). -->
+    <style name="lex_CampoNumero">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:background">@drawable/bg_lec_campo</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+        <item name="android:gravity">center</item>
+        <item name="android:importantForAutofill">no</item>
+        <item name="android:textColor">@color/lec_texto</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Botones - / + de los campos numericos. -->
+    <style name="lex_Paso">
+        <item name="android:layout_width">56dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:background">@drawable/bg_lec_accion</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/lec_primario</item>
+        <item name="android:textSize">26sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Boton principal: 48dp azul lleno, 16sp en negrita. -->
+    <style name="lex_BotonPrimario">
+        <item name="android:layout_height">48dp</item>
+        <item name="android:background">@drawable/bg_cau_boton_primario</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/cau_boton_primario_texto</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Boton secundario: 48dp blanco con borde azul de 2dp. -->
+    <style name="lex_BotonContorno" parent="lex_BotonPrimario">
+        <item name="android:background">@drawable/bg_lec_accion</item>
+        <item name="android:textColor">@color/lec_primario</item>
+    </style>
+
+    <!-- Boton de peligro: 48dp blanco con borde rojo de 2dp. -->
+    <style name="lex_BotonPeligro" parent="lex_BotonPrimario">
+        <item name="android:background">@drawable/lex_boton_peligro</item>
+        <item name="android:textColor">@color/lec_error</item>
+    </style>
+
+    <!-- Opcion de un control segmentado (CheckBox / RadioButton sin circulo). -->
+    <style name="lex_Segmento">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">@drawable/lex_segmento</item>
+        <item name="android:button">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/lex_segmento_texto</item>
+        <item name="android:drawableTint">@color/lex_segmento_texto</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- CheckBox que se ve como interruptor al final de la fila. -->
+    <style name="lex_Interruptor">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:button">@null</item>
+        <item name="android:drawableEnd">@drawable/imp_interruptor</item>
+        <item name="android:drawablePadding">12dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:textColor">@color/lec_texto</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Campo de texto de formulario (lex_campo: sin borde cuando esta deshabilitado). -->
+    <style name="lex_Campo">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:background">@drawable/lex_campo</item>
+        <item name="android:importantForAutofill">no</item>
+        <item name="android:paddingStart">14dp</item>
+        <item name="android:paddingEnd">14dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textColor">@color/lec_texto</item>
+        <item name="android:textColorHint">@color/lec_texto2</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <!-- Dato del resumen (solo lectura): etiqueta pequena y valor en negrita. -->
+    <style name="lex_DatoEtiqueta">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/lec_texto2</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="lex_DatoValor">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textColor">@color/lec_texto</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

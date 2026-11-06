@@ -62,32 +62,32 @@ public final class ControlEntornoTerminal {
      */
     public static Bloqueo evaluar(Context context, Location ultimaPosicionGps, String fechaProceso) {
         if (modoAvionActivo(context)) {
-            return new Bloqueo("MODO_AVION", "Modo avion activo",
-                    "Desactive el modo avion para continuar con la toma de lecturas.",
+            return new Bloqueo("MODO_AVION", "Modo avión activo",
+                    "Desactive el modo avión para seguir con la toma de lecturas.",
                     Settings.ACTION_AIRPLANE_MODE_SETTINGS);
         }
         if (!ubicacionActiva(context)) {
-            return new Bloqueo("SIN_UBICACION", "Ubicacion desactivada",
-                    "Active la ubicacion (GPS) del equipo para continuar con la toma de lecturas.",
+            return new Bloqueo("SIN_UBICACION", "Ubicación desactivada",
+                    "Active la ubicación (GPS) del equipo para seguir con la toma de lecturas.",
                     Settings.ACTION_LOCATION_SOURCE_SETTINGS);
         }
         if (!fechaAutomaticaActiva(context)) {
             return new Bloqueo("FECHA_MANUAL", "Fecha y hora manuales",
-                    "Active \"Fecha y hora automaticas\" en los ajustes del equipo. "
-                            + "No se pueden tomar lecturas con el reloj configurado a mano.",
+                    "Active «Fecha y hora automáticas» en los ajustes del equipo. "
+                            + "No se pueden tomar lecturas con el reloj puesto a mano.",
                     Settings.ACTION_DATE_SETTINGS);
         }
         long desfase = desfaseContraGps(ultimaPosicionGps);
         if (Math.abs(desfase) > DESFASE_MAXIMO_MS && Math.abs(desfase) < DESFASE_NO_CONFIABLE_MS) {
             return new Bloqueo("RELOJ_ALTERADO", "Reloj del equipo alterado",
                     "La hora del equipo difiere " + describirMinutos(desfase) + " de la hora del GPS. "
-                            + "Active \"Fecha y hora automaticas\" y espere a que el equipo sincronice.",
+                            + "Las facturas deben salir con la hora real: active «Fecha y hora automáticas» y espere a que el equipo se sincronice.",
                     Settings.ACTION_DATE_SETTINGS);
         }
         if (fechaAnteriorAlProceso(fechaProceso)) {
             return new Bloqueo("FECHA_ATRASADA", "Fecha del equipo atrasada",
                     "La fecha del equipo es anterior a la fecha de proceso del ciclo (" + fechaProceso.trim() + "). "
-                            + "Active \"Fecha y hora automaticas\".",
+                            + "Active «Fecha y hora automáticas».",
                     Settings.ACTION_DATE_SETTINGS);
         }
         return null;
@@ -169,7 +169,7 @@ public final class ControlEntornoTerminal {
         long minutos = Math.abs(desfaseMs) / 60_000L;
         String sentido = desfaseMs > 0 ? "adelantada" : "atrasada";
         if (minutos >= 1440) {
-            return (minutos / 1440) + " dia(s) (" + sentido + ")";
+            return (minutos / 1440) + " día(s) (" + sentido + ")";
         }
         if (minutos >= 60) {
             return (minutos / 60) + " hora(s) (" + sentido + ")";

@@ -1,96 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Digitos del medidor (ModuloCambioDigitos) con la paleta de sol de la lectura v2: valor de hoy, stepper 4-8,
+  ejemplo vivo, error en linea y Guardar / Cancelar visibles.
+  Id conservado: txtdigitos (EditText, se lee como TextView). Se quitaron los logos btnLogos / btnLogos2 (el Java no
+  los usaba).
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#F5F6FA"
-    android:padding="16dp">
+    android:background="@color/lec_superficie"
+    android:orientation="vertical">
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:gravity="center"
-        android:background="@drawable/bg_card"
-        android:padding="16dp">
+        android:paddingStart="4dp"
+        android:paddingEnd="16dp">
 
         <ImageButton
-            android:id="@+id/btnLogos"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/info"
-            android:scaleType="centerInside"
-            android:src="@drawable/gss_logo40x40" />
+            android:id="@+id/lex_btnVolver"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_lec_icono"
+            android:contentDescription="Volver sin cambiar"
+            android:src="@drawable/ic_nav_back"
+            android:tint="@color/lec_texto" />
 
-        <ImageButton
-            android:id="@+id/btnLogos2"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:contentDescription="@string/info"
-            android:background="@android:color/transparent"
-            android:scaleType="centerInside"
-            android:src="@drawable/operadomovil" />
+        <TextView
+            style="@style/lex_Titulo"
+            android:layout_marginStart="4dp"
+            android:text="Dígitos del medidor" />
     </LinearLayout>
-    <!-- HEADER -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="⚙ CONFIGURACIÓN DE DÍGITOS"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="#333"
-        android:gravity="center"
-        android:layout_marginBottom="12dp"/>
 
-    <!-- CARD -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/lec_divisor" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingTop="12dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="16dp">
+
+            <TextView
+                android:id="@+id/lex_txtDigitosHoy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_cau_elegida"
+                android:fontFeatureSettings="tnum"
+                android:paddingStart="14dp"
+                android:paddingTop="12dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="12dp"
+                android:text="Hoy: 5 dígitos"
+                android:textColor="@color/lec_texto"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                style="@style/lex_Etiqueta"
+                android:layout_marginTop="20dp"
+                android:labelFor="@id/txtdigitos"
+                android:text="Cantidad de dígitos que muestra el medidor" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/lex_btnMenos"
+                    style="@style/lex_Paso"
+                    android:layout_width="72dp"
+                    android:layout_height="64dp"
+                    android:contentDescription="Un dígito menos"
+                    android:text="−" />
+
+                <EditText
+                    android:id="@+id/txtdigitos"
+                    style="@style/lex_CampoNumero"
+                    android:layout_height="64dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:hint="Ej: 5"
+                    android:imeOptions="actionDone"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:textSize="36sp" />
+
+                <Button
+                    android:id="@+id/lex_btnMas"
+                    style="@style/lex_Paso"
+                    android:layout_width="72dp"
+                    android:layout_height="64dp"
+                    android:contentDescription="Un dígito más"
+                    android:text="+" />
+            </LinearLayout>
+
+            <TextView
+                style="@style/lex_Ayuda"
+                android:text="Entre 4 y 8 dígitos." />
+
+            <TextView
+                android:id="@+id/lex_txtError"
+                style="@style/lex_Error" />
+
+            <TextView
+                style="@style/lex_Seccion"
+                android:layout_marginTop="20dp"
+                android:text="Así se pedirá la lectura" />
+
+            <TextView
+                android:id="@+id/lex_txtCifras"
+                android:layout_width="match_parent"
+                android:layout_height="92dp"
+                android:background="@drawable/lex_panel_oscuro"
+                android:fontFamily="monospace"
+                android:fontFeatureSettings="tnum"
+                android:gravity="center"
+                android:letterSpacing="0.25"
+                android:text="—"
+                android:textColor="@color/lec_tecla_texto"
+                android:textSize="38sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtEjemplo"
+                style="@style/lex_Ayuda"
+                android:layout_marginTop="6dp"
+                android:fontFeatureSettings="tnum"
+                android:text="Escriba entre 4 y 8 para ver el ejemplo." />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_lec_aviso"
+                android:padding="12dp"
+                android:text="Si deja el campo vacío, la lectura sigue sin cambios."
+                android:textColor="@color/lec_aviso_texto"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/lec_divisor" />
+
+    <TextView
+        android:id="@+id/lex_txtSiCancela"
+        style="@style/lex_Ayuda"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        android:fontFeatureSettings="tnum"
+        android:text="Si cancela, la lectura sigue igual." />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/bg_card"
-        android:padding="16dp">
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal">
 
-        <!-- DESCRIPCIÓN -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Ingrese la cantidad de dígitos del medidor. Este valor ajusta cómo se interpreta la lectura capturada."
-            android:textSize="14sp"
-            android:textColor="#555"/>
+        <Button
+            android:id="@+id/lex_btnCancelar"
+            style="@style/lex_BotonContorno"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="Cancelar" />
 
-        <!-- INPUT -->
-        <EditText
-            android:id="@+id/txtdigitos"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_input2"
-            android:hint="Ej: 5"
-            android:gravity="center"
-            android:inputType="number"
-            android:maxLength="2"
-            android:textSize="18sp"/>
-
-        <!-- TEXTO DINÁMICO -->
-        <TextView
-            android:id="@+id/txtEjemplo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Ejemplo: Lectura 12345"
-            android:textColor="#1976D2"
-            android:textSize="14sp"
-            android:layout_marginTop="10dp"/>
-
-        <!-- NOTA -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:layout_marginTop="8dp"
-            android:text="ℹ Si no ingresa ningún valor, el sistema continuará sin cambios."
-            android:textColor="#777"
-            android:textSize="12sp" />
-
+        <Button
+            android:id="@+id/lex_btnGuardar"
+            style="@style/lex_BotonPrimario"
+            android:layout_width="0dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="2"
+            android:text="Guardar" />
     </LinearLayout>
-
-
-
-</LinearLayout>
+</LinearLayout>

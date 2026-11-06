@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Contador de rechazadas cuando hay alguna: rosado con borde rojo de 2dp. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#FFFFE1E1" />
+    <stroke android:width="2dp" android:color="@color/lec_error" />
+    <corners android:radius="12dp" />
+</shape>

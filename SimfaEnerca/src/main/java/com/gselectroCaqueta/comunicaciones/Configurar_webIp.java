@@ -125,6 +125,8 @@ public class Configurar_webIp extends AppCompatActivity implements AsyncResponse
             btnGrabarIp.setEnabled(false);
             txtdirWs.setEnabled(false);
             edtxPuertoAPI.setEnabled(false);
+            // Solo presentacion: explica por que los campos estan bloqueados.
+            findViewById(R.id.sis_aviso_admin).setVisibility(View.VISIBLE);
             /*txtIpWs1.setEnabled(false);
             txtIpWs2.setEnabled(false);
             txtIpWs3.setEnabled(false);
@@ -556,12 +558,14 @@ public class Configurar_webIp extends AppCompatActivity implements AsyncResponse
                 iconWebSoff.setVisibility(View.INVISIBLE);
                 iconWebSon.setVisibility(View.VISIBLE);
                 pruebawsok = true;
+                lblTransmite.setBackgroundResource(R.drawable.sis_bg_resultado_ok);
                 lblTransmite.setText("Conexion con Webservice OK\n" + respuestaApi);
 
             } catch (NumberFormatException e) {
                 iconWebSon.setVisibility(View.INVISIBLE);
                 iconWebSoff.setVisibility(View.VISIBLE);
                 pruebawsok = false;
+                lblTransmite.setBackgroundResource(R.drawable.sis_bg_resultado_error);
                 lblTransmite.setText("Error de conexion con Webservice\n" + respuesta + "\n" + respuestaApi);
             }
 
