@@ -14449,12 +14449,18 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
     /**
-     * Cupon de la factura (GS1-128: la cuenta va en la referencia 8020) -> cuenta; cualquier otro codigo se
-     * busca como medidor y, si no aparece, como cuenta. Usa el indice de "Buscar Cliente" (en segundo plano).
+     * Solo el codigo de barras de la factura (cupon GS1-128: la cuenta va en la referencia 8020) -> esa cuenta.
+     * Otro codigo (p. ej. el del medidor) no se busca. Usa el indice de "Buscar Cliente" (en segundo plano).
      */
     private void buscarPorCodigoBarras(String leido) {
         final String texto = leido.trim();
         final String cuentaCupon = com.gselectroCaqueta.impresion.CodigoBarras.cuentaDesdeCupon(texto);
+        if (cuentaCupon == null) {
+            escribeResumenTiempo(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";BUSQUEDA BARRAS NO ES FACTURA;"
+                    + getPhoneDate() + "-" + getPhoneHour() + ";leido=" + texto.replace(';', ' '));
+            mensajeT("Ese codigo no es el de una factura. Lea el codigo de barras del cupon de pago.", msgMedio);
+            return;
+        }
         final String dir = dirEntrada().getAbsolutePath();
         escribeResumenTiempo(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";BUSQUEDA BARRAS;"
                 + getPhoneDate() + "-" + getPhoneHour() + ";leido=" + texto.replace(';', ' ')
@@ -14473,22 +14479,12 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         }, "BusquedaBarras").start();
     }
 
-    /** {tipodebusqueda, dato}: {6, cliente} si es una cuenta, {1, primer registro} si es un medidor; null si no esta. */
+    /** {6, cliente} de la cuenta del cupon; null si no esta en la ruta. */
     static int[] ubicarCodigoBarras(com.gselectroCaqueta.tablas.IndiceBusquedaClientes ix, String cuentaCupon, String texto) {
+        if (cuentaCupon == null) return null;
         int n = ix.total();
-        if (cuentaCupon != null) {
-            for (int i = 0; i < n; i++)
-                if (sinCerosIzq(ix.getCuenta(i)).equals(cuentaCupon)) return new int[]{6, ix.getCliente(i)};
-            return null; // un cupon de otra cuenta no se busca como medidor
-        }
-        String med = sinCerosIzq(texto.replace(" ", "")).toUpperCase(java.util.Locale.ROOT);
-        if (med.isEmpty()) return null;
         for (int i = 0; i < n; i++)
-            if (sinCerosIzq(ix.getMedidor(i).replace(" ", "")).toUpperCase(java.util.Locale.ROOT).equals(med))
-                return new int[]{1, ix.getPrimerRegistro(i)};
-        if (med.matches("\\d{1,10}"))
-            for (int i = 0; i < n; i++)
-                if (sinCerosIzq(ix.getCuenta(i)).equals(med)) return new int[]{6, ix.getCliente(i)};
+            if (sinCerosIzq(ix.getCuenta(i)).equals(cuentaCupon)) return new int[]{6, ix.getCliente(i)};
         return null;
     }
 

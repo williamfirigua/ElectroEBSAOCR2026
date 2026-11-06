@@ -105,7 +105,7 @@
                 android:indeterminateTint="@android:color/white"
                 android:visibility="invisible" />
 
-            <!-- Buscar la cuenta leyendo el codigo de barras de la factura (cupon) o del medidor. -->
+            <!-- Buscar la cuenta leyendo el codigo de barras de la factura (cupon de pago). -->
             <ImageButton
                 android:id="@+id/btnBarras"
                 android:layout_width="44dp"
