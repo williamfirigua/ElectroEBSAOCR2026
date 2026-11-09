@@ -199,7 +199,12 @@ final class PosicionCalidad {
             return m;
         }
         m.put("fuente", fuenteElegida);
-        if (l.hasAccuracy()) poner(m, "precision_h", redondear(l.getAccuracy(), 2));
+        // Ultima conocida: la precision honesta es el error efectivo (precision + 1,5 m/s x antiguedad), como en EMSA.
+        if (FUENTE_ULTIMA.equals(fuenteElegida)) {
+            poner(m, "precision_h", redondear(errorEfectivo(l, ahora), 2));
+        } else if (l.hasAccuracy()) {
+            poner(m, "precision_h", redondear(l.getAccuracy(), 2));
+        }
         if (Build.VERSION.SDK_INT >= 26 && l.hasVerticalAccuracy()) {
             poner(m, "precision_v", redondear(l.getVerticalAccuracyMeters(), 2));
         }
