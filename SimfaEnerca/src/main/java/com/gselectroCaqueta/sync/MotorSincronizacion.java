@@ -387,6 +387,14 @@ public class MotorSincronizacion {
 
     // ------------------------------------------------------------------ tracking
 
+    private static int entero(String v) {
+        try {
+            return Integer.parseInt(v.trim());
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
     private boolean tracking(Resumen r, long ahoraMs) {
         while (true) {
             List<ColaEnvio.Elemento> lote = cola.pendientes(ColaEnvio.TRACKING, LOTE_TRACKING, ahoraMs);
@@ -405,12 +413,24 @@ public class MotorSincronizacion {
                 reprogramar(lote, ahoraMs, resp.toString());
                 return sinServicio(r, resp);
             }
-            // El servidor guarda todos los válidos y descarta reenvíos: el lote entero queda enviado. Si dice
-            // que no todos eran válidos se deja constancia (antes un error de formato pasaba en silencio).
-            String validos = resp.campo("validos");
-            if (validos != null && !validos.equals(String.valueOf(lote.size()))) {
-                log("tracking: el servidor descartó " + (lote.size() - Integer.parseInt(validos)) + " de " + lote.size()
-                        + " puntos por formato; ejemplo " + lote.get(0).datos);
+            // Solo se borra con la confirmación del servidor: HTTP 200 y ok:true en el cuerpo. Un 200 sin ok
+            // (proxy, página de error) no cuenta como recibido.
+            if (!"true".equalsIgnoreCase(String.valueOf(resp.campo("ok")))) {
+                reprogramar(lote, ahoraMs, "sin_confirmacion " + resp);
+                return sinServicio(r, resp);
+            }
+            // El servidor guarda todos los válidos y descarta reenvíos: el lote entero queda enviado. Lo que no
+            // guardó (formato o más viejo que su retención) lo informa en total_descartadas: se deja constancia.
+            String descartadas = resp.campo("total_descartadas");
+            if (descartadas != null && !descartadas.equals("0")) {
+                log("tracking: el servidor descartó " + descartadas + " de " + lote.size() + " puntos (vencidos "
+                        + resp.campo("vencidos") + "); ejemplo " + lote.get(0).datos);
+            } else {
+                String validos = resp.campo("validos");
+                if (validos != null && !validos.equals(String.valueOf(lote.size()))) {
+                    log("tracking: el servidor descartó " + (lote.size() - entero(validos)) + " de " + lote.size()
+                            + " puntos por formato; ejemplo " + lote.get(0).datos);
+                }
             }
             List<Long> ids = new ArrayList<>(lote.size());
             for (ColaEnvio.Elemento e : lote) ids.add(e.id);

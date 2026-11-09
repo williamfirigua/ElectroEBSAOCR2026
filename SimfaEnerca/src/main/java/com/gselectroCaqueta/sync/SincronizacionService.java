@@ -65,7 +65,8 @@ public class SincronizacionService extends Service {
     private static final long CADA_LICENCIA_MS = 6 * 3600_000L;
     /** Enviados se conservan para diagnóstico; tracking pendiente sin despachar en 3 días se descarta. */
     private static final long RETENCION_ENVIADOS_MS = 15 * DIA_MS;
-    private static final long RETENCION_TRACKING_PENDIENTE_MS = 3 * DIA_MS;
+    /** Igual a la retención del servidor (movil.tracking_retencion_dias): más viejo, el servidor ya no lo recibe. */
+    private static final long RETENCION_TRACKING_PENDIENTE_MS = 10 * DIA_MS;
 
     private static volatile SincronizacionService activo;
 

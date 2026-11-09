@@ -121,6 +121,8 @@ public class TrackingLocationService extends Service {
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
     private Handler handler;
+    /** Hilo propio para los callbacks de ubicacion y la escritura en la cola: el hilo principal no se toca. */
+    private android.os.HandlerThread hiloUbicacion;
 
     private final Utils utils = new Utils();
     private File logfile;
@@ -128,7 +130,7 @@ public class TrackingLocationService extends Service {
     // Modo REST: cola persistente; se avisa al servicio de envío cada PUNTOS_POR_AVISO puntos.
     private static final int PUNTOS_POR_AVISO = 10;
     private ConfigSync configSync;
-    private int puntosSinAviso = 0; // puede quedar null si no hay ruta disponible (logging a archivo se omite)
+    private volatile int puntosSinAviso = 0; // puede quedar null si no hay ruta disponible (logging a archivo se omite)
 
     // ==================== CICLO DE VIDA ====================
 
@@ -196,6 +198,10 @@ public class TrackingLocationService extends Service {
             fusedLocationClient.removeLocationUpdates(locationCallback);
         }
         if (handler != null) handler.removeCallbacksAndMessages(null);
+        if (hiloUbicacion != null) {
+            hiloUbicacion.quitSafely(); // termina de escribir lo que tenga en curso
+            hiloUbicacion = null;
+        }
         logEvento("[onDestroy] Rastreo GPS detenido");
     }
 
@@ -234,8 +240,12 @@ public class TrackingLocationService extends Service {
             }
         };
 
+        if (hiloUbicacion == null) {
+            hiloUbicacion = new android.os.HandlerThread("rastreo-gps", android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            hiloUbicacion.start();
+        }
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback,
-                Looper.getMainLooper());
+                hiloUbicacion.getLooper());
 
         isTracking = true;
         actualizarNotificacion("GPS activo");
