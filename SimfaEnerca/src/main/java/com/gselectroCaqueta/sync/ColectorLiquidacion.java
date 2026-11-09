@@ -33,13 +33,18 @@ public final class ColectorLiquidacion {
 
     /** Llamar justo después de escribir la línea en ENVIOSGPRS.SDA (el objeto se reutiliza después). */
     public void agregar(EnvioGPS e) {
+        agregar(e, null);
+    }
+
+    /** Igual, con la calidad de la posicion de la lectura (objeto gps del JSON). */
+    public void agregar(EnvioGPS e, Map<String, Object> calidadGps) {
         if (texto(e.getEnvioGPS_IDCONTADOR()).isEmpty()) return;
         if (lecturas.isEmpty()) {
             primerConcepto = entero(e.getEnvioGPS_PRIMERCONCEPTO());
             nroConceptos = entero(e.getEnvioGPS_NROCONCEPTOS());
             cuenta = sinCeros(ItemLiquidacion.codCuenta(e.getEnvioGPS_CUENTA(), e.getEnvioGPS_DIGITOCHEQUEO())); // como CO_COBRO: cuenta + dígito
         }
-        lecturas.add(ItemLiquidacion.lectura(e));
+        lecturas.add(ItemLiquidacion.lectura(e, calidadGps));
     }
 
     public boolean vacio() {

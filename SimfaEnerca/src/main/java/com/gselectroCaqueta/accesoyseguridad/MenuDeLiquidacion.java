@@ -1205,6 +1205,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         // 1 s / 0 m como siempre: la distancia al predio y la validacion de rango dependen de recibir la
         // posicion aunque el lector este quieto. Se libera en onDestroy (antes nunca se liberaba).
         locationmanager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, gpsListener);
+        iniciarEstadoGnss(locationmanager);
         iniciarUbicacionFusionada();
 
         if (!locationmanager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -1342,8 +1343,64 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     private LocationCallback callbackUbicacion;
     /** Posicion mas vieja que esto no se usa ni se envia: es la de otra cuenta. */
     private static final long EDAD_MAXIMA_POSICION_MS = 2L * 60L * 1000L;
-    /** elapsedRealtime de la ultima posicion recibida (GPS o fusionada); 0 = ninguna en esta sesion. */
+    /** elapsedRealtime del fix que esta en pantalla (GPS o fusionada); 0 = ninguno en esta sesion. */
     private long ultimaPosicionRecibidaMs = 0L;
+    /** Arbitraje GPS / red, ultima conocida y calidad de la posicion (proyecto GPS, fases 0 y 1). */
+    private final PosicionCalidad posicionCalidad = new PosicionCalidad();
+    /** Calidad de la posicion de la lectura que se esta guardando: viaja en el objeto gps de la liquidacion. */
+    private java.util.Map<String, Object> calidadGpsLectura;
+    private android.location.GnssStatus.Callback callbackGnss;
+
+    /** Un fix nuevo (GPS o fusionado): se arbitra y se muestra el elegido. Nunca tumba la pantalla. */
+    private void recibirPosicion(Location loc) {
+        try {
+            posicionCalidad.alimentar(loc);
+            Location elegida = posicionCalidad.elegir();
+            if (elegida != null) muestraPosicionActual(elegida);
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]recibirPosicion -> " + e);
+        }
+    }
+
+    /** Satelites usados en el fix (no los visibles): dato de calidad para gps_satelites_usados. */
+    private void iniciarEstadoGnss(LocationManager lm) {
+        if (lm == null || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        try {
+            callbackGnss = new android.location.GnssStatus.Callback() {
+                @Override
+                public void onSatelliteStatusChanged(android.location.GnssStatus status) {
+                    int usados = 0;
+                    for (int i = 0; i < status.getSatelliteCount(); i++) {
+                        if (status.usedInFix(i)) usados++;
+                    }
+                    posicionCalidad.satelitesUsados(usados);
+                }
+            };
+            lm.registerGnssStatusCallback(callbackGnss, new Handler(android.os.Looper.getMainLooper()));
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]iniciarEstadoGnss -> " + e.getMessage());
+            callbackGnss = null;
+        }
+    }
+
+    /** Coordenada como texto del plano (maximo 16 caracteres, igual que coorTemp*). */
+    private static String coordenadaTexto(double v) {
+        String t = String.valueOf(v);
+        return t.length() > 16 ? t.substring(0, 16) : t;
+    }
+
+    /** Coordenada leida de texto sin excepciones: un texto invalido equivale a "sin coordenada" (0). */
+    private static double coordenadaSegura(String x) {
+        if (x == null) return 0;
+        try {
+            double v = Double.parseDouble(x.trim().replace(",", "."));
+            return Double.isNaN(v) || Double.isInfinite(v) ? 0 : v;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
 
     private void iniciarUbicacionFusionada() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -1361,12 +1418,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     if (resultado == null) return;
                     Location loc = resultado.getLastLocation();
                     if (loc == null) return;
-                    try {
-                        muestraPosicionActual(loc);
-                    } catch (Exception e) {
-                        // Una posicion que no se pueda procesar no debe tumbar la liquidacion.
-                        utils.Log(logfile, "[MenuDeLiquidacion]ubicacion fusionada -> " + e);
-                    }
+                    recibirPosicion(loc); // arbitraje GPS / red; nunca tumba la liquidacion
                 }
             };
             ubicacionFusionada.requestLocationUpdates(solicitud, callbackUbicacion, android.os.Looper.getMainLooper());
@@ -1397,6 +1449,14 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 utils.Log(logfile, "[MenuDeLiquidacion]onDestroy() ubicacion -> " + e.getMessage());
             }
             callbackUbicacion = null;
+        }
+        if (gpsManager != null && callbackGnss != null) {
+            try {
+                gpsManager.unregisterGnssStatusCallback(callbackGnss);
+            } catch (Exception e) {
+                utils.Log(logfile, "[MenuDeLiquidacion]onDestroy() gnss -> " + e.getMessage());
+            }
+            callbackGnss = null;
         }
         if (gpsManager != null && gpsListener != null) {
             try {
@@ -13082,17 +13142,31 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 if (VariablesGlobales.coorTempLatitud.length() > 16) {
                     VariablesGlobales.coorTempLatitud = VariablesGlobales.coorTempLatitud.substring(0, 16);
                 }
+                Location posicionGuardar = null;
                 if (!coordenadaLatitud.equals("") && !coordenadaLongitud.equals("")) {
+                    // Reproceso con la coordenada guardada antes (CUENTASGPS): no es una medida frente al predio.
                     misenvios.setEnvioGPS_Latitud(coordenadaLatitud.replace(",", "."));// txtX.Text;
                     misenvios.setEnvioGPS_Longitud(coordenadaLongitud.replace(",", "."));// txtY.Text;
+                    calidadGpsLectura = PosicionCalidad.soloFuente(PosicionCalidad.FUENTE_REGISTRO_PREVIO);
                 } else if (posicionVigente()) {
                     misenvios.setEnvioGPS_Latitud(VariablesGlobales.coorTempLatitud.replace(",", "."));// txtX.Text;
                     misenvios.setEnvioGPS_Longitud(VariablesGlobales.coorTempLongitud.replace(",", "."));// txtY.Text;
+                    calidadGpsLectura = indicadorManual != 0
+                            ? PosicionCalidad.soloFuente(PosicionCalidad.FUENTE_CIERRE_RUTA) : posicionCalidad.calidad();
+                } else if ((posicionGuardar = posicionCalidad.elegir()) != null) {
+                    // Cadena de respaldo: sin posicion de los ultimos 2 minutos, la mejor conocida de hasta 10 minutos
+                    // (menor error efectivo = precision + 1,5 m/s x antiguedad). Ninguna cuenta queda sin coordenada
+                    // si el equipo tuvo posicion hace poco.
+                    misenvios.setEnvioGPS_Latitud(coordenadaTexto(posicionGuardar.getLongitude())); // mismo cruce que coorTemp*
+                    misenvios.setEnvioGPS_Longitud(coordenadaTexto(posicionGuardar.getLatitude()));
+                    calidadGpsLectura = indicadorManual != 0
+                            ? PosicionCalidad.soloFuente(PosicionCalidad.FUENTE_CIERRE_RUTA) : posicionCalidad.calidad();
                 } else {
-                    // Sin posicion de los ultimos 2 minutos: antes se mandaba la ultima conocida (varias cuentas quedaban
-                    // con el mismo punto). Ahora va sin coordenadas, igual que cuando no hay GPS.
+                    // Sin ninguna posicion de los ultimos 10 minutos: va sin coordenadas.
                     misenvios.setEnvioGPS_Latitud("0.0");
                     misenvios.setEnvioGPS_Longitud("0.0");
+                    calidadGpsLectura = PosicionCalidad.soloFuente(indicadorManual != 0
+                            ? PosicionCalidad.FUENTE_CIERRE_RUTA : PosicionCalidad.FUENTE_SIN_POSICION);
                 }
                 coordenadaLongitud = "";
                 coordenadaLatitud = "";
@@ -13264,7 +13338,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                         misenvios.escribir_EnvioGPS(misenvios.total_EnvioGPS + 1);
                         misenvios.total_EnvioGPS++;
-                        colectorLiquidacion.agregar(misenvios); // copia ya: misenvios se reutiliza
+                        colectorLiquidacion.agregar(misenvios, calidadGpsLectura); // copia ya: misenvios se reutiliza
 
                         misenvios.Cerrar_EnvioGPS();
                         //crea la copia de seguridad del archivo de lecturas
@@ -16095,13 +16169,19 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             estadoUbicacion = UBI_SIN_GPS;
             return;
         }
+        float precisionActual = posicionCalidad.precisionElegida();
+        if (!Float.isNaN(precisionActual) && precisionActual > PosicionCalidad.RED_PRECISION_MAX) {
+            // Posicion con mas de 100 m de error: no se evalua la distancia (nunca se bloquea por una estimacion dudosa).
+            estadoUbicacion = UBI_SIN_GPS;
+            return;
+        }
 
         // Coordenadas del predio
         // cordenadax = Longitud, cordenaday = Latitud
         String cxStr = infoClienteEntrada.gettablaEntradaClientes_cordenadax().trim();
         String cyStr = infoClienteEntrada.gettablaEntradaClientes_cordenaday().trim();
-        double lonPredio = parseStringToDouble(cxStr.isEmpty() ? "0" : cxStr);
-        double latPredio = parseStringToDouble(cyStr.isEmpty() ? "0" : cyStr);
+        double lonPredio = coordenadaSegura(cxStr);
+        double latPredio = coordenadaSegura(cyStr);
 
         if (latPredio == 0 && lonPredio == 0) {
             estadoUbicacion = UBI_SIN_COORDENADAS;
@@ -16112,8 +16192,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         // coorTempLatitud tiene Longitud real, coorTempLongitud tiene Latitud real (invertido en muestraPosicionActual)
         String latStr = VariablesGlobales.coorTempLongitud.trim(); // ← esta es la Latitud real
         String lonStr = VariablesGlobales.coorTempLatitud.trim();  // ← esta es la Longitud real
-        double latActual = parseStringToDouble(latStr.isEmpty() ? "0" : latStr);
-        double lonActual = parseStringToDouble(lonStr.isEmpty() ? "0" : lonStr);
+        double latActual = coordenadaSegura(latStr);
+        double lonActual = coordenadaSegura(lonStr);
         Log.e("errorDistPredio", latPredio + " data long =" + lonPredio + " Coord x2 =" +
                 latActual+" Coordy2 = "+lonActual);
 
@@ -16202,6 +16282,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 .show();
     }
 
+    /** Vuelve a validar la distancia con la posicion actual, sin tocar los intentos. Devuelve el estado nuevo. */
+    private int revalidarUbicacion() {
+        estadoUbicacion = UBI_NO_VALIDADO;
+        validarUbicacionContraPredioActual();
+        return estadoUbicacion;
+    }
+
     private boolean puedeContinuarConTomaLectura() {
         if (!entornoPermiteLiquidar()) {
             return false;
@@ -16210,6 +16297,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 || estadoUbicacion == UBI_SIN_COORDENADAS
                 || estadoUbicacion == UBI_SIN_GPS) {
             return true;
+        } else if (estadoUbicacion == UBI_FUERA_RANGO
+                && revalidarUbicacion() != UBI_FUERA_RANGO) {
+            return true; // con la posicion de ahora ya esta en rango (o no se puede evaluar)
         } else if (estadoUbicacion == UBI_FUERA_RANGO) {
             intentosLecturaFueraRango++;
             if (intentosLecturaFueraRango >= MAX_INTENTOS_FUERA_RANGO) {
@@ -17898,8 +17988,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         String cy = infoClienteEntrada.gettablaEntradaClientes_cordenaday();
         cx = cx == null ? "" : cx.trim(); // null si aun no se ha leido ninguna cuenta
         cy = cy == null ? "" : cy.trim();
-        boolean predioSinCoordenadas = cx.isEmpty() || parseStringToDouble(cx) == 0 || cy.isEmpty() || parseStringToDouble(cy) == 0;
-        double latActual = parseStringToDouble(VariablesGlobales.coorTempLongitud.trim().isEmpty() ? "0" : VariablesGlobales.coorTempLongitud.trim());
+        boolean predioSinCoordenadas = coordenadaSegura(cx) == 0 || coordenadaSegura(cy) == 0;
+        double latActual = coordenadaSegura(VariablesGlobales.coorTempLongitud);
         if (predioSinCoordenadas) {
             txtDistancia.setText("Predio sin coord.");
             txtDistancia.setTextColor(getResources().getColor(R.color.lec_texto2, getTheme()));
@@ -17910,8 +18000,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             txtDistancia.setTextColor(getResources().getColor(R.color.lec_texto2, getTheme()));
             return;
         }
-        int distancia = (int) variables.evaluarDistanciaAlPredio(parseStringToDouble(VariablesGlobales.coorTempLongitud),
-                parseStringToDouble(VariablesGlobales.coorTempLatitud), parseStringToDouble(cy), parseStringToDouble(cx));
+        int distancia = (int) variables.evaluarDistanciaAlPredio(coordenadaSegura(VariablesGlobales.coorTempLongitud),
+                coordenadaSegura(VariablesGlobales.coorTempLatitud), coordenadaSegura(cy), coordenadaSegura(cx));
         txtDistancia.setText(distancia + " m del predio");
         txtDistancia.setTextColor(getResources().getColor(distancia <= radioPermitidoMetros() ? R.color.lec_exito : R.color.lec_error, getTheme()));
     }
@@ -17925,7 +18015,9 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             txtLatitud.setText("0.0");//antes era "Desconocida"
             velocidadGPS = "0";
         } else {// Si se encuentra, se mostrar� la latitud y longitud
-            ultimaPosicionRecibidaMs = android.os.SystemClock.elapsedRealtime();
+            // Hora del fix, no de llegada: el arbitraje puede volver a mostrar un fix de hace unos segundos.
+            long horaFix = loc.getElapsedRealtimeNanos() / 1_000_000L;
+            ultimaPosicionRecibidaMs = horaFix > 0 ? horaFix : android.os.SystemClock.elapsedRealtime();
             ultimaPosicionEvento = new Location(loc);
 //            Log.e("error", "toma posicion " + String.valueOf(loc.getLatitude()));
             txtLongitud.setText(String.valueOf(loc.getLatitude()));//Ax: antes txtLatitud
@@ -17965,7 +18057,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             }
             // Distancia al predio de la cuenta en pantalla. Si la cuenta se valido sin GPS (aun no habia
             // posicion), se vuelve a validar ahora que la hay: asi el aviso de "fuera de rango" funciona.
-            if (estadoUbicacion == UBI_SIN_GPS && (int) loc.getLatitude() != 0) {
+            // Fuera de rango tambien se revalida: si el tecnico se acerco al predio, deja de estarlo.
+            if ((estadoUbicacion == UBI_SIN_GPS || estadoUbicacion == UBI_FUERA_RANGO) && (int) loc.getLatitude() != 0) {
                 estadoUbicacion = UBI_NO_VALIDADO;
                 validarUbicacionContraPredioActual();
             }
@@ -19385,7 +19478,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     private class UsarGPS implements LocationListener {
         @Override
         public void onLocationChanged(Location loc) {
-            muestraPosicionActual(loc);
+            if (loc != null) ultimaPosicionGps = new Location(loc); // ControlEntornoTerminal compara el reloj con este
+            recibirPosicion(loc);
         }
 
         @Override

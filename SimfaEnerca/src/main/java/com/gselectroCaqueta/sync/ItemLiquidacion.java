@@ -56,6 +56,14 @@ public final class ItemLiquidacion {
      * el mismo objeto se reutiliza para el siguiente registrador de la cuenta.
      */
     public static Map<String, Object> lectura(EnvioGPS e) {
+        return lectura(e, null);
+    }
+
+    /**
+     * Igual, y agrega al objeto gps la calidad de la posicion (precision_h, fuente, promedio...: columnas gps_*
+     * del servidor). Se omiten las claves sin valor; nunca reemplaza las del plano.
+     */
+    public static Map<String, Object> lectura(EnvioGPS e, Map<String, Object> calidadGps) {
         Map<String, Object> l = new LinkedHashMap<>();
         l.put("ciclo", t(e.getEnvioGPS_CICLO()));
         l.put("municipio", t(e.getEnvioGPS_MUNUNICIPIO()));
@@ -116,6 +124,11 @@ public final class ItemLiquidacion {
         gps.put("distancia", t(e.getEnvioGPS_DISTANCIA()));
         gps.put("altitud", t(e.getEnvioGPS_ALTITUDSATELITE()));
         gps.put("fecha", t(e.getEnvioGPS_FECHAHORASATELITE()));
+        if (calidadGps != null) {
+            for (Map.Entry<String, Object> c : calidadGps.entrySet()) {
+                if (c.getValue() != null && !gps.containsKey(c.getKey())) gps.put(c.getKey(), c.getValue());
+            }
+        }
         l.put("gps", gps);
         return l;
     }
