@@ -1207,6 +1207,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         locationmanager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, gpsListener);
         iniciarEstadoGnss(locationmanager);
         iniciarUbicacionFusionada();
+        iniciarPdr();
 
         if (!locationmanager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             mensajeT("GPS No esta activo", msgLargo);
@@ -1351,12 +1352,48 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     private java.util.Map<String, Object> calidadGpsLectura;
     private android.location.GnssStatus.Callback callbackGnss;
 
+    /** Navegacion por pasos (fase 2): una instancia por proceso, conserva el ancla al salir y volver. */
+    private PdrMotor pdrMotor;
+    private Location ultimaMostrada;
+    /** Sin GPS ni red no llegan callbacks: cada 2 s se vuelve a arbitrar (la estimacion por pasos avanza). */
+    private final Runnable refrescoPosicion = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                Location e = posicionCalidad.elegir();
+                if (e != null && e != ultimaMostrada && PosicionCalidad.esPdr(e)) {
+                    ultimaMostrada = e;
+                    muestraPosicionActual(e);
+                }
+            } catch (Exception ex) {
+                utils.Log(logfile, "[MenuDeLiquidacion]refrescoPosicion -> " + ex);
+            }
+            handlerPosicion.postDelayed(this, 2000L);
+        }
+    };
+    private final Handler handlerPosicion = new Handler(android.os.Looper.getMainLooper());
+
+    private void iniciarPdr() {
+        try {
+            pdrMotor = PdrMotor.de(this);
+            pdrMotor.iniciar();
+            posicionCalidad.usarPdr(pdrMotor);
+            handlerPosicion.removeCallbacks(refrescoPosicion);
+            handlerPosicion.postDelayed(refrescoPosicion, 2000L);
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]iniciarPdr -> " + e.getMessage());
+        }
+    }
+
     /** Un fix nuevo (GPS o fusionado): se arbitra y se muestra el elegido. Nunca tumba la pantalla. */
     private void recibirPosicion(Location loc) {
         try {
             posicionCalidad.alimentar(loc);
             Location elegida = posicionCalidad.elegir();
-            if (elegida != null) muestraPosicionActual(elegida);
+            if (elegida != null) {
+                ultimaMostrada = elegida;
+                muestraPosicionActual(elegida);
+            }
         } catch (Exception e) {
             utils.Log(logfile, "[MenuDeLiquidacion]recibirPosicion -> " + e);
         }
@@ -1450,6 +1487,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             }
             callbackUbicacion = null;
         }
+        handlerPosicion.removeCallbacks(refrescoPosicion);
+        if (pdrMotor != null) pdrMotor.detener(); // el ancla queda: al volver se retoma con el hueco sumado al error
         if (gpsManager != null && callbackGnss != null) {
             try {
                 gpsManager.unregisterGnssStatusCallback(callbackGnss);
@@ -16229,8 +16268,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         if (indicadorManual != 0) {
             return true;
         }
-        ControlEntornoTerminal.Bloqueo bloqueo =
-                ControlEntornoTerminal.evaluar(this, ultimaPosicionGps, VariablesGlobales.fechaproceso);
+        ControlEntornoTerminal.Bloqueo bloqueo = ControlEntornoTerminal.evaluar(this, ultimaPosicionGps,
+                VariablesGlobales.fechaproceso, pdrMotor != null && pdrMotor.vigente());
         if (bloqueo == null) {
             return true;
         }

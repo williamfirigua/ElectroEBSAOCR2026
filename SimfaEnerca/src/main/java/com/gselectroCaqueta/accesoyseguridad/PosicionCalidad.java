@@ -30,6 +30,7 @@ final class PosicionCalidad {
 
     static final String FUENTE_GPS = "GPS";
     static final String FUENTE_RED = "RED";
+    static final String FUENTE_PDR = "PDR";
     static final String FUENTE_ULTIMA = "ULTIMA_CONOCIDA";
     static final String FUENTE_SIN_POSICION = "SIN_POSICION";
     static final String FUENTE_CIERRE_RUTA = "CIERRE_RUTA";
@@ -63,6 +64,12 @@ final class PosicionCalidad {
     private final ArrayDeque<Location> fixesGps = new ArrayDeque<>();
     /** Satelites usados en el ultimo fix (GnssStatus); -1 = desconocido. */
     private volatile int satelitesUsados = -1;
+    /** Navegacion por pasos (fase 2); null si el equipo no tiene los sensores o no se activo. */
+    private PdrMotor pdr;
+
+    void usarPdr(PdrMotor motor) {
+        pdr = motor;
+    }
 
     static long ahora() {
         return SystemClock.elapsedRealtime();
@@ -83,6 +90,15 @@ final class PosicionCalidad {
         return l != null && LocationManager.GPS_PROVIDER.equals(l.getProvider());
     }
 
+    static boolean esPdr(Location l) {
+        return l != null && "pdr".equals(l.getProvider());
+    }
+
+    /** 0 GPS, 1 red, 2 pasos: para la histeresis entre fuentes. */
+    private static int tipo(Location l) {
+        return esGps(l) ? 0 : esPdr(l) ? 2 : 1;
+    }
+
     static boolean valida(Location l) {
         if (l == null) return false;
         double la = l.getLatitude(), lo = l.getLongitude();
@@ -100,6 +116,7 @@ final class PosicionCalidad {
         if (!valida(l)) return;
         Location copia = new Location(l);
         if (esGps(copia)) {
+            if (pdr != null) pdr.anclar(copia);
             ultimoGps = copia;
             fixesGps.addLast(copia);
             podar(ahora());
@@ -128,23 +145,30 @@ final class PosicionCalidad {
             float acc = red.hasAccuracy() ? red.getAccuracy() : PRECISION_DESCONOCIDA;
             if (acc > RED_PRECISION_MAX) red = null; // con GPS hablando, una red gruesa no compite
         }
-        Location mejor;
-        if (gps == null) {
-            mejor = red;
-        } else if (red == null) {
-            mejor = gps;
-        } else {
-            double eg = errorEfectivo(gps, ahora), er = errorEfectivo(red, ahora);
-            boolean actualEsRed = elegida != null && !esGps(elegida);
-            if (actualEsRed) {
-                mejor = eg < HISTERESIS * er ? gps : red;
-            } else {
-                mejor = er < HISTERESIS * eg ? red : gps;
+        // Pasos: solo cuando el GPS lleva mas de 30 s callado.
+        Location pasos = gpsCallado && pdr != null ? pdr.estimacion() : null;
+
+        Location[] candidatas = {gps, red, pasos};
+        Location mejor = null;
+        double errMejor = Double.MAX_VALUE;
+        for (Location l : candidatas) {
+            if (l == null) continue;
+            double e = errorEfectivo(l, ahora);
+            if (e < errMejor) {
+                errMejor = e;
+                mejor = l;
             }
+        }
+        // Histeresis: si la fuente que estaba en pantalla sigue disponible, solo se cambia si la nueva es 20 % mejor.
+        if (mejor != null && elegida != null && tipo(mejor) != tipo(elegida)) {
+            Location misma = candidatas[tipo(elegida)];
+            if (misma != null && errMejor >= HISTERESIS * errorEfectivo(misma, ahora)) mejor = misma;
         }
         elegida = mejor;
         if (mejor == null) {
             fuenteElegida = null;
+        } else if (esPdr(mejor)) {
+            fuenteElegida = FUENTE_PDR;
         } else if (edadMs(mejor, ahora) > FRESCA_MS) {
             fuenteElegida = FUENTE_ULTIMA;
         } else {

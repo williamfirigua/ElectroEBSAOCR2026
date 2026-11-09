@@ -61,12 +61,20 @@ public final class ControlEntornoTerminal {
      * @return null si se puede tomar la lectura; si no, el motivo.
      */
     public static Bloqueo evaluar(Context context, Location ultimaPosicionGps, String fechaProceso) {
+        return evaluar(context, ultimaPosicionGps, fechaProceso, false);
+    }
+
+    /**
+     * @param ubicacionPorPasos true si hay una estimacion por pasos vigente (PDR): con la ubicacion apagada la
+     *                          lectura se guarda con esa estimacion en vez de bloquearse.
+     */
+    public static Bloqueo evaluar(Context context, Location ultimaPosicionGps, String fechaProceso, boolean ubicacionPorPasos) {
         if (modoAvionActivo(context)) {
             return new Bloqueo("MODO_AVION", "Modo avión activo",
                     "Desactive el modo avión para seguir con la toma de lecturas.",
                     Settings.ACTION_AIRPLANE_MODE_SETTINGS);
         }
-        if (!ubicacionActiva(context)) {
+        if (!ubicacionActiva(context) && !ubicacionPorPasos) {
             return new Bloqueo("SIN_UBICACION", "Ubicación desactivada",
                     "Active la ubicación (GPS) del equipo para seguir con la toma de lecturas.",
                     Settings.ACTION_LOCATION_SOURCE_SETTINGS);
