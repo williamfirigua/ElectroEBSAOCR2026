@@ -65,6 +65,7 @@ public class TablaClienteSalida {
     String buscar_TablaClienteSalida;
     String texto;
     RandomAccessFile rFile;
+    private boolean sucio; // escrito desde que se abrio: se sincroniza a disco al cerrar
     Utils utils = new Utils();
 
     // ------------------------------------------------------------------ getters / setters (sin cambios de nombre)
@@ -141,6 +142,12 @@ public class TablaClienteSalida {
             rFile = new RandomAccessFile(nombreArchivo, "rw");
             archivo_TablaClienteSalida = nombreArchivo;
             total_TablaClienteSalida = (int) (rFile.length() / LONGITUD_REGISTRO);
+            if (UtilPlanos.errorFormato(rFile, nombreArchivo, LONGITUD_REGISTRO) != null) {
+                // Otra longitud de registro: no se lee ni se escribe nada (ver UtilPlanos.errorFormato).
+                cerrarSilencioso();
+                total_TablaClienteSalida = 0;
+                return false;
+            }
             return true;
         } catch (FileNotFoundException e) {
             Log.e(TAG, "al abrir " + nombreArchivo + ": " + e.getMessage());
@@ -157,6 +164,8 @@ public class TablaClienteSalida {
 
     private void cerrarSilencioso() {
         if (rFile == null) return;
+        if (sucio) UtilPlanos.sincronizar(TAG, rFile); // solo si se escribio desde que se abrio
+        sucio = false;
         try {
             rFile.close();
         } catch (IOException e) {
@@ -297,6 +306,7 @@ public class TablaClienteSalida {
     }
 
     private boolean escribirEnPosicion(int posicion) {
+        if (UtilPlanos.rechazarPorBloqueo(TAG, "CLIENTE.SDA", tablaClienteSalida_CUENTA, posicion)) return false;
         rellenar_TablaClienteSalida();
         String linea = tablaClienteSalida_ANIO + sep + tablaClienteSalida_MES + sep + tablaClienteSalida_CUENTA + sep + tablaClienteSalida_ACTIVIDAD + sep + tablaClienteSalida_INDFACTURACION + sep
                 + tablaClienteSalida_NROIMPRESIONES + sep + tablaClienteSalida_IMPRESORA + sep + tablaClienteSalida_LECTOR + sep + tablaClienteSalida_TERMINAL + sep
@@ -312,6 +322,7 @@ public class TablaClienteSalida {
         try {
             rFile.seek((long) (posicion - 1) * LONGITUD_REGISTRO);
             rFile.write(linea.getBytes(LATIN1));
+            sucio = true;
             return true;
         } catch (IOException e) {
             Log.e(TAG, "escritura fallida en posicion " + posicion + ": " + e.getMessage());

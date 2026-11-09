@@ -1058,6 +1058,12 @@ public class TablaMedidorEntrada { //Ax ya es: E_CONTAD
         try {
             int fileSize = (int) rFile.length();
             total_TablaMedidorEntrada = fileSize / LONGITUD_REGISTRO;
+            if (UtilPlanos.errorFormato(rFile, archivo_TablaMedidorEntrada, LONGITUD_REGISTRO) != null) {
+                // Otra longitud de registro (MEDIDOR.TXT): se cierra y no se lee nada (ver UtilPlanos.errorFormato).
+                Cerrar_TablaMedidorEntrada();
+                total_TablaMedidorEntrada = 0;
+                return false;
+            }
             return true;
         } catch (Exception ex) {
             ex.printStackTrace();

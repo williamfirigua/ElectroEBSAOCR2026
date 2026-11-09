@@ -120,6 +120,7 @@ public class EnvioGPS {
     String buscar_EnvioGPS;
     String texto;
     RandomAccessFile rFile;
+    private boolean sucio; // escrito desde que se abrio: se sincroniza a disco al cerrar
     Utils utils = new Utils();
 
     // Indice para BuscarSecuencial_EnvioGPS (se reconstruye si el archivo crecio).
@@ -716,6 +717,8 @@ public class EnvioGPS {
 
     private void cerrarSilencioso() {
         if (rFile == null) return;
+        if (sucio) UtilPlanos.sincronizar(TAG, rFile); // solo si se escribio desde que se abrio
+        sucio = false;
         try {
             rFile.close();
         } catch (IOException e) {
@@ -813,6 +816,7 @@ public class EnvioGPS {
         }
         rFile.seek((long) (posicion - 1) * LONGITUD_REGISTRO);
         rFile.write(linea.getBytes(LATIN1));
+        sucio = true;
         total_EnvioGPS = Math.max(total_EnvioGPS, posicion);
         return true;
     }

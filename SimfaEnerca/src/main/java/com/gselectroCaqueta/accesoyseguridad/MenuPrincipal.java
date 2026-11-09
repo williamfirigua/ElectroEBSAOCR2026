@@ -255,7 +255,10 @@ public class MenuPrincipal extends AppCompatActivity {
                     + (s.getClientesPendientes() == 0 ? " · ruta terminada" : ""));
         } else {
             panelAvance.setVisibility(View.GONE);
-            if (!r.ciclo.isEmpty() && r.error != null) txtRuta.setText("No se pudo leer la ruta");
+            if (!r.ciclo.isEmpty() && r.error != null) {
+                // El de formato (registro de otra longitud) se muestra tal cual: dice que hay que volver a cargar la ruta.
+                txtRuta.setText(r.error.contains("formato distinto") ? r.error : "No se pudo leer la ruta");
+            }
         }
         pintarEnvios(r.envios);
     }

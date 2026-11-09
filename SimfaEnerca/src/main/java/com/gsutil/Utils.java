@@ -299,44 +299,19 @@ public class Utils {
     }
 
     //Ax copia un archivo a otro sobreescribiendolo si ya existe
+    // Ya no trunca el destino en su sitio: copia a <destino>.tmp, sincroniza y renombra (ver copiarSeguro).
     public boolean CrearCopia(String inputFullFile, String outputFullFile) {
 
         File inn = new File(inputFullFile);
         if (!inn.exists() || inn.length() < 4) {
             return false;
         }
-
-        InputStream in = null;
-        OutputStream out = null;
-        try {
-
-            File dir = new File(outputFullFile);
-            if (!dir.exists()) dir.createNewFile();
-
-            in = new FileInputStream(inputFullFile);
-            out = new FileOutputStream(outputFullFile);
-
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = in.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
-            }
-            in.close();
-            in = null;
-
-            out.flush();// write the output file
-            out.close();
-            out = null;
-
-        } catch (FileNotFoundException fe) {
-            return false;
-        } catch (Exception ex) {
-            return false;
-        }
-        return true;
+        return copiarSeguro(inn, new File(outputFullFile));
     }
 
     //Ax copia un archivo a otro SIN sobreescribir si ya existe
+    // Agrega al final del destino (no lo trunca) y sincroniza a disco antes de responder true:
+    // quien llama puede borrar el origen solo si esto devuelve true.
     public boolean CrearCopiaSin(String inputFullFile, String outputFullFile) {
 
         File inn = new File(inputFullFile);
@@ -345,33 +320,73 @@ public class Utils {
         }
 
         InputStream in = null;
-        OutputStream out = null;
+        FileOutputStream out = null;
         try {
-
-            File dir = new File(outputFullFile);
-            if (!dir.exists()) dir.createNewFile();
-
-            in = new FileInputStream(inputFullFile);
+            in = new FileInputStream(inn);
             out = new FileOutputStream(outputFullFile, true);
 
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[8192];
             int read;
             while ((read = in.read(buffer)) != -1) {
                 out.write(buffer, 0, read);
             }
-            in.close();
-            in = null;
+            out.flush();
+            out.getFD().sync(); // durable antes de que quien llama borre el origen
+            return true;
+        } catch (Exception ex) {
+            Log.e("Utils", "CrearCopiaSin " + inputFullFile + " -> " + outputFullFile + ": " + ex.getMessage());
+            return false;
+        } finally {
+            cerrar(in);
+            cerrar(out);
+        }
+    }
 
-            out.flush();// write the output file
+    /**
+     * Copia segura de {@code origen} sobre {@code destino}: escribe en {@code <destino>.tmp}, hace flush + fsync y
+     * solo entonces renombra sobre el destino. Si algo falla el destino queda como estaba y el .tmp se conserva
+     * para revision. NO borra el origen: quien llama lo borra solo si esto devuelve true.
+     */
+    public static boolean copiarSeguro(File origen, File destino) {
+        File tmp = new File(destino.getAbsolutePath() + ".tmp");
+        InputStream in = null;
+        FileOutputStream out = null;
+        try {
+            in = new FileInputStream(origen);
+            out = new FileOutputStream(tmp);
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            out.flush();
+            out.getFD().sync();
             out.close();
             out = null;
-
-        } catch (FileNotFoundException fe) {
-            return false;
+            if (!tmp.renameTo(destino)) {
+                // Donde renameTo no reemplaza un archivo existente: se borra el destino y se reintenta.
+                // Si aun asi falla, el .tmp queda con la copia completa.
+                if (!destino.delete() || !tmp.renameTo(destino)) {
+                    Log.e("Utils", "copiarSeguro: no se pudo renombrar " + tmp + " -> " + destino);
+                    return false;
+                }
+            }
+            return true;
         } catch (Exception ex) {
+            Log.e("Utils", "copiarSeguro " + origen + " -> " + destino + ": " + ex.getMessage());
             return false;
+        } finally {
+            cerrar(in);
+            cerrar(out);
         }
-        return true;
+    }
+
+    private static void cerrar(java.io.Closeable c) {
+        if (c == null) return;
+        try {
+            c.close();
+        } catch (IOException ignored) {
+        }
     }
 
 

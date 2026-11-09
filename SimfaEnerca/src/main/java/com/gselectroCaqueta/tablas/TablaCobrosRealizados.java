@@ -46,6 +46,7 @@ public class TablaCobrosRealizados { //Ax ya es: S_COBRO
     String buscar_TablaCobrosRealizados;
     String texto;
     RandomAccessFile rFile;
+    private boolean sucio; // escrito desde que se abrio: se sincroniza a disco al cerrar
     private String archivo_TablaCobrosRealizados;
 
     // ------------------------------------------------------------------ getters / setters (sin cambios de nombre)
@@ -92,6 +93,12 @@ public class TablaCobrosRealizados { //Ax ya es: S_COBRO
             rFile = new RandomAccessFile(nombreArchivo, "rw");
             archivo_TablaCobrosRealizados = nombreArchivo;
             total_TablaCobrosRealizados = (int) (rFile.length() / LONGITUD_REGISTRO);
+            if (UtilPlanos.errorFormato(rFile, nombreArchivo, LONGITUD_REGISTRO) != null) {
+                // Otra longitud de registro: no se lee ni se escribe nada (ver UtilPlanos.errorFormato).
+                cerrarSilencioso();
+                total_TablaCobrosRealizados = 0;
+                return false;
+            }
             return true;
         } catch (FileNotFoundException e) {
             Log.e(TAG, "al abrir " + nombreArchivo + ": " + e.getMessage());
@@ -115,6 +122,12 @@ public class TablaCobrosRealizados { //Ax ya es: S_COBRO
             rFile = new RandomAccessFile(nombreArchivo, "r");
             archivo_TablaCobrosRealizados = nombreArchivo;
             total_TablaCobrosRealizados = (int) (rFile.length() / LONGITUD_REGISTRO);
+            if (UtilPlanos.errorFormato(rFile, nombreArchivo, LONGITUD_REGISTRO) != null) {
+                // Otra longitud de registro: no se lee ni se escribe nada (ver UtilPlanos.errorFormato).
+                cerrarSilencioso();
+                total_TablaCobrosRealizados = 0;
+                return false;
+            }
             return true;
         } catch (IOException e) {
             Log.e(TAG, "al abrir (lectura) " + nombreArchivo + ": " + e.getMessage());
@@ -128,6 +141,8 @@ public class TablaCobrosRealizados { //Ax ya es: S_COBRO
 
     private void cerrarSilencioso() {
         if (rFile == null) return;
+        if (sucio) UtilPlanos.sincronizar(TAG, rFile); // solo si se escribio desde que se abrio
+        sucio = false;
         try {
             rFile.close();
         } catch (IOException e) {
@@ -227,6 +242,7 @@ public class TablaCobrosRealizados { //Ax ya es: S_COBRO
         try {
             rFile.seek((long) (posicion - 1) * LONGITUD_REGISTRO);
             rFile.write(linea.getBytes(LATIN1));
+            sucio = true;
             return true;
         } catch (IOException e) {
             Log.e(TAG, "escritura fallida en posicion " + posicion + ": " + e.getMessage());

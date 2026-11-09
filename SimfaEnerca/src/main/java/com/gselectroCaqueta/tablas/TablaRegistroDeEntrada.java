@@ -593,6 +593,12 @@ public class TablaRegistroDeEntrada { //Ax ya es : E_REGIST
         try {
             int fileSize = (int) rFile.length();
             total_TablaRegistroDeEntrada = fileSize / LONGITUD_REGISTRO;
+            if (UtilPlanos.errorFormato(rFile, archivo_TablaRegistroDeEntrada, LONGITUD_REGISTRO) != null) {
+                // Otra longitud de registro (REGISTRO.TXT): se cierra y no se lee nada (ver UtilPlanos.errorFormato).
+                Cerrar_TablaRegistroDeEntrada();
+                total_TablaRegistroDeEntrada = 0;
+                return false;
+            }
             return true;
         } catch (Exception ex) {
             ex.printStackTrace();

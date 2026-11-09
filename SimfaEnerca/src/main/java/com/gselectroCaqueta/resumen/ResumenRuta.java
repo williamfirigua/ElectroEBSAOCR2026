@@ -1,6 +1,7 @@
 package com.gselectroCaqueta.resumen;
 
 import com.gselectroCaqueta.moduloanomalias.AnomaliaDeNoLectura;
+import com.gselectroCaqueta.tablas.UtilPlanos;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -171,6 +172,10 @@ public final class ResumenRuta {
         File clienteTxt = new File(dirTrabajo, "DATOSDEENTRADA/CLIENTE.TXT");
         if (!registro.isFile()) throw new IOException("No existe " + registro.getName() + ": no hay ruta cargada");
         if (!clienteSda.isFile()) throw new IOException("No existe DATOSDESALIDA/" + clienteSda.getName());
+        // Plano con otra longitud de registro (p. ej. CLIENTE.SDA de 252): los conteos saldrian cruzados.
+        String formato = UtilPlanos.errorFormato(registro, LONGITUD_REGISTRO);
+        if (formato == null) formato = UtilPlanos.errorFormato(clienteSda, LONGITUD_CLIENTE_SDA);
+        if (formato != null) throw new IOException(formato);
 
         ResumenRuta r = new ResumenRuta();
         r.leerClientes(clienteSda);

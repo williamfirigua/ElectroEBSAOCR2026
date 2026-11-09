@@ -129,6 +129,7 @@ import com.gselectroCaqueta.tablas.TablaRangos;
 import com.gselectroCaqueta.tablas.TablaRegistroDeEntrada;
 import com.gselectroCaqueta.tablas.TablaRegistroSalida;
 import com.gselectroCaqueta.tablas.TablaTarifas;
+import com.gselectroCaqueta.tablas.UtilPlanos;
 import com.gselectroCaqueta.impresion.AdaptadorMovil;
 import com.gselectroCaqueta.impresion.AjustesImpresora;
 import com.gselectroCaqueta.impresion.ColaImpresion;
@@ -328,6 +329,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     int banderaadicionarNovedad = 0; //Ax: para saber que ya se contesto un alert dialog
     int banderaCuentaContratada = 0; //Ax: para saber que ya se contesto un alert dialog
     int capRegistroActual = 0;//Captura registro actual que se esta procesando, para los que regresan de otras actividades
+    private static final String ESTADO_CAP_REGISTRO = "capRegistroActual";
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(ESTADO_CAP_REGISTRO, capRegistroActual); // se restaura en onCreate (retorno de la camara OCR)
+    }
     int cc_indlectura;//Ax: Para recuperar datos de procesarlectura
     int cc_primero;//Ax: Para recuperar datos de procesarlectura
     int conexionGPRSActiva = 1;
@@ -718,6 +726,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            // Si Android mato el proceso mientras estaba la camara OCR, se recupera el registro en curso.
+            capRegistroActual = savedInstanceState.getInt(ESTADO_CAP_REGISTRO, 0);
+        }
         setContentView(R.layout.activity_menu_de_liquidacion);
         bDifNull = new BDifNull(this);
         ctx = this;
@@ -1871,6 +1883,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             // txtInformeEscrito.setText("");
             // variables.registroactual = 1;
             abrirArchivosPrincipales();
+            if (errorFormatoRuta != null) {
+                // Un plano con otra longitud de registro: ya se aviso (avisarFormatoRuta) y no se liquida nada.
+                return;
+            }
 
             txtElectura.setEnabled(true);
 
@@ -1914,11 +1930,18 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 String datoLeido = new String(byteArray);
                 rFile.close();
 
-                if (datoLeido != null && !datoLeido.equals("")) {
+                // "CUENTA(10);APUNTADOR(6)". Tras un apagon puede quedar corto o lleno de ceros: antes
+                // substring/parse reventaban en cada arranque. Si no es valido o no es de esa cuenta, se borra.
+                int apuntadorValidador = validadorImpresionValido(datoLeido);
+                if (apuntadorValidador > 0) {
                     mensajeT("Existe un Registro sin procesar se Inicia Proceso de Liquidacion" + datoLeido, msgMedio);
 
-                    proseguirLiquidacion(datoLeido.substring(0, 10), parseStringToInteger(datoLeido.substring(11, 17).trim()));
+                    proseguirLiquidacion(datoLeido.substring(0, 10), apuntadorValidador);
                 } else {
+                    if (datoLeido != null && !datoLeido.equals("")) {
+                        utils.Log(logfile, "[menuDeLiquidacionLoad()] VALIDADORIMPRESION.SDA invalido (" + fileSize + " bytes), se borra: "
+                                + datoLeido.replace('\0', '0'));
+                    }
                     file.delete();
                 }
 
@@ -1932,6 +1955,33 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 mensajeT("Error en menuDeLiquidacionLoad " + e.getMessage(), msgLargo);
                 utils.Log(logfile, "[menuDeLiquidacionLoad()]: Error: " + e);
             }
+        }
+    }
+
+    /**
+     * Apuntador (registro de REGISTRO.TXT) guardado en VALIDADORIMPRESION.SDA, o 0 si el contenido no es valido:
+     * corto, con ceros, sin numero, fuera de rango o de otra cuenta que la de ese registro.
+     */
+    private int validadorImpresionValido(String dato) {
+        try {
+            if (dato == null || dato.length() < 17 || dato.charAt(10) != ';' || dato.indexOf('\0') >= 0) return 0;
+            String cuenta = dato.substring(0, 10).trim();
+            int apuntador = Integer.parseInt(dato.substring(11, 17).trim());
+            if (cuenta.isEmpty() || apuntador < 1) return 0;
+            abrirArchivosDeFacturacion();
+            try {
+                if (apuntador > infoRegistroEntrada.getTotal_TablaRegistroDeEntrada()) return 0;
+                infoRegistroEntrada.lectura_TablaRegistroDeEntrada(apuntador);
+                String enRegistro = infoRegistroEntrada.gettablaRegistroDeEntrada_CUENTA();
+                if (enRegistro == null) return 0;
+                // misma cuenta sin importar ceros a la izquierda
+                return enRegistro.trim().replaceFirst("^0+(?=.)", "").equals(cuenta.replaceFirst("^0+(?=.)", "")) ? apuntador : 0;
+            } finally {
+                cerrarArchivosFacturacion();
+            }
+        } catch (RuntimeException e) {
+            utils.Log(logfile, "[menuDeLiquidacionLoad()] VALIDADORIMPRESION.SDA: " + e);
+            return 0;
         }
     }
 
@@ -2117,8 +2167,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         try {
             if (!utils.CrearCopiaSin(envioGPRS, envioGPRSerial)) { //sin sobreescribir
                 mensajeT("No se crea copia de envioGPRSerial", msgCorto);//To do trow
+                if (file_envioGPRS.length() >= 4) {
+                    // Hay datos y no quedaron copiados: NO se borra el original.
+                    utils.Log(logfile, "[MenuDeLiquidacion] GuardarEnvioHilos; no se copio " + envioGPRS + ", se conserva");
+                    return;
+                }
             }
-            file_envioGPRS.delete();
+            file_envioGPRS.delete(); // solo cuando la copia ya esta en disco (CrearCopiaSin sincroniza)
         } catch (Exception e) {
             utils.Log(logfile, "[MenuDeLiquidacion] GuardarEnvioHilos; " + e.getMessage());
             mensajeT("Error en GuardarEnvioHilos " + e.getMessage(), msgLargo);
@@ -2165,14 +2220,17 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 CopiaGPRS.createNewFile();
             }
 
-            FileReader stream3 = new FileReader(ArchivoNombre);
-            BufferedReader reader = new BufferedReader(stream3);
+            // Latin-1 de punta a punta (1 byte = 1 caracter): FileReader/OutputStreamWriter usaban UTF-8 y
+            // cambiaban los bytes de las tildes y la Ñ, descuadrando los registros de longitud fija.
+            BufferedReader reader = new BufferedReader(new java.io.InputStreamReader(new java.io.FileInputStream(ArchivoNombre), java.nio.charset.StandardCharsets.ISO_8859_1));
             String linea = "";
             String dato;
             int cont = 0;
             int maximoregs = parseStringToInteger(variables.maximoregaenviar.trim());
-            OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(ArchivoEnv));
-            OutputStreamWriter osw1 = new OutputStreamWriter(new FileOutputStream(CopiaGPRS));
+            FileOutputStream fosEnv = new FileOutputStream(ArchivoEnv);
+            FileOutputStream fosCopia = new FileOutputStream(CopiaGPRS);
+            OutputStreamWriter osw = new OutputStreamWriter(fosEnv, java.nio.charset.StandardCharsets.ISO_8859_1);
+            OutputStreamWriter osw1 = new OutputStreamWriter(fosCopia, java.nio.charset.StandardCharsets.ISO_8859_1);
 
             while ((linea = reader.readLine()) != null) {
                 dato = linea + "\r\n";
@@ -2185,8 +2243,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 }
             }
             osw.flush();
+            fosEnv.getFD().sync(); // en disco antes de borrar el original
             osw.close();
             osw1.flush();
+            fosCopia.getFD().sync();
             osw1.close();
             reader.close();
 
@@ -8238,6 +8298,8 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
     private int leerInformacionUsuario(int tipo) {
 
+        // Cuenta nueva: se vuelve a evaluar. Si los planos no coinciden se bloquea de nuevo al final.
+        UtilPlanos.liberarEscrituras();
         switch (tipo) {
             case 1:
                 Log.e("INFO", "inicia validar cliente: " + VariablesGlobales.registroactual);
@@ -8343,14 +8405,15 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     "&& cs y ce " + infoClienteSalida.gettablaClienteSalida_CUENTA().trim() + ".equals(" + infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() +
                     "&&" + concuerda + "==" + nroconceptos + " Diferente es " + resultado1);
 
-            infoRegistroSalida.settablaRegistroSalida_informe("debe recuperar INFO ReparaRegis|CS y conS: " + infoClienteSalida.gettablaClienteSalida_CUENTA().trim() + ".equals(" + medidorSalida.gettablaContadorSalida_CUENTA().trim() +
-                    "&& CS y rs " + infoClienteSalida.gettablaClienteSalida_CUENTA().trim() + ".equals(" + infoRegistroSalida.gettablaRegistroSalida_CUENTA().trim() +
-                            "&& cs y re " + infoClienteSalida.gettablaClienteSalida_CUENTA().trim() + ".equals(" + infoRegistroEntrada.gettablaRegistroDeEntrada_CUENTA().trim() +
-                            "&& cs y clE" + infoClienteSalida.gettablaClienteSalida_CUENTA().trim() + ".equals(" + infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() +
-                            "&& cs y ce " + infoClienteSalida.gettablaClienteSalida_CUENTA().trim() + ".equals(" + infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() +
-                            "&&" + concuerda + "==" + nroconceptos + " Diferente es " + resultado1);
+            // Antes aqui se ponia en INFORME (30 caracteres) todo el texto de diagnostico: el registro en memoria
+            // quedaba invalido y cualquier escritura posterior se rechazaba. El diagnostico ya queda en el Log de arriba.
 
             int respRep = repararRegistrador(resultado1);
+            if (respRep != 1) {
+                String cuentaMal = infoClienteEntrada.gettablaEntradaClientes_Cuenta();
+                UtilPlanos.bloquearEscrituras("cuenta " + (cuentaMal == null ? "" : cuentaMal.trim()) + ", plano diferente " + resultado1);
+                avisarCuentasDesalineadas(cuentaMal);
+            }
             return respRep;
         }
     }
@@ -8359,18 +8422,16 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         try {
             if (infoClienteSalida.gettablaClienteSalida_INDFACTURACION().trim().equals("") && infoClienteSalida.gettablaClienteSalida_HORAIMPRESION().trim().equals("")
                     && !infoRegistroSalida.gettablaRegistroSalida_CUENTA().trim().equals(infoClienteSalida.gettablaClienteSalida_CUENTA().trim())) {
-                VariablesGlobales.pos_registrador = parseStringToInteger(infoMedidorEntrada.gettablaMedidorEntrada_primerregistro());
+                int posReparar = parseStringToInteger(infoMedidorEntrada.gettablaMedidorEntrada_primerregistro());
                 /*Log.e("INFO","ReparaRegis|cliente: " + infoMedidorEntrada.gettablaMedidorEntrada_cliente().trim());
                 Log.e("INFO","ReparaRegis|primermed: " + infoClienteEntrada.gettablaEntradaClientes_PRIMERMEDIDOR().trim());
                 Log.e("INFO","ReparaRegis|cuenta: " + infoClienteSalida.gettablaClienteSalida_CUENTA().trim());
                 Log.e("INFO","ReparaRegis|marca: " + infoRegistroEntrada.getTablaRegistroDeEntrada_apuntadorregistro());
                 Log.e("INFO","ReparaRegis|contador: " + infoRegistroEntrada..gettablaRegistroDeEntrada_nrocontador());*/
-                variables.totalprediosleidos = variables.totalprediosleidos - 1;
-                VariablesGlobales.registroactual = VariablesGlobales.pos_registrador;
-                String[] time = getTimeError().split("\\|");
-                utils.Log(logfile, infoClienteEntrada.gettablaEntradaClientes_Cuenta() + "|" + Ciclo.substring(0, 3) + "|" + infoClienteEntrada.gettablaEntradaClientes_mes() + "|" + infoClienteEntrada.gettablaEntradaClientes_anio() + "|" +
-                        serialPDA + "|" + "[MenuDeLiquidacion]repararRegistrador()|" + "Se repara registrador " + "|" + time[0] + "|" + time[1] + "|");
 
+                // Se parte de la fila destino tal como esta en disco: solo cambian los campos de abajo
+                // (antes se escribian ahi los demas campos del registro que hubiera quedado en memoria).
+                infoRegistroSalida.lectura_TablaRegistroSalida(posReparar);
                 infoRegistroSalida.settablaRegistroSalida_cliente(infoMedidorEntrada.gettablaMedidorEntrada_cliente().trim());
                 infoRegistroSalida.settablaRegistroSalida_contador(infoClienteEntrada.gettablaEntradaClientes_primermedidor().trim());
                 infoRegistroSalida.settablaRegistroSalida_cuenta(infoClienteSalida.gettablaClienteSalida_CUENTA().trim());
@@ -8382,14 +8443,29 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 infoRegistroSalida.settablaRegistroSalida_consumotomado("0");
                 infoRegistroSalida.settablaRegistroSalida_intentos("0");
                 infoRegistroSalida.settablaRegistroSalida_leido("");
-                infoRegistroSalida.escribir_TablaRegistroSalida(VariablesGlobales.pos_registrador);//repara registrador
+                infoRegistroSalida.settablaRegistroSalida_informe("DEBE RECUPERAR-REPARADO GSS"); // cabe en los 30 de INFORME
+                if (!infoRegistroSalida.escribir_TablaRegistroSalida(posReparar)) {//repara registrador
+                    // No se escribio: no se mueve ningun apuntador y la memoria vuelve a lo que hay en disco.
+                    infoRegistroSalida.lectura_TablaRegistroSalida(VariablesGlobales.registroactual);
+                    utils.Log(logfile, infoClienteEntrada.gettablaEntradaClientes_Cuenta() + "|[MenuDeLiquidacion]repararRegistrador()|No se pudo reparar el registrador en " + posReparar);
+                    ArchivosCorruptos = 1;
+                    return 0;
+                }
+                VariablesGlobales.pos_registrador = posReparar;
+                variables.totalprediosleidos = variables.totalprediosleidos - 1;
+                VariablesGlobales.registroactual = VariablesGlobales.pos_registrador;
+                String[] time = getTimeError().split("\\|");
+                utils.Log(logfile, infoClienteEntrada.gettablaEntradaClientes_Cuenta() + "|" + Ciclo.substring(0, 3) + "|" + infoClienteEntrada.gettablaEntradaClientes_mes() + "|" + infoClienteEntrada.gettablaEntradaClientes_anio() + "|" +
+                        serialPDA + "|" + "[MenuDeLiquidacion]repararRegistrador()|" + "Se repara registrador " + "|" + time[0] + "|" + time[1] + "|");
                 infoRegistroSalida.lectura_TablaRegistroSalida(VariablesGlobales.pos_registrador);
                 ArchivosCorruptos = 0;
                 return 1;
             } else {
                 if (PlanoMalo == 5)//nos indica que el plano que se daño es registros salida y se podria recuperar
                 {
-                    VariablesGlobales.pos_registrador = parseStringToInteger(infoMedidorEntrada.gettablaMedidorEntrada_primerregistro());
+                    int posReparar = parseStringToInteger(infoMedidorEntrada.gettablaMedidorEntrada_primerregistro());
+                    // Se parte de la fila destino tal como esta en disco: solo cambian los campos de abajo.
+                    infoRegistroSalida.lectura_TablaRegistroSalida(posReparar);
                     infoRegistroSalida.settablaRegistroSalida_cliente(infoMedidorEntrada.gettablaMedidorEntrada_cliente().trim());
                     infoRegistroSalida.settablaRegistroSalida_contador(infoClienteEntrada.gettablaEntradaClientes_primermedidor().trim());
                     infoRegistroSalida.settablaRegistroSalida_cuenta(infoClienteSalida.gettablaClienteSalida_CUENTA().trim());
@@ -8406,7 +8482,14 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     infoRegistroSalida.settablaRegistroSalida_horalectura(infoClienteSalida.gettablaClienteSalida_HORAIMPRESION());
                     infoRegistroSalida.settablaRegistroSalida_informe("RECUPERADO DE LA MOVIL GSS");
 
-                    infoRegistroSalida.escribir_TablaRegistroSalida(VariablesGlobales.pos_registrador);//repara registrador
+                    if (!infoRegistroSalida.escribir_TablaRegistroSalida(posReparar)) {//repara registrador
+                        // No se escribio: no se mueve ningun apuntador y la memoria vuelve a lo que hay en disco.
+                        infoRegistroSalida.lectura_TablaRegistroSalida(VariablesGlobales.registroactual);
+                        utils.Log(logfile, infoClienteEntrada.gettablaEntradaClientes_Cuenta() + "|[MenuDeLiquidacion]repararRegistrador()|No se pudo recuperar el registrador en " + posReparar);
+                        ArchivosCorruptos = 1;
+                        return 0;
+                    }
+                    VariablesGlobales.pos_registrador = posReparar;
                     infoRegistroSalida.lectura_TablaRegistroSalida(VariablesGlobales.pos_registrador);
                     ArchivosCorruptos = 0;
                     return 1;
@@ -9742,7 +9825,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
             if (misenvios.abrir_EnvioGPS(misenvios.archivo_EnvioGPS)) {
                 abrirArchivosDeFacturacion();
                 int NumRegistro = VariablesGlobales.registroactual;
+                int clienteGuardado = variables.clienteactual;
+                int contadorGuardado = variables.contadoractual;
                 CuentasProblema = "";
+                try {
                 VariablesGlobales.registroactual = 1;
                 while (VariablesGlobales.registroactual <= infoRegistroSalida.getTotal_TablaRegistroSalida()) {
 
@@ -9818,8 +9904,14 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                         Noleidas++;
                     VariablesGlobales.registroactual++;
                 }
-                misenvios.Cerrar_EnvioGPS();
-                VariablesGlobales.registroactual = NumRegistro;
+                } finally {
+                    // Termine bien o no (cuenta desalineada, excepcion), se vuelve a la cuenta que estaba en pantalla.
+                    // onPostExecute ("ValidarNoEnviados") la vuelve a leer y a mostrar.
+                    misenvios.Cerrar_EnvioGPS();
+                    VariablesGlobales.registroactual = NumRegistro;
+                    variables.clienteactual = clienteGuardado;
+                    variables.contadoractual = contadorGuardado;
+                }
 
             }
             limpiarMedidores();
@@ -9954,14 +10046,77 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         builder.show();
     }
 
-    private void abrirArchivosDeFacturacion() {
+    /** Mensaje del plano de la ruta rechazado por formato (null = todos bien). Lo deja abrirArchivosDeFacturacion. */
+    private volatile String errorFormatoRuta = null;
+    private boolean avisoFormatoMostrado = false;
+    /** Ultima cuenta a la que se aviso que los planos no coinciden (un aviso por cuenta). */
+    private String cuentaAvisadaDesalineada = "";
 
-        infoClienteEntrada.abrir_TablaEntradaClientes(infoClienteEntrada.getArchivo_TablaEntradaClientes());
-        infoRegistroEntrada.abrir_TablaRegistroDeEntrada(infoRegistroEntrada.getArchivo_TablaRegistroDeEntrada());
-        infoMedidorEntrada.abrir_TablaMedidorEntrada(infoMedidorEntrada.getArchivo_TablaMedidorEntrada());
-        infoRegistroSalida.abrir_TablaRegistroSalida(infoRegistroSalida.getArchivo_TablaRegistroSalida());
-        medidorSalida.abrir_TablaContadorSalida(medidorSalida.getArchivo_TablaContadorSalida());
-        infoClienteSalida.abrir_TablaClienteSalida(infoClienteSalida.getArchivo_TablaClienteSalida());
+    /**
+     * Abre los planos de la liquidacion. false si alguno no abrio; si fue por formato (registro de otra
+     * longitud, ver UtilPlanos.errorFormato) ese plano queda cerrado (no se lee ni se escribe), se avisa una
+     * vez con un dialogo que no se puede cerrar sin salir de la liquidacion y errorFormatoRuta queda con el mensaje.
+     */
+    private boolean abrirArchivosDeFacturacion() {
+        UtilPlanos.ultimoErrorFormato = null;
+        boolean ok = infoClienteEntrada.abrir_TablaEntradaClientes(infoClienteEntrada.getArchivo_TablaEntradaClientes());
+        ok &= infoRegistroEntrada.abrir_TablaRegistroDeEntrada(infoRegistroEntrada.getArchivo_TablaRegistroDeEntrada());
+        ok &= infoMedidorEntrada.abrir_TablaMedidorEntrada(infoMedidorEntrada.getArchivo_TablaMedidorEntrada());
+        ok &= infoRegistroSalida.abrir_TablaRegistroSalida(infoRegistroSalida.getArchivo_TablaRegistroSalida());
+        ok &= medidorSalida.abrir_TablaContadorSalida(medidorSalida.getArchivo_TablaContadorSalida());
+        ok &= infoClienteSalida.abrir_TablaClienteSalida(infoClienteSalida.getArchivo_TablaClienteSalida());
+        String formato = UtilPlanos.ultimoErrorFormato;
+        if (formato == null && infoCobrosLiquidados.getArchivo_TablaCobrosRealizados() != null) {
+            // CO_COBRO.SDA se abre en leerInformacionUsuario; su formato se revisa aqui para avisar igual.
+            formato = UtilPlanos.errorFormato(new File(infoCobrosLiquidados.getArchivo_TablaCobrosRealizados()), TablaCobrosRealizados.LONGITUD_REGISTRO);
+        }
+        if (formato != null) {
+            errorFormatoRuta = formato;
+            avisarFormatoRuta(formato);
+            return false;
+        }
+        return ok;
+    }
+
+    /** Aviso bloqueante (una sola vez): con un plano de otro formato no se liquida; al aceptar sale de la liquidacion. */
+    private void avisarFormatoRuta(final String mensaje) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (avisoFormatoMostrado || isFinishing()) return;
+                avisoFormatoMostrado = true;
+                utils.Log(logfile, "[MenuDeLiquidacion][FORMATO] " + mensaje);
+                androidx.appcompat.app.AlertDialog.Builder builder = DialogosLectura.builder(MenuDeLiquidacion.this);
+                builder.setTitle("Archivos de la ruta");
+                builder.setMessage(mensaje);
+                builder.setCancelable(false);
+                builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        cerrarArchivosFacturacion();
+                        finish();
+                    }
+                });
+                builder.show();
+            }
+        });
+    }
+
+    /** Aviso (una vez por cuenta) de que los planos no coinciden y las escrituras quedan bloqueadas. */
+    private void avisarCuentasDesalineadas(String cuenta) {
+        final String c = cuenta == null ? "" : cuenta.trim();
+        if (ValidandoNoEnv != 0 || c.equals(cuentaAvisadaDesalineada)) return;
+        cuentaAvisadaDesalineada = c;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (isFinishing()) return;
+                androidx.appcompat.app.AlertDialog.Builder builder = DialogosLectura.builder(MenuDeLiquidacion.this);
+                builder.setTitle("Cuenta " + c);
+                builder.setMessage("Los archivos de la ruta no coinciden para esta cuenta; no se guardará nada. Avise al supervisor.");
+                builder.setPositiveButton("Entendido", null);
+                builder.show();
+            }
+        });
     }
 
     private void cerrarArchivosFacturacion() {
@@ -10021,7 +10176,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                                                 if (file.exists()) {
                                                     if (leerArchivosSecundarios() == 1) {
 
-                                                        abrirArchivosDeFacturacion();
+                                                        if (!abrirArchivosDeFacturacion() && errorFormatoRuta != null) {
+                                                            cerrarArchivosFacturacion();
+                                                            return; // plano con otro formato: ya se aviso, no se liquida
+                                                        }
                                                         inicializarVariablesSistema();
 
                                                         seleccionMesFacturacion();
@@ -12166,6 +12324,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                 try {
                     RandomAccessFile rFile = new RandomAccessFile(archivoValidador, "rw");
                     rFile.writeBytes(infoClienteEntrada.gettablaEntradaClientes_Cuenta() + ";" + String.format("%1$6s", ("" + VariablesGlobales.registroactual).trim()));
+                    rFile.getFD().sync(); // que un apagon no lo deje en ceros
                     rFile.close();
                 } catch (IOException ioe) {
 
@@ -17858,13 +18017,13 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     Log.e("INFO", "CAMARA_LECTURA_REQUEST_CODE | lecturaOcr: " + lecturaOcr
                             + " | foto: " + fotoPath);
 
-                    // Restaurar registro si cambió durante la captura
-                    if (capRegistroActual != VariablesGlobales.registroactual) {
+                    // Restaurar registro si cambió durante la captura (0 = no se capturo: no se toca)
+                    if (capRegistroActual > 0 && capRegistroActual != VariablesGlobales.registroactual) {
                         Log.e("INFO", "CAMARA_LECTURA: registro cambió. Restaurando " +
                                 VariablesGlobales.registroactual + " → " + capRegistroActual);
                         VariablesGlobales.registroactual = capRegistroActual;
                         abrirArchivosDeFacturacion();
-                        leerInformacionUsuario(0);
+                        leerInformacionUsuario(1); // leerInformacionUsuario(0) no tenia caso: no recargaba nada
                     }
 
                     if (fotoPath != null && !fotoPath.trim().isEmpty()) {
@@ -19312,6 +19471,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     case "liquidacionautomatica2":
                         respuesta_ = IncluirDatosEnModoAutomatico2(); // del menu
                         //respuesta_ = ValidarNoEnviados();
+                        break; // faltaba: seguia con IncluirDatosEnModoAutomatico3 (los tres son excluyentes)
                     case "liquidacionautomatica3":
                         respuesta_ = IncluirDatosEnModoAutomatico3(); // del menu
                         //respuesta_ = ValidarNoEnviados();
@@ -19442,13 +19602,15 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     Log.e("INFO", "ValidarNoEnviados| respuesta_:" + respuesta_);
                     Log.e("INFO", "ValidarNoEnviados| CuentasProblema:" + CuentasProblema);
 
+                    // Siempre (tambien si fallo a medias): la pantalla vuelve a la cuenta en curso, leida de nuevo.
+                    abrirArchivosDeFacturacion();
+                    leerInformacionUsuario(1);
+                    visualizarInformacionCliente(0);
+                    cerrarArchivosFacturacion();
                     if (respuesta_.contains("VALIDACION REALIZADA") || respuesta_.equals("VALIDACION REALIZADA")) {
                         if (!CuentasProblema.trim().equals("")) {
                             mensajeT("Cuentas Problema:\n" + CuentasProblema, msgLargo);
                         }
-                        leerInformacionUsuario(1);
-                        visualizarInformacionCliente(0);
-                        cerrarArchivosFacturacion();
 
 
                         // El reenvio lee CO_COBRO.SDA directamente; ya no hace falta la copia CO_COBROHILOS.SDA.

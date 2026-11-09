@@ -1230,6 +1230,12 @@ public class TablaEntradaClientes { //Ax ya es: E_CLIENT
         try {
             int fileSize = (int) rFile.length();
             total_TablaEntradaClientes = fileSize / LONGITUD_REGISTRO;
+            if (UtilPlanos.errorFormato(rFile, archivo_TablaEntradaClientes, LONGITUD_REGISTRO) != null) {
+                // Otra longitud de registro (CLIENTE.TXT): se cierra y no se lee nada (ver UtilPlanos.errorFormato).
+                Cerrar_TablaEntradaClientes();
+                total_TablaEntradaClientes = 0;
+                return false;
+            }
             return true;
         } catch (Exception ex) {
             ex.printStackTrace();

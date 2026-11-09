@@ -742,41 +742,16 @@ public class VariablesGlobales {
     }
 
     public static void copyFile(String fileA, String fileB, boolean deleteFile) {
-
-        InputStream inStream = null;
-        OutputStream outStream = null;
-
-        try {
-
-            File afile = new File(fileA);
-            File bfile = new File(fileB);
-
-            inStream = new FileInputStream(afile);
-            outStream = new FileOutputStream(bfile);
-
-            byte[] buffer = new byte[1024];
-
-            int length;
-            // copy the file content in bytes
-            while ((length = inStream.read(buffer)) > 0) {
-
-                outStream.write(buffer, 0, length);
-
-            }
-
-            inStream.close();
-            outStream.close();
-
-            // delete the original file
-            if (deleteFile) {
-                afile.delete();
-                System.out.println("File was moved successful!");
-            } else {
-                System.out.println("File is copied successful!");
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        File afile = new File(fileA);
+        File bfile = new File(fileB);
+        // Copia via <destino>.tmp + fsync + rename: el destino nunca queda truncado a medias y el
+        // original solo se borra cuando la copia ya esta en disco.
+        if (!com.gsutil.Utils.copiarSeguro(afile, bfile)) {
+            Log.e("VariablesGlobales", "copyFile: no se pudo copiar " + fileA + " -> " + fileB);
+            return;
+        }
+        if (deleteFile) {
+            afile.delete();
         }
     }
 

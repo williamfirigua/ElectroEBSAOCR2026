@@ -67,6 +67,7 @@ public class TablaRegistroSalida { //Ax esta es S_REGIST, ya
     public int encontro_TablaRegistroSalida;
     String buscar_TablaRegistroSalida;
     RandomAccessFile rFile;
+    private boolean sucio; // escrito desde que se abrio: se sincroniza a disco al cerrar
     private int total_TablaRegistroSalida;
 
     // Indices en memoria (se reconstruyen en cada apertura).
@@ -152,6 +153,13 @@ public class TablaRegistroSalida { //Ax esta es S_REGIST, ya
             long longitud = rFile.length();
             total_TablaRegistroSalida = (int) (longitud / LONGITUD_REGISTRO);
             invalidarBloque();
+            if (UtilPlanos.errorFormato(rFile, nombreArchivo, LONGITUD_REGISTRO) != null) {
+                // Otra longitud de registro: no se lee ni se escribe nada (ver UtilPlanos.errorFormato).
+                archivoAbierto = null; // que cerrarSilencioso no deje como vigente el indice de otro archivo
+                cerrarSilencioso();
+                total_TablaRegistroSalida = 0;
+                return false;
+            }
             if (indiceVigente(nombreArchivo, longitud)) return true;
             construirIndices();
             return true;
@@ -177,6 +185,7 @@ public class TablaRegistroSalida { //Ax esta es S_REGIST, ya
             longitud = rFile.length();
         } catch (IOException ignored) {
         }
+        if (sucio) UtilPlanos.sincronizar(TAG, rFile); // solo si se escribio desde que se abrio
         try {
             rFile.close();
         } catch (IOException e) {
@@ -184,6 +193,7 @@ public class TablaRegistroSalida { //Ax esta es S_REGIST, ya
             longitud = -1;
         }
         rFile = null;
+        sucio = false;
         recordarIndice(longitud);
         archivoAbierto = null;
     }
@@ -419,6 +429,7 @@ public class TablaRegistroSalida { //Ax esta es S_REGIST, ya
     }
 
     private boolean escribirEnPosicion(int posicion) {
+        if (UtilPlanos.rechazarPorBloqueo(TAG, "REGISTRO.SDA", tablaRegistroSalida_cuenta, posicion)) return false;
         String linea = armarLinea();
 
         if (linea.length() != LONGITUD_REGISTRO) {
@@ -428,6 +439,7 @@ public class TablaRegistroSalida { //Ax esta es S_REGIST, ya
         try {
             rFile.seek((long) (posicion - 1) * LONGITUD_REGISTRO); // seek y write dentro del mismo bloque synchronized
             rFile.write(linea.getBytes(LATIN1));
+            sucio = true;
             if (posicion > total_TablaRegistroSalida) total_TablaRegistroSalida = posicion;
             invalidarBloque();
             Integer previa = indiceCuentaConsecutivo.put(llave(tablaRegistroSalida_cuenta, tablaRegistroSalida_consecutivo), posicion);

@@ -48,6 +48,7 @@ public class TablaContadorSalida {
     String buscar_TablaContadorSalida;
     String texto;
     RandomAccessFile rFile;
+    private boolean sucio; // escrito desde que se abrio: se sincroniza a disco al cerrar
     Utils utils = new Utils();
 
     // ------------------------------------------------------------------ getters / setters (sin cambios de nombre)
@@ -92,6 +93,12 @@ public class TablaContadorSalida {
             rFile = new RandomAccessFile(nombreArchivo, "rw");
             archivo_TablaContadorSalida = nombreArchivo;
             total_TablaContadorSalida = (int) (rFile.length() / LONGITUD_REGISTRO); // ya NO se lee el archivo completo
+            if (UtilPlanos.errorFormato(rFile, nombreArchivo, LONGITUD_REGISTRO) != null) {
+                // Otra longitud de registro: no se lee ni se escribe nada (ver UtilPlanos.errorFormato).
+                cerrarSilencioso();
+                total_TablaContadorSalida = 0;
+                return false;
+            }
             return true;
         } catch (FileNotFoundException e) {
             Log.e(TAG, "al abrir " + nombreArchivo + ": " + e.getMessage());
@@ -108,6 +115,8 @@ public class TablaContadorSalida {
 
     private void cerrarSilencioso() {
         if (rFile == null) return;
+        if (sucio) UtilPlanos.sincronizar(TAG, rFile); // solo si se escribio desde que se abrio
+        sucio = false;
         try {
             rFile.close();
         } catch (IOException e) {
@@ -196,6 +205,7 @@ public class TablaContadorSalida {
     }
 
     private boolean escribirEnPosicion(int posicion) {
+        if (UtilPlanos.rechazarPorBloqueo(TAG, "MEDIDOR.SDA", tablaContadorSalida_Cuenta, posicion)) return false;
         rellenar_TablaContadorSalida();
         String linea = tablaContadorSalida_Cuenta + sep + tablaContadorSalida_MARCA + sep + tablaContadorSalida_NUMero + sep + tablaContadorSalida_Fechalectura + sep + tablaContadorSalida_HORALECTURA
                 + sep + tablaContadorSalida_ULTIMOMEDIDORLEIDO + sep + tablaContadorSalida_MARCAMEDIDORLEIDO + sep + tablaContadorSalida_NROregistroS + sep + tablaContadorSalida_PRIMERREGISTRO + sep
@@ -207,6 +217,7 @@ public class TablaContadorSalida {
         try {
             rFile.seek((long) (posicion - 1) * LONGITUD_REGISTRO);
             rFile.write(linea.getBytes(LATIN1));
+            sucio = true;
             return true;
         } catch (IOException e) {
             Log.e(TAG, "escritura fallida en posicion " + posicion + ": " + e.getMessage());
