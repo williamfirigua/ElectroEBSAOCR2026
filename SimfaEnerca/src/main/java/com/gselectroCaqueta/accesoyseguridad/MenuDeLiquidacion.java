@@ -6942,7 +6942,20 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
      */
     private void aplicarMetasConsumo() {
         MetasConsumo m = MetasConsumo.NINGUNA;
+        String cuenta = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim();
         try {
+            // Posibles errores de datos: solo se avisan en el log, el calculo sigue igual que en el Caqueta.
+            for (String aviso : MetasConsumo.revisar(
+                    infoClienteEntrada.getTablaEntradaClientes_APLICAMETA(),
+                    infoClienteEntrada.getTablaEntradaClientes_METAMES(),
+                    infoClienteEntrada.getTablaEntradaClientes_METAMES90(),
+                    infoClienteEntrada.getTablaEntradaClientes_METAMES110(),
+                    infoClienteEntrada.getTablaEntradaClientes_META30(),
+                    infoClienteEntrada.getTablaEntradaClientes_FACTORMETA(),
+                    infoClienteEntrada.getTablaEntradaClientes_CRO_META())) {
+                utils.Log(logfile, "[MenuDeLiquidacion]metas de consumo, cuenta " + cuenta + ": " + aviso);
+            }
+            // El CU es con el que se liquida la energia (en el Caqueta VALORUNIDADREFERENCIA; en EBSA MDDOR1VLORKWH).
             m = MetasConsumo.calcular(
                     infoClienteEntrada.getTablaEntradaClientes_APLICAMETA(),
                     MetasConsumo.numero(infoClienteSalida.gettablaClienteSalida_CONSUMOFACTURADO()),
@@ -6961,7 +6974,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         infoClienteSalida.settablaClienteSalida_ConsumoExcedente("" + m.excedenteKwh);
         infoClienteSalida.settablaClienteSalida_ValorConsumoAdicional("" + m.valorAdicional);
         if (m.hayAlgo()) {
-            escribeResumenTiempo(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";metas de consumo; ahorro "
+            escribeResumenTiempo(cuenta + ";metas de consumo; ahorro "
                     + m.ahorroKwh + " kWh, exceso " + m.excedenteKwh + " kWh, valor " + m.valorAdicional);
         }
     }
