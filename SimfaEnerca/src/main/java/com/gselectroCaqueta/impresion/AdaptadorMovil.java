@@ -121,6 +121,7 @@ public final class AdaptadorMovil {
         leerFoesYComercial(d);
         leerConceptos(d);
         leerFechasPago(d);
+        leerMetas(d);
         llenarCaidas(d);
         return d;
     }
@@ -503,6 +504,14 @@ public final class AdaptadorMovil {
 
     private static String t(String s) {
         return s == null ? "" : s.trim();
+    }
+
+    /** Metas de consumo: la meta del mes (CLIENTE.TXT) y lo que dejo la liquidacion en CLIENTE.SDA. */
+    private void leerMetas(DatosFactura d) {
+        d.metaMes = Formatos.redondear(Formatos.numero(cliente.getTablaEntradaClientes_METAMES()));
+        d.kwhAhorro = Formatos.redondear(Formatos.numero(clienteSalida.gettablaClienteSalida_CONSUMOAHORRO()));
+        d.kwhExcedente = Formatos.redondear(Formatos.numero(clienteSalida.gettablaClienteSalida_CONSUMOEXCEDENTE()));
+        d.valorExceso = Formatos.redondear(Formatos.numero(clienteSalida.gettablaClienteSalida_VALORCONSUMOADICIONAL()));
     }
 
     private static int entero(String s) {

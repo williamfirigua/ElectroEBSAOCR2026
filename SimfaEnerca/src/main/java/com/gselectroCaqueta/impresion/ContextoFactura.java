@@ -75,6 +75,7 @@ public final class ContextoFactura {
         aseo(d, p, c, bloques);
         desviacion(d, p, c);
         pie(d, p, c, bloques);
+        metas(d, c);
         parrafos(p, c);
         return c;
     }
@@ -446,6 +447,14 @@ public final class ContextoFactura {
         c.put("cuotas_ptes", vacioSiCero(d.financiacionCuotasPendientes));
         c.put("ultimo_pago", Formatos.esVacio(d.ultimoPagoValor) ? "" : Formatos.moneda(Formatos.numero(d.ultimoPagoValor)));
         c.put("fecha_ultimo_pago", Formatos.fecha(d.ultimoPagoFecha, "dd/MM/yyyy"));
+    }
+
+    /** Metas de consumo: {meta_mes} {kwh_penalizados} {kwh_ahorro} {valor_penalizacion}. En 0 si no hay meta. */
+    private static void metas(DatosFactura d, Map<String, String> c) {
+        c.put("meta_mes", String.valueOf(d.metaMes));
+        c.put("kwh_penalizados", String.valueOf(d.kwhExcedente));
+        c.put("kwh_ahorro", String.valueOf(d.kwhAhorro));
+        c.put("valor_penalizacion", Formatos.moneda(d.valorExceso));
     }
 
     private static void pie(DatosFactura d, Parametros p, Map<String, String> c, BloquesConceptos.Resultado bloques) {

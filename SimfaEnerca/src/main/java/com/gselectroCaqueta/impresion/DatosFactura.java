@@ -108,6 +108,9 @@ public final class DatosFactura {
         return false;
     }
 
+    // ---- metas de consumo (ahorro y exceso, MetasConsumo). 0 si la cuenta no tiene meta.
+    public long metaMes, kwhAhorro, kwhExcedente, valorExceso;
+
     // ---- fechas de pago
     public String fechaPagoOportuno = "";
     public String fechaSuspension = "";
