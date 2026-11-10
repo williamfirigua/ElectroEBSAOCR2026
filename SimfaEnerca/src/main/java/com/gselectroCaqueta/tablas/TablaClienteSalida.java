@@ -13,14 +13,15 @@ import java.io.RandomAccessFile;
 import static com.gselectroCaqueta.tablas.UtilPlanos.LATIN1;
 
 /// <summary>
-/// S_CLIENT (CLIENTE.SDA de salida) - registro fijo de 263 bytes (incluye TOTALFACTURAASEO).
+/// S_CLIENT (CLIENTE.SDA de salida) - registro fijo de 294 bytes (TOTALFACTURAASEO y las metas de consumo).
 /// - Buffer reutilizable + readFully + Latin-1, acceso synchronized.
 /// - Antes de escribir verifica en disco que la posicion sea de la MISMA cuenta.
 /// - lectura_TablaClienteSalidaII (estadistica) sigue leyendo solo CUENTA e INDFACTURACION, sin crear buffers.
 /// </summary>
 public class TablaClienteSalida {
     private static final String TAG = "CLIENTE_SALIDA";
-    static final int LONGITUD_REGISTRO = 252 + 11; // +11 por TOTALFACTURAASEO. Verificado contra CLIENTE.SDA
+    // 252 + 11 de TOTALFACTURAASEO + 31 de metas de consumo (ahorro 8, excedente 8, valor adicional 12 y separadores).
+    public static final int LONGITUD_REGISTRO = 252 + 11 + 31;
 
     String sep = ";";
     String tablaClienteSalida_ANIO;
@@ -50,6 +51,9 @@ public class TablaClienteSalida {
     String tablaClienteSalida_nombrefoto;
     String tablaClienteSalida_distanciacalculada;
     String tablaClienteSalida_VALORFACTURADOASEO;
+    String tablaClienteSalida_ConsumoAhorro;         // metas: kWh por debajo de la meta
+    String tablaClienteSalida_ConsumoExcedente;      // metas: kWh por encima del 110 %
+    String tablaClienteSalida_ValorConsumoAdicional; // metas: valor cobrado por el exceso
     String tablaClienteSalida_FIN;
 
     BufferedReader fin;                                         // sin uso, se conserva por compatibilidad
@@ -126,6 +130,12 @@ public class TablaClienteSalida {
     public void settablaClienteSalida_distanciacalculada(String v) { this.tablaClienteSalida_distanciacalculada = v; }
     public String gettablaClienteSalida_VALORFACTURADOASEO() { return tablaClienteSalida_VALORFACTURADOASEO; }
     public void settablaClienteSalida_VALORFACTURADOASEO(String v) { this.tablaClienteSalida_VALORFACTURADOASEO = v; }
+    public String gettablaClienteSalida_CONSUMOAHORRO() { return tablaClienteSalida_ConsumoAhorro; }
+    public void settablaClienteSalida_ConsumoAhorro(String v) { this.tablaClienteSalida_ConsumoAhorro = v; }
+    public String gettablaClienteSalida_CONSUMOEXCEDENTE() { return tablaClienteSalida_ConsumoExcedente; }
+    public void settablaClienteSalida_ConsumoExcedente(String v) { this.tablaClienteSalida_ConsumoExcedente = v; }
+    public String gettablaClienteSalida_VALORCONSUMOADICIONAL() { return tablaClienteSalida_ValorConsumoAdicional; }
+    public void settablaClienteSalida_ValorConsumoAdicional(String v) { this.tablaClienteSalida_ValorConsumoAdicional = v; }
     public String gettablaClienteSalida_FIN() { return tablaClienteSalida_FIN; }
     public void settablaClienteSalida_FIN(String v) { this.tablaClienteSalida_FIN = v; }
     public String getArchivo_TablaClienteSalida() { return archivo_TablaClienteSalida; }
@@ -234,6 +244,9 @@ public class TablaClienteSalida {
         tablaClienteSalida_nombrefoto = new String(b, 220, 18, LATIN1);
         tablaClienteSalida_distanciacalculada = new String(b, 239, 10, LATIN1);
         tablaClienteSalida_VALORFACTURADOASEO = new String(b, 250, 10, LATIN1);
+        tablaClienteSalida_ConsumoAhorro = new String(b, 261, 8, LATIN1);
+        tablaClienteSalida_ConsumoExcedente = new String(b, 270, 8, LATIN1);
+        tablaClienteSalida_ValorConsumoAdicional = new String(b, 279, 12, LATIN1);
         tablaClienteSalida_FIN = "\r\n";
         ultimo_TablaClienteSalida = registro;
     }
@@ -314,7 +327,8 @@ public class TablaClienteSalida {
                 + tablaClienteSalida_FECHAIMPRESION + sep + tablaClienteSalida_Nromedidores + sep + tablaClienteSalida_primermedidor + sep + tablaClienteSalida_consumo1 + sep
                 + tablaClienteSalida_consumo2 + sep + tablaClienteSalida_consumo3 + sep + tablaClienteSalida_valor1 + sep + tablaClienteSalida_valor2 + sep + tablaClienteSalida_valor3 + sep
                 + tablaClienteSalida_fechavence + sep + tablaClienteSalida_fechacorte + sep + tablaClienteSalida_nombrefoto + sep + tablaClienteSalida_distanciacalculada + sep
-                + tablaClienteSalida_VALORFACTURADOASEO + sep + tablaClienteSalida_FIN;
+                + tablaClienteSalida_VALORFACTURADOASEO + sep + tablaClienteSalida_ConsumoAhorro + sep
+                + tablaClienteSalida_ConsumoExcedente + sep + tablaClienteSalida_ValorConsumoAdicional + sep + tablaClienteSalida_FIN;
         if (linea.length() != LONGITUD_REGISTRO) {
             UtilPlanos.evento(TAG, "CADENA DAÑADA CLIENTE (longitud " + linea.length() + ", posicion " + posicion + "):\r\n" + linea);
             return false;
@@ -363,6 +377,9 @@ public class TablaClienteSalida {
         tablaClienteSalida_nombrefoto = String.format("%-18s", tablaClienteSalida_nombrefoto);
         tablaClienteSalida_distanciacalculada = String.format("%-10s", tablaClienteSalida_distanciacalculada);
         tablaClienteSalida_VALORFACTURADOASEO = String.format("%-10s", tablaClienteSalida_VALORFACTURADOASEO);
+        tablaClienteSalida_ConsumoAhorro = String.format("%-8s", tablaClienteSalida_ConsumoAhorro);
+        tablaClienteSalida_ConsumoExcedente = String.format("%-8s", tablaClienteSalida_ConsumoExcedente);
+        tablaClienteSalida_ValorConsumoAdicional = String.format("%-12s", tablaClienteSalida_ValorConsumoAdicional);
         tablaClienteSalida_FIN = "\r\n";
     }
 

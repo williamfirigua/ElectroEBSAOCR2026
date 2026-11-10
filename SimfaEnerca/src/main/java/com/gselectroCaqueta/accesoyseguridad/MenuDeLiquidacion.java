@@ -6282,6 +6282,7 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
         variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";ejecutarReliquidacionConceptos ;" + getPhoneDate() + "-" + getPhoneHour();
         escribeResumenTiempo(variableResumenLiquidacion + " " + " Entra a ejecutarReliquidacionConceptos()");
 
+        aplicarMetasConsumo();
         ejecutarReliquidacionConceptos(variables.pesosenergia);
         variableResumenLiquidacion = infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";ejecutarReliquidacionConceptos ;" + getPhoneDate() + "-" + getPhoneHour();
         escribeResumenTiempo(variableResumenLiquidacion + " " + " FIN a ejecutarReliquidacionConceptos()");
@@ -6934,6 +6935,37 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
     }
 
     double acobrarAseo = 0;
+    /**
+     * Metas de consumo (ahorro y exceso), modelo del Caqueta: deja en CLIENTE.SDA los kWh de ahorro, los kWh
+     * de exceso y el valor del exceso, que ejecutarReliquidacionConceptos cobra en MetasConsumo.CONCEPTO_EXCESO.
+     * Siempre los reinicia: una cuenta que se vuelve a liquidar no arrastra el calculo anterior.
+     */
+    private void aplicarMetasConsumo() {
+        MetasConsumo m = MetasConsumo.NINGUNA;
+        try {
+            m = MetasConsumo.calcular(
+                    infoClienteEntrada.getTablaEntradaClientes_APLICAMETA(),
+                    MetasConsumo.numero(infoClienteSalida.gettablaClienteSalida_CONSUMOFACTURADO()),
+                    infoRegistroSalida.gettablaRegistroSalida_CAUSADENOLECTURA(),
+                    infoClienteEntrada.getTablaEntradaClientes_METAMES(),
+                    infoClienteEntrada.getTablaEntradaClientes_METAMES90(),
+                    infoClienteEntrada.getTablaEntradaClientes_METAMES110(),
+                    infoClienteEntrada.getTablaEntradaClientes_META30(),
+                    infoClienteEntrada.getTablaEntradaClientes_FACTORMETA(),
+                    infoClienteEntrada.getTablaEntradaClientes_CRO_META(),
+                    MetasConsumo.numero(infoClienteEntrada.gettablaEntradaClientes_MDDOR1VLORKWH()));
+        } catch (Exception e) {
+            utils.Log(logfile, "[MenuDeLiquidacion]aplicarMetasConsumo: " + e.getMessage());
+        }
+        infoClienteSalida.settablaClienteSalida_ConsumoAhorro("" + m.ahorroKwh);
+        infoClienteSalida.settablaClienteSalida_ConsumoExcedente("" + m.excedenteKwh);
+        infoClienteSalida.settablaClienteSalida_ValorConsumoAdicional("" + m.valorAdicional);
+        if (m.hayAlgo()) {
+            escribeResumenTiempo(infoClienteEntrada.gettablaEntradaClientes_Cuenta().trim() + ";metas de consumo; ahorro "
+                    + m.ahorroKwh + " kWh, exceso " + m.excedenteKwh + " kWh, valor " + m.valorAdicional);
+        }
+    }
+
     private int ejecutarReliquidacionConceptos(double pesosenergia) {
 
         double valorconcepto, pesosajuste;
@@ -7024,6 +7056,15 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
                     valor_energia = variables.pesosenergia + "";
                     valor21 += valorconcepto;
                     // Log.e("error", valor_energia + " ***************concepto1-" + valorconcepto);
+                    break;
+
+                case MetasConsumo.CONCEPTO_EXCESO:
+                    // Exceso sobre la meta (en el Caqueta, el 275): lo calcula aplicarMetasConsumo. El ahorro no
+                    // descuenta, como alla: solo se informa en CLIENTE.SDA y en el JSON.
+                    valorconcepto = MetasConsumo.numero(infoClienteSalida.gettablaClienteSalida_CONSUMOEXCEDENTE()) > 0
+                            ? variables.ejecutarAjusteUnidades(MetasConsumo.numero(infoClienteSalida.gettablaClienteSalida_VALORCONSUMOADICIONAL()))
+                            : 0;
+                    valor21 += valorconcepto;
                     break;
 
                 case 31:
@@ -13536,7 +13577,10 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                         misenvios.escribir_EnvioGPS(misenvios.total_EnvioGPS + 1);
                         misenvios.total_EnvioGPS++;
-                        colectorLiquidacion.agregar(misenvios, calidadGpsLectura); // copia ya: misenvios se reutiliza
+                        colectorLiquidacion.agregar(misenvios, calidadGpsLectura, MetasConsumo.json( // copia ya: misenvios se reutiliza
+                                infoClienteSalida.gettablaClienteSalida_CONSUMOAHORRO(),
+                                infoClienteSalida.gettablaClienteSalida_CONSUMOEXCEDENTE(),
+                                infoClienteSalida.gettablaClienteSalida_VALORCONSUMOADICIONAL()));
 
                         misenvios.Cerrar_EnvioGPS();
                         //crea la copia de seguridad del archivo de lecturas

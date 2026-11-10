@@ -39,8 +39,8 @@ import java.util.Map;
 public final class ResumenRuta {
 
     public static final int LONGITUD_REGISTRO = 185;
-    public static final int LONGITUD_CLIENTE_SDA = 263;
-    public static final int LONGITUD_CLIENTE_TXT = 1847;
+    public static final int LONGITUD_CLIENTE_SDA = com.gselectroCaqueta.tablas.TablaClienteSalida.LONGITUD_REGISTRO;
+    public static final int LONGITUD_CLIENTE_TXT = com.gselectroCaqueta.tablas.TablaEntradaClientes.LONGITUD_REGISTRO;
 
     // REGISTRO.SDA (mismos desplazamientos que TablaRegistroSalida.decodificar)
     static final int R_CLIENTE = 0, R_CLIENTE_L = 5;

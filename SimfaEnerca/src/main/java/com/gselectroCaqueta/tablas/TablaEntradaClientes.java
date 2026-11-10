@@ -27,9 +27,9 @@ import java.nio.charset.StandardCharsets;
 
 public class TablaEntradaClientes { //Ax ya es: E_CLIENT
 
-    // 130 campos + separadores = 1843 bytes de datos
-    // + 2 bytes de fin de linea (CR LF) = 1846 bytes por registro.
-    static final int LONGITUD_REGISTRO = 1847;
+    // 139 campos + separadores = 1936 bytes de datos + CR LF = 1938 bytes por registro.
+    // Los 9 ultimos (desde la posicion 1845) son las metas de consumo del Caqueta (ver MetasConsumo).
+    public static final int LONGITUD_REGISTRO = 1938;
 
     String sep = "|";
     String tablaEntradaClientes_anio;  // ano_proceso
@@ -162,6 +162,15 @@ public class TablaEntradaClientes { //Ax ya es: E_CLIENT
     String tablaEntradaClientes_MDDOR1VLORKWH;  // MDDOR1VLORKWH
     String tablaEntradaClientes_MDDOR2SBSDIOCNTRBCION;  // MDDOR2SBSDIOCNTRBCION
     String tablaEntradaClientes_MDDOR2VLORKWH;  // MDDOR2VLORKWH
+    String tablaEntradaClientes_MetaDiaria;  // MetaDiaria (metas de consumo)
+    String tablaEntradaClientes_Metames;  // Metames (metas de consumo)
+    String tablaEntradaClientes_Metames110;  // Metames110 (metas de consumo)
+    String tablaEntradaClientes_Metames90;  // Metames90 (metas de consumo)
+    String tablaEntradaClientes_ConsumoAhorAcumulado;  // ConsumoAhorAcumulado (metas de consumo)
+    String tablaEntradaClientes_FactorMeta;  // FactorMeta (metas de consumo)
+    String tablaEntradaClientes_CRO_Meta;  // CRO_Meta (metas de consumo)
+    String tablaEntradaClientes_APLICAMETA;  // APLICAMETA (metas de consumo)
+    String tablaEntradaClientes_Meta30;  // Meta30 (metas de consumo)
 
     // Buffer reusable: se reserva UNA sola vez y se sobreescribe en cada
     // lectura, en vez de crear un byte[] nuevo por cada registro leido.
@@ -1212,6 +1221,17 @@ public class TablaEntradaClientes { //Ax ya es: E_CLIENT
         this.tablaEntradaClientes_MDDOR2VLORKWH = tablaEntradaClientes_MDDOR2VLORKWH;
     }
 
+    // Metas de consumo (ahorro y exceso), modelo del Caqueta.
+    public String getTablaEntradaClientes_METADIARIA() { return tablaEntradaClientes_MetaDiaria; }
+    public String getTablaEntradaClientes_METAMES() { return tablaEntradaClientes_Metames; }
+    public String getTablaEntradaClientes_METAMES110() { return tablaEntradaClientes_Metames110; }
+    public String getTablaEntradaClientes_METAMES90() { return tablaEntradaClientes_Metames90; }
+    public String getTablaEntradaClientes_CONSUMOAHORACUMULADO() { return tablaEntradaClientes_ConsumoAhorAcumulado; }
+    public String getTablaEntradaClientes_FACTORMETA() { return tablaEntradaClientes_FactorMeta; }
+    public String getTablaEntradaClientes_CRO_META() { return tablaEntradaClientes_CRO_Meta; }
+    public String getTablaEntradaClientes_APLICAMETA() { return tablaEntradaClientes_APLICAMETA; }
+    public String getTablaEntradaClientes_META30() { return tablaEntradaClientes_Meta30; }
+
     public Boolean abrir_TablaEntradaClientes(String nombreArchivo) {
         if (nombreArchivo.length() == 0) {
             return false;
@@ -1396,6 +1416,16 @@ public class TablaEntradaClientes { //Ax ya es: E_CLIENT
             settablaEntradaClientes_MDDOR1VLORKWH(new String(bufferRegistro, 1812, 12, StandardCharsets.UTF_8));
             settablaEntradaClientes_MDDOR2SBSDIOCNTRBCION(new String(bufferRegistro, 1825, 6, StandardCharsets.UTF_8));
             settablaEntradaClientes_MDDOR2VLORKWH(new String(bufferRegistro, 1832, 12, StandardCharsets.UTF_8));
+            // Metas de consumo (ahorro y exceso)
+            tablaEntradaClientes_MetaDiaria = new String(bufferRegistro, 1845, 10, StandardCharsets.UTF_8);
+            tablaEntradaClientes_Metames = new String(bufferRegistro, 1856, 10, StandardCharsets.UTF_8);
+            tablaEntradaClientes_Metames110 = new String(bufferRegistro, 1867, 10, StandardCharsets.UTF_8);
+            tablaEntradaClientes_Metames90 = new String(bufferRegistro, 1878, 10, StandardCharsets.UTF_8);
+            tablaEntradaClientes_ConsumoAhorAcumulado = new String(bufferRegistro, 1889, 10, StandardCharsets.UTF_8);
+            tablaEntradaClientes_FactorMeta = new String(bufferRegistro, 1900, 10, StandardCharsets.UTF_8);
+            tablaEntradaClientes_CRO_Meta = new String(bufferRegistro, 1911, 10, StandardCharsets.UTF_8);
+            tablaEntradaClientes_APLICAMETA = new String(bufferRegistro, 1922, 2, StandardCharsets.UTF_8);
+            tablaEntradaClientes_Meta30 = new String(bufferRegistro, 1925, 10, StandardCharsets.UTF_8);
             ultimo_TablaEntradaClientes = registro;
             // fin estructura
         } catch (Exception e) {

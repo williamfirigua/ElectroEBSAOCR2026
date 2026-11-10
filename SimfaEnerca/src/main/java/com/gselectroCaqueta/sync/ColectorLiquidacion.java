@@ -38,13 +38,20 @@ public final class ColectorLiquidacion {
 
     /** Igual, con la calidad de la posicion de la lectura (objeto gps del JSON). */
     public void agregar(EnvioGPS e, Map<String, Object> calidadGps) {
+        agregar(e, calidadGps, null);
+    }
+
+    /** Igual, con las metas de consumo de la cuenta (objeto metas del JSON: ahorro, exceso y valor). */
+    public void agregar(EnvioGPS e, Map<String, Object> calidadGps, Map<String, Object> metas) {
         if (texto(e.getEnvioGPS_IDCONTADOR()).isEmpty()) return;
         if (lecturas.isEmpty()) {
             primerConcepto = entero(e.getEnvioGPS_PRIMERCONCEPTO());
             nroConceptos = entero(e.getEnvioGPS_NROCONCEPTOS());
             cuenta = sinCeros(ItemLiquidacion.codCuenta(e.getEnvioGPS_CUENTA(), e.getEnvioGPS_DIGITOCHEQUEO())); // como CO_COBRO: cuenta + dígito
         }
-        lecturas.add(ItemLiquidacion.lectura(e, calidadGps));
+        Map<String, Object> l = ItemLiquidacion.lectura(e, calidadGps);
+        if (metas != null && !metas.isEmpty()) l.put("metas", metas);
+        lecturas.add(l);
     }
 
     public boolean vacio() {
