@@ -16,10 +16,11 @@ import java.util.Map;
  *                                   Se cobra en el concepto CONCEPTO_EXCESO.
  *
  * Igual que alla, a proposito: un campo en blanco vale 0. Asi, Metames110 en blanco o en 0 cobra TODO el
- * consumo como exceso; CRO_Meta o FactorMeta en blanco o en 0 dejan el kWh del exceso en $0; Metames en
- * blanco con Metames90 lleno da un ahorro negativo. Las metas se truncan a entero (parseStringToInteger).
+ * consumo como exceso; CRO_Meta o FactorMeta en blanco o en 0 dejan el kWh del exceso en $0. Las metas se
+ * truncan a entero (parseStringToInteger).
  *
- * Lo unico distinto: alla un texto que no es numero tumbaba la liquidacion de la cuenta; aqui cuenta como 0.
+ * Distinto de alla: un texto que no es numero tumbaba la liquidacion de la cuenta, aqui cuenta como 0; y un
+ * ahorro que da negativo o 0 (Metames en blanco o menor que el consumo) queda en 0: alla se mandaba negativo.
  * Todo lo que puede ser un error de datos lo informa revisar(), sin cambiar el calculo.
  */
 public final class MetasConsumo {
@@ -30,7 +31,7 @@ public final class MetasConsumo {
      */
     public static final int CONCEPTO_EXCESO = 997;
 
-    /** kWh de ahorro. Puede salir negativo, como en el Caqueta, si Metames viene en blanco o menor que el consumo. */
+    /** kWh de ahorro. Nunca negativo. */
     public final int ahorroKwh;
     public final int excedenteKwh;
     public final long valorAdicional;
@@ -44,7 +45,7 @@ public final class MetasConsumo {
     public static final MetasConsumo NINGUNA = new MetasConsumo(0, 0, 0);
 
     public boolean hayAlgo() {
-        return ahorroKwh != 0 || excedenteKwh > 0;
+        return ahorroKwh > 0 || excedenteKwh > 0;
     }
 
     /**
@@ -62,7 +63,7 @@ public final class MetasConsumo {
         if (consumo < entero(metames90)) {
             int ahorro = entero(metames) - (int) consumo;
             if (!vacio(meta30) && ahorro > entero(meta30)) ahorro = entero(meta30);
-            return new MetasConsumo(ahorro, 0, 0);
+            return ahorro > 0 ? new MetasConsumo(ahorro, 0, 0) : NINGUNA;
         }
         if (consumo > entero(metames110)) {
             double valorKwhMeta = valorKwh * numero(factorMeta);
@@ -96,7 +97,7 @@ public final class MetasConsumo {
         if (entero(metames90) <= 0) a.add("Metames90 en blanco o en 0: no puede haber ahorro");
         if (numero(factorMeta) <= 0) a.add("FactorMeta en blanco o en 0: el exceso vale $0");
         if (numero(croMeta) <= 0) a.add("CRO_Meta en blanco o en 0: el tope deja el exceso en $0");
-        if (entero(metames90) > 0 && entero(metames) <= 0) a.add("Metames en blanco o en 0 con Metames90 lleno: el ahorro sale negativo");
+        if (entero(metames90) > 0 && entero(metames) <= 0) a.add("Metames en blanco o en 0 con Metames90 lleno: el ahorro daria negativo y queda en 0");
         if (entero(metames90) > 0 && entero(metames110) > 0 && entero(metames90) > entero(metames110)) {
             a.add("Metames90 (" + entero(metames90) + ") mayor que Metames110 (" + entero(metames110) + "): banda invertida");
         }
