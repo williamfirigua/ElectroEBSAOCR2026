@@ -213,6 +213,39 @@
                 android:layout_height="wrap_content"
                 android:text="Es RW420"
                 android:visibility="gone" />
+
+            <TextView
+                style="@style/lex_Seccion"
+                android:layout_marginTop="18dp"
+                android:text="Impresora" />
+
+            <TextView
+                style="@style/lex_Ayuda"
+                android:text="Le fija el lenguaje y le guarda las fuentes y las imágenes (PCX) que define la oficina. Úselo con una impresora nueva o si la factura sale sin letras o sin logo." />
+
+            <Button
+                android:id="@+id/imp_btnEnviarImpresora"
+                style="@style/lex_BotonContorno"
+                android:layout_width="match_parent"
+                android:layout_marginTop="8dp"
+                android:text="Enviar valores a la impresora" />
+
+            <ProgressBar
+                android:id="@+id/imp_progresoImpresora"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/imp_txtEstadoImpresora"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/lec_texto2"
+                android:textSize="13sp" />
         </LinearLayout>
     </ScrollView>
 

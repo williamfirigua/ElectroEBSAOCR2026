@@ -268,6 +268,11 @@ public class ApiMovil {
         return json("GET", "rutas/estado?carpeta=" + url(carpeta) + "&ruta=" + url(ruta), null, true, LEER_MS);
     }
 
+    /** Lo que se le manda a la impresora: {lenguaje, sgd: [{clave, valor}], archivos: [{nombre, tipo, bytes, sha256}]} */
+    public Respuesta configImpresora() {
+        return json("GET", "impresora/config", null, true, LEER_MS);
+    }
+
     private static String url(String v) {
         try {
             return java.net.URLEncoder.encode(v == null ? "" : v.trim(), "UTF-8");

@@ -354,6 +354,11 @@ public final class DescargaRuta {
         return conSesion(() -> api.cerrarRuta(zip, carpeta, ruta, leidos, causas));
     }
 
+    /** Lenguaje y archivos (fuentes, PCX) que se le mandan a la impresora (Config. Preimpreso). */
+    public Operacion configImpresora() {
+        return conSesion(api::configImpresora);
+    }
+
     /** Estado de la ruta en el servidor (Borrar ruta y Validar envío). */
     public Operacion estadoRuta(String carpeta, String ruta) {
         return conSesion(() -> api.estadoRuta(carpeta, ruta));
