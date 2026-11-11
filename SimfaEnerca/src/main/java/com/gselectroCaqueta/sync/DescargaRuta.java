@@ -110,6 +110,11 @@ public final class DescargaRuta {
         }
     }
 
+    /** La última operación falló porque no hay sesión (faltan código y clave, o no coinciden). */
+    public boolean faltaSesion() {
+        return faltaSesion;
+    }
+
     /** Código del dueño de la licencia de este celular (para sugerirlo al pedir la clave). */
     public String codigoSugerido() {
         try {

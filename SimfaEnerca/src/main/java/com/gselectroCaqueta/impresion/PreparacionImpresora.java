@@ -52,10 +52,17 @@ public final class PreparacionImpresora {
     public static final class Resultado {
         public final boolean ok;
         public final String mensaje;
+        /** No hay sesión con el servidor: pedir código y clave y volver a intentar. */
+        public final boolean necesitaSesion;
 
         Resultado(boolean ok, String mensaje) {
+            this(ok, mensaje, false);
+        }
+
+        Resultado(boolean ok, String mensaje, boolean necesitaSesion) {
             this.ok = ok;
             this.mensaje = mensaje;
+            this.necesitaSesion = necesitaSesion;
         }
     }
 
@@ -70,7 +77,8 @@ public final class PreparacionImpresora {
         DescargaRuta api = new DescargaRuta(ctx);
         DescargaRuta.Operacion op = api.configImpresora();
         if (!op.ok || op.cuerpo == null) {
-            return new Resultado(false, "No se pudo leer la configuración del servidor. " + (op.mensaje != null ? op.mensaje : ""));
+            return new Resultado(false, "No se pudo leer la configuración del servidor. " + (op.mensaje != null ? op.mensaje : ""),
+                    api.faltaSesion());
         }
 
         // Valores SGD (lenguaje). Solo claves y valores simples: van entre comillas en el comando.
@@ -153,6 +161,114 @@ public final class PreparacionImpresora {
         String cuando = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
         registrar(dirTrabajo, cuando + "\n" + resumen);
         return new Resultado(true, "Listo (" + cuando + "):\n" + resumen.toString().trim());
+    }
+
+    /**
+     * Imprime la comprobación: cada fuente escribe una muestra con ella misma y cada PCX se dibuja en su propia
+     * etiqueta (solo la franja de arriba). Los nombres van con la fuente interna de la impresora, así que si un
+     * archivo NO está guardado, al lado de su nombre queda el espacio en blanco. No usa la red: toma los archivos
+     * de la última vez que se enviaron desde este celular.
+     */
+    public static Resultado imprimirComprobacion(File dirTrabajo, btPrintFile servicio) {
+        if (servicio == null || !servicio.tieneImpresoraAsociada()) {
+            return new Resultado(false, "No hay impresora asociada. Asóciela primero.");
+        }
+        File[] archivos = new File(dirTrabajo, CARPETA).listFiles((d, n) -> {
+            String u = n.toUpperCase(Locale.ROOT);
+            return u.endsWith(".TTF") || u.endsWith(".PCX");
+        });
+        if (archivos == null || archivos.length == 0) {
+            return new Resultado(false, "Este celular no ha enviado valores a la impresora. Pulse primero \"Enviar valores a la impresora\".");
+        }
+        java.util.Arrays.sort(archivos);
+        byte[] trabajo = comprobacion(archivos, ultimoEnvio(dirTrabajo));
+        final boolean[] ok = {false};
+        final String[] detalle = {""};
+        final CountDownLatch fin = new CountDownLatch(1);
+        if (!ColaImpresion.encolar(servicio, trabajo, "comprobacion de impresora", (exito, d) -> {
+            ok[0] = exito;
+            detalle[0] = d;
+            fin.countDown();
+        })) return new Resultado(false, "No se pudo enviar a la impresora.");
+        try {
+            if (!fin.await(60_000, TimeUnit.MILLISECONDS)) return new Resultado(false, "La impresora no respondió.");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return new Resultado(false, "Se interrumpió el envío.");
+        }
+        if (!ok[0]) return new Resultado(false, "Falló la impresión: " + detalle[0]);
+        return new Resultado(true, "Revise la hoja: al lado de cada nombre debe salir el texto o la imagen.\n"
+                + "Si un renglón sale vacío, ese archivo no quedó en la impresora: vuelva a enviar los valores.");
+    }
+
+    private static final String FIN = "\r\n";
+
+    /**
+     * Prueba de impresión (pantalla de la impresora Bluetooth): una hoja corta con la fuente interna, la MAC y la
+     * hora. Confirma la conexión y que imprime; para las fuentes y los PCX está {@link #imprimirComprobacion}.
+     *
+     * @return false si no se pudo encolar (sin impresora asociada)
+     */
+    public static boolean imprimirPrueba(btPrintFile servicio, String mac, ColaImpresion.Callback alTerminar) {
+        if (servicio == null || !servicio.tieneImpresoraAsociada()) return false;
+        String cuando = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
+        String s = "! 0 200 200 260 1" + FIN + "JOURNAL" + FIN + "PAGE-WIDTH 816" + FIN
+                + "T 4 0 20 10 PRUEBA DE IMPRESION" + FIN
+                + "T 7 0 20 80 Impresora: " + ascii(mac == null ? "" : mac.trim()) + FIN
+                + "T 7 0 20 115 Fecha: " + ascii(cuando) + FIN
+                + "T 7 0 20 150 Conexion y cabezal OK si esta hoja salio completa y legible." + FIN
+                + "LINE 20 200 796 200 3" + FIN
+                + "FORM" + FIN + "PRINT" + FIN;
+        return ColaImpresion.encolar(servicio, s.getBytes(LATIN1), "prueba de impresion", alTerminar);
+    }
+
+    /** CPCL de la comprobación: una etiqueta con las fuentes y una por cada PCX. */
+    static byte[] comprobacion(File[] archivos, String ultimo) {
+        List<String> fuentes = new ArrayList<>();
+        List<String> imagenes = new ArrayList<>();
+        for (File f : archivos) {
+            String n = f.getName().toUpperCase(Locale.ROOT);
+            if (n.endsWith(".TTF")) fuentes.add(n);
+            else imagenes.add(n);
+        }
+        String cuando = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
+        int alto = 200 + fuentes.size() * 70 + 120;
+        StringBuilder s = new StringBuilder();
+        s.append("! 0 200 200 ").append(alto).append(" 1").append(FIN).append("JOURNAL").append(FIN).append("PAGE-WIDTH 816").append(FIN);
+        s.append("T 4 0 20 10 COMPROBACION DE IMPRESORA").append(FIN);
+        s.append("T 7 0 20 70 ").append(ascii(cuando)).append("  -  ").append(fuentes.size()).append(" fuentes, ")
+                .append(imagenes.size()).append(" imagenes").append(FIN);
+        s.append("T 7 0 20 100 Al lado de cada nombre debe salir texto. Vacio = falta el archivo.").append(FIN);
+        s.append("LINE 20 135 796 135 2").append(FIN);
+        int y = 155;
+        for (String n : fuentes) {
+            s.append("T 7 0 20 ").append(y + 10).append(' ').append(n).append(FIN);
+            s.append("SCALE-TEXT ").append(n).append(" 12 12 260 ").append(y).append(" Factura EBSA 0123456789 $").append(FIN);
+            y += 70;
+        }
+        s.append("T 7 0 20 ").append(y + 10).append(" Lenguaje enviado: ").append(ascii(lenguajeDe(ultimo))).append(FIN);
+        s.append("FORM").append(FIN).append("PRINT").append(FIN);
+        for (String n : imagenes) {
+            // Solo la franja de arriba de la imagen (la etiqueta la recorta): basta para ver que está.
+            s.append("! 0 200 200 300 1").append(FIN).append("JOURNAL").append(FIN).append("PAGE-WIDTH 816").append(FIN);
+            s.append("T 7 0 20 10 ").append(n).append(" (parte de arriba):").append(FIN);
+            s.append("PCX 0 40 !<").append(n).append(FIN);
+            s.append("FORM").append(FIN).append("PRINT").append(FIN);
+        }
+        return s.toString().getBytes(LATIN1);
+    }
+
+    private static String lenguajeDe(String ultimo) {
+        if (ultimo != null) {
+            for (String l : ultimo.split("\n")) {
+                if (l.startsWith("device.languages")) return l.substring(l.indexOf('=') + 1).trim();
+            }
+        }
+        return "(sin dato)";
+    }
+
+    private static String ascii(String t) {
+        return java.text.Normalizer.normalize(t == null ? "" : t, java.text.Normalizer.Form.NFD).replaceAll("[^\\x20-\\x7E]", "");
     }
 
     /** Lo último que se mandó (para mostrarlo en la pantalla), o null. */

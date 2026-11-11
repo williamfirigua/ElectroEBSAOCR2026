@@ -49,6 +49,7 @@ public class DeviceListActivity extends Activity {
     // Vistas de presentacion (tarjeta de la impresora asociada y estado de la busqueda)
     private TextView txtAsociada, txtMacAsociada, chipEstado, txtEstadoBusqueda;
     private Button btnDesasociar;
+    private View accionesAsociada;
     private ProgressBar progresoBusqueda;
     //String directorioactual = "";//Ax recibe directorio de las varaibles globales
     // The BroadcastReceiver that listens for discovered devices and
@@ -135,6 +136,26 @@ public class DeviceListActivity extends Activity {
         txtEstadoBusqueda = (TextView) findViewById(R.id.imp_txtEstadoBusqueda);
         progresoBusqueda = (ProgressBar) findViewById(R.id.imp_progresoBusqueda);
         btnDesasociar = (Button) findViewById(R.id.imp_btnDesasociar);
+        accionesAsociada = findViewById(R.id.imp_accionesAsociada);
+        // Probar: una hoja corta con texto, la impresora y la hora (confirma conexion y que imprime).
+        findViewById(R.id.imp_btnProbar).setOnClickListener(v -> {
+            final View boton = v;
+            boton.setEnabled(false);
+            boolean encolada = com.gselectroCaqueta.impresion.PreparacionImpresora.imprimirPrueba(
+                    com.gselectroCaqueta.accesoyseguridad.VariablesGlobales.btPrintService, conectadoa,
+                    (ok, detalle) -> runOnUiThread(() -> {
+                        boton.setEnabled(true);
+                        android.widget.Toast.makeText(this, ok ? "Prueba enviada: debe salir una hoja con el texto PRUEBA DE IMPRESION."
+                                : "No se pudo imprimir: " + detalle, android.widget.Toast.LENGTH_LONG).show();
+                    }));
+            if (!encolada) {
+                boton.setEnabled(true);
+                android.widget.Toast.makeText(this, "No hay conexion con la impresora.", android.widget.Toast.LENGTH_LONG).show();
+            }
+        });
+        // Preparar: lenguaje, fuentes y PCX que define la oficina, y la hoja de comprobacion.
+        findViewById(R.id.imp_btnPreparar).setOnClickListener(v ->
+                startActivity(new Intent(this, com.gselectroCaqueta.impresion.PrepararImpresoraActivity.class)));
 
         // Set result CANCELED incase the user backs out
         setResult(Activity.RESULT_CANCELED);
@@ -251,6 +272,7 @@ public class DeviceListActivity extends Activity {
             chipEstado.setBackgroundResource(R.drawable.bg_lec_chip_ok);
             chipEstado.setTextColor(getResources().getColor(R.color.lec_superficie, getTheme()));
             btnDesasociar.setVisibility(View.VISIBLE);
+            accionesAsociada.setVisibility(View.VISIBLE);
         } else {
             String noDevices = getResources().getText(R.string.none_paired).toString();
             mPairedDevicesArrayAdapter.add(noDevices);
@@ -261,6 +283,7 @@ public class DeviceListActivity extends Activity {
             chipEstado.setBackgroundResource(R.drawable.bg_lec_chip_neutro);
             chipEstado.setTextColor(getResources().getColor(R.color.lec_texto, getTheme()));
             btnDesasociar.setVisibility(View.GONE);
+            accionesAsociada.setVisibility(View.GONE);
         }
     }
 

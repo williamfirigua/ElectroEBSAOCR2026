@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Preparar impresora (PrepararImpresoraActivity): le manda a la impresora el lenguaje, las fuentes y los PCX que
+  define la oficina, e imprime una hoja de comprobación. Se abre desde el ingreso (Test de impresión) y desde
+  Config. Preimpreso. Nada se edita aquí.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/lec_superficie"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="12dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_nav_print"
+            android:tint="@color/lec_primario" />
+
+        <TextView
+            style="@style/lex_Titulo"
+            android:text="Preparar impresora" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/lec_divisor" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                style="@style/lex_Seccion"
+                android:layout_marginTop="0dp"
+                android:text="Impresora asociada" />
+
+            <TextView
+                android:id="@+id/pi_txtImpresora"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/lec_texto"
+                android:textSize="16sp" />
+
+            <TextView
+                style="@style/lex_Seccion"
+                android:layout_marginTop="18dp"
+                android:text="1. Enviar valores" />
+
+            <TextView
+                style="@style/lex_Ayuda"
+                android:text="Le fija el lenguaje y le guarda las fuentes y las imágenes (PCX) que define la oficina. Quedan en la memoria de la impresora: no se borran al apagarla ni al quitarle la batería." />
+
+            <Button
+                android:id="@+id/pi_btnEnviar"
+                style="@style/lex_BotonPrimario"
+                android:layout_width="match_parent"
+                android:layout_marginTop="8dp"
+                android:text="Enviar valores a la impresora" />
+
+            <TextView
+                style="@style/lex_Seccion"
+                android:layout_marginTop="18dp"
+                android:text="2. Comprobar" />
+
+            <TextView
+                style="@style/lex_Ayuda"
+                android:text="Imprime una hoja con una muestra de cada fuente y de cada imagen. Si al lado de un nombre sale vacío, ese archivo no está en la impresora. Úsela también después de apagarla para confirmar que no se borró nada." />
+
+            <Button
+                android:id="@+id/pi_btnComprobar"
+                style="@style/lex_BotonContorno"
+                android:layout_width="match_parent"
+                android:layout_marginTop="8dp"
+                android:text="Imprimir comprobación" />
+
+            <ProgressBar
+                android:id="@+id/pi_progreso"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/pi_txtEstado"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textColor="@color/lec_texto2"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

@@ -157,6 +157,7 @@
                 <Button
                     android:id="@+id/btnImprime"
                     style="@style/AccBotonPrincipal"
+                    android:visibility="gone"
                     android:drawableTop="@drawable/ic_acc_impresora"
                     android:text="Impresora" />
 

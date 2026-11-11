@@ -181,6 +181,9 @@ Esto hacia que NavigationHelper cayera siempre al fallcack in app.
             android:name="com.gselectroCaqueta.modulocaptnovedlect.ModuloFirma"
             android:label="ModuloFirma" />
         <activity
+            android:name="com.gselectroCaqueta.impresion.PrepararImpresoraActivity"
+            android:label="Preparar impresora" />
+        <activity
             android:name="com.gselectroCaqueta.modulocaptnovedlect.ModuloConfigFormatoImpresion"
             android:label="ModuloConfigFormatoImpresion" />
         <activity

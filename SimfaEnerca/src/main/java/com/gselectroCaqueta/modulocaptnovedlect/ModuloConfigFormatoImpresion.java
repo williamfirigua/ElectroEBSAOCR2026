@@ -338,45 +338,26 @@ public class ModuloConfigFormatoImpresion extends AppCompatActivity {
     }
     // ------------------------------------------------------------------ Enviar valores a la impresora
 
-    private volatile boolean enviandoImpresora = false;
-
     /**
-     * Un solo botón: el lenguaje y los archivos (fuentes, PCX) los define la web (Caída de datos > Recursos);
-     * el técnico no edita nada, solo los manda a la impresora asociada.
+     * La impresora se prepara en su propia pantalla (Preparar impresora: lenguaje, fuentes, PCX y la hoja de
+     * comprobación). Aquí solo se abre y se muestra el último envío. El técnico no edita nada.
      */
     private void configurarEnvioImpresora() {
-        final Button boton = (Button) findViewById(R.id.imp_btnEnviarImpresora);
-        final android.widget.ProgressBar progreso = (android.widget.ProgressBar) findViewById(R.id.imp_progresoImpresora);
-        final TextView estado = (TextView) findViewById(R.id.imp_txtEstadoImpresora);
-        final File dir = new File(AppPath == null ? "" : AppPath);
-        String ultimo = com.gselectroCaqueta.impresion.PreparacionImpresora.ultimoEnvio(dir);
-        estado.setText(ultimo == null ? "Todavía no se han enviado valores desde este celular." : "Último envío: " + ultimo);
-        boton.setOnClickListener(v -> {
-            if (enviandoImpresora) return;
-            new androidx.appcompat.app.AlertDialog.Builder(this)
-                    .setTitle("Enviar valores a la impresora")
-                    .setMessage("La impresora debe estar encendida, cerca y sin imprimir. Tarda unos segundos; no la apague mientras recibe.")
-                    .setNegativeButton("Cancelar", null)
-                    .setPositiveButton("Enviar", (d, w) -> {
-                        enviandoImpresora = true;
-                        boton.setEnabled(false);
-                        progreso.setVisibility(View.VISIBLE);
-                        estado.setText("Preparando...");
-                        new Thread(() -> {
-                            com.gselectroCaqueta.impresion.PreparacionImpresora.Resultado r =
-                                    com.gselectroCaqueta.impresion.PreparacionImpresora.preparar(getApplicationContext(), dir,
-                                            com.gselectroCaqueta.accesoyseguridad.VariablesGlobales.btPrintService,
-                                            texto -> runOnUiThread(() -> estado.setText(texto)));
-                            runOnUiThread(() -> {
-                                enviandoImpresora = false;
-                                boton.setEnabled(true);
-                                progreso.setVisibility(View.GONE);
-                                estado.setText(r.mensaje);
-                                estado.setTextColor(getResources().getColor(r.ok ? R.color.lec_ok : R.color.lec_error));
-                            });
-                        }, "valores-impresora").start();
-                    })
-                    .show();
-        });
+        Button boton = (Button) findViewById(R.id.imp_btnEnviarImpresora);
+        boton.setText("Preparar impresora");
+        boton.setOnClickListener(v -> startActivity(new Intent(this, com.gselectroCaqueta.impresion.PrepararImpresoraActivity.class)));
+        mostrarUltimoEnvio();
+    }
+
+    private void mostrarUltimoEnvio() {
+        String ultimo = com.gselectroCaqueta.impresion.PreparacionImpresora.ultimoEnvio(new File(AppPath == null ? "" : AppPath));
+        ((TextView) findViewById(R.id.imp_txtEstadoImpresora)).setText(ultimo == null
+                ? "Todavía no se han enviado valores desde este celular." : "Último envío: " + ultimo);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (findViewById(R.id.imp_txtEstadoImpresora) != null) mostrarUltimoEnvio();
     }
 }

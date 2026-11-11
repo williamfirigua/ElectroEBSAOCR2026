@@ -107,6 +107,31 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/imp_accionesAsociada"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/imp_btnProbar"
+                style="@style/lex_BotonContorno"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:text="Probar impresión" />
+
+            <Button
+                android:id="@+id/imp_btnPreparar"
+                style="@style/lex_BotonContorno"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:text="Preparar impresora" />
+        </LinearLayout>
+
         <Button
             android:id="@+id/imp_btnDesasociar"
             android:layout_width="match_parent"
