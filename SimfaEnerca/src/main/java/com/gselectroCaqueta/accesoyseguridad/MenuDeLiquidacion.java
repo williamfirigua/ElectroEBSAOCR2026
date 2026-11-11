@@ -14054,9 +14054,18 @@ public class MenuDeLiquidacion extends AppCompatActivity implements AsyncRespons
 
                 if (esFotoMedidor) {
                     // ── MODO OCR: lanzar Activity intermedia de lectura ──────────
-                    Log.e("INFO", "esFotoMedidor=true | lanzando CamaraLecturaActivity");
-                    Intent intentOcr = new Intent(this, CamaraLecturaActivity.class);
+                    // Lector IA en vivo (modelo ONNX propio); si el modelo no carga, el mismo abre CamaraLecturaActivity.
+                    Log.e("INFO", "esFotoMedidor=true | lanzando LecturaEnVivoActivity");
+                    Intent intentOcr = new Intent(this, com.gselectroCaqueta.lectoria.LecturaEnVivoActivity.class);
                     intentOcr.putExtra(CamaraLecturaActivity.EXTRA_NOMBRE_IMAGEN, nombredelaImagen.trim());
+                    try {
+                        intentOcr.putExtra(com.gselectroCaqueta.lectoria.LecturaEnVivoActivity.EXTRA_TITULO,
+                                "Cuenta " + infoRegistroSalida.gettablaRegistroSalida_CUENTA().trim());
+                        intentOcr.putExtra(com.gselectroCaqueta.lectoria.LecturaEnVivoActivity.EXTRA_LECTURA_ANTERIOR,
+                                infoRegistroEntrada.gettablaRegistroDeEntrada_Lecturaanterior().trim());
+                    } catch (Exception exDatos) {
+                        Log.e("INFO", "LecturaEnVivo: sin cuenta/lectura anterior para el encabezado " + exDatos.getMessage());
+                    }
                     camaraAbierta = true;
                     startActivityForResult(intentOcr, CAMARA_LECTURA_REQUEST_CODE);
                     // nombrefoto se actualizará en onActivityResult cuando vuelva

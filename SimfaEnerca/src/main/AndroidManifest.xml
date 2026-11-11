@@ -171,6 +171,11 @@ Esto hacia que NavigationHelper cayera siempre al fallcack in app.
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
+            android:name="com.gselectroCaqueta.lectoria.LecturaEnVivoActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+        <activity
             android:name="com.gselectroCaqueta.modulobusquedacuenta.ModuloConsultaNoEnviados"
             android:label="ModuloConsultaNoEnviados" />
         <activity

@@ -87,6 +87,11 @@ dependencies {
 
     implementation 'com.google.android.gms:play-services-location:21.0.1'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+
+    // ── Lector IA de medidores (modelo ONNX propio, sin internet) ─────────────
+    // 1.16.3: la mas nueva que acepta AGP 4.1 / compileSdk 33. Requiere android.jetifier.blacklist=onnxruntime.
+    implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.16.3'
+    implementation 'androidx.exifinterface:exifinterface:1.3.3'
 }
 apply plugin: 'realm-android'
 
