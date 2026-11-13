@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Acceso (GuiAcceso), paleta para el sol de la lectura v2: fondo blanco, texto negro, bordes de 2dp.
-    - detras, abajo, la ilustracion de la red de distribucion (acc_fondo_red) sobre un degradado muy claro
+    - detras, de arriba abajo, el grabado de la red (FondoGrabado, puesto en la ventana desde GuiAcceso)
     - arriba los dos logos (GS&S y EBSA) con la fecha y la hora
     - codigo, clave e Ingresar
     - Comunicaciones, Impresora y Acerca de siempre a la vista; Bluetooth, Bateria, Carga y Salir debajo
@@ -10,7 +10,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_acc_fondo"
     android:orientation="vertical">
 
     <ScrollView
@@ -277,23 +276,12 @@
                 android:src="@drawable/avatar_man_icono"
                 android:visibility="gone" />
 
-            <!--
-              Espacio libre de abajo: lleva la red de distribucion (decorativa) y la version encima. Ocupa solo lo
-              que sobra, asi que con el teclado abierto el dibujo se recorta y nunca queda detras de los campos.
-            -->
+            <!-- Espacio libre de abajo: deja ver el grabado del fondo; la version queda pegada abajo. -->
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginStart="-16dp"
-                android:layout_marginEnd="-16dp"
-                android:layout_marginBottom="-8dp"
                 android:layout_weight="1"
                 android:minHeight="40dp">
-
-            <!-- La red pegada abajo; usa solo el alto que sobra (se recorta por arriba si no cabe). -->
-            <com.gselectroCaqueta.accesoyseguridad.FondoRed
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
 
             <!-- Version y equipo -->
             <LinearLayout

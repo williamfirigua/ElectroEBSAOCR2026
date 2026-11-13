@@ -225,6 +225,7 @@ public class GuiAcceso extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gui_acceso);
+        getWindow().setBackgroundDrawable(new FondoGrabado(getResources()));
         ctx = this;
 
 
