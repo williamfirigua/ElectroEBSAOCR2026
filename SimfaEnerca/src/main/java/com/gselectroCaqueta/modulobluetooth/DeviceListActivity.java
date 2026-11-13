@@ -1,7 +1,7 @@
 package com.gselectroCaqueta.modulobluetooth;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -358,7 +358,7 @@ public class DeviceListActivity extends Activity {
     }
 
     public void AlertDialogEscoger(String titulo, final String mensaje, final String method) {
-        new AlertDialog.Builder(DeviceListActivity.this, android.R.style.Theme_Material_Light_Dialog_Alert)
+        new AlertDialog.Builder(DeviceListActivity.this, com.gselectroCaqueta.accesoyseguridad.R.style.CauDialogo)
                 .setTitle("Desasociar impresora")
                 .setMessage("La app dejará de imprimir en " + conectadoa + ". ¿Desea desasociarla?")
                 .setNegativeButton("Cancelar", null)

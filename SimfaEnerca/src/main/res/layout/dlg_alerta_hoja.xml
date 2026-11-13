@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Dialogos de la lectura en hoja (DialogosLectura.builder, tema CauDialogo.Hoja): el mismo AlertDialog de AppCompat
+  Todos los dialogos de la app en hoja (tema CauDialogo): el mismo AlertDialog de AppCompat
   (mismos ids que abc_alert_dialog_material) con los botones uno debajo del otro y a todo el ancho, el principal
   arriba (button1 = positivo, button2 = negativo, button3 = neutro). Solo presentacion.
 -->
@@ -10,6 +10,12 @@
     android:layout_height="wrap_content"
     android:gravity="start|left|top"
     android:orientation="vertical">
+
+    <!-- Invisible: pega el dialogo abajo y a todo el ancho. -->
+    <com.gselectroCaqueta.accesoyseguridad.HojaAbajo
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
 
     <include layout="@layout/abc_alert_dialog_title_material" />
 

@@ -6,7 +6,7 @@ import com.gselectroCaqueta.sync.ColaEnvioSqlite;
 
 import com.gselectroCaqueta.sync.ColaEnvio;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;

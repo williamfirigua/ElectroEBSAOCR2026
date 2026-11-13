@@ -1,28 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Dialogos de causal, subcausal, informe, busqueda y galeria con la paleta de sol de la lectura v2
-     (colors_lectura.xml): fondo blanco, texto negro, bordes oscuros de 2dp y botones de 44dp. -->
+<!--
+  Dialogos de toda la app con la paleta de sol de la lectura v2 (colors_lectura.xml): hoja blanca que sube desde
+  abajo a todo el ancho (HojaAbajo la pega abajo), titulo grande y botones de 60dp uno debajo del otro, el principal
+  arriba. AppTheme lo usa como alertDialogTheme, asi que new AlertDialog.Builder(activity) tambien lo toma.
+-->
 <resources>
 
-    <!-- Tema de los AlertDialog de AppCompat: new AlertDialog.Builder(activity, R.style.CauDialogo). -->
-    <style name="CauDialogo" parent="ThemeOverlay.AppCompat.Dialog.Alert">
+    <!-- Tema de los AlertDialog de AppCompat: new AlertDialog.Builder(activity[, R.style.CauDialogo]). -->
+    <style name="CauDialogo" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="colorPrimary">@color/lec_primario</item>
         <item name="colorAccent">@color/lec_primario</item>
         <item name="colorControlNormal">@color/lec_contorno</item>
         <item name="colorControlActivated">@color/lec_primario</item>
-        <item name="android:windowBackground">@drawable/bg_cau_dialogo</item>
+        <item name="android:windowBackground">@drawable/bg_dlg_hoja</item>
+        <item name="android:windowAnimationStyle">@style/CauDialogo.Animacion</item>
+        <item name="android:windowMinWidthMajor">100%</item>
+        <item name="android:windowMinWidthMinor">100%</item>
         <item name="android:textColorPrimary">@color/lec_texto</item>
         <item name="android:textColorSecondary">@color/lec_texto2</item>
         <item name="android:textColorHint">@color/lec_texto2</item>
         <item name="android:windowTitleStyle">@style/CauDialogo.Titulo</item>
+        <item name="dialogPreferredPadding">20dp</item>
+        <item name="alertDialogCenterButtons">false</item>
         <item name="buttonBarPositiveButtonStyle">@style/CauDialogo.BotonPrimario</item>
         <item name="buttonBarNegativeButtonStyle">@style/CauDialogo.BotonContorno</item>
         <item name="buttonBarNeutralButtonStyle">@style/CauDialogo.BotonContorno</item>
         <item name="alertDialogStyle">@style/CauDialogo.Alerta</item>
     </style>
 
-    <!-- Filas de setItems (subcausales) de 48dp, en negrita. -->
+    <!-- Los de la liquidacion (DialogosLectura.builder): el mismo tema. -->
+    <style name="CauDialogo.Hoja" />
+
+    <!-- Layout de la hoja (botones apilados) y filas de setItems (subcausales) de 48dp, en negrita. -->
     <style name="CauDialogo.Alerta" parent="AlertDialog.AppCompat">
+        <item name="android:layout">@layout/dlg_alerta_hoja</item>
         <item name="listItemLayout">@layout/item_cau_subcausal</item>
+    </style>
+
+    <style name="CauDialogo.Animacion">
+        <item name="android:windowEnterAnimation">@anim/dlg_hoja_entra</item>
+        <item name="android:windowExitAnimation">@anim/dlg_hoja_sale</item>
     </style>
 
     <style name="CauDialogo.Titulo" parent="RtlOverlay.DialogWindowTitle.AppCompat">
@@ -30,74 +47,25 @@
     </style>
 
     <style name="CauDialogo.TituloTexto" parent="TextAppearance.AppCompat.Title">
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">21sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/lec_texto</item>
     </style>
 
     <style name="CauDialogo.BotonPrimario" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
-        <item name="android:background">@drawable/bg_cau_boton_primario</item>
+        <item name="android:background">@drawable/bg_dlg_hoja_primario</item>
         <item name="android:textColor">@color/cau_boton_primario_texto</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:textSize">19sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:minHeight">44dp</item>
-        <item name="android:minWidth">88dp</item>
+        <item name="android:minHeight">60dp</item>
         <item name="android:paddingStart">16dp</item>
         <item name="android:paddingEnd">16dp</item>
-        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginTop">10dp</item>
         <item name="android:stateListAnimator">@null</item>
     </style>
 
     <style name="CauDialogo.BotonContorno" parent="CauDialogo.BotonPrimario">
-        <item name="android:background">@drawable/bg_cau_boton_contorno</item>
-        <item name="android:textColor">@color/lec_primario</item>
-    </style>
-
-    <!--
-      Dialogos de la lectura en hoja (DialogosLectura.builder): suben desde abajo, a todo el ancho, al alcance del
-      pulgar; titulo mas grande y botones de 60dp uno debajo del otro, el principal arriba. Solo presentacion.
-    -->
-    <style name="CauDialogo.Hoja">
-        <item name="android:windowBackground">@drawable/bg_dlg_hoja</item>
-        <item name="android:windowAnimationStyle">@style/CauDialogo.Hoja.Animacion</item>
-        <item name="android:windowMinWidthMajor">100%</item>
-        <item name="android:windowMinWidthMinor">100%</item>
-        <item name="android:windowTitleStyle">@style/CauDialogo.Hoja.Titulo</item>
-        <item name="dialogPreferredPadding">20dp</item>
-        <item name="alertDialogCenterButtons">false</item>
-        <item name="buttonBarPositiveButtonStyle">@style/CauDialogo.Hoja.BotonPrimario</item>
-        <item name="buttonBarNegativeButtonStyle">@style/CauDialogo.Hoja.BotonContorno</item>
-        <item name="buttonBarNeutralButtonStyle">@style/CauDialogo.Hoja.BotonContorno</item>
-        <item name="alertDialogStyle">@style/CauDialogo.Hoja.Alerta</item>
-    </style>
-
-    <style name="CauDialogo.Hoja.Alerta" parent="CauDialogo.Alerta">
-        <item name="android:layout">@layout/dlg_alerta_hoja</item>
-    </style>
-
-    <style name="CauDialogo.Hoja.Animacion">
-        <item name="android:windowEnterAnimation">@anim/dlg_hoja_entra</item>
-        <item name="android:windowExitAnimation">@anim/dlg_hoja_sale</item>
-    </style>
-
-    <style name="CauDialogo.Hoja.Titulo" parent="CauDialogo.Titulo">
-        <item name="android:textAppearance">@style/CauDialogo.Hoja.TituloTexto</item>
-    </style>
-
-    <style name="CauDialogo.Hoja.TituloTexto" parent="CauDialogo.TituloTexto">
-        <item name="android:textSize">21sp</item>
-    </style>
-
-    <style name="CauDialogo.Hoja.BotonPrimario" parent="CauDialogo.BotonPrimario">
-        <item name="android:background">@drawable/bg_dlg_hoja_primario</item>
-        <item name="android:textSize">19sp</item>
-        <item name="android:minHeight">60dp</item>
-        <item name="android:layout_marginStart">0dp</item>
-        <item name="android:layout_marginTop">10dp</item>
-    </style>
-
-    <style name="CauDialogo.Hoja.BotonContorno" parent="CauDialogo.Hoja.BotonPrimario">
         <item name="android:background">@drawable/bg_dlg_hoja_contorno</item>
         <item name="android:textColor">@color/lec_texto</item>
         <item name="android:textSize">17sp</item>

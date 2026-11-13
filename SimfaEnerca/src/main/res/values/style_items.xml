@@ -8,6 +8,8 @@
         <item name="colorPrimaryDark">#303F9F</item>
         <!--   theme UI controls like checkboxes and text fields -->
         <item name="colorAccent">#0069FF</item>
+        <!-- Todos los AlertDialog de AppCompat salen con el diseno de la lectura (hoja desde abajo). -->
+        <item name="alertDialogTheme">@style/CauDialogo</item>
     </style>
 
     <style name="etiqueta">

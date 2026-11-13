@@ -13,24 +13,10 @@
     android:background="@drawable/bg_acc_fondo"
     android:orientation="vertical">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-    <!-- Fondo: red de distribucion abajo, en el espacio libre (decorativo). -->
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:adjustViewBounds="true"
-        android:importantForAccessibility="no"
-        android:scaleType="fitXY"
-        android:src="@drawable/acc_fondo_red" />
-
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:fillViewport="true">
 
         <LinearLayout
@@ -291,17 +277,30 @@
                 android:src="@drawable/avatar_man_icono"
                 android:visibility="gone" />
 
-            <Space
+            <!--
+              Espacio libre de abajo: lleva la red de distribucion (decorativa) y la version encima. Ocupa solo lo
+              que sobra, asi que con el teclado abierto el dibujo se recorta y nunca queda detras de los campos.
+            -->
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
+                android:layout_marginStart="-16dp"
+                android:layout_marginEnd="-16dp"
+                android:layout_marginBottom="-8dp"
                 android:layout_weight="1"
-                android:minHeight="16dp" />
+                android:minHeight="40dp">
+
+            <!-- La red pegada abajo; usa solo el alto que sobra (se recorta por arriba si no cabe). -->
+            <com.gselectroCaqueta.accesoyseguridad.FondoRed
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
             <!-- Version y equipo -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="8dp"
                 android:background="@drawable/bg_acc_pie"
                 android:gravity="center"
                 android:orientation="horizontal"
@@ -325,9 +324,9 @@
                     android:maxLength="15"
                     android:text="" />
             </LinearLayout>
+            </FrameLayout>
         </LinearLayout>
     </ScrollView>
-    </FrameLayout>
 
     <!-- Cinta con la ruta cargada: se desplaza sola (GuiAcceso la deja seleccionada). -->
     <TextView
