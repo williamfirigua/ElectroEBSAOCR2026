@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Dialogos de la lectura en hoja (DialogosLectura.builder, tema CauDialogo.Hoja): el mismo AlertDialog de AppCompat
+  (mismos ids que abc_alert_dialog_material) con los botones uno debajo del otro y a todo el ancho, el principal
+  arriba (button1 = positivo, button2 = negativo, button3 = neutro). Solo presentacion.
+-->
+<androidx.appcompat.widget.AlertDialogLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/parentPanel"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="start|left|top"
+    android:orientation="vertical">
+
+    <include layout="@layout/abc_alert_dialog_title_material" />
+
+    <FrameLayout
+        android:id="@+id/contentPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp">
+
+        <ImageView
+            android:id="@+id/scrollIndicatorUp"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="top"
+            android:background="#1f000000"
+            android:importantForAccessibility="no"
+            android:visibility="gone" />
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <android.widget.Space
+                    android:id="@+id/textSpacerNoTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/abc_dialog_padding_top_material"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@android:id/message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:lineSpacingMultiplier="1.15"
+                    android:paddingLeft="?attr/dialogPreferredPadding"
+                    android:paddingRight="?attr/dialogPreferredPadding"
+                    android:textColor="@color/lec_texto"
+                    android:textSize="17sp" />
+
+                <android.widget.Space
+                    android:id="@+id/textSpacerNoButtons"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/abc_dialog_padding_top_material"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <ImageView
+            android:id="@+id/scrollIndicatorDown"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="bottom"
+            android:background="#1f000000"
+            android:importantForAccessibility="no"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/customPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp">
+
+        <FrameLayout
+            android:id="@+id/custom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </FrameLayout>
+
+    <ScrollView
+        android:id="@+id/buttonPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="20dp"
+            android:paddingTop="8dp"
+            android:paddingRight="20dp"
+            android:paddingBottom="20dp">
+
+            <Button
+                android:id="@android:id/button1"
+                style="?attr/buttonBarPositiveButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@android:id/button2"
+                style="?attr/buttonBarNegativeButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@android:id/button3"
+                style="?attr/buttonBarNeutralButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <android.widget.Space
+                android:id="@+id/spacer"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone" />
+        </LinearLayout>
+    </ScrollView>
+</androidx.appcompat.widget.AlertDialogLayout>

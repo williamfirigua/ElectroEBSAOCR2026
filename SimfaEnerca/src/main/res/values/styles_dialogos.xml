@@ -54,6 +54,56 @@
         <item name="android:textColor">@color/lec_primario</item>
     </style>
 
+    <!--
+      Dialogos de la lectura en hoja (DialogosLectura.builder): suben desde abajo, a todo el ancho, al alcance del
+      pulgar; titulo mas grande y botones de 60dp uno debajo del otro, el principal arriba. Solo presentacion.
+    -->
+    <style name="CauDialogo.Hoja">
+        <item name="android:windowBackground">@drawable/bg_dlg_hoja</item>
+        <item name="android:windowAnimationStyle">@style/CauDialogo.Hoja.Animacion</item>
+        <item name="android:windowMinWidthMajor">100%</item>
+        <item name="android:windowMinWidthMinor">100%</item>
+        <item name="android:windowTitleStyle">@style/CauDialogo.Hoja.Titulo</item>
+        <item name="dialogPreferredPadding">20dp</item>
+        <item name="alertDialogCenterButtons">false</item>
+        <item name="buttonBarPositiveButtonStyle">@style/CauDialogo.Hoja.BotonPrimario</item>
+        <item name="buttonBarNegativeButtonStyle">@style/CauDialogo.Hoja.BotonContorno</item>
+        <item name="buttonBarNeutralButtonStyle">@style/CauDialogo.Hoja.BotonContorno</item>
+        <item name="alertDialogStyle">@style/CauDialogo.Hoja.Alerta</item>
+    </style>
+
+    <style name="CauDialogo.Hoja.Alerta" parent="CauDialogo.Alerta">
+        <item name="android:layout">@layout/dlg_alerta_hoja</item>
+    </style>
+
+    <style name="CauDialogo.Hoja.Animacion">
+        <item name="android:windowEnterAnimation">@anim/dlg_hoja_entra</item>
+        <item name="android:windowExitAnimation">@anim/dlg_hoja_sale</item>
+    </style>
+
+    <style name="CauDialogo.Hoja.Titulo" parent="CauDialogo.Titulo">
+        <item name="android:textAppearance">@style/CauDialogo.Hoja.TituloTexto</item>
+    </style>
+
+    <style name="CauDialogo.Hoja.TituloTexto" parent="CauDialogo.TituloTexto">
+        <item name="android:textSize">21sp</item>
+    </style>
+
+    <style name="CauDialogo.Hoja.BotonPrimario" parent="CauDialogo.BotonPrimario">
+        <item name="android:background">@drawable/bg_dlg_hoja_primario</item>
+        <item name="android:textSize">19sp</item>
+        <item name="android:minHeight">60dp</item>
+        <item name="android:layout_marginStart">0dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+    </style>
+
+    <style name="CauDialogo.Hoja.BotonContorno" parent="CauDialogo.Hoja.BotonPrimario">
+        <item name="android:background">@drawable/bg_dlg_hoja_contorno</item>
+        <item name="android:textColor">@color/lec_texto</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:minHeight">52dp</item>
+    </style>
+
     <!-- Campos de busqueda: blanco con borde negro (bg_lec_campo), texto de 16sp en negrita. -->
     <style name="CauCampo">
         <item name="android:background">@drawable/bg_lec_campo</item>

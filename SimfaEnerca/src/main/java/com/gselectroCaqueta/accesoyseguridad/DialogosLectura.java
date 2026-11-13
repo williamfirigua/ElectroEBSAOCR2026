@@ -13,6 +13,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -40,9 +41,24 @@ public final class DialogosLectura {
     private DialogosLectura() {
     }
 
-    /** AlertDialog de AppCompat con el tema de los dialogos de la lectura. */
+    /**
+     * AlertDialog de AppCompat con el tema de los dialogos de la lectura, en hoja (CauDialogo.Hoja): sube desde
+     * abajo y ocupa todo el ancho. Solo cambia donde y como se ve; titulo, cuerpo, botones y respuestas son los de
+     * quien lo arma.
+     */
     public static AlertDialog.Builder builder(Context ctx) {
-        return new AlertDialog.Builder(ctx, R.style.CauDialogo);
+        return new AlertDialog.Builder(ctx, R.style.CauDialogo_Hoja) {
+            @Override
+            public AlertDialog create() {
+                AlertDialog d = super.create();
+                Window w = d.getWindow();
+                if (w != null) {
+                    w.setGravity(Gravity.BOTTOM);
+                    w.setLayout(MATCH, WRAP);
+                }
+                return d;
+            }
+        };
     }
 
     public static int dp(Context ctx, float valor) {
@@ -81,11 +97,11 @@ public final class DialogosLectura {
 
     // ---------------------------------------------------------------- cuerpo
 
-    /** Cuerpo vertical con el mismo margen lateral del titulo (24dp). */
+    /** Cuerpo vertical con el mismo margen lateral del titulo de la hoja (20dp). */
     public static LinearLayout cuerpo(Context ctx) {
         LinearLayout l = new LinearLayout(ctx);
         l.setOrientation(LinearLayout.VERTICAL);
-        l.setPadding(dp(ctx, 24), dp(ctx, 4), dp(ctx, 24), dp(ctx, 8));
+        l.setPadding(dp(ctx, 20), dp(ctx, 4), dp(ctx, 20), dp(ctx, 8));
         return l;
     }
 
@@ -192,17 +208,17 @@ public final class DialogosLectura {
         return caja;
     }
 
-    /** Franja ambar con el icono de aviso (p. ej. "Se lo llevo al ultimo cliente leido"). */
+    /** Aviso ambar claro con franja a la izquierda y el icono (p. ej. "Se lo llevo al ultimo cliente leido"). */
     public static TextView aviso(LinearLayout cuerpo, CharSequence s) {
         Context ctx = cuerpo.getContext();
         TextView t = new TextView(ctx);
         t.setText(s);
         t.setTextColor(color(ctx, R.color.lec_aviso_texto));
-        t.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        t.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
         t.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        t.setBackgroundResource(R.drawable.bg_lec_aviso);
+        t.setBackgroundResource(R.drawable.dlg_aviso);
         t.setGravity(Gravity.CENTER_VERTICAL);
-        t.setPadding(dp(ctx, 12), dp(ctx, 10), dp(ctx, 12), dp(ctx, 10));
+        t.setPadding(dp(ctx, 18), dp(ctx, 10), dp(ctx, 12), dp(ctx, 10));
         t.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_lec_alerta, 0, 0, 0);
         t.setCompoundDrawablePadding(dp(ctx, 10));
         t.setCompoundDrawableTintList(ColorStateList.valueOf(color(ctx, R.color.lec_aviso_texto)));

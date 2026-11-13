@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Boton secundario de la hoja: blanco con borde oscuro de 2dp, 14dp. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#33000000">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/lec_superficie" />
+            <stroke android:width="2dp" android:color="@color/lec_contorno" />
+            <corners android:radius="14dp" />
+        </shape>
+    </item>
+</ripple>

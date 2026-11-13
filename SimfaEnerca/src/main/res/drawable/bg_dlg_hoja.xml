@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fondo de la hoja de dialogo: blanca, esquinas de arriba redondeadas (24dp) y la manija gris arriba al centro. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/lec_superficie" />
+            <corners
+                android:topLeftRadius="24dp"
+                android:topRightRadius="24dp" />
+        </shape>
+    </item>
+    <item
+        android:width="44dp"
+        android:height="5dp"
+        android:gravity="top|center_horizontal"
+        android:top="8dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FF9AA3B0" />
+            <corners android:radius="3dp" />
+        </shape>
+    </item>
+</layer-list>
