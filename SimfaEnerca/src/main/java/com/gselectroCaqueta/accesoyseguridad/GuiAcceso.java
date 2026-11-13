@@ -1284,11 +1284,20 @@ public class GuiAcceso extends AppCompatActivity {
             txtClave.setEnabled(true);
         }
     }
+    /** Texto de la cinta de abajo: empieza con OKINNOM-FES en ambar y sigue el estado de la ruta. */
+    private static CharSequence cinta(String estado) {
+        String marca = "OKINNOM-FES";
+        android.text.SpannableString t = new android.text.SpannableString(marca + "  ·  " + estado);
+        t.setSpan(new android.text.style.ForegroundColorSpan(0xFFFFB000), 0, marca.length(),
+                android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return t;
+    }
+
     //Ax: Archivo necesario para entrar a comunicaciones
     private void preNombreArchivo(Integer Alerta) {
 
         File archivoNombre = new File(VariablesGlobales.getDirectorioactual() + "/DATOSDEENTRADA/NOMBRE");
-        txtCondicion.setText("Sin ruta cargada en el equipo");
+        txtCondicion.setText(cinta("Sin ruta cargada en el equipo"));
         if (!archivoNombre.exists() && archivoNombre.length() < 1) {
             if (Alerta>0)
                 mostrarDialogoAlerta("Advertencia", "Dispositivo no tiene Archivos\n Cargados... Favor Cargar Datos: ");
@@ -1305,7 +1314,7 @@ public class GuiAcceso extends AppCompatActivity {
             String archivo_cargado = new String(byteArray);
 //| Archivo: AAAAMMRRR LXXXXXXX.000 txtcondicion
             String NombreArchivos_0 = archivo_cargado.substring(4, 12);//cambia 5, 14
-            txtCondicion.setText("Ruta cargada " + NombreArchivos_0 + "  ·  Ciclo " + archivo_cargado.substring(0, 4).trim());
+            txtCondicion.setText(cinta("Ruta cargada " + NombreArchivos_0 + "  ·  Ciclo " + archivo_cargado.substring(0, 4).trim()));
             rFile.close();
             btnInfo.setImageResource(R.drawable.ic_acc_carga_ok);
         } catch (Exception ex) {
@@ -1331,7 +1340,7 @@ public class GuiAcceso extends AppCompatActivity {
                 variables.setNombregeneral(VariablesGlobales.getDirectorioactual() + "/DATOSDEENTRADA/GENERAL.TXT");
 
                 archivocargado = archivo_cargado.substring(4, 12);
-                txtCondicion.setText("Ruta cargada " + archivocargado + "  ·  Ciclo " + archivo_cargado.substring(0, 4).trim());
+                txtCondicion.setText(cinta("Ruta cargada " + archivocargado + "  ·  Ciclo " + archivo_cargado.substring(0, 4).trim()));
                 mensajeDeAlerta = "Ruta Cargada: " + archivocargado;
                 rFile.close();
 

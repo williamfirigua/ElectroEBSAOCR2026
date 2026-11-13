@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Fondo del acceso: red de distribucion en trazo fino (montanas, postes, cables con aisladores ambar y una casa con
+  su medidor). Va abajo, en el espacio libre, detras de la pantalla; se escala al ancho conservando la proporcion.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="390dp"
+    android:height="300dp"
+    android:viewportWidth="390"
+    android:viewportHeight="300">
+
+    <!-- Montanas -->
+    <path
+        android:fillColor="#DCE7F5"
+        android:pathData="M0,170 L50,128 L95,150 L150,100 L210,145 L265,112 L320,140 L390,118 L390,300 L0,300 Z" />
+    <path
+        android:fillColor="#C9DAF0"
+        android:pathData="M0,205 L70,175 L140,198 L215,165 L290,192 L390,170 L390,300 L0,300 Z" />
+    <path
+        android:fillColor="#B7CCE8"
+        android:pathData="M0,250 Q100,228 200,246 T390,238 L390,300 L0,300 Z" />
+
+    <!-- Postes -->
+    <path
+        android:pathData="M38,250 V60 M20,76 H56 M25,94 H51 M196,246 V44 M178,60 H214 M183,78 H209 M356,240 V66 M338,82 H374 M343,100 H369"
+        android:strokeWidth="2.4"
+        android:strokeColor="#8C0047A0"
+        android:strokeLineCap="round" />
+
+    <!-- Cables con catenaria y acometida a la casa -->
+    <path
+        android:pathData="M20,76 Q105,108 178,60 M56,76 Q128,116 214,60 M25,94 Q110,126 183,78 M214,60 Q280,104 338,82 M178,60 Q262,100 374,82 M209,78 Q280,120 343,100 M214,60 Q250,130 270,190"
+        android:strokeWidth="1.3"
+        android:strokeColor="#730047A0" />
+
+    <!-- Aisladores (acento ambar) -->
+    <path
+        android:fillColor="#FFFFB000"
+        android:pathData="M16.6,76a3.4,3.4 0,1 0,6.8 0a3.4,3.4 0,1 0,-6.8 0 M52.6,76a3.4,3.4 0,1 0,6.8 0a3.4,3.4 0,1 0,-6.8 0 M174.6,60a3.4,3.4 0,1 0,6.8 0a3.4,3.4 0,1 0,-6.8 0 M210.6,60a3.4,3.4 0,1 0,6.8 0a3.4,3.4 0,1 0,-6.8 0 M334.6,82a3.4,3.4 0,1 0,6.8 0a3.4,3.4 0,1 0,-6.8 0 M370.6,82a3.4,3.4 0,1 0,6.8 0a3.4,3.4 0,1 0,-6.8 0" />
+
+    <!-- Casa con puerta -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M244,214 L270,190 L296,214 V246 H244 Z"
+        android:strokeWidth="1.8"
+        android:strokeColor="#CC0B1F3A"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M252,226 H264 V246 H252 Z"
+        android:strokeWidth="1.4"
+        android:strokeColor="#B30B1F3A" />
+
+    <!-- Medidor con su rayo -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M278,220 H286 A2,2 0,0 1,288 222 V234 A2,2 0,0 1,286 236 H278 A2,2 0,0 1,276 234 V222 A2,2 0,0 1,278 220 Z"
+        android:strokeWidth="1.6"
+        android:strokeColor="#FFFFB000" />
+    <path
+        android:pathData="M281,224 L284,228 L281,228 L284,232"
+        android:strokeWidth="1.4"
+        android:strokeColor="#FFFFB000" />
+</vector>

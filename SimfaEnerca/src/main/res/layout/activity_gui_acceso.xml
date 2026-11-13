@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Acceso (GuiAcceso), paleta para el sol de la lectura v2: fondo blanco, texto negro, bordes de 2dp.
+    - detras, abajo, la ilustracion de la red de distribucion (acc_fondo_red) sobre un degradado muy claro
     - arriba los dos logos (GS&S y EBSA) con la fecha y la hora
     - codigo, clave e Ingresar
     - Comunicaciones, Impresora y Acerca de siempre a la vista; Bluetooth, Bateria, Carga y Salir debajo
@@ -9,13 +10,27 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/lec_superficie"
+    android:background="@drawable/bg_acc_fondo"
     android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+    <!-- Fondo: red de distribucion abajo, en el espacio libre (decorativo). -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:adjustViewBounds="true"
+        android:importantForAccessibility="no"
+        android:scaleType="fitXY"
+        android:src="@drawable/acc_fondo_red" />
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         android:fillViewport="true">
 
         <LinearLayout
@@ -284,10 +299,16 @@
 
             <!-- Version y equipo -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/bg_acc_pie"
                 android:gravity="center"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingStart="10dp"
+                android:paddingTop="3dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="3dp">
 
                 <TextView
                     android:id="@+id/txtVerion"
@@ -306,6 +327,7 @@
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
+    </FrameLayout>
 
     <!-- Cinta con la ruta cargada: se desplaza sola (GuiAcceso la deja seleccionada). -->
     <TextView
